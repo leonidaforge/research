@@ -1,0 +1,48 @@
+# Proprietary game inputs
+*.exe
+*.dll
+*.pdb
+*.rpf
+*.xvc
+
+# Extracted or dumped game data
+/dumps/
+/extracted/
+/game/
+
+# Ghidra projects and databases
+*.gpr
+*.rep/
+*.gpr.lock
+*.gpr.lock~
+/ghidra/
+
+# Reverse-engineering caches and scratch space
+.rea/
+*.rea-cache/
+/scratch/
+/tmp/
+/local/
+*.local.*
+
+# Secrets
+.env
+.env.*
+*.key
+*.pem
+/keys/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Editors and operating systems
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini
+.claude/settings.local.json
