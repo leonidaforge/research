@@ -238,6 +238,12 @@ The same flag disables the chunk fast path. Seeks reposition the context. The al
 
 These agree. The data observations were made by scanning, not by following native offsets. Entries with mode 1 and no chunk table hold raw DEFLATE, which the scan does not detect. Whether the data contains such entries is not established.
 
+## Native reads from authenticated metadata
+
+Once the metadata signature verifies, payloads can be read through native location records rather than by scanning. In the 22 tested archives, 5150 rows were stored and 929 decoded through chunk tables; 455 rows carried the payload transform and were refused (RPF9-F103). Stored and chunked extractions produced exactly the logical size (RPF9-F104).
+
+No raw DEFLATE row without a chunk table was observed, so that path remains confirmed by code but unconfirmed by real extraction. The payload-transform path remains unknown. The metadata signature covers none of these payload bytes; successful extraction is not authentication.
+
 ## Observed storage layout
 
 Archive payload data follows the rules below (RPF9-F29). They are observations from data, not a specification. Payloads can be recovered with them without the table of contents.

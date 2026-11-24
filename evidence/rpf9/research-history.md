@@ -37,6 +37,7 @@ Interpretations that were once used for RPF9 and later corrected. The current mo
 **Old assumption.** The high 16 bits of an entry ID were a computed section index.
 
 **Correction.** The getter returns the `u16` stored at file object `+0x0C`. It is the index of the file object's slot in a global registry, assigned when the file object is created (RPF9-F15, RPF9-F64).
+
 ## Names
 
 **Old assumption.** Names were rebuilt by the engine, and the hashes could be compared with the name hashes of earlier RPF versions.
@@ -166,6 +167,12 @@ Some earlier notes used "A" and "B" for `hdr[0x04]` and `hdr[0x08]`. Those lette
 **Old assumption.** The signed value was `SHA-256(message)`, so a verifier hashed the assembled metadata spans once and compared that digest. Every tested archive failed that check.
 
 **Correction.** The archive path hashes the message once and the verifier hashes the resulting 32-byte digest again, so the signed value is `SHA-256(SHA-256(message))` (RPF9-F101). A single-hash check rejects valid signatures; the archive signatures were never invalid. All 22 tested archives authenticate (RPF9-F102).
+
+## Native table of contents unreadable
+
+**Old assumption.** The native table of contents could not be listed or extracted. Metadata was encrypted, the location layouts came from code only, and the available tools could scan for zlib streams but had no authoritative entries.
+
+**Correction.** Once step 1 runs with the recognized provider and steps 4 and 5 decode the primary area, the columnar table of contents parses directly. All 22 tested archives authenticate and yield 6534 native rows (RPF9-F102, RPF9-F103). The location record layouts are confirmed in real data: F on 6533 rows and R on one row; all listed rows use read source `main` and mode 0. Stored and chunked rows extract to exactly their logical sizes, while rows behind the payload transform are refused (RPF9-F104). Names remain hashes, type meanings remain mostly unknown, and payload bytes remain outside the signature. Native listing therefore needs metadata authentication but does not make payload content authenticated.
 
 ## Open
 

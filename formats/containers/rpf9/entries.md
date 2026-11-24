@@ -98,6 +98,27 @@ Not established:
 - What selects layout F over layout A.
 - The bits that no traced accessor reads: bits 56 to 63 of F `+0x00`, bits 40 to 63 of F `+0x08`, bits 44 to 63 of F `+0x10`.
 
+### Observed in real rows
+
+After the metadata signature verifies, the location records can be read for every row without scanning the data area (RPF9-F103). In the 22 tested archives:
+
+| Observation | Result |
+|---|---|
+| Rows | 6534 |
+| Layout F | 6533 |
+| Layout R | 1 |
+| Layout A | 0 |
+| Read source `main` | 6534 |
+| Compression mode 0 | 6534 |
+| Stored rows | 5150 |
+| Chunked rows decoded | 929 |
+| Rows behind the payload transform | 455 |
+| Type IDs | 0, 11, 14 and 255 |
+
+The counts are sample observations, not format limits. Type IDs are numeric; their meanings and extension mappings are not established. Layout A and non-main read sources are confirmed by code but were not observed in this sample.
+
+Stored and chunked rows extract to exactly their logical sizes. Rows behind the payload transform are refused because the transform is unknown (RPF9-F104). Successful extraction does not authenticate payload bytes.
+
 ## Path resolution
 
 Entries are found by path. The resolver hashes the path relative to the archive's mount prefix and searches the rows for the hash and the type ID, see [names.md](names.md#path-to-row) (RPF9-F55, RPF9-F58). A second, dictionary-based path lookup uses a substring search, see [names.md](names.md#substring-lookup) (RPF9-F20).

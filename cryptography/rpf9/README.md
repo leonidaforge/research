@@ -20,13 +20,13 @@ The archive constructor reads the header and metadata into buffers ([header.md](
 
 The chain runs in this order (RPF9-F42):
 
-| Step | Operation | Runs when | On failure |
-|---|---|---|---|
-| 1 | Static pass over the `A` table and `B` block | `hdr[0x2E] != 0`. Otherwise the step succeeds without processing | Archive rejected |
-| 2 | [Signature check](#signature-check) | File object `+0x08` bit 0 is clear | Archive rejected |
-| lookup | Fetch `B` sub-block 1, the per-archive cipher descriptor | Always | If it is missing, the chain ends with success and steps 4 and 5 do not run |
-| 4 | Primary pass with the sub-block 1 descriptor | Sub-block 1 present | Archive rejected |
-| 5 | Secondary pass with the sub-block 1 descriptor | Sub-block 1 present, header read mode 0 or 1, non-empty secondary area. Otherwise the step succeeds without processing | Archive rejected |
+| Step   | Operation                                                | Runs when                                                                                                              | On failure                                                                 |
+| ------ | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| 1      | Static pass over the `A` table and `B` block             | `hdr[0x2E] != 0`. Otherwise the step succeeds without processing                                                       | Archive rejected                                                           |
+| 2      | [Signature check](#signature-check)                      | File object `+0x08` bit 0 is clear                                                                                     | Archive rejected                                                           |
+| lookup | Fetch `B` sub-block 1, the per-archive cipher descriptor | Always                                                                                                                 | If it is missing, the chain ends with success and steps 4 and 5 do not run |
+| 4      | Primary pass with the sub-block 1 descriptor             | Sub-block 1 present                                                                                                    | Archive rejected                                                           |
+| 5      | Secondary pass with the sub-block 1 descriptor           | Sub-block 1 present, header read mode 0 or 1, non-empty secondary area. Otherwise the step succeeds without processing | Archive rejected                                                           |
 
 The lookup between steps 2 and 4 is not a validation step. Earlier notes called it step 3.
 
@@ -36,10 +36,10 @@ The prefix counts are read before the chain runs, so they are stored in plain fo
 
 The byte at prefix `0x2E` controls step 1 (RPF9-F24):
 
-| Value | Effect |
-|---|---|
-| 0 | Step 1 does nothing |
-| bit 0 | Selects one of two span sets, see [Processed spans](#processed-spans) |
+| Value        | Effect                                                                                                                                                             |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 0            | Step 1 does nothing                                                                                                                                                |
+| bit 0        | Selects one of two span sets, see [Processed spans](#processed-spans)                                                                                              |
 | `value >> 1` | Selects a static cipher descriptor: index 4 has cipher type 16, index 1 has cipher type 3, any other index gets a default descriptor with cipher type 0 (RPF9-F51) |
 
 All inspected archives use 9: bit 0 set, descriptor index 4, cipher type 16, which selects [algorithm 0x10](#algorithm-0x10).
@@ -48,18 +48,18 @@ All inspected archives use 9: bit 0 set, descriptor index 4, cipher type 16, whi
 
 A cipher descriptor has this layout (RPF9-F25):
 
-| Offset | Type | Meaning |
-|---|---|---|
-| `+0x00` | `u32` | Key identifier |
-| `+0x04` | `u16` | Cipher type |
+| Offset  | Type     | Meaning                                                  |
+| ------- | -------- | -------------------------------------------------------- |
+| `+0x00` | `u32`    | Key identifier                                           |
+| `+0x04` | `u16`    | Cipher type                                              |
 | `+0x06` | 16 bytes | Parameter. For algorithm `0x10` it is the initial CBC IV |
 
 Two descriptor sources use this layout and the same initializer:
 
-| Source | Used by |
-|---|---|
-| Static, built in the executable | Step 1 |
-| `B` sub-block 1 in the archive | Steps 4 and 5 (RPF9-F45) |
+| Source                          | Used by                  |
+| ------------------------------- | ------------------------ |
+| Static, built in the executable | Step 1                   |
+| `B` sub-block 1 in the archive  | Steps 4 and 5 (RPF9-F45) |
 
 The cipher type in sub-block 1 is not known for real archives, because sub-block 1 lies inside the step 1 span.
 
@@ -88,11 +88,11 @@ The registry is a lazily built map populated from a static entry list plus runti
 
 Algorithm `0x10` consumes a `0x10F4`-byte encoded key state (RPF9-F95):
 
-| Blob offset | Content |
-|---|---|
-| `+0x000` | `u32` magic `0x4E3B9B8E` |
-| `+0x004` | 240-byte schedule, 60 little-endian dwords |
-| `+0x0F4` | 16 × 256-byte key-dependent final-round tables |
+| Blob offset | Content                                        |
+| ----------- | ---------------------------------------------- |
+| `+0x000`    | `u32` magic `0x4E3B9B8E`                       |
+| `+0x004`    | 240-byte schedule, 60 little-endian dwords     |
+| `+0x0F4`    | 16 × 256-byte key-dependent final-round tables |
 
 The setup copies these bytes into a `0x1100`-byte state and copies the 16-byte descriptor parameter into state `+0x10F0`. The engine checks the magic and does not expand a raw key. It does not receive the blob length, so a provider MUST enforce `0x10F4`.
 
@@ -130,30 +130,30 @@ All 22 tested local archives select the same candidate and pass. A qualifying `A
 
 The cipher type indexes a 19-entry table of algorithm IDs (RPF9-F51):
 
-| Cipher types | Algorithm ID | Implementation |
-|---|---|---|
-| 0, 9, and any type of 19 or more | 0 | [No-op](#algorithm-0) |
-| 3, 4, 5, 10, 11, 12, 16 | `0x10` | [CBC decryption](#algorithm-0x10) |
-| 1 | 1 | Not analyzed |
-| 2 | 2 | Not analyzed |
-| 17 | `0x11` | Not analyzed |
-| 6, 7, 8, 18 | `0x12` | Not analyzed |
-| 13, 14, 15 | `0x0D` to `0x0F` | None. The object factory traps, so these types crash the engine |
+| Cipher types                     | Algorithm ID     | Implementation                                                  |
+| -------------------------------- | ---------------- | --------------------------------------------------------------- |
+| 0, 9, and any type of 19 or more | 0                | [No-op](#algorithm-0)                                           |
+| 3, 4, 5, 10, 11, 12, 16          | `0x10`           | [CBC decryption](#algorithm-0x10)                               |
+| 1                                | 1                | Not analyzed                                                    |
+| 2                                | 2                | Not analyzed                                                    |
+| 17                               | `0x11`           | Not analyzed                                                    |
+| 6, 7, 8, 18                      | `0x12`           | Not analyzed                                                    |
+| 13, 14, 15                       | `0x0D` to `0x0F` | None. The object factory traps, so these types crash the engine |
 
 An algorithm ID outside the factory's cases gets an object whose operations all fail.
 
-A descriptor stores a *cipher kind*, a `u16`. The kind is the archive's or the static writer's selection and indexes the type table; it is not the algorithm identity. Several kinds share one algorithm family: 3, 4, 5, 10, 11, 12 and 16 all map to algorithm `0x10`, and 3, 4 and 5 differ from the others in when `final` runs. The algorithm family selects the provider namespace and the block implementation. Cipher kinds and algorithm families MUST NOT be used interchangeably: "type 16" names the archive-side kind, "algorithm `0x10`" names the implementation family.
+A descriptor stores a _cipher kind_, a `u16`. The kind is the archive's or the static writer's selection and indexes the type table; it is not the algorithm identity. Several kinds share one algorithm family: 3, 4, 5, 10, 11, 12 and 16 all map to algorithm `0x10`, and 3, 4 and 5 differ from the others in when `final` runs. The algorithm family selects the provider namespace and the block implementation. Cipher kinds and algorithm families MUST NOT be used interchangeably: "type 16" names the archive-side kind, "algorithm `0x10`" names the implementation family.
 
 ## Processed spans
 
 `A`, `B` and `u32@0x30` are the [prefix fields](../../formats/containers/rpf9/header.md#schema-prefix).
 
-| Step | Span | Covers |
-|---|---|---|
-| 1, `hdr[0x2E]` bit 0 set | `(A table, align16(A * 8))` and `(B block, B - u32@0x30)` | `A` with padding, `B` without its trailer |
-| 1, bit 0 clear, nonzero | One span `(A table, align16(A * 8) + B)` | `A`, padding and all of `B` |
-| 4 | `[end of B - u32@0x30, hdr[0x08])` | `B` trailer, column descriptors, primary index store, primary value pool |
-| 5 | `[hdr[0x08], hdr[0x04])` | The whole secondary area |
+| Step                     | Span                                                      | Covers                                                                   |
+| ------------------------ | --------------------------------------------------------- | ------------------------------------------------------------------------ |
+| 1, `hdr[0x2E]` bit 0 set | `(A table, align16(A * 8))` and `(B block, B - u32@0x30)` | `A` with padding, `B` without its trailer                                |
+| 1, bit 0 clear, nonzero  | One span `(A table, align16(A * 8) + B)`                  | `A`, padding and all of `B`                                              |
+| 4                        | `[end of B - u32@0x30, hdr[0x08])`                        | `B` trailer, column descriptors, primary index store, primary value pool |
+| 5                        | `[hdr[0x08], hdr[0x04])`                                  | The whole secondary area                                                 |
 
 (RPF9-F26, RPF9-F45)
 
@@ -182,15 +182,15 @@ Initialization, `update` and `final` all return success without touching the dat
 
 ### Algorithm 0x10
 
-| Part | Behavior | Confidence |
-|---|---|---|
-| Engine | Only the mode 1 engine exists. Mode 0 has none and cannot initialize | Confirmed |
-| Initialization | Sets up the engine state from the key material and sets the IV to the 16-byte descriptor parameter | Confirmed |
-| `update` | CBC decryption: decrypts each 16-byte block and XORs it with the previous stored block, the first with the IV. Writes the result to the output, which is the input buffer. The output is written only after decryption, so in-place use is safe | Confirmed |
-| Chaining | After each `update` the IV is the last stored block of that span, so the next span continues the CBC chain | Confirmed |
-| Length | A length that is not a multiple of 16 fails | Confirmed |
-| `final` | Resets the IV to the descriptor parameter and returns success. It checks nothing | Confirmed |
-| Authentication | None in this algorithm. `final` cannot reject the data | Confirmed |
+| Part           | Behavior                                                                                                                                                                                                                                        | Confidence |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| Engine         | Only the mode 1 engine exists. Mode 0 has none and cannot initialize                                                                                                                                                                            | Confirmed  |
+| Initialization | Sets up the engine state from the key material and sets the IV to the 16-byte descriptor parameter                                                                                                                                              | Confirmed  |
+| `update`       | CBC decryption: decrypts each 16-byte block and XORs it with the previous stored block, the first with the IV. Writes the result to the output, which is the input buffer. The output is written only after decryption, so in-place use is safe | Confirmed  |
+| Chaining       | After each `update` the IV is the last stored block of that span, so the next span continues the CBC chain                                                                                                                                      | Confirmed  |
+| Length         | A length that is not a multiple of 16 fails                                                                                                                                                                                                     | Confirmed  |
+| `final`        | Resets the IV to the descriptor parameter and returns success. It checks nothing                                                                                                                                                                | Confirmed  |
+| Authentication | None in this algorithm. `final` cannot reject the data                                                                                                                                                                                          | Confirmed  |
 
 (RPF9-F53)
 
@@ -223,13 +223,13 @@ The identity of the algorithm does not by itself enable interoperability. A stan
 
 ### Interpretation summary
 
-| Interpretation | Status |
-|---|---|
-| In-place call for each span | Confirmed: input and output pointers are identical |
-| Result checked by a boolean `final` that can reject the archive | Confirmed for the runner. Algorithms 0 and `0x10` never fail in `final` |
-| Decryption that changes the bytes | Confirmed for algorithm `0x10`. Algorithm 0 leaves them unchanged |
-| Authenticated decryption | Rejected for algorithm `0x10`. Unknown for the algorithms that were not analyzed |
-| Algorithm `0x10` identity | Encoded AES-256 decryption: the AES inverse S-box and InvMixColumns, established constructively and verified on all 256 inputs per S-box core (RPF9-F89, RPF9-F90) |
+| Interpretation                                                  | Status                                                                                                                                                             |
+| --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| In-place call for each span                                     | Confirmed: input and output pointers are identical                                                                                                                 |
+| Result checked by a boolean `final` that can reject the archive | Confirmed for the runner. Algorithms 0 and `0x10` never fail in `final`                                                                                            |
+| Decryption that changes the bytes                               | Confirmed for algorithm `0x10`. Algorithm 0 leaves them unchanged                                                                                                  |
+| Authenticated decryption                                        | Rejected for algorithm `0x10`. Unknown for the algorithms that were not analyzed                                                                                   |
+| Algorithm `0x10` identity                                       | Encoded AES-256 decryption: the AES inverse S-box and InvMixColumns, established constructively and verified on all 256 inputs per S-box core (RPF9-F89, RPF9-F90) |
 
 ### On-disk state of the primary area
 
@@ -248,19 +248,19 @@ Step 2 checks a 256-byte value against a message built from metadata bytes (RPF9
 
 The signature record comes from the `B` block:
 
-| Sub-block | Layout | Used |
-|---|---|---|
-| 6 | `u8` message type, `u16` key identifier at `+2`, 256-byte signature at `+4` | First choice |
-| 2 | `u32` key identifier, 256-byte signature at `+4`. Message type 0 | If sub-block 6 is missing |
+| Sub-block | Layout                                                                      | Used                      |
+| --------- | --------------------------------------------------------------------------- | ------------------------- |
+| 6         | `u8` message type, `u16` key identifier at `+2`, 256-byte signature at `+4` | First choice              |
+| 2         | `u32` key identifier, 256-byte signature at `+4`. Message type 0            | If sub-block 6 is missing |
 
 Neither present, a message type other than 0 or 1, a signature outside the `B` block, a key identifier without key material, or a failed check all reject the archive.
 
 The message is the concatenation of these spans:
 
-| Message type | Spans, in order |
-|---|---|
-| 0 | `hdr[0x00..0x10)`, from the end of the signature to `hdr[0x08]`, then the secondary area if it is non-empty |
-| 1 | `hdr[0x00..0x10)`, from `hdr[0x18]` to the signature, from the end of the signature to `hdr[0x08]`, then the secondary area if it is non-empty |
+| Message type | Spans, in order                                                                                                                                |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0            | `hdr[0x00..0x10)`, from the end of the signature to `hdr[0x08]`, then the secondary area if it is non-empty                                    |
+| 1            | `hdr[0x00..0x10)`, from `hdr[0x18]` to the signature, from the end of the signature to `hdr[0x08]`, then the secondary area if it is non-empty |
 
 Coverage:
 
@@ -291,12 +291,12 @@ The archive is only partly authenticated even when the signature passes: coverag
 
 ### What is authenticated
 
-| Layer | Authenticated | Basis |
-|---|---|---|
-| Signed metadata spans | Yes | RSA signature over the post-step-1 spans (RPF9-F102) |
-| Other metadata bytes | No | `hdr[0x10..0x18)` is outside every message type; for type 0 so are `hdr[0x18..0x40)` and the `B` prefix |
-| Structurally valid native entries | No | A plausible `A` table and column view follow from decryption; the signature covers bytes, not parsed entry semantics (RPF9-F100) |
-| Payload contents | No | No message type covers payload data |
+| Layer                             | Authenticated | Basis                                                                                                                            |
+| --------------------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Signed metadata spans             | Yes           | RSA signature over the post-step-1 spans (RPF9-F102)                                                                             |
+| Other metadata bytes              | No            | `hdr[0x10..0x18)` is outside every message type; for type 0 so are `hdr[0x18..0x40)` and the `B` prefix                          |
+| Structurally valid native entries | No            | A plausible `A` table and column view follow from decryption; the signature covers bytes, not parsed entry semantics (RPF9-F100) |
+| Payload contents                  | No            | No message type covers payload data                                                                                              |
 
 A plausible `A` table is structural evidence that one ciphertext span decoded under the recognized key. It is not authenticity. Only a successful signature check authenticates the metadata, and it says nothing about later opens that skip step 2 or about payload bytes.
 
@@ -304,15 +304,15 @@ A plausible `A` table is structural evidence that one ciphertext span decoded un
 
 Payload reads have their own transform path. The read routines call RVAs `0x19C380` (position the context), `0x1616150` (whole blocks) and `0x28CF9C0` (partial blocks), not the metadata span runner directly. Those routines were not analyzed, so shared code with the span runner is not excluded (RPF9-F38).
 
-| Part | Status |
-|---|---|
-| Selection | Per entry, by the presence of key `0x286030A358A789FB` in the [schema](../../formats/containers/rpf9/schema.md#known-columns). Confirmed |
-| Granularity | The engine positions a per-stream context at `position & ~0xF`, reads whole 16-byte blocks and processes them in place. Partial blocks at the ends use a separate routine. Confirmed |
-| Seeks | Reposition the context to the new position. Confirmed |
-| Interaction | Entries with the flag never use the chunk fast path. Confirmed |
-| Algorithm | Unknown |
-| Key source | Unknown. Not examined |
-| Relation to the metadata cipher | Unknown |
+| Part                            | Status                                                                                                                                                                               |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Selection                       | Per entry, by the presence of key `0x286030A358A789FB` in the [schema](../../formats/containers/rpf9/schema.md#known-columns). Confirmed                                             |
+| Granularity                     | The engine positions a per-stream context at `position & ~0xF`, reads whole 16-byte blocks and processes them in place. Partial blocks at the ends use a separate routine. Confirmed |
+| Seeks                           | Reposition the context to the new position. Confirmed                                                                                                                                |
+| Interaction                     | Entries with the flag never use the chunk fast path. Confirmed                                                                                                                       |
+| Algorithm                       | Unknown                                                                                                                                                                              |
+| Key source                      | Unknown. Not examined                                                                                                                                                                |
+| Relation to the metadata cipher | Unknown                                                                                                                                                                              |
 
 The read path is described in [payloads.md](../../formats/containers/rpf9/payloads.md#payload-transform). Routines are listed in the [function catalog](../../builds/gta-vi/scarlett-e95020b2/functions.md#entries-names-payloads).
 
@@ -320,12 +320,12 @@ The read path is described in [payloads.md](../../formats/containers/rpf9/payloa
 
 A reader without game data can check the cryptographic claims at the level they are published:
 
-| Check | Input | Expected |
-|---|---|---|
-| Block transform | The engine's fixed tables read from a user-provided executable, a synthetic encoded key state and the FIPS-197 AES-256 vector | The recovered block operation decrypts to the FIPS plaintext, and further synthetic blocks agree (RPF9-F91) |
-| CBC order | The same block operation with the engine's chaining rule and the NIST SP 800-38A AES-256-CBC vector | Four blocks decrypt to the published plaintext |
-| Signature rule | A synthetic RSA-2048 key and synthetic messages | The double-hash signature is accepted; single-hash, mutated-message, mutated-signature, short-signature and wrong-key cases are rejected (RPF9-F101) |
-| A-table gate | Synthetic 8-byte records and a synthetic `B` length | Well-formed tables pass; zero or duplicate IDs, out-of-range offsets and tables without a known sub-block ID fail (RPF9-F100) |
+| Check           | Input                                                                                                                         | Expected                                                                                                                                             |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Block transform | The engine's fixed tables read from a user-provided executable, a synthetic encoded key state and the FIPS-197 AES-256 vector | The recovered block operation decrypts to the FIPS plaintext, and further synthetic blocks agree (RPF9-F91)                                          |
+| CBC order       | The same block operation with the engine's chaining rule and the NIST SP 800-38A AES-256-CBC vector                           | Four blocks decrypt to the published plaintext                                                                                                       |
+| Signature rule  | A synthetic RSA-2048 key and synthetic messages                                                                               | The double-hash signature is accepted; single-hash, mutated-message, mutated-signature, short-signature and wrong-key cases are rejected (RPF9-F101) |
+| A-table gate    | Synthetic 8-byte records and a synthetic `B` length                                                                           | Well-formed tables pass; zero or duplicate IDs, out-of-range offsets and tables without a known sub-block ID fail (RPF9-F100)                        |
 
 The checks use author-created keys, states, tables and records. They validate the published rules, not any real archive. Engine-fixed tables and real key states are never redistributed.
 
@@ -333,16 +333,16 @@ The checks use author-created keys, states, tables and records. They validate th
 
 Leonida Forge implements the chain in `crates/rage9/src/rpf/metadata/`:
 
-| Module | Role |
-|---|---|
-| `transform/` | Span runner, descriptor parsing, `Cipher` and `CipherSource` |
-| `recognize/` | Structural recognition of the static key registry and the static cipher descriptor |
-| `provider/` | Fixed-table recognition, encoded block operation and archive-dependent candidate selection |
-| `probe.rs` | Bounded step-1 compatibility probe and `A`-table validation |
-| `signature.rs` | Signature record, message spans, key resolution and double-hash verification |
-| `verify.rs` | Steps 1, 2, 4 and 5, with the trust classification |
+| Module         | Role                                                                                       |
+| -------------- | ------------------------------------------------------------------------------------------ |
+| `transform/`   | Span runner, descriptor parsing, `Cipher` and `CipherSource`                               |
+| `recognize/`   | Structural recognition of the static key registry and the static cipher descriptor         |
+| `provider/`    | Fixed-table recognition, encoded block operation and archive-dependent candidate selection |
+| `probe.rs`     | Bounded step-1 compatibility probe and `A`-table validation                                |
+| `signature.rs` | Signature record, message spans, key resolution and double-hash verification               |
+| `verify.rs`    | Steps 1, 2, 4 and 5, the trust classification and authenticated metadata opening           |
 
-`lforge archive probe <archive> --executable <exe>` reports the recognition, signature, archive-pass and trust stages. Only a verified signature permits trusted native use; decoded but unsigned metadata is reported separately.
+`verify::open_authenticated` returns parsed metadata only when the signature verifies and the decoded table parses. The type boundary keeps unverified bytes out of the trusted reader. `lforge archive probe <archive> --executable <exe>` reports the recognition, signature, archive-pass and trust stages. `lforge archive metadata <archive> --executable <exe> --entries` lists native rows, and `lforge archive extract <archive> --executable <exe> --row <n> --output <file>` extracts a supported payload. Native listing requires authentication for processed metadata; unprocessed metadata remains readable without an executable. Decoded but unsigned metadata is reported separately and never unlocks the trusted path.
 
 ## Relation to earlier RPF versions
 
