@@ -144,9 +144,19 @@ Span handling follows from `final`:
 - Cipher types 10, 11, 12 and 16 call `final` only at the end. Consecutive spans form one CBC chain. For the observed type 16 this means the step 1 `A` and `B` spans are decrypted as one chain.
 - The extra `final` after the last span only resets the IV and changes no output.
 
-The block decryption has the structure of AES-256 decryption: a 128-bit block, 14 rounds and a 240-byte round-key schedule, with a substitution-only final round, computed with lookup tables (RPF9-F54). The round tables are key-dependent in the final round and static in the inner rounds, which is the structure of a table-encoded block cipher.
+The block decryption has the structure of AES-256 decryption: a 128-bit block, 14 rounds (13 table rounds plus a substitution-only final round) and a 240-byte round-key schedule (RPF9-F54, RPF9-F88).
 
-Its static tables differ from the standard AES reference constants. On its own that does not establish a different algorithm: a table-encoded cipher folds the substitution, the linear layer and the round key into its tables under secret encodings, so its table bytes differ from textbook constants even when the underlying transform is AES. The difference does rule out dropping in a standard AES table implementation, but it neither confirms nor excludes AES as the underlying transform. Telling an encoded AES apart from an encoded AES-like cipher of the same shape would require reconstructing the secret encodings and the embedded key, which is out of scope. So the structure is AES-256-shaped and consistent with a table-encoded AES, and exact equivalence to AES stays unknown.
+The fixed tables decompose exactly (RPF9-F85, RPF9-F86, RPF9-F87):
+
+- The 16 static byte tables applied before the first round are affine bijections over GF(2), not substitution boxes. That stage is a fixed invertible affine transform of the block followed by a four-word key XOR.
+- Each of the 16 static 1 KiB round tables is injective 8→32 bit: an injective linear map composed with an 8-bit permutation. Every one of those permutations is differentially 4-uniform, of algebraic degree 7 and with maximum absolute Walsh coefficient 32, and its difference-distribution and absolute Walsh multisets equal the AES inverse S-box's. The checked core also has the AES inverse S-box's boomerang uniformity of 6.
+- The 16 round tables are pairwise unrelated by a linear map or by a byte rotation, and all are distinct. They are therefore not a textbook AES T-table set. Any AES reading requires a separate affine encoding per table position.
+
+The round-key material supplies the rest of the structure. Whitening uses schedule words 0 to 3, 13 rounds use words 4 to 55, and the last 16 schedule bytes are never read. That fits the AES-256 equivalent-inverse-cipher layout, whose 15th round key is folded into the 16 key-dependent final-round byte tables instead of being XORed (RPF9-F88).
+
+These properties were measured read-only from the two fixed table regions at RVAs `0x6036F30` (4 KiB) and `0x6037F30` (16 KiB) in build e95020b2, from the Ghidra 12.2 listing of `0x5642C50` and local scripts that recompute the difference distribution, the Walsh spectrum and the table relations.
+
+Differing table bytes still do not decide AES equivalence, because a table-encoded cipher with per-position affine encodings necessarily differs from the textbook constants. What changed is the scope of the open question: all computed affine invariants of the round cores match the AES inverse S-box, so an affinely encoded AES-256 decryption is more plausible than before; and deciding it is now a bounded affine-equivalence problem over public data, not one that needs key-dependent material. Exact equivalence remains Unknown. It would need a constructive affine-equivalence search for the 8-bit cores and identification of the 16-fold linear layer against InvMixColumns. Neither has been done.
 
 The identity of the algorithm does not by itself enable interoperability. The block engine is initialized from a pre-expanded, encoded, key-dependent table structure, not from a raw key (RPF9-F53), so a standard library that expands a raw key internally cannot stand in for it even if the transform were confirmed to be AES. The binding constraint is the key-supply boundary.
 
@@ -222,7 +232,7 @@ Whether RPF9 shares any cryptography with earlier RPF versions is unknown. Nothi
 ## Open questions
 
 - Algorithms 1, 2, `0x11` and `0x12`.
-- Whether the algorithm `0x10` block transform equals AES under some encoding.
+- The affine encodings of the algorithm `0x10` tables, which decide whether that transform is AES-256 under an encoding. The question is bounded and needs no key material (RPF9-F86).
 - The cipher type of `B` sub-block 1 in real archives.
 - Whether the key lookup succeeds for the default descriptor, which decides whether algorithm 0 archives open at all.
 - The signature algorithm.
