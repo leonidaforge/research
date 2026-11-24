@@ -2,7 +2,9 @@
 
 While the engine opens an RPF9 archive, it runs a validation chain over the [metadata area](../../formats/containers/rpf9/metadata.md). The chain processes selected spans in place with a cipher. On the first open of a file it also checks a signature. Any failure rejects the archive.
 
-The cipher used by the observed archives is CBC-mode decryption with a 16-byte block, and it does not authenticate (see [Algorithm 0x10](#algorithm-0x10)). The only integrity check in the chain is the conditional [signature check](#signature-check). It is RSASSA-PKCS1-v1_5 with SHA-256 and a 2048-bit RSA key embedded in the executable (RPF9-F92, RPF9-F93).
+The cipher used by the observed archives is CBC-mode decryption with a 16-byte block, and it does not authenticate (see [Algorithm 0x10](#algorithm-0x10)). The only integrity check in the chain is the conditional [signature check](#signature-check). It is RSASSA-PKCS1-v1_5 with SHA-256 and a 2048-bit RSA key embedded in the executable (RPF9-F92, RPF9-F93). The engine signs the SHA-256 hash of the SHA-256 hash of the message (RPF9-F101). With the recognized key supply and the archive-dependent fixed-table selection, step 1 decrypts the metadata of all 22 tested local archives and their signatures verify (RPF9-F100, RPF9-F102).
+
+The authenticated layer is metadata. Parsed entry semantics and payload contents are outside the signature. See [What is authenticated](#what-is-authenticated).
 
 Payloads of some entries go through a separate 16-byte block transform when they are read. See [Payload transform](#payload-transform).
 
@@ -98,7 +100,7 @@ In private validation, the registered algorithm-`0x10` states matched the recove
 
 A standard 32-byte AES key is not accepted by algorithm `0x10`. Separate provider-0 32-byte entries serve other algorithms and are not a conversion path. No conversion from a raw AES key to the encoded state is provided by the engine.
 
-The key material is embedded and build-specific. A read-only probe did not reproduce a structured `A` table for the local archive sample with any registered algorithm-`0x10` blob (RPF9-F96). The blob-to-archive binding is therefore unconfirmed. A build mismatch is a hypothesis, not an established explanation; a matching executable/archive pair has not been demonstrated. Do not treat the identified key supply as a demonstrated archive decryption.
+The key material is embedded and build-specific. The binding to the local archives is demonstrated for this build: the resolved state decrypts the step-1 `A` span of all 22 tested archives into structurally valid tables, and the metadata signature then verifies under the static public key (RPF9-F100, RPF9-F102). An earlier read-only probe recovered no structured `A` table; it used one assumed fixed-table block (RPF9-F96). The difference is candidate selection, not the key. Whether a second executable build binds to the same archives is untested; a build mismatch for those archives is neither shown nor excluded.
 
 ### Recognition
 
@@ -116,6 +118,13 @@ The method is public; the concrete result is verified only for this build. A mis
 
 The static descriptor is recognized separately (RPF9-F98). The recognizer finds the descriptor writer, bounds its caller with the PE exception table and derives the index-guarded key/type/parameter path. On build e95020b2 selector 9 resolves to index 4, kind `0x10`, and exactly one compatible registry state; selector 7 has no descriptor and fails closed. Key identifiers, IVs and addresses are not published.
 
+### Fixed tables and the archive gate
+
+The fixed transformation tables are recognized structurally (RPF9-F99). A candidate is a contiguous 20 KiB block: sixteen 256-byte stage tables that are affine bijections of rank 8, followed without padding by sixteen 1 KiB round tables that are injective with four byte-lane permutations and an affine 8-dimensional image. On build e95020b2 this finds nine structurally valid blocks. The recognition method and the validation rule are public; the concrete count and the selected index are private-evidence supported.
+
+Structural validity does not identify which block the engine uses. All nine satisfy the same public invariants, the archive names no block, and the table bytes are not published. The discriminator is archive data (RPF9-F100): the engine's step-1 `A` span is decrypted with the recognized descriptor state under each candidate, and the decoded records are validated. A candidate qualifies only if the records are 8 bytes long, their `u16` identifiers are nonzero and unique, every offset lies inside `B`, and at least one identifier is a known sub-block ID. Exactly one candidate MUST qualify; zero or several fail closed.
+
+All 22 tested local archives select the same candidate and pass. A qualifying `A` table is structural evidence that one ciphertext span decoded under the recognized key. It is not authenticity: the signature check decides that, in [Verified archive result](#verified-archive-result).
 
 ### Cipher types
 
@@ -132,6 +141,8 @@ The cipher type indexes a 19-entry table of algorithm IDs (RPF9-F51):
 | 13, 14, 15 | `0x0D` to `0x0F` | None. The object factory traps, so these types crash the engine |
 
 An algorithm ID outside the factory's cases gets an object whose operations all fail.
+
+A descriptor stores a *cipher kind*, a `u16`. The kind is the archive's or the static writer's selection and indexes the type table; it is not the algorithm identity. Several kinds share one algorithm family: 3, 4, 5, 10, 11, 12 and 16 all map to algorithm `0x10`, and 3, 4 and 5 differ from the others in when `final` runs. The algorithm family selects the provider namespace and the block implementation. Cipher kinds and algorithm families MUST NOT be used interchangeably: "type 16" names the archive-side kind, "algorithm `0x10`" names the implementation family.
 
 ## Processed spans
 
@@ -200,7 +211,7 @@ The fixed tables decompose exactly (RPF9-F85, RPF9-F86, RPF9-F87, RPF9-F89):
 
 The linear layer is identified as well. Each 8→32 table map factors exactly as `E_i P_j`, where `E_i` is a byte-diagonal 32-bit encoding and `P_j` is the `InvMixColumns` coefficient column, and the per-position encodings compose across rounds: each output byte encoding is the inverse of the input decoding of the table that reads that byte next, with the affine constants absorbed into the encoded round key. The fixed tables therefore implement the AES-256 equivalent-inverse-cipher round function on a fixed byte-wise affine state encoding, with the round key supplied in the encoded domain (RPF9-F90). With the thirteen rounds, the substitution-only final round and the initial key addition, the block function is an encoded AES-256 decryption.
 
-The round model is verified against the instructions, not only against its own algebra. Symbolic execution of the 272-instruction listing derives the stage-0 packing and key-byte order, both half-round table and lane formulas, the 13-round control flow and the final permutation; Ghidra and objdump agree on all instruction boundaries. A synthetic encoded AES-256 instance, built from the recovered encodings and a synthetic key blob and executed with the real fixed tables read from a user-provided executable, reproduces the FIPS-197 AES-256 decryption vector and further blocks (RPF9-F91). The layout is fixed: a code word is an AES column and its lane `r` is AES row `3-r`, with the caller block in column-major order.
+The round model is verified against the instructions, not only against its own algebra. Symbolic execution of the 272-instruction listing derives the stage-0 packing and key-byte order, both half-round table and lane formulas, the 13-round control flow and the final permutation; Ghidra and objdump agree on all instruction boundaries. A synthetic encoded AES-256 instance, built from the recovered encodings and a synthetic key blob and executed with the real fixed tables read from a user-provided executable, reproduces the FIPS-197 AES-256 decryption vector and further blocks (RPF9-F91). Driven with the engine's chaining rule, the same model reproduces the NIST SP 800-38A AES-256-CBC vector over four blocks, so the block transform and the CBC order are checked against published vectors. The layout is fixed: a code word is an AES column and its lane `r` is AES row `3-r`, with the caller block in column-major order.
 
 The round-key material supplies the rest of the structure. Whitening uses schedule words 0 to 3, 13 rounds use words 4 to 55, and the last 16 schedule bytes are never read. That fits the AES-256 equivalent-inverse-cipher layout, whose 15th round key is folded into the 16 key-dependent final-round byte tables instead of being XORed (RPF9-F88).
 
@@ -208,7 +219,7 @@ These properties were measured read-only from the two fixed table regions at RVA
 
 Differing table bytes do not by themselves decide AES equivalence, because a table-encoded cipher with per-position affine encodings necessarily differs from the textbook constants. The constructive result settles both layers from the fixed tables: the S-box layer is the AES inverse S-box and the linear layer is InvMixColumns, each up to the recovered affine encodings, and the encodings compose across rounds. Algorithm `0x10` is therefore an encoded AES-256 decryption. What remains outside the fixed data is the key-dependent state: the 240-byte schedule and the 16 key-dependent final-round tables. That state is embedded in a static registry (RPF9-F94, RPF9-F95). Private validation found that the registered algorithm-`0x10` states match the recovered final-table encodings on all 16 tables, so they are encoded AES-256 states. Their bytes, fingerprints and registry locations are not published. Whether the schedule is the standard AES-256 expansion of a raw key in encoded form was not determined from public data.
 
-The identity of the algorithm does not by itself enable interoperability. A standard AES-256 implementation cannot be dropped in, because the engine consumes a pre-expanded, per-position-encoded schedule and key-dependent final tables, not a raw key. The state encodings are recovered by the constructive analysis. The provider boundary is therefore a `0x10F4` blob, not a raw key. The remaining blocker is the archive-specific key binding, which a read-only probe did not confirm for the local sample (RPF9-F96), not an external platform key store.
+The identity of the algorithm does not by itself enable interoperability. A standard AES-256 implementation cannot be dropped in, because the engine consumes a pre-expanded, per-position-encoded schedule and key-dependent final tables, not a raw key. The state encodings are recovered by the constructive analysis. The provider boundary is therefore a `0x10F4` blob, not a raw key. The archive-specific key binding is demonstrated for the tested build and archive sample (RPF9-F100, RPF9-F102); the key does not come from an external platform key store.
 
 ### Interpretation summary
 
@@ -227,9 +238,9 @@ Code places the column descriptors, primary index store and primary value pool i
 - A read-only scan of a sample of archives found none of the known field keys anywhere in the stored primary area `[0x40, hdr[0x08])`. The scan looked for each key as a little-endian `u64` at every byte offset.
 - The engine needs one of the location record keys in the descriptors of every archive it reads (RPF9-F32).
 
-So in those archives the stored primary area differs from what the engine reads. Probable: it is stored transformed and step 4 transforms it, which also means those archives contain `B` sub-block 1 with a cipher type that is not a no-op.
+So in those archives the stored primary area differs from what the engine reads. The area is stored transformed and step 4 transforms it, which also means those archives contain `B` sub-block 1 with a cipher type that is not a no-op. Confirmed for the inspected archives by the successful step 4 pass and the signature; whether every byte changes is not established.
 
-Not established: other archives, the secondary area, and whether every byte changes.
+Steps 4 and 5 now run to completion with the sub-block 1 descriptor on all 22 tested archives, and the metadata signature over the decoded spans verifies (RPF9-F102). That confirms the stored primary area is transformed in those archives and that a non-no-op descriptor is present. It does not show that every byte changes, and it does not decode the secondary area's storage state beyond running the step 5 span.
 
 ## Signature check
 
@@ -258,22 +269,36 @@ Coverage:
 - No message type covers `hdr[0x10..0x18)` or any payload data.
 - The check runs only while file object `+0x08` bit 0 is clear. After the first successful open the engine sets that bit, so later archives opened on the same file object skip the check (RPF9-F44).
 
-The scheme is RSASSA-PKCS1-v1_5 with SHA-256 (RPF9-F92):
+The scheme is RSASSA-PKCS1-v1_5 with SHA-256 (RPF9-F92). The engine hashes the assembled message once and passes that 32-byte digest to the verifier, which applies SHA-256 again. The signed value is therefore the double hash (RPF9-F101):
 
 ```
 digest     = SHA-256(message)
-digestInfo = 30 31 30 0d 06 09 60 86 48 01 65 03 04 02 01 05 00 04 20 || digest
+signed     = SHA-256(digest)
+digestInfo = 30 31 30 0d 06 09 60 86 48 01 65 03 04 02 01 05 00 04 20 || signed
 EM         = 00 01 FF...FF 00 || digestInfo
 accept     = RSA public operation on the signature yields exactly EM
 ```
 
-The verifier builds the DigestInfo itself. It requires the recovered payload to be 51 bytes and compares it with the computed DigestInfo; a raw 32-byte digest is rejected. The signature length is fixed at 256 bytes, so the key is 2048-bit. The RSA type is fixed in the verifier call and does not come from the archive. The synthetic rule is publicly reproducible with a synthetic key; the executable-specific verifier mapping and any real archive signature are private-evidence supported. No stored archive signature was verified.
+The verifier builds the DigestInfo itself. It requires the recovered payload to be 51 bytes and compares it with the computed DigestInfo; a raw 32-byte digest is rejected. The signature length is fixed at 256 bytes, so the key is 2048-bit. The RSA type is fixed in the verifier call and does not come from the archive. The synthetic rule is publicly reproducible with a synthetic key and synthetic messages. The concrete verification-key record and the archive signatures stay private-evidence supported.
 
-The key record carries a 16-bit or 32-bit identifier, resolved through a static key registry. This build supplies a DER `rsaEncryption` SubjectPublicKeyInfo with exponent 65537 (RPF9-F93). The registry location, identifier mapping and fingerprint are not published; the modulus bytes are not reproduced.
+The key record carries a 16-bit or 32-bit identifier, resolved through a static key registry that MUST yield exactly one match. This build supplies a DER `rsaEncryption` SubjectPublicKeyInfo with exponent 65537 (RPF9-F93). The registry location, identifier mapping and fingerprint are not published; the modulus bytes are not reproduced.
 
-Step 2 runs after step 1, so the signed message is the metadata after decryption. For the observed archives, selector 9 keeps step 1 active, and the stored `A` and `B` bytes are ciphertext. The 256-byte signature cannot fit in the observed 16-byte `B` trailer, so at least 240 of its bytes lie in the step 1 `B` span and are ciphertext as well. A stored archive therefore contains neither the signed message nor a readable signature, and its signature cannot be checked without the step 1 key. No real archive signature has been verified.
+### Verified archive result
 
-The archive is only partly authenticated even when the signature passes: coverage depends on the message type, and the check is skipped on later opens. For archives using algorithm `0x10`, nothing else in the chain detects altered metadata.
+Step 2 runs after step 1, so the signed message is metadata after decryption. For the observed archives selector 9 keeps step 1 active, so the stored `A` and `B` bytes are ciphertext and a stored archive contains neither the signed message nor a readable signature. The recognized provider of [Key supply](#key-supply) supplies the missing step, and the whole chain runs end to end (RPF9-F102). All 22 tested local archives, 12 root archives and 10 under `pack/`, authenticate: step 1 decrypts, the type 1 record in `B` sub-block 6 supplies the signature, the message spans are hashed and double-hashed, and the static key verifies. None of them uses sub-block 2. The rules and the pipeline are public; the archive set, the signatures and the key identifier are private-evidence supported.
+
+The archive is only partly authenticated even when the signature passes: coverage depends on the message type, and the check is skipped on later opens of the same file object. For archives using algorithm `0x10`, nothing else in the chain detects altered metadata.
+
+### What is authenticated
+
+| Layer | Authenticated | Basis |
+|---|---|---|
+| Signed metadata spans | Yes | RSA signature over the post-step-1 spans (RPF9-F102) |
+| Other metadata bytes | No | `hdr[0x10..0x18)` is outside every message type; for type 0 so are `hdr[0x18..0x40)` and the `B` prefix |
+| Structurally valid native entries | No | A plausible `A` table and column view follow from decryption; the signature covers bytes, not parsed entry semantics (RPF9-F100) |
+| Payload contents | No | No message type covers payload data |
+
+A plausible `A` table is structural evidence that one ciphertext span decoded under the recognized key. It is not authenticity. Only a successful signature check authenticates the metadata, and it says nothing about later opens that skip step 2 or about payload bytes.
 
 ## Payload transform
 
@@ -291,6 +316,34 @@ Payload reads have their own transform path. The read routines call RVAs `0x19C3
 
 The read path is described in [payloads.md](../../formats/containers/rpf9/payloads.md#payload-transform). Routines are listed in the [function catalog](../../builds/gta-vi/scarlett-e95020b2/functions.md#entries-names-payloads).
 
+## Synthetic and public checks
+
+A reader without game data can check the cryptographic claims at the level they are published:
+
+| Check | Input | Expected |
+|---|---|---|
+| Block transform | The engine's fixed tables read from a user-provided executable, a synthetic encoded key state and the FIPS-197 AES-256 vector | The recovered block operation decrypts to the FIPS plaintext, and further synthetic blocks agree (RPF9-F91) |
+| CBC order | The same block operation with the engine's chaining rule and the NIST SP 800-38A AES-256-CBC vector | Four blocks decrypt to the published plaintext |
+| Signature rule | A synthetic RSA-2048 key and synthetic messages | The double-hash signature is accepted; single-hash, mutated-message, mutated-signature, short-signature and wrong-key cases are rejected (RPF9-F101) |
+| A-table gate | Synthetic 8-byte records and a synthetic `B` length | Well-formed tables pass; zero or duplicate IDs, out-of-range offsets and tables without a known sub-block ID fail (RPF9-F100) |
+
+The checks use author-created keys, states, tables and records. They validate the published rules, not any real archive. Engine-fixed tables and real key states are never redistributed.
+
+## Implementation
+
+Leonida Forge implements the chain in `crates/rage9/src/rpf/metadata/`:
+
+| Module | Role |
+|---|---|
+| `transform/` | Span runner, descriptor parsing, `Cipher` and `CipherSource` |
+| `recognize/` | Structural recognition of the static key registry and the static cipher descriptor |
+| `provider/` | Fixed-table recognition, encoded block operation and archive-dependent candidate selection |
+| `probe.rs` | Bounded step-1 compatibility probe and `A`-table validation |
+| `signature.rs` | Signature record, message spans, key resolution and double-hash verification |
+| `verify.rs` | Steps 1, 2, 4 and 5, with the trust classification |
+
+`lforge archive probe <archive> --executable <exe>` reports the recognition, signature, archive-pass and trust stages. Only a verified signature permits trusted native use; decoded but unsigned metadata is reported separately.
+
 ## Relation to earlier RPF versions
 
 Whether RPF9 shares any cryptography with earlier RPF versions is unknown. Nothing in the analyzed code supports that assumption.
@@ -298,13 +351,12 @@ Whether RPF9 shares any cryptography with earlier RPF versions is unknown. Nothi
 ## Open questions
 
 - Algorithms 1, 2, `0x11` and `0x12`.
-- The archive-specific binding of the static algorithm-`0x10` key registry. The S-box, linear layer, round model and layout are established (RPF9-F89, RPF9-F90, RPF9-F91) and the key state is embedded (RPF9-F94, RPF9-F95), but no local archive was decrypted (RPF9-F96).
-- The cipher type of `B` sub-block 1 in real archives.
-- Whether the local archive sample matches this build's static key registry. A read-only probe did not decrypt it (RPF9-F96).
-- The per-archive key identifier and IV used by steps 4 and 5, which are inside the encrypted sub-block 1.
+- Whether the 240-byte schedule is the standard AES-256 expansion of a raw key in encoded form. The block transform is established (RPF9-F89, RPF9-F90, RPF9-F91); the key blob was not read.
+- Whether a second executable build registers the same keys or binds to the same archives. Every verified result covers build e95020b2 and its local archive set.
+- The cipher type of `B` sub-block 1 in real archives. It is readable only after step 1, which the provider now performs.
+- The per-archive key identifier and IV used by steps 4 and 5, which are inside sub-block 1 and are not published.
 - Whether the key lookup succeeds for the default descriptor, which decides whether algorithm 0 archives open at all.
-- Whether a real archive signature verifies. Step 1 decryption is needed to reconstruct the message.
-- Which message type real archives use, and whether every build registers the same key.
+- Which message types real archives use beyond the observed type 1, and whether every build registers the same key.
 - The role of the `B` trailer.
 - The `A` table content is identical across observed archives although it lies inside a processed span. The static descriptor uses a fixed key identifier and a fixed IV, which would explain identical stored bytes for identical plaintext. Not verified.
-- The payload transform's algorithm, key source and relation to the metadata cipher. Payload reads do not call the span runner directly (RPF9-F38).
+- The payload transform's algorithm, key source and relation to the metadata cipher. Payload reads do not call the span runner directly (RPF9-F38). Payload bytes are not authenticated by the metadata signature.

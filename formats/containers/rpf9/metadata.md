@@ -85,7 +85,7 @@ The open passes the archive's own base offset field as the output for the compan
 
 Only the companion check reads companion bytes outside entry payloads. No other parser for the companion format exists in the executable.
 
-Both regions lie inside the spans that validation step 1 processes (see [cryptography/rpf9](../../../cryptography/rpf9/README.md#processed-spans)). The lookups run after step 1, so this layout describes the bytes after processing. Whether the bytes on disk have the same layout is not established.
+Both regions lie inside the spans that validation step 1 processes (see [cryptography/rpf9](../../../cryptography/rpf9/README.md#processed-spans)). The lookups run after step 1, so this layout describes the bytes after processing. In the inspected archives the stored bytes are ciphertext, step 1 decryption produces this layout, and the metadata signature over it verifies (RPF9-F100, RPF9-F102).
 
 ## Secondary area
 
@@ -145,6 +145,6 @@ The chain processes these regions in place (see [cryptography/rpf9](../../../cry
 
 What lookups read is the post-validation state. This is confirmed (RPF9-F28).
 
-For the primary area, archive data narrows the question. In the inspected sample of archives none of the known field keys occurs anywhere in the stored bytes, although the engine must find one in every archive. Those archives probably store the primary area transformed (RPF9-F48). For other archives and other regions this is not established.
+For the primary area, archive data narrows the question. In the inspected sample of archives none of the known field keys occurs anywhere in the stored bytes, although the engine must find one in every archive. Those archives store the primary area transformed. Step 4 runs with a non-no-op `B` sub-block 1 descriptor, the decoded metadata is consistent, and its signature verifies (RPF9-F48, RPF9-F100, RPF9-F102). How many bytes change is not established. For other archives and other regions this is not established.
 
 A parser MUST NOT assume that the stored descriptors, index stores or value pools are plain. It MUST NOT assume that a stored region is transformed unless the region lies in a processed span that runs for that archive.

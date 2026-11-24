@@ -38,9 +38,9 @@ Evidence: [evidence/rpf9/INDEX.md](../../../evidence/rpf9/INDEX.md). Corrections
 | Nested archives | Confirmed (opened through the parent archive as device, positional reads without decoding). Raw storage requirement probable |
 | `A` table, `B` sub-blocks | Confirmed (index into `B`). Uses of sub-blocks 1, 2, 3, 6 and 9 known |
 | Validation chain order and conditions | Confirmed |
-| Metadata cipher spans | Confirmed. CBC decryption without authentication for the observed cipher type. Block transform not reproducible with standard AES |
-| Signature check | Data flow confirmed, conditional. RSASSA-PKCS1-v1_5 with SHA-256 and a 2048-bit RSA key. A stored archive cannot be checked without the step 1 key |
-| Stored primary area | Probably transformed in the inspected archives |
+| Metadata cipher spans | Confirmed. CBC decryption without authentication for the observed cipher type. The block transform is encoded AES-256: reproducible with the engine's fixed tables and key state, not with a standard AES API |
+| Signature check | Confirmed, conditional. RSASSA-PKCS1-v1_5 with SHA-256 over the double hash of the signed spans and a 2048-bit RSA key. Verifies on all 22 inspected archives once step 1 runs. Metadata only |
+| Stored primary area | Transformed in the inspected archives. Step 4 decodes it and the metadata signature verifies |
 | Structural checks in validation | None found |
 | Payload transform | Routing confirmed. Algorithm and key source unknown |
 | Enumeration, directory hierarchy | None on the traced paths. Paths are flat hashed stems |
@@ -49,7 +49,7 @@ Evidence: [evidence/rpf9/INDEX.md](../../../evidence/rpf9/INDEX.md). Corrections
 
 A tool cannot yet list an archive's files with their names and read them from the metadata alone. Missing:
 
-1. The stored descriptors, cells and pools. They lie in the step 4 cipher span, and in the inspected archives they are probably stored transformed. Reading them needs the transform, which is unknown. See [cryptography/rpf9](../../../cryptography/rpf9/README.md#on-disk-state-of-the-primary-area).
+1. Column identities. The bytes are recoverable: steps 4 and 5 decode the primary and secondary areas with the `B` sub-block 1 descriptor, and the decoded metadata authenticates on the tested archives. Most column meanings are still unknown, see [schema.md](schema.md).
 2. Name strings. Names are hashes, so they resolve only against an external list of candidate paths. Matching also needs the archive's mount prefix and the extension-to-type table, see [names.md](names.md#offline-consequences).
 3. Entries with the payload transform flag. Their stored bytes cannot be read without the unknown transform.
 4. A check of the location record layouts against real archives. The layouts come from code only.

@@ -155,14 +155,26 @@ Some earlier notes used "A" and "B" for `hdr[0x04]` and `hdr[0x08]`. Those lette
 
 **Correction.** The fixed tables are an encoded AES-256 decryption, established constructively. Every round-table core is affinely equivalent to the AES inverse S-box with explicit invertible maps verified on all 256 inputs. The 16 table maps factor as InvMixColumns columns under byte-diagonal output encodings, and the per-position encodings compose across rounds (RPF9-F89, RPF9-F90). The round formula was then re-derived by symbolic execution of the instruction stream, and a synthetic encoded AES-256 instance reproduced standard AES-256 on known vectors (RPF9-F91). The key schedule and the key-dependent final-round tables remain protected, so the equivalence is established for the block transform, not for any particular key.
 
+## Archive metadata could not be decrypted
+
+**Old assumption.** No local archive produced verified native metadata. Read-only probes decrypted the step-1 `A` span with one assumed fixed-table block, found no structured `A` table, and reported the key-to-archive binding as unconfirmed (RPF9-F96).
+
+**Correction.** Structural recognition finds nine fixed-table blocks that satisfy every public invariant, so structure alone cannot pick one (RPF9-F99). The archive decides: each candidate is tried with the recognized descriptor state, and the block whose decryption yields a plausible `A` table is selected (RPF9-F100). All 22 tested archives select the same candidate and then pass the metadata signature check (RPF9-F102). A plausible `A` table is a compatibility gate, not authentication.
+
+## Signature covered a single hash
+
+**Old assumption.** The signed value was `SHA-256(message)`, so a verifier hashed the assembled metadata spans once and compared that digest. Every tested archive failed that check.
+
+**Correction.** The archive path hashes the message once and the verifier hashes the resulting 32-byte digest again, so the signed value is `SHA-256(SHA-256(message))` (RPF9-F101). A single-hash check rejects valid signatures; the archive signatures were never invalid. All 22 tested archives authenticate (RPF9-F102).
+
 ## Open
 
 - Meaning of descriptor `+0x08`, and any use of `+0x12`.
 - What selects location layout F over A, and whether real rows carry more than one layout.
 - The content of the `B` sub-blocks.
-- The stored state of the secondary area and of archives other than the inspected ones. One earlier note called the primary regions "post-transform" from the order of initialization alone. The step 4 span and the archive scan now support that for the inspected archives (RPF9-F28, RPF9-F48).
-- The archive-specific binding of the static algorithm-`0x10` key registry, cipher algorithms 1, 2, `0x11` and `0x12`, whether the embedded schedule is the standard AES-256 expansion, and the role of the `B` trailer.
-- The payload transform algorithm and key source.
+- The stored state of the secondary area and of archives other than the inspected ones, and how many bytes of the primary area change. One earlier note called the primary regions "post-transform" from the order of initialization alone. The step 4 pass, the archive scan and the verified signature now confirm the primary area is stored transformed in the inspected archives (RPF9-F28, RPF9-F48, RPF9-F102).
+- Whether a second executable build registers the same keys or binds to the same archives. Cipher algorithms 1, 2, `0x11` and `0x12`, whether the embedded schedule is the standard AES-256 expansion, and the role of the `B` trailer remain open.
+- The payload transform algorithm and key source. Payload bytes are not covered by the metadata signature.
 - Directory structure outside the traced paths, and enumeration in the device layer or above.
 - CityHash32 identity of the fingerprint hash, the concrete startup fingerprint and the contents of `B` sub-block 9 in real archives.
 - Path normalization, the physical device implementation, and the mount prefixes the game uses.

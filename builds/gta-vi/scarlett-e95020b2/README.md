@@ -40,5 +40,5 @@ The executable carries no meaningful symbol names. Function names in this reposi
 
 - Indirect calls are resolved only where a vtable slot was read directly.
 - Device read and open implementations are not traced.
-- The key lookup is analyzed at the architecture level. Whether the local archive sample binds to this build's registry is open. The payload transform and metadata cipher algorithms 1, 2, `0x11` and `0x12` are not analyzed. Algorithms 0 and `0x10` are.
+- The key lookup is analyzed at the architecture level. The local archive sample binds to this build's registry: step 1 decrypts all 22 tested archives and their metadata signatures verify (RPF9-F100, RPF9-F102). A second build is untested. The payload transform and metadata cipher algorithms 1, 2, `0x11` and `0x12` are not analyzed. Algorithms 0 and `0x10` are.
 - The codec's inner decode call and the chunk decompression service are not analyzed.
