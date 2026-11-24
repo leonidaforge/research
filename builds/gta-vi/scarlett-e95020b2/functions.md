@@ -112,14 +112,19 @@ Callers of `0xFC21C0`: `0xFC20D0`, `0x1D4C980`, `0x1DEE6C0`, `0x22372C0`, `0x275
 | `0x536AC0` | Cipher type to algorithm ID, 19-entry table at `0x62FE860`. Types of 19 or more give 0 | Confirmed | F25, F51 |
 | `0x1FB2310` | Returns the per-thread cipher context | Confirmed | F50 |
 | `0x613880` | Replaces the algorithm object when the algorithm ID changes, looks up the key and initializes the object | Confirmed | F25, F50 |
-| `0x193F90` | Key lookup by identifier, algorithm ID and mode, called from `0x613880`. Not analyzed | Confirmed (call) | F25 |
+| `0x193F90` | Key selector: `(key_id << 32) \| (provider << 24)`. Algorithms `0x10..0x15` use provider 3 for mode 0, else 2; other algorithms use provider 0 | Confirmed | F94 |
 | `0x4C11250` | Algorithm object factory by algorithm ID. Traps for `0x0D` to `0x0F` | Confirmed | F50, F51 |
 | `0x613720`, `0x613740` | `update` and `final` dispatch to algorithm object slots `+0x18` and `+0x20` | Confirmed | F50 |
 | `0x19056F0` | Creates the algorithm `0x10` object: mode 0 engine null, mode 1 engine from `0x19057B0` | Confirmed | F53 |
 | `0x4C115E0` | Algorithm `0x10` init: selects the engine by mode, initializes it, stores the 16-byte parameter | Confirmed | F53 |
 | `0x6137D0` | Algorithm `0x10` `update`: requires output at least as long as input, runs the engine | Confirmed | F53 |
 | `0x613760`, `0x613780` | Algorithm `0x10` `final`: resets the engine IV to the stored parameter and returns success | Confirmed | F53 |
-| `0x55DC660` | Engine setup: checks the key-material magic `0x4E3B9B8E`, copies a 240-byte schedule, 16 × 256-byte final-round tables and the IV into the 0x1100-byte state | Confirmed | F53, F54, F88 |
+| `0x55DC660` | Engine setup: checks the key-material magic `0x4E3B9B8E`, copies a 240-byte schedule, 16 × 256-byte final-round tables and the IV into the 0x1100-byte state | Confirmed | F53, F54, F88, F95 |
+| `0x575A70`, `0x575A90` | Compose the key selector and look it up in the static registry | Confirmed | F94 |
+| `0x575AC0` | Lazy registry init from the executable's static entry list | Confirmed | F94 |
+| `0x1456406B0`, `0x145640510` | Internal integrity gate before and after key-state setup. No platform call | Confirmed | F95 |
+| `0x140A60550` | Engine setup thunk: maps the setup result `0x24A187B9` to true | Confirmed | F95 |
+| `0x145E90390` | Algorithm 1 and 2 constructor; references a provider-0 default key id | Confirmed | F95 |
 | `0x55DBCF0` | Engine CBC decryption over whole 16-byte blocks, keeps the last stored block as the next IV | Confirmed | F53 |
 | `0x55DBA30` | Engine IV reset | Confirmed | F53 |
 | `0x5642C50` | 128-bit block decryption: encoded AES-256 decryption (affine pre-stage, 13 table rounds, substitution-only final round) | Confirmed (instruction-derived model, S-box, linear layers) | F54, F85, F86, F87, F88, F89, F90, F91 |

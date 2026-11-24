@@ -161,7 +161,7 @@ Some earlier notes used "A" and "B" for `hdr[0x04]` and `hdr[0x08]`. Those lette
 - What selects location layout F over A, and whether real rows carry more than one layout.
 - The content of the `B` sub-blocks.
 - The stored state of the secondary area and of archives other than the inspected ones. One earlier note called the primary regions "post-transform" from the order of initialization alone. The step 4 span and the archive scan now support that for the inspected archives (RPF9-F28, RPF9-F48).
-- The step 1 key material needed to reconstruct a real signed message, cipher algorithms 1, 2, `0x11` and `0x12`, the key schedule and final-round tables of algorithm `0x10` (RPF9-F89, RPF9-F90), and the role of the `B` trailer.
+- The archive-specific binding of the static algorithm-`0x10` key registry, cipher algorithms 1, 2, `0x11` and `0x12`, whether the embedded schedule is the standard AES-256 expansion, and the role of the `B` trailer.
 - The payload transform algorithm and key source.
 - Directory structure outside the traced paths, and enumeration in the device layer or above.
 - CityHash32 identity of the fingerprint hash, the concrete startup fingerprint and the contents of `B` sub-block 9 in real archives.

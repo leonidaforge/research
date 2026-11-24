@@ -70,7 +70,36 @@ Initialization (RPF9-F50):
 3. Looks up key material by key identifier, algorithm ID and mode. If the lookup fails, initialization fails and the archive is rejected.
 4. Initializes the algorithm object with the key material and the 16-byte parameter.
 
-The metadata path always uses mode 1. The key is not stored in the descriptor or in the archive. Key identifiers, descriptor parameters, key material and executable lookup tables are not published, and the key lookup was not analyzed.
+The metadata path always uses mode 1. The key is not stored in the descriptor or in the archive.
+
+### Key supply
+
+Key resolution uses a static registry inside the executable, not a platform key store (RPF9-F94). The key identifier and the cipher mode form a 64-bit selector:
+
+```text
+algorithm in 0x10..0x15:  provider = 3 if mode == 0 else 2
+otherwise:                provider = 0
+selector = (key_id << 32) | (provider << 24)
+```
+
+The registry is a lazily built map populated from a static entry list plus runtime registrations. A hit returns a pointer and a length. The observed archives use `hdr[0x2E] = 9` with cipher type `0x10` and mode 1, so provider 2. The registry's location, exact size, identifiers and entry-to-location mappings are kept in private evidence.
+
+Algorithm `0x10` consumes a `0x10F4`-byte encoded key state (RPF9-F95):
+
+| Blob offset | Content |
+|---|---|
+| `+0x000` | `u32` magic `0x4E3B9B8E` |
+| `+0x004` | 240-byte schedule, 60 little-endian dwords |
+| `+0x0F4` | 16 × 256-byte key-dependent final-round tables |
+
+The setup copies these bytes into a `0x1100`-byte state and copies the 16-byte descriptor parameter into state `+0x10F0`. The engine checks the magic and does not expand a raw key. It does not receive the blob length, so a provider MUST enforce `0x10F4`.
+
+In private validation, the registered algorithm-`0x10` states matched the recovered encodings on all 16 final-round tables, so they are encoded AES-256 states. Their contents, fingerprints and registry locations are not published.
+
+A standard 32-byte AES key is not accepted by algorithm `0x10`. Separate provider-0 32-byte entries serve other algorithms and are not a conversion path. No conversion from a raw AES key to the encoded state is provided by the engine.
+
+The key material is embedded and build-specific. A read-only probe did not reproduce a structured `A` table for the local archive sample with any registered algorithm-`0x10` blob (RPF9-F96). The blob-to-archive binding is therefore unconfirmed. A build mismatch is a hypothesis, not an established explanation; a matching executable/archive pair has not been demonstrated. Do not treat the identified key supply as a demonstrated archive decryption.
+
 
 ### Cipher types
 
@@ -161,9 +190,9 @@ The round-key material supplies the rest of the structure. Whitening uses schedu
 
 These properties were measured read-only from the two fixed table regions at RVAs `0x6036F30` (4 KiB) and `0x6037F30` (16 KiB) in build e95020b2, from the Ghidra 12.2 listing of `0x5642C50` and local scripts that recompute the difference distribution, the Walsh spectrum, the table relations and the affine-equivalence witnesses.
 
-Differing table bytes do not by themselves decide AES equivalence, because a table-encoded cipher with per-position affine encodings necessarily differs from the textbook constants. The constructive result settles both layers from the fixed tables: the S-box layer is the AES inverse S-box and the linear layer is InvMixColumns, each up to the recovered affine encodings, and the encodings compose across rounds. Algorithm `0x10` is therefore an encoded AES-256 decryption. What remains outside the fixed data is the protected key material: the 240-byte schedule and the 16 key-dependent final-round tables. Whether the schedule is the standard AES-256 expansion of a raw key in encoded form, and what the final-round tables contain, cannot be checked without a key blob.
+Differing table bytes do not by themselves decide AES equivalence, because a table-encoded cipher with per-position affine encodings necessarily differs from the textbook constants. The constructive result settles both layers from the fixed tables: the S-box layer is the AES inverse S-box and the linear layer is InvMixColumns, each up to the recovered affine encodings, and the encodings compose across rounds. Algorithm `0x10` is therefore an encoded AES-256 decryption. What remains outside the fixed data is the key-dependent state: the 240-byte schedule and the 16 key-dependent final-round tables. That state is embedded in a static registry (RPF9-F94, RPF9-F95). The registered algorithm-`0x10` blobs match the recovered final-table encodings on all 16 tables, so they are genuine encoded AES-256 states. Their bytes are not published. Whether the schedule is the standard AES-256 expansion of a raw key in encoded form was not checked, because that would require extracting the key.
 
-The identity of the algorithm does not by itself enable interoperability. A standard AES-256 implementation cannot be dropped in, because the engine consumes a pre-expanded, per-position-encoded schedule and key-dependent final tables, not a raw key. The state encodings are recovered by the constructive analysis; the schedule is protected. The binding constraint remains the key-supply boundary.
+The identity of the algorithm does not by itself enable interoperability. A standard AES-256 implementation cannot be dropped in, because the engine consumes a pre-expanded, per-position-encoded schedule and key-dependent final tables, not a raw key. The state encodings are recovered by the constructive analysis. The provider boundary is therefore a `0x10F4` blob, not a raw key. The remaining blocker is the archive-specific key binding, which a read-only probe did not confirm for the local sample (RPF9-F96), not an external platform key store.
 
 ### Interpretation summary
 
@@ -253,10 +282,12 @@ Whether RPF9 shares any cryptography with earlier RPF versions is unknown. Nothi
 ## Open questions
 
 - Algorithms 1, 2, `0x11` and `0x12`.
-- The key schedule and the key-dependent final-round tables of algorithm `0x10`. The S-box, linear layer, round model and layout are established as encoded AES-256 (RPF9-F89, RPF9-F90, RPF9-F91); only the protected key material remains.
+- The archive-specific binding of the static algorithm-`0x10` key registry. The S-box, linear layer, round model and layout are established (RPF9-F89, RPF9-F90, RPF9-F91) and the key state is embedded (RPF9-F94, RPF9-F95), but no local archive was decrypted (RPF9-F96).
 - The cipher type of `B` sub-block 1 in real archives.
+- Whether the local archive sample matches this build's static key registry. A read-only probe did not decrypt it (RPF9-F96).
+- The per-archive key identifier and IV used by steps 4 and 5, which are inside the encrypted sub-block 1.
 - Whether the key lookup succeeds for the default descriptor, which decides whether algorithm 0 archives open at all.
-- Whether a real archive signature verifies. Step 1 key material is needed to reconstruct the message.
+- Whether a real archive signature verifies. Step 1 decryption is needed to reconstruct the message.
 - Which message type real archives use, and whether every build registers the same key.
 - The role of the `B` trailer.
 - The `A` table content is identical across observed archives although it lies inside a processed span. The static descriptor uses a fixed key identifier and a fixed IV, which would explain identical stored bytes for identical plaintext. Not verified.
