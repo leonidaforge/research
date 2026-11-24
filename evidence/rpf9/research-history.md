@@ -143,13 +143,19 @@ Interpretations that were once used for RPF9 and later corrected. The current mo
 
 Some earlier notes used "A" and "B" for `hdr[0x04]` and `hdr[0x08]`. Those letters name the prefix fields at `0x1A` and `0x1C`. Header fields are now referred to by offset.
 
+## Algorithm 0x10 input stage
+
+**Old assumption.** The block function substitutes each input byte through 16 static 256-byte tables.
+
+**Correction.** Those tables are affine bijections over GF(2): for every table and every nonzero input difference, the output difference is constant. The stage contains no substitution box and is an invertible affine transform of the block followed by a four-word key XOR (RPF9-F85). The nonlinearity is entirely in the 16 static round tables, whose cores are 4-uniform permutations of degree 7, and in the key-dependent final-round tables (RPF9-F86, RPF9-F87).
+
 ## Open
 
 - Meaning of descriptor `+0x08`, and any use of `+0x12`.
 - What selects location layout F over A, and whether real rows carry more than one layout.
 - The content of the `B` sub-blocks.
 - The stored state of the secondary area and of archives other than the inspected ones. One earlier note called the primary regions "post-transform" from the order of initialization alone. The step 4 span and the archive scan now support that for the inspected archives (RPF9-F28, RPF9-F48).
-- The signature algorithm, cipher algorithms 1, 2, `0x11` and `0x12`, AES equivalence of algorithm `0x10`, and the role of the `B` trailer.
+- The signature algorithm, cipher algorithms 1, 2, `0x11` and `0x12`, the affine encodings that decide whether algorithm `0x10` is AES-256 (RPF9-F86), and the role of the `B` trailer.
 - The payload transform algorithm and key source.
 - Directory structure outside the traced paths, and enumeration in the device layer or above.
 - CityHash32 identity of the fingerprint hash, the concrete startup fingerprint and the contents of `B` sub-block 9 in real archives.
