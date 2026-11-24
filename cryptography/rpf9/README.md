@@ -144,7 +144,11 @@ Span handling follows from `final`:
 - Cipher types 10, 11, 12 and 16 call `final` only at the end. Consecutive spans form one CBC chain. For the observed type 16 this means the step 1 `A` and `B` spans are decrypted as one chain.
 - The extra `final` after the last span only resets the IV and changes no output.
 
-The block decryption has the structure of AES-256 decryption: a 128-bit block, 14 rounds and a 240-byte round-key schedule, computed with lookup tables (RPF9-F54). Its static tables differ from the standard AES reference constants, so a standard AES implementation cannot replace this one. Whether the underlying transform equals AES under some encoding is unknown.
+The block decryption has the structure of AES-256 decryption: a 128-bit block, 14 rounds and a 240-byte round-key schedule, with a substitution-only final round, computed with lookup tables (RPF9-F54). The round tables are key-dependent in the final round and static in the inner rounds, which is the structure of a table-encoded block cipher.
+
+Its static tables differ from the standard AES reference constants. On its own that does not establish a different algorithm: a table-encoded cipher folds the substitution, the linear layer and the round key into its tables under secret encodings, so its table bytes differ from textbook constants even when the underlying transform is AES. The difference does rule out dropping in a standard AES table implementation, but it neither confirms nor excludes AES as the underlying transform. Telling an encoded AES apart from an encoded AES-like cipher of the same shape would require reconstructing the secret encodings and the embedded key, which is out of scope. So the structure is AES-256-shaped and consistent with a table-encoded AES, and exact equivalence to AES stays unknown.
+
+The identity of the algorithm does not by itself enable interoperability. The block engine is initialized from a pre-expanded, encoded, key-dependent table structure, not from a raw key (RPF9-F53), so a standard library that expands a raw key internally cannot stand in for it even if the transform were confirmed to be AES. The binding constraint is the key-supply boundary.
 
 ### Interpretation summary
 
