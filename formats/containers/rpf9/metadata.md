@@ -6,26 +6,26 @@ The metadata area runs from offset 0 to `hdr[0x04]`. It has two parts. The prima
 
 The engine derives each region from the prefix counts (RPF9-F05). Region starts are rounded up from the end of the previous region. The layout builder rounds memory addresses, not file offsets:
 
-| Region start | `G` bit 0 set | `G` bit 0 clear |
-|---|---|---|
-| `A` table, after the 0x40-byte header | 16 | 4 |
-| `B` block | 16 | 8 |
-| Column descriptors | 16 | 8 |
-| Primary index store | `F` | `F` |
-| Primary value pool, after the index store | 8 | 8 |
+| Region start                              | `G` bit 0 set | `G` bit 0 clear |
+| ----------------------------------------- | ------------- | --------------- |
+| `A` table, after the 0x40-byte header     | 16            | 4               |
+| `B` block                                 | 16            | 8               |
+| Column descriptors                        | 16            | 8               |
+| Primary index store                       | `F`           | `F`             |
+| Primary value pool, after the index store | 8             | 8               |
 
 The index store size `(C - D) * E * F` is computed as a 32-bit product. The builder also computes a 16-byte-aligned address after the pool start, but does not store it in the view (RPF9-F05). These offsets equal file offsets only when the metadata buffer starts on a 16-byte boundary. The buffer's alignment is not traced. In observed archives the primary index store starts at the next 8-byte boundary after the descriptors, for example `0x1F8` when `C = 3`. All inspected archives have `G` bit 0 set.
 
 The cryptographic spans compute the `B` block and descriptor starts with their own formula, which can disagree with this table for some values of `A`, `B` and `G` (see [cryptography/rpf9](../../../cryptography/rpf9/README.md#processed-spans), RPF9-F49).
 
-| Order | Region | Size | Role | Confidence |
-|---|---|---|---|---|
-| 1 | Header and prefix | `0x40` | Counts and flags | Confirmed |
-| 2 | `A` table | `A * 8` | Index of sub-blocks in the `B` block, see [below](#a-table-and-b-block) | Confirmed (structure) |
-| 3 | `B` block | `B` | Sub-blocks addressed through the `A` table | Unknown content |
-| 4 | Column descriptors | `C * 24` | One descriptor per column, see [schema.md](schema.md#column-descriptor) | Confirmed |
-| 5 | Primary index store | `(C - D) * E * F` | Compact indices for columns `0 .. C-D-1` | Confirmed |
-| 6 | Primary value pool | to `hdr[0x08]` | Values of the primary columns | Confirmed |
+| Order | Region              | Size              | Role                                                                    | Confidence            |
+| ----- | ------------------- | ----------------- | ----------------------------------------------------------------------- | --------------------- |
+| 1     | Header and prefix   | `0x40`            | Counts and flags                                                        | Confirmed             |
+| 2     | `A` table           | `A * 8`           | Index of sub-blocks in the `B` block, see [below](#a-table-and-b-block) | Confirmed (structure) |
+| 3     | `B` block           | `B`               | Sub-blocks addressed through the `A` table                              | Unknown content       |
+| 4     | Column descriptors  | `C * 24`          | One descriptor per column, see [schema.md](schema.md#column-descriptor) | Confirmed             |
+| 5     | Primary index store | `(C - D) * E * F` | Compact indices for columns `0 .. C-D-1`                                | Confirmed             |
+| 6     | Primary value pool  | to `hdr[0x08]`    | Values of the primary columns                                           | Confirmed             |
 
 The primary value pool has no size field. It fills the space up to `hdr[0x08]`.
 
@@ -35,38 +35,38 @@ With the observed `A = 4` and `B = 0x150`, the descriptor table starts at `0x1B0
 
 Each `A` record is 8 bytes (RPF9-F39):
 
-| Offset | Type | Meaning |
-|---|---|---|
-| `+0x00` | `u16` | Sub-block ID |
-| `+0x02` | 2 bytes | Not read on the traced path |
-| `+0x04` | `u32` | Offset of the sub-block from the start of the `B` block |
+| Offset  | Type    | Meaning                                                 |
+| ------- | ------- | ------------------------------------------------------- |
+| `+0x00` | `u16`   | Sub-block ID                                            |
+| `+0x02` | 2 bytes | Not read on the traced path                             |
+| `+0x04` | `u32`   | Offset of the sub-block from the start of the `B` block |
 
 A lookup scans the `A` records in order and returns `B + offset` for the first matching ID, or nothing. Neither the lookup nor any traced caller checks that the offset lies inside the `B` block. Neither region is read by the cell accessors.
 
 Sub-block IDs used by the engine (RPF9-F39, RPF9-F43):
 
-| ID | Content | Used by | Confidence |
-|---|---|---|---|
-| 1 | Per-archive cipher descriptor | Steps 4 and 5 of the [validation chain](../../../cryptography/rpf9/README.md#validation-chain). Optional: without it those steps do not run | Confirmed (use) |
-| 2 | Key identifier and 256-byte signature | Signature check, if sub-block 6 is missing | Confirmed (layout) |
-| 3 | List of companion files, see [below](#sub-block-3) | Opened after validation as the file object's alternate read sources. Optional | Confirmed (RPF9-F81) |
-| 6 | Message type, key identifier and 256-byte signature | Signature check, first choice | Confirmed (layout) |
-| 9 | `u8` count `n`, then `n` `u8` type IDs | Type classification fingerprint, when header `u8@0x2D` bit 3 is set, see [names.md](names.md#sorted-flag) | Confirmed (layout, RPF9-F63) |
+| ID  | Content                                             | Used by                                                                                                                                     | Confidence                   |
+| --- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
+| 1   | Per-archive cipher descriptor                       | Steps 4 and 5 of the [validation chain](../../../cryptography/rpf9/README.md#validation-chain). Optional: without it those steps do not run | Confirmed (use)              |
+| 2   | Key identifier and 256-byte signature               | Signature check, if sub-block 6 is missing                                                                                                  | Confirmed (layout)           |
+| 3   | List of companion files, see [below](#sub-block-3)  | Opened after validation as the file object's alternate read sources. Optional                                                               | Confirmed (RPF9-F81)         |
+| 6   | Message type, key identifier and 256-byte signature | Signature check, first choice                                                                                                               | Confirmed (layout)           |
+| 9   | `u8` count `n`, then `n` `u8` type IDs              | Type classification fingerprint, when header `u8@0x2D` bit 3 is set, see [names.md](names.md#sorted-flag)                                   | Confirmed (layout, RPF9-F63) |
 
 #### Sub-block 3
 
-| Offset | Type | Meaning | Confidence |
-|---|---|---|---|
-| `+0x00` | `u32` | Record count `n` | Confirmed |
-| `+0x04` | 4 bytes | Not read | Unknown |
-| `+0x08` | `n` × 0x108 bytes | Companion records | Confirmed |
+| Offset  | Type              | Meaning           | Confidence |
+| ------- | ----------------- | ----------------- | ---------- |
+| `+0x00` | `u32`             | Record count `n`  | Confirmed  |
+| `+0x04` | 4 bytes           | Not read          | Unknown    |
+| `+0x08` | `n` × 0x108 bytes | Companion records | Confirmed  |
 
 Each record (RPF9-F81):
 
-| Offset | Type | Meaning |
-|---|---|---|
+| Offset   | Type                          | Meaning                                                        |
+| -------- | ----------------------------- | -------------------------------------------------------------- |
 | `+0x000` | `char[0x100]`, NUL-terminated | File name, relative to the directory of the archive's own path |
-| `+0x100` | `u64` | Identifier the companion's header must carry |
+| `+0x100` | `u64`                         | Identifier the companion's header must carry                   |
 
 After the first successful validation of a file object, the engine processes the records in order:
 
@@ -89,10 +89,10 @@ Both regions lie inside the spans that validation step 1 processes (see [cryptog
 
 ## Secondary area
 
-| Order | Region | Size | Role | Confidence |
-|---|---|---|---|---|
-| 1 | Secondary index store | `D * E * F` | Compact indices for columns `C-D .. C-1` | Confirmed (RPF9-F06) |
-| 2 | Secondary value pool | to `hdr[0x04]` | Values of the secondary columns | Confirmed |
+| Order | Region                | Size           | Role                                     | Confidence           |
+| ----- | --------------------- | -------------- | ---------------------------------------- | -------------------- |
+| 1     | Secondary index store | `D * E * F`    | Compact indices for columns `C-D .. C-1` | Confirmed (RPF9-F06) |
+| 2     | Secondary value pool  | to `hdr[0x04]` | Values of the secondary columns          | Confirmed            |
 
 The secondary index store starts at `hdr[0x08]` rounded up to `F` bytes. The secondary value pool starts at the end of the store, `D * E * F` as a 32-bit product, rounded up to 8 bytes (RPF9-F06). With read mode 1 the secondary area is a separate buffer, and the rounding applies to that buffer's address.
 
@@ -124,24 +124,24 @@ This consistency covers offsets and sizes only. It does not confirm the decoded 
 
 After the header read, the engine lays out a temporary view over the metadata buffers, runs the validation chain on it, and then stores one pointer per region in a metadata view inside the archive object (RPF9-F07). Both views point into the same buffers. Every lookup goes through the archive's view and sees the bytes as the chain left them.
 
-| View slot | Region |
-|---|---|
-| `+0x08` | Header and prefix |
-| `+0x10` | `A` table |
-| `+0x18` | `B` block |
-| `+0x20` | Column descriptors |
-| `+0x28` | Primary index store |
-| `+0x30` | Primary value pool |
-| `+0x38` | Secondary index store |
-| `+0x40` | Secondary value pool |
+| View slot | Region                |
+| --------- | --------------------- |
+| `+0x08`   | Header and prefix     |
+| `+0x10`   | `A` table             |
+| `+0x18`   | `B` block             |
+| `+0x20`   | Column descriptors    |
+| `+0x28`   | Primary index store   |
+| `+0x30`   | Primary value pool    |
+| `+0x38`   | Secondary index store |
+| `+0x40`   | Secondary value pool  |
 
 The chain processes these regions in place (see [cryptography/rpf9](../../../cryptography/rpf9/README.md#processed-spans)):
 
-| Region | Processed by | Condition |
-|---|---|---|
-| `A` table, `B` block | Step 1 | `hdr[0x2E] != 0` |
-| `B` trailer, column descriptors, primary index store, primary value pool | Step 4 | `B` sub-block 1 present |
-| Secondary area | Step 5 | `B` sub-block 1 present |
+| Region                                                                   | Processed by | Condition               |
+| ------------------------------------------------------------------------ | ------------ | ----------------------- |
+| `A` table, `B` block                                                     | Step 1       | `hdr[0x2E] != 0`        |
+| `B` trailer, column descriptors, primary index store, primary value pool | Step 4       | `B` sub-block 1 present |
+| Secondary area                                                           | Step 5       | `B` sub-block 1 present |
 
 What lookups read is the post-validation state. This is confirmed (RPF9-F28).
 
