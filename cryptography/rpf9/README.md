@@ -1,6 +1,8 @@
-# RPF9 metadata cryptography
+# RPF9 cryptography
 
 RPF9 archives pass through a cryptographic step while the engine opens them. The step processes selected spans of the [metadata area](../../formats/containers/rpf9/metadata.md) in place, and a failure rejects the archive. The algorithm is unknown, and so is whether the step decrypts or only verifies.
+
+Payloads of some entries go through a separate 16-byte block transform when they are read. See [Payload transform](#payload-transform).
 
 ## Position in archive initialization
 
@@ -60,6 +62,22 @@ The span runner initializes the cipher from the descriptor. It calls `update` on
 | Authenticated decryption with a 16-byte tag | Probable |
 | Verification only, data unchanged | Not excluded |
 
+## Payload transform
+
+Payload reads have their own transform path. The read routines call RVAs `0x19C380` (position the context), `0x1616150` (whole blocks) and `0x28CF9C0` (partial blocks), not the metadata span runner directly. Those routines were not analyzed, so shared code with the span runner is not excluded (RPF9-F38).
+
+| Part | Status |
+|---|---|
+| Selection | Per entry, by the presence of key `0x286030A358A789FB` in the [schema](../../formats/containers/rpf9/schema.md#known-columns). Confirmed |
+| Granularity | The engine positions a per-stream context at `position & ~0xF`, reads whole 16-byte blocks and processes them in place. Partial blocks at the ends use a separate routine. Confirmed |
+| Seeks | Reposition the context to the new position. Confirmed |
+| Interaction | Entries with the flag never use the chunk fast path. Confirmed |
+| Algorithm | Unknown |
+| Key source | Unknown. Not examined |
+| Relation to the metadata cipher | Unknown |
+
+The read path is described in [payloads.md](../../formats/containers/rpf9/payloads.md#payload-transform). Routines are listed in the [function catalog](../../builds/gta-vi/scarlett-e95020b2/functions.md#entries-names-payloads).
+
 ## Relation to earlier RPF versions
 
 Whether RPF9 shares any cryptography with earlier RPF versions is unknown. Nothing in the analyzed code supports that assumption.
@@ -71,4 +89,4 @@ Whether RPF9 shares any cryptography with earlier RPF versions is unknown. Nothi
 - The span set for selector values with bit 0 clear.
 - The column descriptors, primary index store and primary value pool lie outside the established spans. Lookups read them only after validation, but whether they are stored transformed is unknown (RPF9-F28).
 - The `A` table content is identical across observed archives although it lies inside a processed span. With a per-archive key or nonce that would be unexpected. It is unexplained.
-- Whether payloads use the same span runner.
+- The payload transform's algorithm, key source and relation to the metadata cipher. Payload reads do not call the span runner directly (RPF9-F38).

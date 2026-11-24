@@ -9,8 +9,8 @@ The engine derives each region from the prefix counts (RPF9-F05). Region starts 
 | Order | Region | Size | Role | Confidence |
 |---|---|---|---|---|
 | 1 | Header and prefix | `0x40` | Counts and flags | Confirmed |
-| 2 | `A` table | `A * 8` | Unknown. Not read by the cell accessors | Unknown role |
-| 3 | `B` block | `B` | Unknown. Not read by the cell accessors | Unknown role |
+| 2 | `A` table | `A * 8` | Index of sub-blocks in the `B` block, see [below](#a-table-and-b-block) | Confirmed (structure) |
+| 3 | `B` block | `B` | Sub-blocks addressed through the `A` table | Unknown content |
 | 4 | Column descriptors | `C * 24` | One descriptor per column, see [schema.md](schema.md#column-descriptor) | Confirmed |
 | 5 | Primary index store | `(C - D) * E * F` | Compact indices for columns `0 .. C-D-1` | Confirmed |
 | 6 | Primary value pool | to `hdr[0x08]` | Values of the primary columns | Confirmed |
@@ -18,6 +18,20 @@ The engine derives each region from the prefix counts (RPF9-F05). Region starts 
 The primary value pool has no size field. It fills the space up to `hdr[0x08]`.
 
 With the observed `A = 4` and `B = 0x150`, the descriptor table starts at `0x1B0`.
+
+### A table and B block
+
+Each `A` record is 8 bytes (RPF9-F39):
+
+| Offset | Type | Meaning |
+|---|---|---|
+| `+0x00` | `u16` | Sub-block ID |
+| `+0x02` | 2 bytes | Not read on the traced path |
+| `+0x04` | `u32` | Offset of the sub-block from the start of the `B` block |
+
+A lookup scans the `A` records in order and returns `B + offset` for the first matching ID, or nothing. Validation step 3 asks for ID 1. What the sub-blocks contain, and what step 3 does with sub-block 1, is unknown. Neither region is read by the cell accessors.
+
+Both regions lie inside the spans that validation step 1 processes (see [cryptography/rpf9](../../../cryptography/rpf9/README.md#processed-spans)). Step 3 runs after step 1, so this layout describes the bytes after processing. Whether the bytes on disk have the same layout is not established.
 
 ## Secondary area
 

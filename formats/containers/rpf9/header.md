@@ -21,8 +21,8 @@ The loader reads these fields directly. They are stored in plain form (RPF9-F04)
 |---|---|---|---|---|---|
 | `0x10` | 8 bytes | | Unknown. Varies per archive. Not a size or timestamp | | Unknown |
 | `0x18` | `u16` | | Unknown | | Unknown |
-| `0x1A` | `u16` | `A` | Number of 8-byte records in the `A` table | 4 | Confirmed (count). Role unknown |
-| `0x1C` | `u32` | `B` | Size of the `B` block in bytes | `0x150` | Confirmed (size). Role unknown |
+| `0x1A` | `u16` | `A` | Number of 8-byte records in the `A` table, an index into the `B` block | 4 | Confirmed (RPF9-F39) |
+| `0x1C` | `u32` | `B` | Size of the `B` block in bytes | `0x150` | Confirmed (size). Content unknown |
 | `0x20` | `u16` | `C` | Column count | 3 to 7 | Confirmed (RPF9-F08) |
 | `0x22` | `u16` | `D` | Columns stored in the secondary area | 1 | Confirmed (RPF9-F10) |
 | `0x24` | `u32` | `E` | Row (entry) count | 2 to 699 | Confirmed (RPF9-F13) |
@@ -57,6 +57,6 @@ Known checks before an archive is accepted:
 - magic,
 - the validation chain run after layout, which includes the cryptographic pass and rejects the archive on failure (RPF9-F23).
 
-The individual validation steps other than the cryptographic ones are not analyzed. No bounds checks on the prefix counts have been documented.
+Of the other validation steps, only step 3 is partly known. It looks up `B` sub-block 1 through the `A` table (RPF9-F39). Steps 2 and 4 are not analyzed. No bounds checks on the prefix counts have been documented.
 
 A reader SHOULD at least require `0x40 <= hdr[0x08] <= hdr[0x04] <= file size`. This is a sanity rule consistent with observed archives, not a check found in the engine.

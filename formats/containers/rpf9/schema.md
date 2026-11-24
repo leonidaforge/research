@@ -20,7 +20,7 @@ Region positions are in [metadata.md](metadata.md).
 | `+0x10` | `u16` | Element width in bytes | Confirmed (RPF9-F09) |
 | `+0x12` | 6 bytes | Unknown | Unknown |
 
-The hash function behind the field keys is unknown.
+The hash function behind the field keys is unknown. The key search reads only `+0x00`, and the value pointer reads only `+0x0C` and `+0x10`. No traced accessor reads `+0x08` or `+0x12` (RPF9-F40). Code outside the traced accessors may still use them.
 
 ## Step 1: field key to column
 
@@ -67,22 +67,27 @@ valuePointer = poolBase + columnBaseOffset + elementWidth * compactIndex
 
 Each column has its own run of fixed-width elements in its area's pool. A one-byte index can select a 16-byte value, because the width belongs to the pool element. Rows that share a value can share one pool element. No deduplication rule has been checked against data.
 
+The value pointer is not checked against the pool. A compact index that is not the null sentinel is multiplied by the element width and added without comparison to any count, so an out-of-range index points past the column's elements. This holds for the traced accessor paths (RPF9-F40). Whether a validation step checks indices before lookups is unresolved.
+
 The engine exposes two accessors on top of this. One returns whether the field is present. The other returns the value pointer, and callers read typed fields from it (RPF9-F14).
 
 ## Known columns
 
-Field keys seen at engine use sites (RPF9-F17). Meanings come from how the caller uses the value.
+Field keys seen at engine use sites (RPF9-F17). Each meaning comes from how the callers use the value.
 
-| Field key | Element use | Probable meaning | Confidence |
-|---|---|---|---|
-| `0xBA180AFB232D1B4B` | Two 32-bit words, masked and added | Resource size flags, see [entries.md](entries.md#sizes) | Probable |
-| `0x33F70DFAF2C50989` | Masked to 44 bits | Size of a non-resource entry | Probable |
-| `0x4EAA16DD829995BC` | Masked to 48 bits | Alternate size | Probable |
-| `0xE0C12D7A5D4884C5` | Read by the stream reader | Stream flags or state | Probable |
-| `0x286030A358A789FB` | Read by the stream reader | Stream flags or state | Probable |
-| `0xC26722D233648AE7` | 16-byte value, read during enumeration | Unknown | Speculative |
+| Field key | Value | Meaning | Confidence | Finding |
+|---|---|---|---|---|
+| `0x73BCB72DCE74F11F` | `u64` | Name hash, see [names.md](names.md#name-lookup) | Confirmed | F30 |
+| `0xBA180AFB232D1B4B` | Location record R | See [entries.md](entries.md#location-records) | Confirmed (layout) | F32 |
+| `0x33F70DFAF2C50989` | Location record F | See [entries.md](entries.md#location-records) | Confirmed (layout) | F32 |
+| `0x4EAA16DD829995BC` | Location record A | See [entries.md](entries.md#location-records) | Confirmed (layout) | F32 |
+| `0xE0C12D7A5D4884C5` | Chunk table, self-relative | See [payloads.md](payloads.md#chunk-table) | Confirmed (layout) | F36 |
+| `0x286030A358A789FB` | Presence only | Routes stored bytes through the payload transform, see [payloads.md](payloads.md#payload-transform) | Confirmed (routing) | F38 |
+| `0xC26722D233648AE7` | `u32` self-relative offset to 16 bytes | Copy of the first 16 payload bytes, used by enumeration | Probable | F21 |
+| `0xCBB68FF7B7078DB7` | `u32`, `0xFFFFFFFF` when absent | Index that selects the handle payload reads go through | Probable | F41 |
+| `0xB7076B6245D35FB5` | `u32` | Must be nonzero for the fallback name path | Unknown | F31 |
 
-The keys of the name-hash, namespace and extension-type columns used by path lookup are not recorded. Neither are the payload offset and compression columns.
+The type ID and compression mode are fields inside the location records, not columns of their own. The namespace is not stored in the archive.
 
 ## Worked example
 

@@ -44,6 +44,30 @@ Interpretations that were once used for RPF9 and later corrected. The current mo
 
 **Correction.** A row stores a 64-bit hash, which a runtime dictionary resolves to a string. No hash function has been identified (RPF9-F18).
 
+## Size columns were location records
+
+**Old assumption.** Keys `0xBA18…`, `0x33F7…` and `0x4EAA…` were three size columns: a resource size and two plain sizes masked to 44 and 48 bits. The resource formula was `(w0 & 0xFFFFFFF0) + (w1 & 0x7FFFFFF0)`.
+
+**Correction.** The three keys hold alternative layouts of one location record. Each layout has the payload offset, stored size, logical size, type ID and compression mode. The 44- and 48-bit values are fields at `+0x10` and `+0x08` inside the record, not the whole value. The resource formula has the masks the other way round: `(w1 & 0xFFFFFFF0) + (w0 & 0x7FFFFFF0)` (RPF9-F16, RPF9-F32).
+
+## Stream read was a seek
+
+**Old assumption.** `0x28CD3B0` was the stream reader and read payloads in 4 KiB blocks through a low-level block read at `0x314330`.
+
+**Correction.** `0x28CD3B0` is a seek. It decodes and discards up to 4 KiB at a time only when a compressed stream seeks forward. `0x314330` is the read dispatcher (RPF9-F34, RPF9-F37).
+
+## Enumeration base offset
+
+**Old assumption.** Enumeration descriptor `+0x18` held the device base offset.
+
+**Correction.** It holds the `u64` at file object `+0x30`. Payload reads add file object `+0x20` (RPF9-F21, RPF9-F33).
+
+## Namespace column
+
+**Old assumption.** Each row stored its name namespace in a column.
+
+**Correction.** The namespace comes from a table in the executable, indexed by the row's type ID (RPF9-F31).
+
 ## Header field letters
 
 Some earlier notes used "A" and "B" for `hdr[0x04]` and `hdr[0x08]`. Those letters name the prefix fields at `0x1A` and `0x1C`. Header fields are now referred to by offset.
@@ -51,7 +75,8 @@ Some earlier notes used "A" and "B" for `hdr[0x04]` and `hdr[0x08]`. Those lette
 ## Open
 
 - Descriptor bytes `+0x08` and `+0x12`.
-- Column identities beyond the size columns.
-- Roles of the `A` table and the `B` block.
+- What selects location layout F over A, and whether real rows carry more than one layout.
+- The content of the `B` sub-blocks.
 - Whether the descriptors, primary cells and primary pool are stored transformed. One earlier note called them "post-transform". That was inferred from the order of initialization, not from cipher span coverage (RPF9-F28).
-- Directory structure, payload offsets and the decompression path.
+- The payload transform algorithm and key source.
+- Directory structure.
