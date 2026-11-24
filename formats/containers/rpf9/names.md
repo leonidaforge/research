@@ -56,7 +56,7 @@ A nested archive is a row of type 0 (`rpf`) in a parent archive. It is opened by
 3. The row's payload offset, relative to the parent's base, becomes the child's base offset.
 4. The row's logical size becomes the child's size.
 5. The child reads with the parent's handle that the row's [read-source index](payloads.md#read-source) selects in the parent: the parent's main handle or one of its alternates.
-6. The child gets its own file object, tag and archive object. Its prefix is the default derived from its own path, unless it is mounted itself. Its own alternate handle array starts empty. It does not inherit the parent's alternates, so read-source indices of entries inside the child refer to the child's own handles (RPF9-F73).
+6. The child gets its own file object, tag and archive object. Its prefix is the default derived from its own path, unless it is mounted itself. Its own alternate handle array starts empty and is filled only from the child's own `B` sub-block 3. It does not inherit the parent's alternates, so read-source indices of entries inside the child refer to the child's own handles (RPF9-F73, RPF9-F81).
 
 All child reads then go through the parent as [positional reads with added bases](payloads.md#nested-reads).
 

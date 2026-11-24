@@ -133,13 +133,19 @@ Interpretations that were once used for RPF9 and later corrected. The current mo
 
 **Correction.** The traced caller of the preloaded path is a batch loader that takes its blocks from a global index. What fills that index is unknown. Whether the parent copy is used on this path was not established (RPF9-F76).
 
+## Descriptor `+0x08` unread
+
+**Old assumption.** No code read column descriptor `+0x08` or `+0x12` (RPF9-F40).
+
+**Correction.** One archive method returns the `u32` at `+0x08` together with a column's first value address (RPF9-F82). `+0x12` is still unread on the traced paths.
+
 ## Header field letters
 
 Some earlier notes used "A" and "B" for `hdr[0x04]` and `hdr[0x08]`. Those letters name the prefix fields at `0x1A` and `0x1C`. Header fields are now referred to by offset.
 
 ## Open
 
-- Descriptor bytes `+0x08` and `+0x12`.
+- Meaning of descriptor `+0x08`, and any use of `+0x12`.
 - What selects location layout F over A, and whether real rows carry more than one layout.
 - The content of the `B` sub-blocks.
 - The stored state of the secondary area and of archives other than the inspected ones. One earlier note called the primary regions "post-transform" from the order of initialization alone. The step 4 span and the archive scan now support that for the inspected archives (RPF9-F28, RPF9-F48).

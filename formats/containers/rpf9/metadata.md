@@ -49,9 +49,33 @@ Sub-block IDs used by the engine (RPF9-F39, RPF9-F43):
 |---|---|---|---|
 | 1 | Per-archive cipher descriptor | Steps 4 and 5 of the [validation chain](../../../cryptography/rpf9/README.md#validation-chain). Optional: without it those steps do not run | Confirmed (use) |
 | 2 | Key identifier and 256-byte signature | Signature check, if sub-block 6 is missing | Confirmed (layout) |
-| 3 | Requested after validation by a path that was not traced | | Unknown |
+| 3 | List of companion files, see [below](#sub-block-3) | Opened after validation as the file object's alternate read sources. Optional | Confirmed (RPF9-F81) |
 | 6 | Message type, key identifier and 256-byte signature | Signature check, first choice | Confirmed (layout) |
 | 9 | `u8` count `n`, then `n` `u8` type IDs | Type classification fingerprint, when header `u8@0x2D` bit 3 is set, see [names.md](names.md#sorted-flag) | Confirmed (layout, RPF9-F63) |
+
+#### Sub-block 3
+
+| Offset | Type | Meaning | Confidence |
+|---|---|---|---|
+| `+0x00` | `u32` | Record count `n` | Confirmed |
+| `+0x04` | 4 bytes | Not read | Unknown |
+| `+0x08` | `n` × 0x108 bytes | Companion records | Confirmed |
+
+Each record (RPF9-F81):
+
+| Offset | Type | Meaning |
+|---|---|---|
+| `+0x000` | `char[0x100]`, NUL-terminated | File name, relative to the directory of the archive's own path |
+| `+0x100` | `u64` | Identifier the companion's header must carry |
+
+After the first successful validation of a file object, the engine processes the records in order:
+
+1. It builds `<directory of the archive path>/<name>`, at most 255 bytes, and removes `/../` components.
+2. It opens that path through the archive's device. If the open fails, it stops and ignores the remaining records.
+3. It reads the companion's first 16 bytes. The first 8 bytes MUST be `00 00 00 39 56 46 50 52`, the next 8 bytes MUST equal the record's identifier. That magic differs from the RPF9 header magic. Nothing else in the companion is checked.
+4. It appends the handle to the file object's alternate handle array, or -1 if the check failed.
+
+Record `i` therefore becomes the source that [read-source index](payloads.md#read-source) `i` selects. The open passes the archive's own base offset field as the output for the companion's base. What the physical file device writes there is not established.
 
 Both regions lie inside the spans that validation step 1 processes (see [cryptography/rpf9](../../../cryptography/rpf9/README.md#processed-spans)). The lookups run after step 1, so this layout describes the bytes after processing. Whether the bytes on disk have the same layout is not established.
 

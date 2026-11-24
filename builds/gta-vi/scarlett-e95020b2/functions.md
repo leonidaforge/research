@@ -80,7 +80,11 @@ Callers of `0xFC21C0`: `0xFC20D0`, `0x1D4C980`, `0x1DEE6C0`, `0x22372C0`, `0x275
 | `0x28CE970`, `0x1FB2380` | Message span lists for message types 0 and 1 | Confirmed | F43 |
 | `0x28CEA80`, `0x28CEAB0` | Message length and concatenation | Confirmed | F43 |
 | `0xDAF010` | Verifier setup: resolves the key identifier through the static registry. Not analyzed further at this stage | Confirmed (call) | F43 |
-| `0x28CE230` | After a successful open with step 2 enabled: consumes sub-block 3, sets file object `+0x09` bit 0 from the fingerprint check, sets `+0x08` bit 0 | Confirmed (bits), Unknown (sub-block 3 use) | F44, F63 |
+| `0x28CE230` | After a successful open with step 2 enabled: opens the companions of sub-block 3, sets file object `+0x09` bit 0 from the fingerprint check, sets `+0x08` bit 0 | Confirmed | F44, F63, F81 |
+| `0x28CE280` | Opens each sub-block 3 companion, checks its header and appends the handle, or -1, to the alternate array. Stops at the first failed open | Confirmed | F81 |
+| `0x28CE450` | Reads the sub-block 3 count and record pointer | Confirmed | F81 |
+| `0x28CE460` | Builds `<archive directory>/<name>` in a 0x108-byte buffer and removes `/../` | Confirmed | F81 |
+| `0x28CE4D0` | Companion check: 16 bytes at the base, magic `0x5250465639000000` and identifier | Confirmed | F81 |
 | `0xC63230` | Fingerprint check: header `u32@0x28` against the startup value or the sub-block 9 value, chosen by `u8@0x2D` bit 3 | Confirmed | F63 |
 | `0xC632E0`, `0xC632F0` | Look up `B` sub-block 9 and read its count and type ID list | Confirmed | F63 |
 | `0xC63300` | Builds the type classification bit mask for the listed type IDs and hashes it | Confirmed | F63 |
@@ -277,9 +281,11 @@ Archive object vtable at RVA `0x62FD480`.
 | `+0x3B8` | `0x12C5630` | Mount at a prefix | Confirmed |
 | `+0x3C0` | `0xA57F70` | Mount prefix setup | Confirmed |
 | `+0x3D0` | `0x5305EC0` | Entry ID high half | Confirmed |
+| `+0x3E8` | `0x5568B00` | `B` sub-block lookup on the view, through `0x4E6F740` | Confirmed |
 | `+0x3F0` | `0x28CE0A0` | Field value getter | Confirmed |
 | `+0x3F8` | `0x28CE0B0` | Field pointer getter | Confirmed |
 | `+0x400` | `0x28CE0C0` | Column key present, through `0x28CE190` | Confirmed |
+| `+0x408` | `0x28CE0E0` | Field key to `{address of the column's first value, descriptor u32@+0x08}`, through `0x28CE110` | Confirmed |
 
 Enumeration search (RPF9-F66). Further inspected slots, none of which iterates rows:
 
@@ -322,7 +328,7 @@ File object vtable at RVA `0x62FD890`.
 | `+0x50` | `0x1321020` | Value at `+0x30` | Confirmed |
 | `+0x58` | `0x28CD1D0` | Sets `+0x30` | Confirmed |
 
-No slot writes the alternate handle array (RPF9-F74).
+No slot writes the alternate handle array (RPF9-F74). `0x28CE280` fills it (RPF9-F81).
 
 ## Object layouts
 
@@ -368,8 +374,8 @@ File object, 0x60 bytes:
 | `+0x30` | `u64` from device slot `+0x108` or the caller block. Copied into batch resolution and substring lookup records. Probably the modification time | Confirmed (source), Probable (meaning) |
 | `+0x38` | Resolved path, 16-byte string object, inline when the sign bit of `+0x47` is set | Confirmed |
 | `+0x48` | `u32` capacity of the alternate handle array. Zeroed by the constructor and the destructor | Probable |
-| `+0x4C` | `u32` count of alternate handles. Zeroed by the constructor, read by the destructor. No traced writer adds to it | Confirmed (use) |
-| `+0x50` | Alternate handle array, 8-byte handles, -1 for unused. Indexed by `0x4F60A90` without bounds, released and freed by the destructor. No traced writer | Confirmed (use) |
+| `+0x4C` | `u32` count of alternate handles. Zeroed by the constructor, read by the destructor. Incremented by `0x28CE280` | Confirmed |
+| `+0x50` | Alternate handle array, 8-byte handles, -1 for unused. Indexed by `0x4F60A90` without bounds, released and freed by the destructor. Filled by `0x28CE280` from sub-block 3 | Confirmed |
 | `+0x58` | Cached archive object | Confirmed (use) |
 
 The device interface reads through vtable slot `+0x60` and reports size and time through `+0xF8` and `+0x108`. The device read implementation is not traced.

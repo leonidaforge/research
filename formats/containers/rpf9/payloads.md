@@ -32,11 +32,15 @@ The handle for the read comes from the entry's read-source index, the `u32` valu
 
 - The engine does not check `i` against the number of alternate handles, does not check that the array exists, and does not check the handle it gets. An index past the end reads past the array.
 - The handle choice does not change the address. The same `fileObject[+0x20] + payloadOffset + position` goes to the device whichever handle is chosen.
-- What an alternate handle refers to is unknown. Whether it reaches the same data as the main handle is not established.
+- Alternate handle `i` is the companion file listed as record `i` of `B` [sub-block 3](metadata.md#sub-block-3) (RPF9-F81). The payload address does not change, so a row with index `i` is read from that companion at the same `base + payloadOffset + position`.
 
-The alternate array starts empty when the file object is constructed, and the destructor releases its entries. No code that adds entries was found (RPF9-F74). Whether the array is ever filled in this build is unknown.
+The alternate array starts empty when the file object is constructed, and the destructor releases its entries (RPF9-F74). It is filled once, after the first successful validation:
 
-A reader SHOULD treat an absent index or `0xFFFFFFFF` as the main source. Any other value SHOULD be bounds-checked against the sources the reader actually has.
+- An archive without sub-block 3 has no alternates.
+- A companion that fails its header check occupies its slot with handle -1.
+- A companion that fails to open ends the list. Later records get no slot, and their indices read past the array.
+
+A reader SHOULD treat an absent index or `0xFFFFFFFF` as the main source. Any other value MUST be checked against the companions the reader actually opened and verified.
 
 ### Offset frames
 
