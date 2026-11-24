@@ -18,6 +18,10 @@ RVAs for image base `0x140000000`. Roles are descriptive labels, not recovered s
 | `0x11A89C0` | Preloaded archive constructor. Same vtable `0x62FD480`. Metadata from the parent's `0xC267…` copy or a device read of `hdr[0x04]` bytes. No header read, layout or validation | Confirmed | F75 |
 | `0x1FB22A0` | Parent metadata copy available: device is a version-9 archive with laid-out metadata and column `0xC26722D233648AE7` | Confirmed | F75 |
 | `0x1941B0` | Synchronous read through the global read service. Traps on failure | Confirmed | F75 |
+| `0x1DEE6C0` | Batch archive loader. Only traced caller of file object vtable `+0x10` | Confirmed | F76 |
+| `0x1FB2260` | Device is the same underlying device as a fixed global device. Gates the preloaded construction in the batch loader | Confirmed | F76 |
+| `0xDAB760` | Copies a 0x20-byte preload block from a global index record | Confirmed | F76 |
+| `0x23D9500`, `0xFA8740` | Parallel job worker of the batch loader. Calls archive `+0x3A8` when `+0x3A0` is false | Confirmed | F76 |
 | `0xA57F70` | Derives the default mount prefix from the file object path. Archive vtable `+0x3C0` | Confirmed | F61 |
 | `0x54524E0` | End of the directory part of a path, with the `memory:` exception | Confirmed | F61 |
 | `0xA58030` | Stores the prefix length and folded hash in the archive object. Called at construction and by the mount method | Confirmed | F61 |
@@ -260,7 +264,8 @@ Archive object vtable at RVA `0x62FD480`.
 | `+0x2F0` | `0x4F885C0` | Compression mode is nonzero | Confirmed |
 | `+0x2F8` | `0xF62E0` | Compression mode | Confirmed |
 | `+0x398` | `0x28CDFC0` | Mode-0 metadata read | Confirmed |
-| `+0x3A8` | `0xFA87E0` | Lays out the view over buffer `+0x18` in mode 0 and runs validation. Completes the preloaded construction | Confirmed |
+| `+0x3A0` | `0xFC2530` | Metadata laid out: header pointer `+0x30` nonzero | Confirmed |
+| `+0x3A8` | `0xFA87E0` | Lays out the view over buffer `+0x18` in mode 0 and runs validation. Completes the preloaded construction. A validation failure is not signaled | Confirmed |
 | `+0x3B8` | `0x12C5630` | Mount at a prefix | Confirmed |
 | `+0x3C0` | `0xA57F70` | Mount prefix setup | Confirmed |
 | `+0x3D0` | `0x5305EC0` | Entry ID high half | Confirmed |

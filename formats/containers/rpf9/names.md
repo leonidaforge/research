@@ -74,7 +74,24 @@ The engine has a second way to build an RPF9 archive object. It uses the same cl
    - **Device read.** Otherwise it reads the block's `u32@+4` bytes from the file's base.
 3. The constructor reads no header and runs no layout or validation. A separate archive method lays out the metadata and runs the validation chain on the copied or read buffer.
 
-The batch path resolution record has exactly the block's layout. It carries the 16 header bytes from the same column, the stored size and the time. That the engine uses batch resolution in a parent to build the blocks for nested archives, and validates them afterwards, is Probable. The layouts match, but no direct call chain was observed.
+The parent copy has no bounds check. Neither the self-relative offset nor the copied length is compared with the parent's value pool or metadata size. The copied bytes come from the parent's metadata after the parent's validation chain processed it. The child's validation chain then runs over them again. Nothing compares the copy with the metadata stored in the child's payload.
+
+#### Batch loader
+
+One caller of the preloaded path was found, a batch archive loader (RPF9-F76). It takes a list of archive paths and handles each one:
+
+1. A path that the loader already holds gets its reference count increased and is skipped.
+2. The loader looks the path up in a global index. A hit supplies the 0x20-byte block, which the loader uses only if its size and time words are nonzero.
+3. It creates the file object with that block.
+4. It picks the preloaded construction only if the list has more than one path and the path's device is the same underlying device as a fixed global device. Otherwise it uses the regular construction with the same block.
+
+After the loop, the loader waits for the queued reads. Then it runs a parallel job over the new archives. The job calls the layout and validation method on every archive whose metadata is not laid out yet.
+
+That method lays out the view before it validates. If validation fails, it returns without reporting the failure or undoing the layout. The archive then counts as laid out, and the loader goes on to use it. In the regular construction a failed validation fails the open (RPF9-F07).
+
+Afterwards the loader mounts each archive at a prefix, calls a callback and unmounts the prefix again.
+
+The global index's records match the batch path resolution record in layout. They carry the 16 header bytes from the same column, the stored size and the time. Which code fills the index, and whether it uses batch resolution, is Unknown. Whether loader paths resolve to archive devices, so that the parent copy is used, was not established.
 
 Differences to the regular open:
 - The size is the block's size, which batch resolution fills with the stored size, not the logical size.

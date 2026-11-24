@@ -127,6 +127,12 @@ Interpretations that were once used for RPF9 and later corrected. The current mo
 
 **Correction.** The directory-derived prefix is only the default set during construction. Mounting the archive through its mount method replaces it with the caller's mount prefix. Mounted archives therefore resolve entries under the mount prefix (RPF9-F61, RPF9-F69).
 
+## Preloaded blocks from batch resolution
+
+**Old assumption.** A parent's batch path resolution built the preload blocks for nested archives, which were then mounted in bulk from the parent's metadata copies. This rested on matching record layouts.
+
+**Correction.** The traced caller of the preloaded path is a batch loader that takes its blocks from a global index. What fills that index is unknown. Whether the parent copy is used on this path was not established (RPF9-F76).
+
 ## Header field letters
 
 Some earlier notes used "A" and "B" for `hdr[0x04]` and `hdr[0x08]`. Those letters name the prefix fields at `0x1A` and `0x1C`. Header fields are now referred to by offset.
