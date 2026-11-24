@@ -14,6 +14,10 @@ RVAs for image base `0x140000000`. Roles are descriptive labels, not recovered s
 | `0x55B2550` | Claims the first free slot from 1 upwards in the global file object registry and returns its index | Confirmed | F64 |
 | `0x28CD1A0` | Offset of the file name in a path, stored at file object `+0x0E` | Probable | F64 |
 | `0xFC2490` | Allocates the 0x80-byte archive object. File object vtable `+0x08`. Can cache the archive at file object `+0x58` | Confirmed | F07 |
+| `0x11A8970` | Preloaded archive factory, file object vtable `+0x10`. Caches the archive at file object `+0x58`. No open check | Confirmed | F75 |
+| `0x11A89C0` | Preloaded archive constructor. Same vtable `0x62FD480`. Metadata from the parent's `0xC267…` copy or a device read of `hdr[0x04]` bytes. No header read, layout or validation | Confirmed | F75 |
+| `0x1FB22A0` | Parent metadata copy available: device is a version-9 archive with laid-out metadata and column `0xC26722D233648AE7` | Confirmed | F75 |
+| `0x1941B0` | Synchronous read through the global read service. Traps on failure | Confirmed | F75 |
 | `0xA57F70` | Derives the default mount prefix from the file object path. Archive vtable `+0x3C0` | Confirmed | F61 |
 | `0x54524E0` | End of the directory part of a path, with the `memory:` exception | Confirmed | F61 |
 | `0xA58030` | Stores the prefix length and folded hash in the archive object. Called at construction and by the mount method | Confirmed | F61 |
@@ -239,8 +243,12 @@ Archive object vtable at RVA `0x62FD480`.
 | `+0x90` | `0x503F490` | Release handle. Returns 0 without action | Confirmed |
 | `+0x108` | `0x28CD580` | Fetch an entry field or size by ID | Probable |
 | `+0x120` | `0x28CD5B0` | Substring lookup | Confirmed |
+| `+0x168` | `0x5305860` | Path exists, through the resolver | Confirmed |
 | `+0x1A0` | `0x28CDA50` | Batch path resolution | Confirmed |
 | `+0x1B0` | `0x28C6B20` | Batch open | Confirmed |
+| `+0x1D0` | `0x4870` | Archive-backed device test, returns 1 | Confirmed |
+| `+0x1D8` | `0x528F750` | Archive version, returns 9 | Confirmed |
+| `+0x1E0` | `0x6151A0` | Parent archive, returns the object itself | Confirmed |
 | `+0x298` | `0x56F130` | Row lookup by 64-bit name hash | Confirmed |
 | `+0x2A0` | `0x56EC70` | Row lookup by 32-bit key | Confirmed |
 | `+0x2A8` | `0x5305880` | Path to row resolver | Confirmed |
@@ -252,15 +260,13 @@ Archive object vtable at RVA `0x62FD480`.
 | `+0x2F0` | `0x4F885C0` | Compression mode is nonzero | Confirmed |
 | `+0x2F8` | `0xF62E0` | Compression mode | Confirmed |
 | `+0x398` | `0x28CDFC0` | Mode-0 metadata read | Confirmed |
-| `+0x168` | `0x5305860` | Path exists, through the resolver | Confirmed |
-| `+0x1D0` | `0x4870` | Archive-backed device test, returns 1 | Confirmed |
-| `+0x1E0` | `0x6151A0` | Parent archive, returns the object itself | Confirmed |
-| `+0x3A8` | `0xFA87E0` | Reruns view layout and validation | Confirmed |
+| `+0x3A8` | `0xFA87E0` | Lays out the view over buffer `+0x18` in mode 0 and runs validation. Completes the preloaded construction | Confirmed |
 | `+0x3B8` | `0x12C5630` | Mount at a prefix | Confirmed |
 | `+0x3C0` | `0xA57F70` | Mount prefix setup | Confirmed |
 | `+0x3D0` | `0x5305EC0` | Entry ID high half | Confirmed |
 | `+0x3F0` | `0x28CE0A0` | Field value getter | Confirmed |
 | `+0x3F8` | `0x28CE0B0` | Field pointer getter | Confirmed |
+| `+0x400` | `0x28CE0C0` | Column key present, through `0x28CE190` | Confirmed |
 
 Enumeration search (RPF9-F66). Further inspected slots, none of which iterates rows:
 
@@ -293,7 +299,7 @@ File object vtable at RVA `0x62FD890`.
 |---|---|---|---|
 | `+0x00` | `0x56DD500` | Destructor wrapper | Probable |
 | `+0x08` | `0xFC2490` | Creates the RPF9 archive object | Confirmed |
-| `+0x10` | `0x11A8970` | Creates an object of another 0x80-byte archive class. Not analyzed | Confirmed (call) |
+| `+0x10` | `0x11A8970` | Creates an RPF9 archive object from a preloaded block, through `0x11A89C0` | Confirmed |
 | `+0x18` | `0x9ED970` | Flags bit 0 | Confirmed |
 | `+0x20` | `0xE0EE80` | Returns 9 | Confirmed |
 | `+0x28` | `0x55B25C0` | Tag at `+0x0C` | Confirmed |

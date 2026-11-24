@@ -37,7 +37,7 @@ RPF9 uses the dictionaries only for reverse lookup and for its substring path lo
 An RPF9 archive is opened through two objects (RPF9-F07):
 
 - A 0x60-byte file object. It finds a device for the path and opens a handle through it, then queries size and modification time through two device methods. It can also take these values from a caller-supplied block in memory.
-- A 0x80-byte archive object that holds the file object, the metadata buffers and the metadata view.
+- A 0x80-byte archive object that holds the file object, the metadata buffers and the metadata view. The file object can create it in two ways: the regular construction reads and validates the metadata, and a preloaded construction copies or reads the metadata and leaves layout and validation to a later call ([names.md](../formats/containers/rpf9/names.md#preloaded-construction), RPF9-F75).
 
 All archive reads go through a device read method with an explicit offset. The physical device implementations behind that method were not traced, so whether such a device transforms data is unknown.
 

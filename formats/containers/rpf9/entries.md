@@ -113,11 +113,13 @@ The batch resolution descriptor:
 
 | Offset | Content | Confidence |
 |---|---|---|
-| `+0x00` | 16 bytes. One code path reads them from the archive at the payload offset. Another copies them from the 16-byte value of key `0xC26722D233648AE7` | Confirmed (sources), Probable (first 16 payload bytes) |
+| `+0x00` | 16 bytes. One code path reads them from the archive at the payload offset. Another copies the 16-byte header at the start of the value of key `0xC26722D233648AE7` | Confirmed (sources), Probable (the entry's RPF9 header) |
 | `+0x10` | Stored size | Confirmed |
 | `+0x18` | The `u64` at file object `+0x30`, the device's second attribute after the size | Confirmed (source), Probable (modification time, RPF9-F65) |
 
 The descriptor does not hold the archive base offset. Reads add file object `+0x20`, not `+0x30`.
+
+The descriptor has the same layout as the caller-supplied block a file object can be constructed from: an RPF9 header first, then size and time (RPF9-F75). See [names.md](names.md#preloaded-construction).
 
 ## Enumeration
 

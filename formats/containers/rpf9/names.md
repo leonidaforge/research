@@ -64,6 +64,22 @@ Matching a nested archive therefore works in two steps. Find `<parent prefix><st
 
 Raw storage: the nested read path does not decompress, decrypt or apply the payload transform, and the open checks neither the compression mode nor the transform flag. A nested archive is readable through this path only if its row stores the archive bytes as they are, starting at the payload offset. All reads are clamped to the row's logical size, not its stored size. That every nested archive in valid game data is stored this way is Probable. It follows from the code, not from a check found in it.
 
+### Preloaded construction
+
+The engine has a second way to build an RPF9 archive object. It uses the same class and interface as the regular one (RPF9-F75):
+
+1. The file object is constructed from a caller-supplied 0x20-byte block instead of querying the device. The block MUST start with the RPF9 magic. Its `+0x10` gives the size and `+0x18` the time.
+2. The archive takes its metadata from one of two sources:
+   - **Parent copy.** If the file's device is a version-9 archive with loaded metadata and column `0xC26722D233648AE7`, the parent resolves the file's path to a row. The archive copies `u32@+4` bytes, the total metadata size, from that row's value.
+   - **Device read.** Otherwise it reads the block's `u32@+4` bytes from the file's base.
+3. The constructor reads no header and runs no layout or validation. A separate archive method lays out the metadata and runs the validation chain on the copied or read buffer.
+
+The batch path resolution record has exactly the block's layout. It carries the 16 header bytes from the same column, the stored size and the time. That the engine uses batch resolution in a parent to build the blocks for nested archives, and validates them afterwards, is Probable. The layouts match, but no direct call chain was observed.
+
+Differences to the regular open:
+- The size is the block's size, which batch resolution fills with the stored size, not the logical size.
+- With the parent copy, the nested archive's metadata comes from the parent's value pool, not from the nested archive's payload. Entry payloads are still read through the parent as raw positional reads.
+
 ## Normalization
 
 Both hashes map every input byte through the same table before mixing: ASCII `A` to `Z` become `a` to `z`, and `\` becomes `/`. All other bytes are unchanged (RPF9-F56, RPF9-F57).
