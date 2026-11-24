@@ -7,11 +7,11 @@ Each mechanism is documented once, in the section that owns it. Other sections l
 | Directory | Holds | Does not hold |
 |---|---|---|
 | `formats/` | On-disk structures, field tables, encoding rules, parsing behavior | Function addresses, cipher internals, research narrative |
-| `cryptography/` | Cipher selection, processing spans, integrity and authentication, key-management architecture | Key material, cipher implementation listings |
+| `cryptography/` | Cipher selection, processing spans, integrity and authentication, key-provider architecture | Key material, encoded secret states, key-material locators |
 | `engine/` | Runtime mechanisms that more than one format uses, such as name dictionaries or device abstractions | Behavior used by a single format, which stays with that format |
 | `builds/` | RVAs, vtables, object layouts and function roles for one identified executable | Format rules that do not depend on the build |
 | `evidence/` | Source list, finding index and research history per subject | Raw reports, decompiler output, game data |
-| `tools/` | Original, publishable research tools and their synthetic fixtures | Private scripts, anything that reads or exports keys |
+| `tools/` | Original, publishable research tools and their synthetic fixtures, including generic recognition interfaces | Private scripts, key-material dumps, extraction reports |
 
 A format document says *what* the structure is. The build catalog says *where* in one executable the evidence was found. The evidence index connects the two. Format documents cite findings by ID, such as `RPF9-F07`, and do not repeat addresses.
 

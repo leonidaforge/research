@@ -2,7 +2,7 @@
 
 Research into how GTA VI selects and applies ciphers, verifies integrity and references keys. Format documents link here and do not repeat it.
 
-The section documents architecture only. [RESEARCH-POLICY.md](../RESEARCH-POLICY.md#cryptographic-research) lists what is never published: keys, key fingerprints, descriptor values and implementation listings.
+The section documents architecture only. [RESEARCH-POLICY.md](../RESEARCH-POLICY.md#cryptographic-research) defines the boundary: algorithms, formats and provider contracts are publishable; key material, encoded secret states, direct key-material locators and private extraction reports are not.
 
 ## Organization
 

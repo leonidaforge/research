@@ -18,7 +18,7 @@ This repository holds the knowledge base behind [Leonida Forge](https://github.c
 | RPF9 columnar schema | Cell addressing confirmed. Most column identities unknown | [schema.md](formats/containers/rpf9/schema.md) |
 | RPF9 entries and names | Entry IDs and name lookup confirmed. Directory hierarchy unknown | [entries.md](formats/containers/rpf9/entries.md), [names.md](formats/containers/rpf9/names.md) |
 | RPF9 payloads | Engine read path partly traced. Storage layout known only from observed data | [payloads.md](formats/containers/rpf9/payloads.md) |
-| RPF9 cryptography | Selection and span structure confirmed. Operation probable | [cryptography/rpf9](cryptography/rpf9/README.md) |
+| RPF9 cryptography | Encoded AES-256 decryption and RSA signature scheme confirmed. Key supply embedded and build-specific; archive binding open | [cryptography/rpf9](cryptography/rpf9/README.md) |
 
 Native RPF9 table-of-contents extraction is not possible yet. The blockers are listed in the [RPF9 overview](formats/containers/rpf9/README.md#blockers-for-native-toc-extraction).
 
@@ -37,7 +37,7 @@ Specifications use five confidence levels, defined in [RESEARCH-POLICY.md](RESEA
 
 ## Why there is no game data here
 
-The repository holds original descriptions, formulas and tools only. It contains no game executables, archives, extracted assets, keys or decompiled code. Anyone can read and check the documents without access to proprietary material. The license below covers the project's own contributions. It grants no rights to Rockstar Games or Take-Two Interactive material. See [RESEARCH-POLICY.md](RESEARCH-POLICY.md).
+The repository holds original descriptions, formulas and tools only. It contains no game executables, archives, extracted assets, cryptographic key material or decompiled code. Most findings can be checked from the documents and synthetic tests. Findings that depend on restricted private evidence say so and are not independently reproducible from this repository alone. The license below covers the project's own contributions. It grants no rights to Rockstar Games or Take-Two Interactive material. See [RESEARCH-POLICY.md](RESEARCH-POLICY.md).
 
 ## Contributing
 

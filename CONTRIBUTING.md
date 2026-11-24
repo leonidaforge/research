@@ -5,7 +5,7 @@ Contributions are welcome if they can be checked. Read [RESEARCH-POLICY.md](RESE
 ## Technical claims
 
 - Back every significant claim with evidence and add it to the subject's evidence index, for example [evidence/rpf9/INDEX.md](evidence/rpf9/INDEX.md).
-- Identify the build. Give the executable SHA-256, image base and RVAs for anything that depends on an executable.
+- Identify the build. Give the executable SHA-256, image base and RVAs for anything that depends on an executable. Key-material locators stay private; cite an opaque evidence ID and mark the dependency instead.
 - Describe the method well enough to repeat it: tool and version, function RVA, the samples checked and what the check covered.
 - Label confidence. Never promote a probable interpretation to confirmed without new evidence.
 - Keep unknown fields in tables as **Unknown**. Do not fill gaps with guesses.

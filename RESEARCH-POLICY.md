@@ -44,12 +44,52 @@ Addresses only apply to the executable they came from. Every build-specific find
 
 ## Cryptographic research
 
-Cryptographic research describes architecture: where processing happens, how a cipher is selected, which spans it covers, and how failure affects loading. The repository does not publish:
+Cryptographic research may describe algorithms, format structures, initialization and validation contracts, and the general key-provider architecture. This supports open-source interoperability and generic recognition of compatible data in a user-provided executable.
 
-- key material, key fingerprints or values derived from keys,
-- descriptor values, parameters or key identifiers read from the executable,
-- listings of cipher or key-lookup implementations,
-- tools that search for, extract or apply keys.
+### Permitted public research
+
+- Algorithms and mathematical descriptions, including synthetic test vectors and original tests.
+- File-format structures, metadata semantics, descriptor layouts and selection behavior.
+- Cryptographic initialization, validation and failure contracts.
+- General key-provider architecture, record layouts and provider-selection behavior.
+- Generic structural recognition methods, validators and format constants.
+- Build-specific addresses for ordinary format-processing functions, including cipher block operations, signature verification and parser code.
+- Publicly reproducible, nonsecret analysis.
+
+### Kept out of this repository
+
+- Actual cryptographic key material or encoded secret states, and dumps derived from them.
+- Proprietary executable bytes and extracted secret tables.
+- Direct addresses or RVAs that point to embedded key-material storage.
+- Direct maps from executable-specific cryptographic key identifiers to key-material locations.
+- Key-material fingerprints or hashes used primarily to identify stored secrets.
+- Private extraction reports and executable-derived secret-state dumps.
+- Machine-specific paths, configurations and local analysis artifacts.
+- Long decompiler listings or copied proprietary code.
+
+### Distinctions
+
+- The word `key` is not by itself a secret. RPF9 schema field keys, name hashes, archive identifiers and metadata keys are ordinary format data and may be documented.
+- A generic recognition algorithm is publishable even if it can locate compatible state in a user-provided executable. What stays private is a ready-made address map or extraction report for one build's secret storage.
+- Build-specific addresses of ordinary processing functions are publishable. Addresses of key-material storage are not.
+- Concrete executable-specific cryptographic key identifiers may be described only as part of general selection behavior. They MUST NOT be published together with a key-material location or a direct identifier-to-location mapping.
+- A public recognizer cannot promise to conceal how it works. Secrecy through code obfuscation is not a goal. The goal is to avoid distributing proprietary material and unnecessarily convenient build-specific key-location references.
+
+Public research MUST remain compatible with automatic local recognition. It MUST NOT require a mandatory private build profile or a manually entered key-storage address. A recognizer may use generic structural checks against a user-provided executable, MUST verify build compatibility, and MUST fail explicitly when no compatible state is found. Published tools MUST NOT bundle key material, require an external key service or transmit key material over a network.
+
+### Evidence and reproducibility
+
+Every public finding states one of these:
+
+| Label | Meaning |
+|---|---|
+| **Publicly reproducible** | Checkable from this repository and synthetic inputs alone |
+| **Private-evidence supported** | Verified against restricted local evidence; the public text states the conclusion and the dependency without the locator or secret bytes |
+| **Not demonstrated** | A hypothesis or an incomplete result |
+
+Private-evidence findings may cite stable opaque evidence IDs. They MUST NOT be described as independently reproducible from this repository alone. The repository does not include the private locators or secret state needed to repeat them.
+
+This section supersedes older blanket exclusions of descriptor values and key identifiers. Descriptor structure and selection behavior are publishable. Direct key-material locators and concrete key-identifier-to-location maps are not.
 
 ## Publication-safe artifacts
 

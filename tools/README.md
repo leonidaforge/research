@@ -8,7 +8,11 @@ A tool added here MUST:
 - open game files and executables read-only and never run them,
 - take every input and output path as an argument, with no default pointing at a local installation or another project,
 - refuse to write output inside an input directory,
-- never search for, read, print or apply cryptographic keys,
+- may implement generic recognition, structural validation and local application of compatible cryptographic state from a user-provided executable,
+- never print, export or persist cryptographic key material or encoded secret state,
+- never embed key material, key-material locators for a specific build, or private extraction reports,
+- not require an external key service or transmit key material over a network,
+- fail explicitly when compatible state is missing or the build is unsupported,
 - not print game data beyond what a finding needs, such as a header field or a size,
 - list its dependencies with versions,
 - ship tests that build synthetic inputs, so they run without game files.
