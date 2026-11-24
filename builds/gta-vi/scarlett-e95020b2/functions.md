@@ -80,10 +80,17 @@ Callers of `0xFC21C0`: `0xFC20D0`, `0x1D4C980`, `0x1DEE6C0`, `0x22372C0`, `0x275
 | `0x28CE530` | Step 2: signature check with sub-block 6, else sub-block 2 | Confirmed | F43 |
 | `0x1FB2370`, `0x28CE5B0` | Look up `B` sub-blocks 6 and 2 | Confirmed | F43 |
 | `0xDAED40`, `0x28CE5C0` | Build the check request from sub-block 6 or 2 | Confirmed | F43 |
-| `0xDAED80` | Checks that the signature lies in `B`, builds the message, looks up the key and runs the verifier | Confirmed (data flow), Probable (signature) | F43 |
+| `0xDAED80` | Checks that the signature lies in `B`, builds the message, looks up the key and runs the verifier | Confirmed | F43, F92 |
 | `0x28CE970`, `0x1FB2380` | Message span lists for message types 0 and 1 | Confirmed | F43 |
 | `0x28CEA80`, `0x28CEAB0` | Message length and concatenation | Confirmed | F43 |
-| `0xDAF010` | Verifier setup: resolves the key identifier through the static registry. Not analyzed further at this stage | Confirmed (call) | F43 |
+| `0xDAF010` | Verifier init: resolves the record's key identifier through the static key registry, then imports the key | Confirmed | F43, F93 |
+| `0xDAEFD0`, `0x1171770`, `0x11717F8` | Verifier entry, scheme wrapper and hash call: SHA-256 over the message, DigestInfo encoding, core call with RSA type 3 | Confirmed | F92 |
+| `0x216E7B5` | Signature core: size check, RSA public operation, payload length and DigestInfo compare. Returns 0 on success | Confirmed | F92 |
+| `0x216CCAD`, `0x216C9A7` | RSA public operation entry and modular exponentiation | Confirmed | F92 |
+| `0x216BC9E` | Padding decoder: mode 0 requires `00 01 FF...FF 00`, mode 1 is the other path | Confirmed | F92 |
+| `0x218FA76`, `0x218F82D`, `0x218FC97` | SHA-256 one-shot, hash length table lookup and hash dispatch | Confirmed | F92 |
+| `0x216E99A`, `0x2166CBA` | DigestInfo length selection and DER DigestInfo writer | Confirmed (OID and writer), Probable (standard layout) | F92 |
+| `0xB2DF40`, `0x2165694` | Key import and DER SubjectPublicKeyInfo parse | Confirmed | F93 |
 | `0x28CE230` | After a successful open with step 2 enabled: opens the companions of sub-block 3, sets file object `+0x09` bit 0 from the fingerprint check, sets `+0x08` bit 0 | Confirmed | F44, F63, F81 |
 | `0x28CE280` | Opens each sub-block 3 companion, checks its header and appends the handle, or -1, to the alternate array. Stops at the first failed open | Confirmed | F81 |
 | `0x28CE450` | Reads the sub-block 3 count and record pointer | Confirmed | F81 |

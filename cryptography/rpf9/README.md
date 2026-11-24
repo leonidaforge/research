@@ -2,7 +2,7 @@
 
 While the engine opens an RPF9 archive, it runs a validation chain over the [metadata area](../../formats/containers/rpf9/metadata.md). The chain processes selected spans in place with a cipher. On the first open of a file it also checks a signature. Any failure rejects the archive.
 
-The cipher used by the observed archives is CBC-mode decryption with a 16-byte block, and it does not authenticate (see [Algorithm 0x10](#algorithm-0x10)). The only integrity check in the chain is the conditional [signature check](#signature-check). The signature algorithm is unknown.
+The cipher used by the observed archives is CBC-mode decryption with a 16-byte block, and it does not authenticate (see [Algorithm 0x10](#algorithm-0x10)). The only integrity check in the chain is the conditional [signature check](#signature-check). It is RSASSA-PKCS1-v1_5 with SHA-256 and a 2048-bit RSA key embedded in the executable (RPF9-F92, RPF9-F93).
 
 Payloads of some entries go through a separate 16-byte block transform when they are read. See [Payload transform](#payload-transform).
 
@@ -213,7 +213,22 @@ Coverage:
 - No message type covers `hdr[0x10..0x18)` or any payload data.
 - The check runs only while file object `+0x08` bit 0 is clear. After the first successful open the engine sets that bit, so later archives opened on the same file object skip the check (RPF9-F44).
 
-The structure, key lookup by identifier and a 256-byte value checked against a message, is Probable for a digital signature. The algorithm is unknown. The archive is therefore not fully signature-verified: coverage depends on the message type, and the check is skipped on later opens. For archives using algorithm `0x10`, nothing else in the chain detects altered metadata.
+The scheme is RSASSA-PKCS1-v1_5 with SHA-256 (RPF9-F92):
+
+```
+digest     = SHA-256(message)
+digestInfo = 30 31 30 0d 06 09 60 86 48 01 65 03 04 02 01 05 00 04 20 || digest
+EM         = 00 01 FF...FF 00 || digestInfo
+accept     = RSA public operation on the signature yields exactly EM
+```
+
+The verifier builds the DigestInfo itself. It requires the recovered payload to be 51 bytes and compares it with the computed DigestInfo; a raw 32-byte digest is rejected. The signature length is fixed at 256 bytes, so the key is 2048-bit. The RSA type is fixed in the verifier call and does not come from the archive.
+
+The key record carries a 16-bit or 32-bit identifier, resolved through a static key registry. This build supplies a DER `rsaEncryption` SubjectPublicKeyInfo with exponent 65537 (RPF9-F93). The registry location, identifier mapping and fingerprint are not published; the modulus bytes are not reproduced.
+
+Step 2 runs after step 1, so the signed message is the metadata after decryption. For the observed archives, selector 9 keeps step 1 active, and the stored `A` and `B` bytes are ciphertext. The 256-byte signature cannot fit in the observed 16-byte `B` trailer, so at least 240 of its bytes lie in the step 1 `B` span and are ciphertext as well. A stored archive therefore contains neither the signed message nor a readable signature, and its signature cannot be checked without the step 1 key. No real archive signature has been verified.
+
+The archive is only partly authenticated even when the signature passes: coverage depends on the message type, and the check is skipped on later opens. For archives using algorithm `0x10`, nothing else in the chain detects altered metadata.
 
 ## Payload transform
 
@@ -241,7 +256,8 @@ Whether RPF9 shares any cryptography with earlier RPF versions is unknown. Nothi
 - The key schedule and the key-dependent final-round tables of algorithm `0x10`. The S-box, linear layer, round model and layout are established as encoded AES-256 (RPF9-F89, RPF9-F90, RPF9-F91); only the protected key material remains.
 - The cipher type of `B` sub-block 1 in real archives.
 - Whether the key lookup succeeds for the default descriptor, which decides whether algorithm 0 archives open at all.
-- The signature algorithm.
+- Whether a real archive signature verifies. Step 1 key material is needed to reconstruct the message.
+- Which message type real archives use, and whether every build registers the same key.
 - The role of the `B` trailer.
 - The `A` table content is identical across observed archives although it lies inside a processed span. The static descriptor uses a fixed key identifier and a fixed IV, which would explain identical stored bytes for identical plaintext. Not verified.
 - The payload transform's algorithm, key source and relation to the metadata cipher. Payload reads do not call the span runner directly (RPF9-F38).

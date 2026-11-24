@@ -39,7 +39,7 @@ Evidence: [evidence/rpf9/INDEX.md](../../../evidence/rpf9/INDEX.md). Corrections
 | `A` table, `B` sub-blocks | Confirmed (index into `B`). Uses of sub-blocks 1, 2, 3, 6 and 9 known |
 | Validation chain order and conditions | Confirmed |
 | Metadata cipher spans | Confirmed. CBC decryption without authentication for the observed cipher type. Block transform not reproducible with standard AES |
-| Signature check | Data flow confirmed, conditional. Signature algorithm unknown |
+| Signature check | Data flow confirmed, conditional. RSASSA-PKCS1-v1_5 with SHA-256 and a 2048-bit RSA key. A stored archive cannot be checked without the step 1 key |
 | Stored primary area | Probably transformed in the inspected archives |
 | Structural checks in validation | None found |
 | Payload transform | Routing confirmed. Algorithm and key source unknown |
