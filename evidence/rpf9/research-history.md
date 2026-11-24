@@ -153,7 +153,7 @@ Some earlier notes used "A" and "B" for `hdr[0x04]` and `hdr[0x08]`. Those lette
 
 **Old assumption.** Algorithm `0x10` was AES-256-shaped, and equivalence with AES was unknown. Its table invariants matched, but no constructive result existed, and differing table bytes were read as consistent with, not evidence for, AES.
 
-**Correction.** The fixed tables are an encoded AES-256 decryption, established constructively. Every round-table core is affinely equivalent to the AES inverse S-box with explicit invertible maps verified on all 256 inputs. The 16 table maps factor as InvMixColumns columns under byte-diagonal output encodings, and the per-position encodings compose across rounds (RPF9-F89, RPF9-F90). The key schedule and the key-dependent final-round tables remain protected, so the equivalence is established for the block transform, not for any particular key.
+**Correction.** The fixed tables are an encoded AES-256 decryption, established constructively. Every round-table core is affinely equivalent to the AES inverse S-box with explicit invertible maps verified on all 256 inputs. The 16 table maps factor as InvMixColumns columns under byte-diagonal output encodings, and the per-position encodings compose across rounds (RPF9-F89, RPF9-F90). The round formula was then re-derived by symbolic execution of the instruction stream, and a synthetic encoded AES-256 instance reproduced standard AES-256 on known vectors (RPF9-F91). The key schedule and the key-dependent final-round tables remain protected, so the equivalence is established for the block transform, not for any particular key.
 
 ## Open
 
