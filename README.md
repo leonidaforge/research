@@ -18,7 +18,7 @@ This repository holds the knowledge base behind [Leonida Forge](https://github.c
 | RPF9 columnar schema | Cell addressing confirmed. Most column identities unknown | [schema.md](formats/containers/rpf9/schema.md) |
 | RPF9 entries and names | Entry IDs and name lookup confirmed. Directory hierarchy unknown | [entries.md](formats/containers/rpf9/entries.md), [names.md](formats/containers/rpf9/names.md) |
 | RPF9 payloads | Engine read path partly traced. Storage layout known only from observed data | [payloads.md](formats/containers/rpf9/payloads.md) |
-| RPF9 cryptography | Encoded AES-256 decryption and RSA signature scheme confirmed. Registry recognition verified for e95020b2; key supply embedded; archive binding and cross-build behavior open | [cryptography/rpf9](cryptography/rpf9/README.md) |
+| RPF9 cryptography | Encoded AES-256 decryption and RSA signature scheme confirmed. Registry and static descriptor recognition verified for e95020b2; key supply embedded; archive binding and cross-build behavior open | [cryptography/rpf9](cryptography/rpf9/README.md) |
 
 Native RPF9 table-of-contents extraction is not possible yet. The blockers are listed in the [RPF9 overview](formats/containers/rpf9/README.md#blockers-for-native-toc-extraction).
 

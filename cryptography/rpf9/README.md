@@ -114,6 +114,8 @@ On build e95020b2 this yields one candidate run with 24 records and 10 algorithm
 
 The method is public; the concrete result is verified only for this build. A missing, malformed or ambiguous candidate fails closed. No cross-build compatibility is established.
 
+The static descriptor is recognized separately (RPF9-F98). The recognizer finds the descriptor writer, bounds its caller with the PE exception table and derives the index-guarded key/type/parameter path. On build e95020b2 selector 9 resolves to index 4, kind `0x10`, and exactly one compatible registry state; selector 7 has no descriptor and fails closed. Key identifiers, IVs and addresses are not published.
+
 
 ### Cipher types
 
