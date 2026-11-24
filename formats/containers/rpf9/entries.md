@@ -15,7 +15,7 @@ entryId = (tag << 16) | rowIndex
 | 0 to 15 | Row index, `0 .. E-1` | Confirmed |
 | 16 to 31 | The `u16` tag stored in the archive's file object at `+0x0C` | Confirmed (read), Probable (identifies the mounted archive) |
 
-The schema accessors keep only the low 16 bits (RPF9-F14). One archive can therefore address at most 65,536 rows, and the high half never reaches the schema. Path lookup also reads `E` as a `u16`. Where the tag value comes from at mount time is not traced. `0xFFFF` is the invalid row index, returned by the field-key search and by the row resolver.
+The schema accessors keep only the low 16 bits (RPF9-F14). The high half never reaches the schema. Because `0xFFFF` is reserved as the invalid row index, one archive can address at most 65,535 rows, `0` to `0xFFFE`. Path lookup also reads `E` as a `u16`. Where the tag value comes from at mount time is not traced. `0xFFFF` is the invalid row index, returned by the field-key search and by the row resolver.
 
 ## Row count
 

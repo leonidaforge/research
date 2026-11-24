@@ -40,5 +40,5 @@ The executable carries no meaningful symbol names. Function names in this reposi
 
 - Indirect calls are resolved only where a vtable slot was read directly.
 - Device read and open implementations are not traced.
-- Cipher algorithm and key lookup internals are not analyzed. This covers the metadata cipher and the payload transform.
+- The key lookup, the payload transform and metadata cipher algorithms 1, 2, `0x11` and `0x12` are not analyzed. Algorithms 0 and `0x10` are.
 - The codec's inner decode call and the chunk decompression service are not analyzed.

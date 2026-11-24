@@ -20,7 +20,9 @@ Region positions are in [metadata.md](metadata.md).
 | `+0x10` | `u16` | Element width in bytes | Confirmed (RPF9-F09) |
 | `+0x12` | 6 bytes | Unknown | Unknown |
 
-The hash function behind the field keys is unknown. The key search reads only `+0x00`, and the value pointer reads only `+0x0C` and `+0x10`. No traced accessor reads `+0x08` or `+0x12` (RPF9-F40). Code outside the traced accessors may still use them.
+The hash function behind the field keys is unknown. The key search reads only `+0x00`, and the value pointer reads only `+0x0C` and `+0x10`. No traced accessor, layout routine or validation step reads `+0x08` or `+0x12`. The validation chain signs and processes the whole descriptor table as opaque bytes (RPF9-F40). Code outside those paths may still use the two fields.
+
+The descriptor table as stored is probably not plain in the inspected archives. See [metadata.md](metadata.md#on-disk-bytes-and-the-metadata-view).
 
 ## Step 1: field key to column
 
@@ -67,7 +69,7 @@ valuePointer = poolBase + columnBaseOffset + elementWidth * compactIndex
 
 Each column has its own run of fixed-width elements in its area's pool. A one-byte index can select a 16-byte value, because the width belongs to the pool element. Rows that share a value can share one pool element. No deduplication rule has been checked against data.
 
-The value pointer is not checked against the pool. A compact index that is not the null sentinel is multiplied by the element width and added without comparison to any count, so an out-of-range index points past the column's elements. This holds for the traced accessor paths (RPF9-F40). Whether a validation step checks indices before lookups is unresolved.
+The value pointer is not checked against the pool. A compact index that is not the null sentinel is multiplied by the element width and added without comparison to any count, so an out-of-range index points past the column's elements. This holds for the traced accessor paths (RPF9-F40). The validation chain does not check counts, index values or pool bounds either (RPF9-F47). An archive that passes validation can therefore hold out-of-range indices, and the traced code would follow them. Code outside those paths was not searched.
 
 The engine exposes two accessors on top of this. One returns whether the field is present. The other returns the value pointer, and callers read typed fields from it (RPF9-F14).
 

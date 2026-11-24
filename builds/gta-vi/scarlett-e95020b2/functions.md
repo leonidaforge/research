@@ -13,8 +13,8 @@ RVAs for image base `0x140000000`. Roles are descriptive labels, not recovered s
 | `0x1FB2600` | Header and metadata reader. Magic compares at `0x1FB2619` (preloaded header) and `0x1FB2692` (disk) | Confirmed | F01, F02 |
 | `0x28CDFC0` | Mode-0 metadata read helper, archive vtable `+0x398` | Confirmed | F02 |
 | `0x1FB2780` | Builds the metadata view descriptor | Confirmed | F07 |
-| `0x87AEC0` | Writes region pointers into the metadata view | Confirmed | F07 |
-| `0x87AF70`, `0x87AFF0` | Read prefix counts, compute primary region offsets with alignment | Confirmed | F04, F05 |
+| `0x87AEC0` | Writes region pointers into a metadata view. Used for the validation view and again for the archive view | Confirmed | F07 |
+| `0x87AF70`, `0x87AFF0` | Read prefix counts, compute primary region offsets with alignment. No bounds checks | Confirmed | F04, F05, F47 |
 | `0x87B0B0`, `0x87B0F0` | Compute secondary region offsets | Confirmed | F06 |
 
 Callers of `0xFC21C0`: `0xFC20D0`, `0x1D4C980`, `0x1DEE6C0`, `0x22372C0`, `0x2758210`. A second path at `0xFA87F9`/`0xFA8805` runs the same layout and validation. It was not traced.
@@ -23,19 +23,42 @@ Callers of `0xFC21C0`: `0xFC20D0`, `0x1D4C980`, `0x1DEE6C0`, `0x22372C0`, `0x275
 
 | RVA | Role | Confidence | Finding |
 |---|---|---|---|
-| `0x8EC200` | Validation chain entry. Every step must succeed | Confirmed | F23 |
-| `0xA348A0` | Step 1: reads selector `0x2E`, picks descriptor and span set, processes `A` and `B` spans | Confirmed | F24, F26 |
+| `0x8EC200` | Validation entry. Passes "file object `+0x08` bit 0 clear" as the step 2 condition to `0x8EC210` | Confirmed | F23, F42 |
+| `0x8EC210` | Validation chain: step 1, step 2 if enabled, sub-block 1 lookup, then steps 4 and 5 if sub-block 1 exists | Confirmed | F42 |
+| `0xA348A0` | Step 1: reads selector `0x2E`, picks descriptor and span set, processes `A` and `B` spans. Does nothing for selector 0 | Confirmed | F24, F26 |
 | `0xA349A0` | Builds the two static cipher descriptors | Confirmed | F24 |
-| `0x28CE530` | Conditional step 2. Branches to `0x1FB2370`, `0x28CE5B0`, `0x28CE5C0` and `0xDAED40`, none analyzed. Role unknown | Unknown | |
-| `0x1FB2300` | Step 3. Looks up `B` sub-block 1 through the `A` table. Use of the result unknown | Confirmed (lookup) | F39 |
-| `0x4E6F740` | `A` table lookup: returns `B + offset` for an ID, or null | Confirmed | F39 |
+| `0x28CEB20` | Step 1 span for selector bit 0 clear: `A` and all of `B` as one span | Confirmed | F26 |
+| `0x28CE530` | Step 2: signature check with sub-block 6, else sub-block 2 | Confirmed | F43 |
+| `0x1FB2370`, `0x28CE5B0` | Look up `B` sub-blocks 6 and 2 | Confirmed | F43 |
+| `0xDAED40`, `0x28CE5C0` | Build the check request from sub-block 6 or 2 | Confirmed | F43 |
+| `0xDAED80` | Checks that the signature lies in `B`, builds the message, looks up the key and runs the verifier | Confirmed (data flow), Probable (signature) | F43 |
+| `0x28CE970`, `0x1FB2380` | Message span lists for message types 0 and 1 | Confirmed | F43 |
+| `0x28CEA80`, `0x28CEAB0` | Message length and concatenation | Confirmed | F43 |
+| `0xDAF010` | Verifier setup: resolves the key identifier through the static registry. Not analyzed further at this stage | Confirmed (call) | F43 |
+| `0x28CE230` | After a successful open with step 2 enabled: sets file object `+0x08` bit 0, then consumes sub-block 3 | Confirmed (bit), Unknown (sub-block 3 use) | F44 |
+| `0x1FB2300` | Looks up `B` sub-block 1, the per-archive descriptor. Not a validation step | Confirmed | F39, F42 |
+| `0x4E6F740` | `A` table lookup: returns `B + offset` for an ID, or null. Offset not checked | Confirmed | F39, F47 |
 | `0x4E6F780` | Linear search of the `A` records by `u16` ID, `0xFFFF` if absent | Confirmed | F39 |
-| `0x6BD040` | Step 4. Builds a context with `0x6BD090` and calls the span runner `0x6BD160` with one span. Which span is not traced | Confirmed (calls) | |
-| `0x8EC360` | Step 5: processes the secondary area | Confirmed | F26 |
-| `0x6BD160` | Span runner: init from descriptor, in-place `update` per span, boolean `final` | Confirmed | F27 |
-| `0x536A70` | Cipher type to algorithm ID, 19-entry table | Confirmed | F25 |
-| `0x613880` | Creates the algorithm object and resolves the key by identifier. Internals not analyzed | Confirmed (role) | F25 |
-| `0x193F90` | Key lookup by identifier, called from `0x613880`. Not analyzed | Confirmed (call) | F25 |
+| `0x6BD040` | Step 4: one span from `0x6BD090`, span runner with the sub-block 1 descriptor | Confirmed | F45 |
+| `0x6BD090`, `0x6BD100`, `0x6BD110`, `0x6BD150` | Step 4 span: `B` trailer through `hdr[0x08]` | Confirmed | F45, F49 |
+| `0x8EC360` | Step 5: secondary area with the sub-block 1 descriptor | Confirmed | F26, F45 |
+| `0x6BD160` | Span runner: init from descriptor, in-place `update` per span, `final` after each span and at the end for cipher types 3 to 5, else once | Confirmed | F27, F46, F53 |
+| `0x536A70` | Cipher initializer: maps the descriptor type through `0x536AC0`, then calls `0x613880` with mode 1, key identifier and parameter | Confirmed | F25 |
+| `0x536AC0` | Cipher type to algorithm ID, 19-entry table at `0x62FE860`. Types of 19 or more give 0 | Confirmed | F25, F51 |
+| `0x1FB2310` | Returns the per-thread cipher context | Confirmed | F50 |
+| `0x613880` | Replaces the algorithm object when the algorithm ID changes, looks up the key and initializes the object | Confirmed | F25, F50 |
+| `0x193F90` | Key lookup by identifier, algorithm ID and mode, called from `0x613880`. Not analyzed | Confirmed (call) | F25 |
+| `0x4C11250` | Algorithm object factory by algorithm ID. Traps for `0x0D` to `0x0F` | Confirmed | F50, F51 |
+| `0x613720`, `0x613740` | `update` and `final` dispatch to algorithm object slots `+0x18` and `+0x20` | Confirmed | F50 |
+| `0x19056F0` | Creates the algorithm `0x10` object: mode 0 engine null, mode 1 engine from `0x19057B0` | Confirmed | F53 |
+| `0x4C115E0` | Algorithm `0x10` init: selects the engine by mode, initializes it, stores the 16-byte parameter | Confirmed | F53 |
+| `0x6137D0` | Algorithm `0x10` `update`: requires output at least as long as input, runs the engine | Confirmed | F53 |
+| `0x613760`, `0x613780` | Algorithm `0x10` `final`: resets the engine IV to the stored parameter and returns success | Confirmed | F53 |
+| `0x55DC660` | Engine setup: checks the key material header, builds the 0x1100-byte state, sets the IV | Confirmed | F53, F54 |
+| `0x55DBCF0` | Engine CBC decryption over whole 16-byte blocks, keeps the last stored block as the next IV | Confirmed | F53 |
+| `0x55DBA30` | Engine IV reset | Confirmed | F53 |
+| `0x5642C50` | 128-bit block decryption, 14 table-driven rounds | Confirmed (structure) | F54 |
+| `0x5643140` | CBC XOR with the IV and previous stored blocks, then copy to the output | Confirmed | F53 |
 
 ## Schema access
 
@@ -131,6 +154,12 @@ Data:
 | `0x6DD5B08` | Codec object, vtable `0x66FDD40`, decode slot `+0x30` | Confirmed | F35 |
 | `0x79F6D70` | Pointer to the decompression service used by the chunk fast path | Confirmed (use) | F36 |
 | `0x7A0B000`, `0x7A0B100` | Fallback and primary namespace tables, `u8` per type ID | Confirmed (use) | F31 |
+| `0x62FE540` | Verifier vtable for step 2 | Confirmed | F43 |
+| `0x62FE720`, `0x62FE760` | Message builder vtables for message types 0 and 1. `0x62FE740` serves other types and always fails | Confirmed | F43 |
+| `0x66FDB70` | Algorithm 0 vtable: every operation returns success | Confirmed | F52 |
+| `0x66FDBB0` | Vtable for unknown algorithm IDs: every operation fails | Confirmed | F51 |
+| `0x66FDB10` | Algorithm `0x10` vtable | Confirmed | F53 |
+| `0x674B040` | Algorithm `0x10` mode 1 engine vtable | Confirmed | F53 |
 
 ## Archive vtable
 
@@ -189,6 +218,7 @@ File object, 0x60 bytes:
 
 | Offset | Content | Confidence |
 |---|---|---|
+| `+0x08` | Flags. Bit 0 clear enables the signature check. Set after the first successful open | Confirmed |
 | `+0x0C` | `u16` tag, high half of entry IDs | Confirmed |
 | `+0x10` | Device. Payload reads call its vtable slot `+0x60` | Confirmed |
 | `+0x18` | Handle, -1 when the open failed. Input to the read-handle selection `0x4F60A90` | Probable |

@@ -68,6 +68,36 @@ Interpretations that were once used for RPF9 and later corrected. The current mo
 
 **Correction.** The namespace comes from a table in the executable, indexed by the row's type ID (RPF9-F31).
 
+## Validation step 3 was a lookup
+
+**Old assumption.** The validation chain had five steps. Steps 2 to 4 had unknown roles, and step 3 looked up `B` sub-block 1.
+
+**Correction.** Step 2 is a conditional signature check. The third operation is a lookup of the per-archive cipher descriptor in sub-block 1. If that sub-block is missing, the chain ends with success and steps 4 and 5 do not run. Step 4 processes the primary area (RPF9-F42, RPF9-F43, RPF9-F45).
+
+## Primary regions outside the cipher spans
+
+**Old assumption.** The column descriptors, primary index store and primary value pool lay outside every processed span, so their stored state was open with no code-level lead.
+
+**Correction.** They lie in the step 4 span. In the inspected archives none of the known field keys occurs in the stored primary area, so those archives probably store it transformed (RPF9-F45, RPF9-F48).
+
+## B trailer as authentication tag
+
+**Old assumption.** The `B` trailer, left out of step 1, was a plausible authentication tag.
+
+**Correction.** The trailer starts the step 4 span and is part of the signed message. Nothing in the code supports the tag reading any more. Its role is unknown (RPF9-F45).
+
+## Authenticated decryption was CBC decryption
+
+**Old assumption.** The span runner calls `update` in place and checks a boolean `final`, so the metadata cipher was probably authenticated decryption with a 16-byte tag.
+
+**Correction.** Algorithm `0x10`, which the observed static descriptor selects, is CBC decryption. Its `final` resets the IV and always succeeds. The cipher therefore authenticates nothing. The separate signature check remains the chain's only integrity check, and it is conditional (RPF9-F43, RPF9-F44, RPF9-F53).
+
+## Initializer label
+
+**Old assumption.** `0x536A70` was the table that maps cipher types to algorithm IDs.
+
+**Correction.** `0x536A70` is the initializer. It calls the table lookup `0x536AC0` and then the factory and key setup `0x613880` (RPF9-F25).
+
 ## Header field letters
 
 Some earlier notes used "A" and "B" for `hdr[0x04]` and `hdr[0x08]`. Those letters name the prefix fields at `0x1A` and `0x1C`. Header fields are now referred to by offset.
@@ -77,6 +107,7 @@ Some earlier notes used "A" and "B" for `hdr[0x04]` and `hdr[0x08]`. Those lette
 - Descriptor bytes `+0x08` and `+0x12`.
 - What selects location layout F over A, and whether real rows carry more than one layout.
 - The content of the `B` sub-blocks.
-- Whether the descriptors, primary cells and primary pool are stored transformed. One earlier note called them "post-transform". That was inferred from the order of initialization, not from cipher span coverage (RPF9-F28).
+- The stored state of the secondary area and of archives other than the inspected ones. One earlier note called the primary regions "post-transform" from the order of initialization alone. The step 4 span and the archive scan now support that for the inspected archives (RPF9-F28, RPF9-F48).
+- The signature algorithm, cipher algorithms 1, 2, `0x11` and `0x12`, AES equivalence of algorithm `0x10`, and the role of the `B` trailer.
 - The payload transform algorithm and key source.
 - Directory structure.

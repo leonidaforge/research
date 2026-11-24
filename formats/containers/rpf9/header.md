@@ -19,7 +19,7 @@ The loader reads these fields directly. They are stored in plain form (RPF9-F04)
 
 | Offset | Type | Name | Meaning | Observed | Confidence |
 |---|---|---|---|---|---|
-| `0x10` | 8 bytes | | Unknown. Varies per archive. Not a size or timestamp | | Unknown |
+| `0x10` | 8 bytes | | Unknown. Varies per archive. Not a size or timestamp. Neither processed nor signed by the validation chain | | Unknown |
 | `0x18` | `u16` | | Unknown | | Unknown |
 | `0x1A` | `u16` | `A` | Number of 8-byte records in the `A` table, an index into the `B` block | 4 | Confirmed (RPF9-F39) |
 | `0x1C` | `u32` | `B` | Size of the `B` block in bytes | `0x150` | Confirmed (size). Content unknown |
@@ -28,10 +28,10 @@ The loader reads these fields directly. They are stored in plain form (RPF9-F04)
 | `0x24` | `u32` | `E` | Row (entry) count | 2 to 699 | Confirmed (RPF9-F13) |
 | `0x28` | `u32` | | Unknown | | Unknown |
 | `0x2C` | `u8` | `F` | Width of a compact cell index in bytes: 1, 2 or 4 | 1 or 2 | Confirmed (RPF9-F11) |
-| `0x2D` | `u8` | `G` | Bit 0 selects 16-byte region alignment. Other bits unknown | | Confirmed (bit 0) |
+| `0x2D` | `u8` | `G` | Bit 0 selects 16-byte region alignment. Other bits unknown | bit 0 set | Confirmed (bit 0) |
 | `0x2E` | `u8` | | Cryptographic selector, see [cryptography/rpf9](../../../cryptography/rpf9/README.md#selection) | 9 | Confirmed (RPF9-F24) |
 | `0x2F` | `u8` | | Unknown | | Unknown |
-| `0x30` | `u32` | | Length of the `B` block trailer left out of the cipher span | `0x10` | Confirmed (RPF9-F26) |
+| `0x30` | `u32` | | Length of the `B` block trailer. Left out of the step 1 span when `0x2E` bit 0 is set. Start of the step 4 span | `0x10` | Confirmed (RPF9-F26, RPF9-F45) |
 | `0x34` | 12 bytes | | Unknown | | Unknown |
 
 The 8 bytes at `0x18` hold the same value in all observed archives. This fits the constant `A` and `B` values inside them.
@@ -55,8 +55,8 @@ Known checks before an archive is accepted:
 
 - exact 16-byte header read,
 - magic,
-- the validation chain run after layout, which includes the cryptographic pass and rejects the archive on failure (RPF9-F23).
+- the [validation chain](../../../cryptography/rpf9/README.md#validation-chain): cipher passes, a conditional signature check, and a check that the signature lies inside the `B` block (RPF9-F23, RPF9-F42, RPF9-F43).
 
-Of the other validation steps, only step 3 is partly known. It looks up `B` sub-block 1 through the `A` table (RPF9-F39). Steps 2 and 4 are not analyzed. No bounds checks on the prefix counts have been documented.
+The validation chain and the layout builder do not check the prefix counts, region sizes, index stores or `A` offsets against each other or against `hdr[0x08]` and `hdr[0x04]` (RPF9-F47). Code outside those paths was not searched.
 
 A reader SHOULD at least require `0x40 <= hdr[0x08] <= hdr[0x04] <= file size`. This is a sanity rule consistent with observed archives, not a check found in the engine.
