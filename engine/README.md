@@ -92,15 +92,15 @@ The mount table does not own devices. Unmounting and clearing the table release 
 An RPF9 archive object implements the device interface itself (RPF9-F67):
 - It reports that it is an archive-backed device, and its "parent archive" method returns the archive object.
 - Its existence test resolves the path with the [row resolver](../formats/containers/rpf9/names.md#path-to-row).
-- Its open method resolves the path to a row, returns its own file object's physical handle, and reports the row's payload offset as the opened file's base (RPF9-F70).
+- Its open method resolves the path to a row, returns the handle its own file object selects for the row's [read source](../formats/containers/rpf9/payloads.md#read-source), and reports the row's payload offset as the opened file's base (RPF9-F70).
 - Its read method is a positional read that adds its own base offset, clamps to its own size and calls its own device (RPF9-F71, see [payloads.md](../formats/containers/rpf9/payloads.md#nested-reads)).
 - Its handle release does nothing.
 
 The archive's mount method adds it to the mount table under a caller-supplied prefix and replaces the archive's [resolver prefix](../formats/containers/rpf9/names.md#mount-prefix) with that prefix (RPF9-F61, RPF9-F69).
 
 Lifetime (RPF9-F72):
-- A nested archive's file object stores the parent archive as its device and the parent's physical handle as its own handle. It takes no reference on either.
-- Destroying the nested archive calls the parent's handle release, which does nothing, so the shared physical handle stays open.
+- A nested archive's file object stores the parent archive as its device and the parent handle selected for its row as its own handle. Its own alternate handle array starts empty (RPF9-F73). It takes no reference on either.
+- Destroying the nested archive calls the parent's handle release, which does nothing, so the shared handle stays open.
 - The parent MUST outlive every archive and stream opened through it. No mechanism that invalidates children when a parent goes away was found.
 
 Object layouts and vtable slots are in the [build catalog](../builds/gta-vi/scarlett-e95020b2/functions.md).

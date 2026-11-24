@@ -184,8 +184,8 @@ Reads and seeks:
 | `0x13308E0` | Compressed stream read: fills the stream buffer in pieces of up to 0x10000 bytes, then decodes | Confirmed | F34 |
 | `0x1330B60` | Stored-byte read. Branches on the payload transform flag | Confirmed | F33, F38 |
 | `0x1330C10` | Device read at `fileObject[+0x20] + payloadOffset + position` | Confirmed | F33 |
-| `0x4F60AB0` | Read-source index, key `0xCBB68FF7B7078DB7`, `0xFFFFFFFF` if absent | Confirmed (read) | F41 |
-| `0x4F60A90` | Selects the read handle from the source index, file object `+0x18` and `+0x50` | Probable | F41 |
+| `0x4F60AB0` | Read-source index, key `0xCBB68FF7B7078DB7`, `0xFFFFFFFF` if absent | Confirmed | F41 |
+| `0x4F60A90` | Read handle: main handle for `0xFFFFFFFF`, else `alternates[index]` without bounds or null checks | Confirmed (assembly) | F41, F73 |
 | `0x1331470` | Transform read: positions the context at a 16-byte boundary, processes whole blocks, handles partial blocks | Confirmed | F38 |
 | `0x19C380` | Positions the payload transform context. Not analyzed | Confirmed (call) | F38 |
 | `0x1616150` | Processes whole 16-byte blocks in place. Not analyzed | Confirmed (call) | F38 |
@@ -232,7 +232,7 @@ Archive object vtable at RVA `0x62FD480`.
 
 | Slot | RVA | Role | Confidence |
 |---|---|---|---|
-| `+0x28` | `0x28CD2E0` | Open by path: row payload offset as base, own physical handle, -1 if unresolved | Confirmed |
+| `+0x28` | `0x28CD2E0` | Open by path: row payload offset as base, own handle selected by the row's read source, -1 if unresolved | Confirmed |
 | `+0x30` | `0x2758940` | Open entry, variant with an extra argument | Probable |
 | `+0x60` | `0x28CD360` | Positional raw read: 32-bit clamp to file object `+0x28`, adds `+0x20`, forwards to the device | Confirmed |
 | `+0x80` | `0x28CD3B0` | Seek | Confirmed |
@@ -289,6 +289,22 @@ Slots neither listed here nor above were not inspected.
 
 File object vtable at RVA `0x62FD890`.
 
+| Slot | RVA | Role | Confidence |
+|---|---|---|---|
+| `+0x00` | `0x56DD500` | Destructor wrapper | Probable |
+| `+0x08` | `0xFC2490` | Creates the RPF9 archive object | Confirmed |
+| `+0x10` | `0x11A8970` | Creates an object of another 0x80-byte archive class. Not analyzed | Confirmed (call) |
+| `+0x18` | `0x9ED970` | Flags bit 0 | Confirmed |
+| `+0x20` | `0xE0EE80` | Returns 9 | Confirmed |
+| `+0x28` | `0x55B25C0` | Tag at `+0x0C` | Confirmed |
+| `+0x30` | `0x80B2C0` | Device at `+0x10` | Confirmed |
+| `+0x40` | `0x12D2AC0` | Base offset at `+0x20` | Confirmed |
+| `+0x48` | `0x459930` | Size at `+0x28` | Confirmed |
+| `+0x50` | `0x1321020` | Value at `+0x30` | Confirmed |
+| `+0x58` | `0x28CD1D0` | Sets `+0x30` | Confirmed |
+
+No slot writes the alternate handle array (RPF9-F74).
+
 ## Object layouts
 
 Archive object, 0x80 bytes:
@@ -327,13 +343,14 @@ File object, 0x60 bytes:
 | `+0x0C` | `u16` tag, high half of entry IDs. `0xFFFF` until registration | Confirmed |
 | `+0x0E` | `u16` offset of the file name in the stored path | Probable |
 | `+0x10` | Device. Payload reads call its vtable slot `+0x60` | Confirmed |
-| `+0x18` | Handle from the device's open method, -1 when the open failed. For a nested archive the parent's physical handle. Input to the read-handle selection `0x4F60A90` | Confirmed |
+| `+0x18` | Handle from the device's open method, -1 when the open failed. For a nested archive the parent handle selected by the row's read source. Input to the read-handle selection `0x4F60A90` | Confirmed |
 | `+0x20` | Base offset written by the device's open method. Added to every read. For a nested archive the row's payload offset in the parent | Confirmed |
 | `+0x28` | Archive size: device slot `+0xF8`, the caller block, or the parent row's logical size | Confirmed |
 | `+0x30` | `u64` from device slot `+0x108` or the caller block. Copied into batch resolution and substring lookup records. Probably the modification time | Confirmed (source), Probable (meaning) |
 | `+0x38` | Resolved path, 16-byte string object, inline when the sign bit of `+0x47` is set | Confirmed |
-| `+0x4C` | `u32` count of alternate handles | Confirmed (use) |
-| `+0x50` | Alternate handle array. Input to the read-handle selection `0x4F60A90`, released by the destructor | Confirmed (use) |
+| `+0x48` | `u32` capacity of the alternate handle array. Zeroed by the constructor and the destructor | Probable |
+| `+0x4C` | `u32` count of alternate handles. Zeroed by the constructor, read by the destructor. No traced writer adds to it | Confirmed (use) |
+| `+0x50` | Alternate handle array, 8-byte handles, -1 for unused. Indexed by `0x4F60A90` without bounds, released and freed by the destructor. No traced writer | Confirmed (use) |
 | `+0x58` | Cached archive object | Confirmed (use) |
 
 The device interface reads through vtable slot `+0x60` and reports size and time through `+0xF8` and `+0x108`. The device read implementation is not traced.

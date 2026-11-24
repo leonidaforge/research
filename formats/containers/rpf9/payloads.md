@@ -19,7 +19,24 @@ address = fileObject[+0x20] + payloadOffset + position
 - `payloadOffset` is the location record's offset field shifted left by 4, see [entries.md](entries.md#derived-values). Offsets are therefore in 16-byte units and relative to the archive base.
 - `position` is the logical position for plain reads and the stored-byte cursor for compressed reads.
 
-The device read goes through the device object at file object `+0x10`, vtable slot `+0x60`. The handle comes from a helper that combines file object `+0x18`, file object `+0x50` and the read-source index of key `0xCBB68FF7B7078DB7` (RPF9-F41).
+The device read goes through the device object at file object `+0x10`, vtable slot `+0x60`.
+
+### Read source
+
+The handle for the read comes from the entry's read-source index, the `u32` value of key `0xCBB68FF7B7078DB7` (RPF9-F41, RPF9-F73):
+
+| Index | Handle |
+|---|---|
+| `0xFFFFFFFF`, also when the column is absent or the cell is null | The file object's main handle |
+| Any other value `i` | Entry `i` of the file object's alternate handle array |
+
+- The engine does not check `i` against the number of alternate handles, does not check that the array exists, and does not check the handle it gets. An index past the end reads past the array.
+- The handle choice does not change the address. The same `fileObject[+0x20] + payloadOffset + position` goes to the device whichever handle is chosen.
+- What an alternate handle refers to is unknown. Whether it reaches the same data as the main handle is not established.
+
+The alternate array starts empty when the file object is constructed, and the destructor releases its entries. No code that adds entries was found (RPF9-F74). Whether the array is ever filled in this build is unknown.
+
+A reader SHOULD treat an absent index or `0xFFFFFFFF` as the main source. Any other value SHOULD be bounds-checked against the sources the reader actually has.
 
 ### Offset frames
 
