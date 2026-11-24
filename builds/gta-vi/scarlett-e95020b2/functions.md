@@ -115,7 +115,7 @@ Callers of `0xFC21C0`: `0xFC20D0`, `0x1D4C980`, `0x1DEE6C0`, `0x22372C0`, `0x275
 | `0x55DC660` | Engine setup: checks the key-material magic `0x4E3B9B8E`, copies a 240-byte schedule, 16 × 256-byte final-round tables and the IV into the 0x1100-byte state | Confirmed | F53, F54, F88 |
 | `0x55DBCF0` | Engine CBC decryption over whole 16-byte blocks, keeps the last stored block as the next IV | Confirmed | F53 |
 | `0x55DBA30` | Engine IV reset | Confirmed | F53 |
-| `0x5642C50` | 128-bit block decryption: affine pre-stage, 13 table rounds, substitution-only final round | Confirmed (structure) | F54, F85, F86, F87, F88 |
+| `0x5642C50` | 128-bit block decryption: encoded AES-256 decryption (affine pre-stage, 13 table rounds, substitution-only final round) | Confirmed (structure, S-box and linear layers) | F54, F85, F86, F87, F88, F89, F90 |
 | `0x5643140` | CBC XOR with the IV and previous stored blocks, then copy to the output | Confirmed | F53 |
 
 ## Schema access
