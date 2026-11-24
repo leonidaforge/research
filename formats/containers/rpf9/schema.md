@@ -79,15 +79,15 @@ Field keys seen at engine use sites (RPF9-F17). Each meaning comes from how the 
 
 | Field key | Value | Meaning | Confidence | Finding |
 |---|---|---|---|---|
-| `0x73BCB72DCE74F11F` | `u64` | Name hash, see [names.md](names.md#name-lookup) | Confirmed | F30 |
+| `0x73BCB72DCE74F11F` | `u64` | Name hash of 64-bit-class rows, see [names.md](names.md#path-to-row) | Confirmed | F30, F55 |
 | `0xBA180AFB232D1B4B` | Location record R | See [entries.md](entries.md#location-records) | Confirmed (layout) | F32 |
 | `0x33F70DFAF2C50989` | Location record F | See [entries.md](entries.md#location-records) | Confirmed (layout) | F32 |
 | `0x4EAA16DD829995BC` | Location record A | See [entries.md](entries.md#location-records) | Confirmed (layout) | F32 |
 | `0xE0C12D7A5D4884C5` | Chunk table, self-relative | See [payloads.md](payloads.md#chunk-table) | Confirmed (layout) | F36 |
 | `0x286030A358A789FB` | Presence only | Routes stored bytes through the payload transform, see [payloads.md](payloads.md#payload-transform) | Confirmed (routing) | F38 |
-| `0xC26722D233648AE7` | `u32` self-relative offset to 16 bytes | Copy of the first 16 payload bytes, used by enumeration | Probable | F21 |
+| `0xC26722D233648AE7` | `u32` self-relative offset to 16 bytes | Copy of the first 16 payload bytes, used by batch path resolution | Probable | F21 |
 | `0xCBB68FF7B7078DB7` | `u32`, `0xFFFFFFFF` when absent | Index that selects the handle payload reads go through | Probable | F41 |
-| `0xB7076B6245D35FB5` | `u32` | Must be nonzero for the fallback name path | Unknown | F31 |
+| `0xB7076B6245D35FB5` | `u32` | 32-bit key of 32-bit-class rows, 0 on 64-bit-class rows in sorted archives, see [names.md](names.md#32-bit-key) | Confirmed (use), Probable (stored value is `joaat` of the stem) | F31, F57, F58 |
 
 The type ID and compression mode are fields inside the location records, not columns of their own. The namespace is not stored in the archive.
 

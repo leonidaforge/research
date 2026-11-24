@@ -7,8 +7,16 @@ RVAs for image base `0x140000000`. Roles are descriptive labels, not recovered s
 | RVA | Role | Confidence | Finding |
 |---|---|---|---|
 | `0xFC21C0` | File object factory: allocates 0x60 bytes, constructs, frees on failure. Optional magic check on a caller-supplied block (compare at `0xFC21D9`) | Confirmed | F01, F07 |
-| `0xFC2240` | File object constructor. Resolves the device, opens the handle, reads size and time | Confirmed | F07 |
-| `0xFC2490` | Allocates the 0x80-byte archive object | Confirmed | F07 |
+| `0xFC2240` | File object constructor. Resolves the path and device, opens the handle, reads size and time or sizes from the parent archive, registers the tag | Confirmed | F07, F62, F64, F65 |
+| `0x56EB30` | Tries each search root, normalizes the candidate, keeps the first one whose device reports existence | Confirmed | F62 |
+| `0x128BB70`, `0x128BAE0` | Path normalizers called by `0x56EB30`. Not analyzed | Confirmed (call) | F62 |
+| `0x968490` | Device lookup for a path. Not analyzed | Confirmed (call) | F62, F65 |
+| `0x55B2550` | Claims the first free slot from 1 upwards in the global file object registry and returns its index | Confirmed | F64 |
+| `0x28CD1A0` | Offset of the file name in a path, stored at file object `+0x0E` | Probable | F64 |
+| `0xFC2490` | Allocates the 0x80-byte archive object. File object vtable `+0x08`. Can cache the archive at file object `+0x58` | Confirmed | F07 |
+| `0xA57F70` | Derives the mount prefix from the file object path. Archive vtable `+0x3C0` | Confirmed | F61 |
+| `0x54524E0` | End of the directory part of a path, with the `memory:` exception | Confirmed | F61 |
+| `0xA58030` | Stores the prefix length and folded hash in the archive object | Confirmed | F61 |
 | `0xFC2540` | Archive object constructor: header read, view descriptor, validation, view layout | Confirmed | F07 |
 | `0x1FB2600` | Header and metadata reader. Magic compares at `0x1FB2619` (preloaded header) and `0x1FB2692` (disk) | Confirmed | F01, F02 |
 | `0x28CDFC0` | Mode-0 metadata read helper, archive vtable `+0x398` | Confirmed | F02 |
@@ -17,7 +25,7 @@ RVAs for image base `0x140000000`. Roles are descriptive labels, not recovered s
 | `0x87AF70`, `0x87AFF0` | Read prefix counts, compute primary region offsets with alignment. No bounds checks | Confirmed | F04, F05, F47 |
 | `0x87B0B0`, `0x87B0F0` | Compute secondary region offsets | Confirmed | F06 |
 
-Callers of `0xFC21C0`: `0xFC20D0`, `0x1D4C980`, `0x1DEE6C0`, `0x22372C0`, `0x2758210`. A second path at `0xFA87F9`/`0xFA8805` runs the same layout and validation. It was not traced.
+Callers of `0xFC21C0`: `0xFC20D0`, `0x1D4C980`, `0x1DEE6C0`, `0x22372C0`, `0x2758210`. Archive vtable `+0x3A8`, `0xFA87E0`, reruns view layout and validation on the existing buffers, then calls `0x28CE230` when file object `+0x08` bit 0 is clear.
 
 ## Validation and cryptography
 
@@ -35,7 +43,12 @@ Callers of `0xFC21C0`: `0xFC20D0`, `0x1D4C980`, `0x1DEE6C0`, `0x22372C0`, `0x275
 | `0x28CE970`, `0x1FB2380` | Message span lists for message types 0 and 1 | Confirmed | F43 |
 | `0x28CEA80`, `0x28CEAB0` | Message length and concatenation | Confirmed | F43 |
 | `0xDAF010` | Verifier setup: resolves the key identifier through the static registry. Not analyzed further at this stage | Confirmed (call) | F43 |
-| `0x28CE230` | After a successful open with step 2 enabled: sets file object `+0x08` bit 0, then consumes sub-block 3 | Confirmed (bit), Unknown (sub-block 3 use) | F44 |
+| `0x28CE230` | After a successful open with step 2 enabled: consumes sub-block 3, sets file object `+0x09` bit 0 from the fingerprint check, sets `+0x08` bit 0 | Confirmed (bits), Unknown (sub-block 3 use) | F44, F63 |
+| `0xC63230` | Fingerprint check: header `u32@0x28` against the startup value or the sub-block 9 value, chosen by `u8@0x2D` bit 3 | Confirmed | F63 |
+| `0xC632E0`, `0xC632F0` | Look up `B` sub-block 9 and read its count and type ID list | Confirmed | F63 |
+| `0xC63300` | Builds the type classification bit mask for the listed type IDs and hashes it | Confirmed | F63 |
+| `0xC63390` | 32-bit hash over the bit mask. CityHash32 structure | Confirmed (call), Probable (CityHash32) | F63 |
+| `0x1DFBD20`, `0x5C0B8E0` | Startup fingerprint over all 256 type IDs, stored at `0x7A0B204` | Confirmed | F63 |
 | `0x1FB2300` | Looks up `B` sub-block 1, the per-archive descriptor. Not a validation step | Confirmed | F39, F42 |
 | `0x4E6F740` | `A` table lookup: returns `B + offset` for an ID, or null. Offset not checked | Confirmed | F39, F47 |
 | `0x4E6F780` | Linear search of the `A` records by `u16` ID, `0xFFFF` if absent | Confirmed | F39 |
@@ -72,7 +85,7 @@ Callers of `0xFC21C0`: `0xFC20D0`, `0x1D4C980`, `0x1DEE6C0`, `0x22372C0`, `0x275
 | `0x4DB65B0` | Selects index store and stride, rebases secondary columns | Confirmed | F10 |
 | `0x4DB6600` | Reads one compact index of `F` bytes, sentinel handling | Confirmed | F11 |
 | `0x55B2600` | Builds the value pointer from pool, column base offset and element width. No bounds check | Confirmed | F12, F40 |
-| `0x5305880` | Row resolver, returns `0xFFFF` when not found | Probable | F15 |
+| `0x5305880` | Path to row resolver: mount prefix check, extension to type, stem hash, row lookup. Returns `0xFFFF` when not found | Confirmed | F55 |
 | `0x5305EC0` | Returns the `u16` at file object `+0x0C`, the entry ID high half. Reached only through the vtable | Confirmed | F15 |
 
 ## Entries, names, payloads
@@ -94,22 +107,41 @@ Names:
 
 | RVA | Role | Confidence | Finding |
 |---|---|---|---|
-| `0x28CD5B0` | Open by path: linear row scan with name rebuild and substring match | Confirmed | F20 |
-| `0x4DAC8F0` | Builds the 0x118-byte entry descriptor after a path match | Confirmed (call) | F20 |
+| `0x56F130` | Row lookup by 64-bit name hash and type ID. Linear scan, or binary search when file object `+0x09` bit 0 is set | Confirmed | F58 |
+| `0x56EC70` | Row lookup by 32-bit key and type ID, same two methods | Confirmed | F58 |
+| `0x56F250` | Lower-bound binary search for the 64-bit lookup | Confirmed | F58 |
+| `0x56EDC0` | Lower-bound binary search for the 32-bit lookup. Not decompiled | Confirmed (call) | F58 |
+| `0x56EE50` | Extension to type ID: case-sensitive string compares, then registered handlers, else `0xFF` | Confirmed | F59 |
+| `0x4F66800` | 64-bit hash dispatch through the namespace's hash function pointer | Confirmed | F56 |
+| `0x4F66DE0` | Folded MurmurHash3 x64-128 variant | Confirmed | F56 |
+| `0x4F67220` | Same hash without folding | Confirmed | F56 |
+| `0x4FC21D0` | joaat: core `0x4FC21F0` plus the final avalanche | Confirmed | F57 |
+| `0x4FC21F0` | joaat core with folding and the leading-quote rule | Confirmed | F57 |
+| `0x28CD5B0` | Substring lookup: reverse lookup of every row through the dictionaries, `strstr` on the dictionary string, first match in row order | Confirmed | F20 |
+| `0x4DAC8F0` | Bounded string copy. Copies the matched dictionary string into the result record | Confirmed | F20 |
+| `0x28CF380`, `0x28CF7A0` | Append a 0x120-byte match record, return the first record | Confirmed | F20 |
 | `0x5520AC0` | Name hash, key `0x73BCB72DCE74F11F` | Confirmed | F30 |
-| `0x5305F10` | Namespace from the table at `0x7A0B100` by type ID | Confirmed | F31 |
-| `0x55B2520` | Fallback namespace from the table at `0x7A0B000` by type ID | Confirmed | F31 |
-| `0x5305EE0` | `u32` of key `0xB7076B6245D35FB5`, gate for the fallback name path | Confirmed (read) | F31 |
-| `0x56C9290` | Guarded one-time initializer run before the namespace table read. Not analyzed | Confirmed (call) | F31 |
-| `0x4DA8040` | Fallback name lookup. Arguments not verified | Confirmed (call) | F31 |
-| `0x553D070` | Hashed-string dictionary lookup by namespace and hash | Confirmed | F18 |
+| `0x5305F10` | Namespace of the 64-bit class from the table at `0x7A0B100` by type ID | Confirmed | F31 |
+| `0x55B2520` | Namespace of the 32-bit class from the table at `0x7A0B000` by type ID | Confirmed | F31 |
+| `0x5305EE0` | `u32` of key `0xB7076B6245D35FB5`, the 32-bit key | Confirmed | F31, F57 |
+| `0x5305F30` | Guarded call of `0x56C9290` | Confirmed | F59 |
+| `0x56C9290` | Fills both per-type namespace tables. The 32-bit table is seeded from `0x62FC510` | Confirmed | F59 |
+| `0x4DA8040` | 32-bit dictionary lookup by namespace and key | Confirmed | F31, F60 |
+| `0x553D070` | 64-bit dictionary lookup by namespace and hash | Confirmed | F18 |
+| `0x4FD8E70` | 64-bit dictionary insert. Gated by namespace flag bit 1, first insert wins | Confirmed | F60 |
+| `0x554AE00` | 32-bit dictionary insert | Confirmed (call) | F60 |
+| `0x541F000` | Inserts a list of strings into one 32-bit namespace | Confirmed | F60 |
+| `0x4FD9E60` | UTF-8 check before insertion | Confirmed | F60 |
+| `0xC3EEF0`, `0x4061230` | Structured-data field setters that hash and insert strings | Confirmed | F60 |
+| `0x1E1CCE0` | Allocates the 64-bit dictionaries and their control blocks | Confirmed | F60 |
+| `0x5C34FD0` | Initializes the namespace control blocks: hash functions and flags | Confirmed | F60 |
 | `0x4EBBC30` | Extension string from type ID. Default string at `0x678832B` | Confirmed | F19 |
 
-Enumeration:
+Batch operations:
 
 | RVA | Role | Confidence | Finding |
 |---|---|---|---|
-| `0x28CDA50` | Child enumeration into 0x20-byte descriptors | Confirmed | F21 |
+| `0x28CDA50` | Batch path resolution into 0x20-byte descriptors | Confirmed | F21 |
 | `0x28C6B20` | Batch open, read and collect over an ID array | Confirmed | F21 |
 
 Reads and seeks:
@@ -153,7 +185,11 @@ Data:
 | `0x66FDD10` | Codec table by entry compression mode. Slot 0 null, slot 1 `0x6DD5B08`, slot 2 null | Confirmed | F35 |
 | `0x6DD5B08` | Codec object, vtable `0x66FDD40`, decode slot `+0x30` | Confirmed | F35 |
 | `0x79F6D70` | Pointer to the decompression service used by the chunk fast path | Confirmed (use) | F36 |
-| `0x7A0B000`, `0x7A0B100` | Fallback and primary namespace tables, `u8` per type ID | Confirmed (use) | F31 |
+| `0x7A0B000`, `0x7A0B100` | Namespace tables of the 32-bit and 64-bit class, `u8` per type ID, filled at runtime | Confirmed | F31, F59 |
+| `0x65B23B0` | 256-byte folding table: ASCII upper case to lower case, `\` to `/` | Confirmed | F56 |
+| `0x62FCD30` | Type-to-extension pointer table, 19 types per variant | Confirmed (use) | F19, F59 |
+| `0x99FED28`, `0x99FED30` | 64-bit dictionary maps and their 0x58-byte control blocks | Confirmed | F60 |
+| `0x99FED10`, `0x99FED18` | 32-bit dictionary maps and their control blocks | Confirmed | F60 |
 | `0x62FE540` | Verifier vtable for step 2 | Confirmed | F43 |
 | `0x62FE720`, `0x62FE760` | Message builder vtables for message types 0 and 1. `0x62FE740` serves other types and always fails | Confirmed | F43 |
 | `0x66FDB70` | Algorithm 0 vtable: every operation returns success | Confirmed | F52 |
@@ -173,17 +209,51 @@ Archive object vtable at RVA `0x62FD480`.
 | `+0x80` | `0x28CD3B0` | Seek | Confirmed |
 | `+0x90` | `0x503F490` | Release handle | Probable |
 | `+0x108` | `0x28CD580` | Fetch an entry field or size by ID | Probable |
-| `+0x120` | `0x28CD5B0` | Open by path | Confirmed |
-| `+0x1A0` | `0x28CDA50` | Child enumeration | Confirmed |
+| `+0x120` | `0x28CD5B0` | Substring lookup | Confirmed |
+| `+0x1A0` | `0x28CDA50` | Batch path resolution | Confirmed |
 | `+0x1B0` | `0x28C6B20` | Batch open | Confirmed |
+| `+0x298` | `0x56F130` | Row lookup by 64-bit name hash | Confirmed |
+| `+0x2A0` | `0x56EC70` | Row lookup by 32-bit key | Confirmed |
+| `+0x2A8` | `0x5305880` | Path to row resolver | Confirmed |
+| `+0x2B0` | `0x5305EE0` | 32-bit key of a row | Confirmed |
+| `+0x2B8` | `0x5520AC0` | Name hash of a row | Confirmed |
+| `+0x2C0` | `0x5305ED0` | Type ID of a row | Confirmed |
 | `+0x2E0` | `0x1330AD0` | Stored size | Confirmed |
 | `+0x2E8` | `0x1331670` | Logical size | Confirmed |
 | `+0x2F0` | `0x4F885C0` | Compression mode is nonzero | Confirmed |
 | `+0x2F8` | `0xF62E0` | Compression mode | Confirmed |
 | `+0x398` | `0x28CDFC0` | Mode-0 metadata read | Confirmed |
+| `+0x3A8` | `0xFA87E0` | Reruns view layout and validation | Confirmed |
+| `+0x3C0` | `0xA57F70` | Mount prefix setup | Confirmed |
 | `+0x3D0` | `0x5305EC0` | Entry ID high half | Confirmed |
 | `+0x3F0` | `0x28CE0A0` | Field value getter | Confirmed |
 | `+0x3F8` | `0x28CE0B0` | Field pointer getter | Confirmed |
+
+Enumeration search (RPF9-F66). Further inspected slots, none of which iterates rows:
+
+| Slot | RVA | Role | Confidence |
+|---|---|---|---|
+| `+0x58` | `0x28C6480` | Open, read N bytes, close | Confirmed |
+| `+0xF0` | `0x28C6500` | Batch over a path list through slot `+0xF8` | Confirmed |
+| `+0x100` | `0x28C6610` | Batch over a path list through slot `+0x108` | Confirmed |
+| `+0x128` | `0x28CD920` | Opens a stream from a substring lookup result | Confirmed |
+| `+0x168` | `0x5305860` | Path exists, through the resolver | Confirmed |
+| `+0x190` | `0x28C68E0` | Read loop until N bytes | Confirmed |
+| `+0x1A8` | `0x28CDDD0` | Path to descriptor, through the resolver | Confirmed |
+| `+0x1C8` | `0x28CDE50` | Path to payload offset, through the resolver | Confirmed |
+| `+0x210` | `0x28C6E40` | Allocates a request batch | Confirmed |
+| `+0x240` | `0x28C6F40` | Queues a request and starts a worker | Confirmed |
+
+Stub slots:
+
+| Return value | Stub RVA | Slots |
+|---|---|---|
+| -1 | `0x222F7C0` | `+0x38`, `+0x48`, `+0x118`, `+0x200` |
+| 0 | `0x4810` | `+0xA8` to `+0xE0`, `+0x110`, `+0x150`, `+0x170`, `+0x1B8`, `+0x1E8`, `+0x220`, `+0x230`, `+0x250`, `+0x340` |
+| 1 | `0x4870` | `+0x1C0`, `+0x1D0` |
+| none | `0x4380` | `+0x158`, `+0x160`, `+0x258`, `+0x3D8` |
+
+Slots neither listed here nor above were not inspected.
 
 File object vtable at RVA `0x62FD890`.
 
@@ -198,6 +268,8 @@ Archive object, 0x80 bytes:
 | `+0x18` | Primary metadata buffer | Confirmed |
 | `+0x20` | Secondary metadata buffer | Confirmed |
 | `+0x28` | Metadata view, see below | Confirmed |
+| `+0x70` | `u64` folded hash of the mount prefix | Confirmed |
+| `+0x78` | `u32` mount prefix length | Confirmed |
 | `+0x7C` | Flags byte | Confirmed (presence) |
 
 Metadata view at archive object `+0x28`:
@@ -219,12 +291,17 @@ File object, 0x60 bytes:
 | Offset | Content | Confidence |
 |---|---|---|
 | `+0x08` | Flags. Bit 0 clear enables the signature check. Set after the first successful open | Confirmed |
-| `+0x0C` | `u16` tag, high half of entry IDs | Confirmed |
+| `+0x09` | Bit 0 enables the sorted row lookup. Cleared by the constructor, set by `0x28CE230` | Confirmed |
+| `+0x0C` | `u16` tag, high half of entry IDs. `0xFFFF` until registration | Confirmed |
+| `+0x0E` | `u16` offset of the file name in the stored path | Probable |
 | `+0x10` | Device. Payload reads call its vtable slot `+0x60` | Confirmed |
 | `+0x18` | Handle, -1 when the open failed. Input to the read-handle selection `0x4F60A90` | Probable |
 | `+0x20` | Archive base offset. Added to every payload read address | Confirmed (use) |
-| `+0x30` | `u64` copied into enumeration and path-lookup descriptors. Meaning unknown | Confirmed (use) |
+| `+0x28` | Archive size: device slot `+0xF8`, the caller block, or the parent row's logical size | Confirmed |
+| `+0x30` | `u64` from device slot `+0x108` or the caller block. Copied into batch resolution and substring lookup records. Probably the modification time | Confirmed (source), Probable (meaning) |
+| `+0x38` | Resolved path, 16-byte string object, inline when the sign bit of `+0x47` is set | Confirmed |
 | `+0x50` | Input to the read-handle selection `0x4F60A90` | Confirmed (use) |
+| `+0x58` | Cached archive object | Confirmed (use) |
 
 The device interface reads through vtable slot `+0x60` and reports size and time through `+0xF8` and `+0x108`. The device read implementation is not traced.
 

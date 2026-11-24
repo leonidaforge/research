@@ -22,13 +22,13 @@ The loader reads these fields directly. They are stored in plain form (RPF9-F04)
 | `0x10` | 8 bytes | | Unknown. Varies per archive. Not a size or timestamp. Neither processed nor signed by the validation chain | | Unknown |
 | `0x18` | `u16` | | Unknown | | Unknown |
 | `0x1A` | `u16` | `A` | Number of 8-byte records in the `A` table, an index into the `B` block | 4 | Confirmed (RPF9-F39) |
-| `0x1C` | `u32` | `B` | Size of the `B` block in bytes | `0x150` | Confirmed (size). Content unknown |
+| `0x1C` | `u32` | `B` | Size of the `B` block in bytes. Known sub-blocks in [metadata.md](metadata.md#a-table-and-b-block) | `0x150` | Confirmed (size) |
 | `0x20` | `u16` | `C` | Column count | 3 to 7 | Confirmed (RPF9-F08) |
 | `0x22` | `u16` | `D` | Columns stored in the secondary area | 1 | Confirmed (RPF9-F10) |
 | `0x24` | `u32` | `E` | Row (entry) count | 2 to 699 | Confirmed (RPF9-F13) |
-| `0x28` | `u32` | | Unknown | | Unknown |
+| `0x28` | `u32` | | Type classification fingerprint. The engine enables its sorted row lookup only when this equals its own fingerprint, see [names.md](names.md#sorted-flag) | | Confirmed (use, RPF9-F63), Probable (meaning) |
 | `0x2C` | `u8` | `F` | Width of a compact cell index in bytes: 1, 2 or 4 | 1 or 2 | Confirmed (RPF9-F11) |
-| `0x2D` | `u8` | `G` | Bit 0 selects 16-byte region alignment. Other bits unknown | bit 0 set | Confirmed (bit 0) |
+| `0x2D` | `u8` | `G` | Bit 0 selects 16-byte region alignment. Bit 3 selects the fingerprint from `B` sub-block 9 for the `0x28` comparison. Bits 1, 2 and 4 to 7 unknown | bit 0 set | Confirmed (bits 0 and 3, RPF9-F63) |
 | `0x2E` | `u8` | | Cryptographic selector, see [cryptography/rpf9](../../../cryptography/rpf9/README.md#selection) | 9 | Confirmed (RPF9-F24) |
 | `0x2F` | `u8` | | Unknown | | Unknown |
 | `0x30` | `u32` | | Length of the `B` block trailer. Left out of the step 1 span when `0x2E` bit 0 is set. Start of the step 4 span | `0x10` | Confirmed (RPF9-F26, RPF9-F45) |

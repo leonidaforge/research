@@ -15,7 +15,19 @@ entryId = (tag << 16) | rowIndex
 | 0 to 15 | Row index, `0 .. E-1` | Confirmed |
 | 16 to 31 | The `u16` tag stored in the archive's file object at `+0x0C` | Confirmed (read), Probable (identifies the mounted archive) |
 
-The schema accessors keep only the low 16 bits (RPF9-F14). The high half never reaches the schema. Because `0xFFFF` is reserved as the invalid row index, one archive can address at most 65,535 rows, `0` to `0xFFFE`. Path lookup also reads `E` as a `u16`. Where the tag value comes from at mount time is not traced. `0xFFFF` is the invalid row index, returned by the field-key search and by the row resolver.
+The schema accessors keep only the low 16 bits (RPF9-F14). The high half never reaches the schema. Because `0xFFFF` is reserved as the invalid row index, one archive can address at most 65,535 rows, `0` to `0xFFFE`. The substring lookup also reads `E` as a `u16`. `0xFFFF` is the invalid row index, returned by the field-key search and by the row resolver.
+
+### Tag allocation
+
+The file object constructor sets the tag to `0xFFFF`. After the device open succeeds, it registers the file object in a global registry and stores the slot index as the tag (RPF9-F64):
+
+- Slots are searched from 1 upwards. The first free slot is claimed with an atomic compare-and-swap. Slot 0 is never used.
+- The registry has two tables, slots 1 to 999 and slots from 1000 up to a stored capacity. A full registry traps.
+- A failed device open leaves the tag at `0xFFFF`.
+
+The tag depends on the order in which file objects are created and on which slots are free. It is not derived from the archive. That tags are not stable across sessions or mount orders is Probable. When a slot is released, and therefore how tags are reused, was not traced.
+
+A tool MUST NOT persist tags or use them as archive identifiers. Row indices are stable only within one archive.
 
 ## Row count
 
@@ -84,39 +96,40 @@ Not established:
 - What selects layout F over layout A.
 - The bits that no traced accessor reads: bits 56 to 63 of F `+0x00`, bits 40 to 63 of F `+0x08`, bits 44 to 63 of F `+0x10`.
 
-## Enumeration
+## Path resolution
+
+Entries are found by path. The resolver hashes the path relative to the archive's mount prefix and searches the rows for the hash and the type ID, see [names.md](names.md#path-to-row) (RPF9-F55, RPF9-F58). A second, dictionary-based path lookup uses a substring search, see [names.md](names.md#substring-lookup) (RPF9-F20).
+
+## Batch operations
 
 The archive interface has two bulk operations (RPF9-F21):
 
-- Child enumeration takes an array of entry IDs and writes one 0x20-byte descriptor per entry.
+- Batch path resolution takes an array of path strings. It resolves each one and writes one 0x20-byte descriptor per input. An unresolved path leaves its descriptor zeroed.
 - Batch open takes an array of entry IDs. For each one it opens the entry, optionally reads it, releases it and collects one field.
 
-The enumeration descriptor:
+The batch resolution descriptor:
 
 | Offset | Content | Confidence |
 |---|---|---|
 | `+0x00` | 16 bytes. One code path reads them from the archive at the payload offset. Another copies them from the 16-byte value of key `0xC26722D233648AE7` | Confirmed (sources), Probable (first 16 payload bytes) |
 | `+0x10` | Stored size | Confirmed |
-| `+0x18` | The `u64` at file object `+0x30` | Confirmed (source), Unknown (meaning) |
+| `+0x18` | The `u64` at file object `+0x30`, the device's second attribute after the size | Confirmed (source), Probable (modification time, RPF9-F65) |
 
 The descriptor does not hold the archive base offset. Reads add file object `+0x20`, not `+0x30`.
 
-Neither operation shows how the input ID array is built for a directory.
+## Enumeration
 
-## Path lookup
+No archive operation that iterates all rows and returns them was found (RPF9-F66). The only traced loop over all rows is the substring lookup, which returns one match.
 
-Opening by path works as follows (RPF9-F20):
+Search scope: about twenty implemented methods of the archive interface were inspected. All of them work on a path the caller supplies, on an open handle or on a request queue. Many other slots are stubs that return a constant. If the base device interface has a find-first and find-next pair, it would sit in one of those stubs for this archive class. Which stub that would be is not known, because the base interface was not mapped.
 
-1. Take the part of the requested path after the first `/`.
-2. For every row `0 .. E-1`, resolve the row's name as described in [names.md](names.md#name-lookup), and append `.` plus the extension for the row's type ID.
-3. Search for the requested part inside the rebuilt name with a substring search.
-4. On a match, build an in-memory entry descriptor of 0x118 bytes with the logical size and file object `+0x30`, and open the entry.
-
-The lookup is a linear scan over all rows. No sorted hash index is used, and there is no binary search. A substring search can match more than one row. Which match the engine keeps, and whether it rejects partial matches, is not established.
+Not covered: the uninspected interface methods, the device layer, and any resource manager above it. They may still enumerate. The inspected and stubbed slots are listed in the [build catalog](../../../builds/gta-vi/scarlett-e95020b2/functions.md#archive-vtable).
 
 ## Directory hierarchy
 
-Unknown. No parent or child record has been found. Path lookup matches components against a flat set of rows and does not walk a tree. No column has been identified that distinguishes directories from files. Whether the high-half tag or a column encodes hierarchy is open.
+No directory model exists on the traced paths. The resolver hashes the whole stem, subdirectories included, and matches it against a flat set of rows. No row type, column or record for directories or parent links has been found. A hierarchy shows up only as `/` inside the hashed path. The traced code does not show whether rows exist that stand for directories.
+
+A tool that shows a tree therefore has to build it from the paths of matched rows.
 
 ## Relation to payload reads
 

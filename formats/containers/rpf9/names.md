@@ -1,46 +1,183 @@
 # RPF9 names
 
-RPF9 stores no file name text. A row holds a 64-bit name hash. The engine turns it into a string at runtime with a namespace that depends on the row's type ID (RPF9-F18, RPF9-F30, RPF9-F31).
+RPF9 stores no file name text. A row holds a hash of its path. The engine opens an entry by hashing the requested path and searching the rows for that hash (RPF9-F55). It does not need to turn a stored hash back into a string to open a file.
 
-## Name lookup
+A separate runtime dictionary can map hashes back to strings. It is optional, it is not filled from archives, and [path matching by substring](#substring-lookup) depends on it (RPF9-F60).
 
-Path lookup resolves a row's name in these steps:
+## Path to row
 
-1. Read the type ID from the row's [location record](entries.md#location-records).
-2. Look up the namespace: `ns = table1[typeId]`, a `u8` table in the executable's `.data` section at RVA `0x7A0B100`. Before the read, the lookup runs a guarded one-time initializer at RVA `0x56C9290`. That this initializer fills the table is Probable. It was not analyzed.
-3. Read the name hash, the `u64` value of key `0x73BCB72DCE74F11F`.
-4. If `ns != 0xFF` and the hash is nonzero, look up `(ns, hash)` in the runtime string dictionary (see [engine](../../../engine/README.md#hashed-string-dictionary)). The result is the stored string or null.
-5. If step 4 did not run or returned null, try a fallback. Take `ns2 = table2[typeId]` from the `u8` table at RVA `0x7A0B000`. If `ns2 != 0xFF` and the `u32` value of key `0xB7076B6245D35FB5` is nonzero, call a second lookup at RVA `0x4DA8040`.
-6. If neither path returns a string, the row cannot match.
+The resolver takes a path string and returns a row index or `0xFFFF` (RPF9-F55):
 
-The namespace is a property of the type, not of the archive. An offline tool needs the contents of both tables. They are probably filled at runtime, so the executable's static bytes may not hold them.
+1. Mount prefix. The archive object holds a prefix length `P` and a 64-bit hash of the prefix. If the path is shorter than `P`, the result is `0xFFFF`. Otherwise the first `P` bytes are hashed with the [folded 64-bit hash](#64-bit-hash) and compared with the stored hash. A mismatch gives `0xFFFF`.
+2. The rest of the path after the prefix is split at its last `.` into a stem and an extension.
+3. The extension selects a type ID ([extensions](#extensions)).
+4. The type decides the key ([type classes](#type-classes)):
+   - 64-bit class: `key = hash64(stem)`. The resolver looks for a row with name hash `key` and type ID `type`.
+   - 32-bit class: `key = joaat(stem)`. The resolver looks for a row whose `u32` value of key `0xB7076B6245D35FB5` is `key` and whose type ID is `type`.
+5. No `.` in the rest, or an extension that maps to no type: `key = joaat(rest)` over the whole rest including any extension, with type `0xFF`.
 
-| Part | Status |
-|---|---|
-| Hash width | 64 bits. Confirmed |
-| Hash column | `0x73BCB72DCE74F11F`. Confirmed |
-| Namespace source | Per-type table in the executable. Confirmed |
-| Namespace table contents | Unknown |
-| Hash function | Unknown |
-| Behavior when the hash is unknown | The lookup returns null |
-| Fallback path | Arguments and meaning of `0x4DA8040` and key `0xB707…` unknown |
+The row lookup is described [below](#row-lookup).
 
-RPF9 name hashes are 64-bit. Hash functions of earlier RPF versions must not be assumed. A hash function for RPF9 names must be verified in engine code before matches against known strings count as evidence.
+## Mount prefix
+
+The archive object sets its prefix once, during construction, from the path of its own file object (RPF9-F61):
+
+1. Take the file object's stored path. That is the archive's resolved device path ([engine](../../../engine/README.md#file-objects-and-devices)).
+2. If the path starts with `memory:`, the prefix ends just after the next `:` following `memory:`.
+3. Otherwise the prefix ends just after the last `/` or `\`. Without either, the prefix is empty.
+4. The prefix is cut to at most 255 bytes.
+5. The archive stores the prefix length and the [folded 64-bit hash](#64-bit-hash) of the prefix. The empty prefix has length 0 and hash 0.
+
+Consequences:
+- The prefix is derived from the archive itself, not supplied by a caller as a mount point.
+- It includes the trailing separator.
+- Entries are addressed as `<directory of the archive><stem>.<ext>`. The archive's own file name is not part of an entry path.
+- The resolver compares only the first `P` bytes of a request by folded hash, so case and separator style do not matter in the prefix either.
+
+How the path normalizers that produce the stored path format it is not established. Because matching folds case and separators, only the directory structure matters.
+
+## Nested archives
+
+A nested archive is a row of type 0 (`rpf`). It is opened by path like any file (RPF9-F65):
+
+- The device that serves the path is backed by the parent archive. The parent resolves the path with the same resolver and returns that row's logical size, which becomes the nested archive's size.
+- The nested archive gets its own file object, tag and archive object. Its mount prefix is the directory part of its own path.
+
+Matching a nested archive therefore works in two steps. Find `<parent directory><stem>.rpf` in the parent. Then match the nested archive's entries under the directory of that path.
+
+That the device test identifies an archive-backed device is Probable. It is inferred from the sequence of archive interface calls that follow it. How the device layer chooses that device for a path was not traced.
+
+## Normalization
+
+Both hashes map every input byte through the same table before mixing: ASCII `A` to `Z` become `a` to `z`, and `\` becomes `/`. All other bytes are unchanged (RPF9-F56, RPF9-F57).
+
+- Matching is case-insensitive for ASCII only. Bytes above `0x7F` must match exactly.
+- `\` and `/` are interchangeable.
+- Nothing else is normalized. Repeated separators, `.` and `..` components and surrounding spaces are hashed as they are.
+- The extension test is a case-sensitive string comparison. `ITEM.YDR` and `item.ydr` give the same stem hash but may select different types.
+
+## 64-bit hash
+
+The hash is MurmurHash3 x64-128 with seed 0, returning the first 64-bit word of the result, with one deviation: only the low 8 bits of the input length are mixed into the final state (RPF9-F56). For inputs shorter than 256 bytes the result equals the standard algorithm on the normalized input. From 256 bytes on, it differs.
+
+```text
+hash64(s) = MurmurHash3_x64_128_h1(fold(s), seed = 0, length_mixed = len(s) & 0xFF)
+```
+
+A null pointer and the empty string both give 0. The engine also has a variant without folding. It is not used for RPF9 paths.
+
+## 32-bit key
+
+The 32-bit key is Jenkins one-at-a-time ("joaat") over the folded bytes with seed 0 (RPF9-F57):
+
+```text
+for each byte b: h += fold(b); h += h << 10; h ^= h >> 6
+h += h << 3; h ^= h >> 11; h += h << 15
+```
+
+If the string starts with `"`, the quote is skipped and hashing stops at the next `"` or at the end. `"a/b"x`, `"a/b` and `a/b` therefore have the same key.
+
+That the archive stores `joaat(stem)` in key `0xB707…` follows from the lookup. It has not been checked against archive data.
+
+## Type classes
+
+Each type ID belongs to exactly one class: 64-bit name hash or 32-bit key. The engine keeps two complementary per-type tables. One gives a namespace for the 64-bit class, the other a namespace for the 32-bit class, and `0xFF` marks the class a type does not use (RPF9-F31, RPF9-F59). Both tables are filled at runtime by a one-time initializer. Their contents are executable data and are not reproduced here.
+
+The namespace numbers only matter for the [runtime dictionary](#runtime-dictionary). The resolver hashes every 64-bit-class stem with the same function.
 
 ## Extensions
 
-The extension comes from the numeric type ID, not from the name (RPF9-F19).
+The extension and the type ID map to each other through executable tables (RPF9-F19, RPF9-F59).
 
-- The engine maps the type ID to an extension string.
-- `0xFF` means no extension.
-- An ID without a table entry gives a default string.
+- Type to extension: `0xFF` means no extension. An ID without a table entry gives a default string.
+- Extension to type: a case-sensitive comparison against fixed strings, then against registered handlers. No match gives `0xFF`.
+- `rpf` maps to type 0, which belongs to the 64-bit class. Nested archives are rows of type 0.
 
-The type ID table is not decoded.
+The tables are not reproduced here.
 
-## Path matching
+## Row lookup
 
-Path lookup rebuilds `name + "." + extension` for each row and matches it with a substring search, as described in [entries.md](entries.md#path-lookup).
+Two row lookups exist, one per class. Both use the same method, chosen by a per-archive sorted flag (RPF9-F58):
+
+| Sorted flag | Method |
+|---|---|
+| Clear | Scan rows `0 .. E-1`. Return the first row whose key and type ID match |
+| Set | Binary search for the first row not below the key, then scan forward over rows with an equal key until the type ID matches |
+
+In sorted archives the comparator puts every row with `0xB707… == 0` first, in ascending unsigned order of the 64-bit name hash. Rows with a nonzero 32-bit key come after them. The forward scan of the 64-bit lookup stops at the first row with a nonzero 32-bit key.
+
+### Sorted flag
+
+The sorted flag is bit 0 of the byte at file object `+0x09` (RPF9-F63). It is computed once, after the first successful open of the file object:
+
+```text
+sorted = (u32@0x28 == fingerprint)
+```
+
+The header byte `u8@0x2D` selects the fingerprint:
+
+| `u8@0x2D` bit 3 | Fingerprint |
+|---|---|
+| Clear | A value the engine computes once at startup over all 256 type IDs |
+| Set | Computed over the type IDs listed in `B` sub-block 9 ([metadata.md](metadata.md#a-table-and-b-block)) |
+
+Both fingerprints hash a bit mask. Bit `i` is set when the `i`-th type ID uses the 32-bit class. For the startup value the `i`-th type ID is `i`; for sub-block 9 it is the `i`-th listed ID. The mask has `ceil(n / 8)` bytes for `n` type IDs.
+
+The 32-bit hash over the mask has the constants and length branches of CityHash32. Equivalence with CityHash32 has not been checked (Probable).
+
+Interpretation: the sort order depends on which rows carry a 64-bit hash and which a 32-bit key. The header records the type classification the archive was sorted under. If the engine classifies the types differently, the fingerprints differ and the engine scans linearly. This reading is Probable.
+
+The concrete startup fingerprint is not established, because it depends on whether the type tables are filled before the static initializer that computes it runs.
+
+A reader that does not reproduce the fingerprint SHOULD scan linearly, as the engine does when the fingerprints differ.
+
+Collisions and duplicates:
+- The first row in scan order that matches both key and type wins.
+- Nothing detects a collision. A second row with the same key and type is unreachable through the resolver.
+- The same stem with different types, i.e. different extensions, is fine.
+
+## Runtime dictionary
+
+The engine keeps hash-to-string dictionaries per namespace, one set for 64-bit keys and one for 32-bit keys (RPF9-F18, RPF9-F60). The mechanism is described in [engine](../../../engine/README.md#hashed-string-dictionary).
+
+What matters for RPF9:
+- Strings enter the dictionaries when structured data files that spell them out are loaded. Archives do not fill them.
+- A dictionary string for a row is the string whose hash equals the row's key. Given the resolver, that is the stem: the path relative to the mount prefix, without the last extension. Probable, by hash equality.
+- At initialization, insertion is disabled for all 64-bit namespaces. No direct code that enables it was found. Indirect writers were not excluded, so the dictionaries MUST NOT be assumed to stay empty.
+
+Reverse lookup for one row: the 64-bit dictionary under the row's 64-bit-class namespace and name hash; if that misses, the 32-bit dictionary under the 32-bit-class namespace and the `u32` key. The extension for the row's type is appended for display.
+
+## Substring lookup
+
+The archive interface also has a path lookup that works through the dictionary (RPF9-F20):
+
+1. Take the part of the request after the first `/`. The code does not check that a `/` exists. Without one it reads an invalid pointer.
+2. For every row `0 .. E-1`, get the row's dictionary string by the reverse lookup above. Rows without a string are skipped.
+3. Search for the requested part inside the dictionary string with a case-sensitive, unanchored substring search. The code also builds `name.extension` in a buffer but never reads it.
+4. Collect the matches in row order and return the first.
+
+An empty requested part matches every row that has a string. This lookup depends on the dictionary, so it finds nothing for rows whose strings were never registered.
 
 ## Offline consequences
 
-A tool without the engine's dictionary can only show names whose strings it already knows and can hash. That needs the hash function and the namespace tables, and both are unknown. Until then, offline tools can show row numbers, type IDs and raw hashes, but no names.
+A tool can match entries by hashing candidate paths. It needs:
+- the plain metadata, i.e. descriptors, cells and pools;
+- candidate paths from outside the archive;
+- the archive's resolved path, to derive the [mount prefix](#mount-prefix);
+- the extension-to-type table, to choose the class and the type ID.
+
+With those, a candidate matches a row when its stem hash or 32-bit key and its type ID agree. Rows that match no candidate can only be shown by type ID, hash and size.
+
+## Synthetic example
+
+Mount prefix `dev:/synthetic/Packs/`, request `dev:/synthetic/Packs/Sub\Dir/Item.Name.rpf`:
+
+| Step | Value |
+|---|---|
+| Rest | `Sub\Dir/Item.Name.rpf` |
+| Stem, extension | `Sub\Dir/Item.Name`, `rpf` |
+| Type | 0 |
+| Normalized stem | `sub/dir/item.name` |
+| `hash64(stem)` | `0x3FC602FCF22D7472` |
+| `hash64("alpha/beta/gamma")` | `0x7489FBD94F2A4C86`, the same for `ALPHA\BETA\GAMMA` |
+| `joaat("alpha/beta")` | `0x75438640` |

@@ -36,13 +36,36 @@ Interpretations that were once used for RPF9 and later corrected. The current mo
 
 **Old assumption.** The high 16 bits of an entry ID were a computed section index.
 
-**Correction.** The getter returns the `u16` stored at file object `+0x0C`. It is a stored tag. Where its value comes from is still open (RPF9-F15).
-
+**Correction.** The getter returns the `u16` stored at file object `+0x0C`. It is the index of the file object's slot in a global registry, assigned when the file object is created (RPF9-F15, RPF9-F64).
 ## Names
 
 **Old assumption.** Names were rebuilt by the engine, and the hashes could be compared with the name hashes of earlier RPF versions.
 
-**Correction.** A row stores a 64-bit hash, which a runtime dictionary resolves to a string. No hash function has been identified (RPF9-F18).
+**Correction.** A row stores a 64-bit hash of its path. The hash function is RPF9-specific and is described in the specification (RPF9-F18, RPF9-F56).
+
+## Names resolved in reverse
+
+**Old assumption.** The engine turned each row's hash into a name through the runtime dictionary, rebuilt `name.extension` and matched the requested path against it with a substring search. Without the dictionary nothing could be opened.
+
+**Correction.** Opening by path is forward hashing. The resolver strips the mount prefix, hashes the stem and searches the rows by hash and type ID (RPF9-F55). The dictionary is a separate facility that is not filled from archives (RPF9-F60). The substring lookup does exist, but it searches the dictionary string, never reads its rebuilt `name.extension` buffer, and returns the first match in row order (RPF9-F20).
+
+## Fallback name path
+
+**Old assumption.** Key `0xB7076B6245D35FB5` was an unexplained gate for a fallback name lookup.
+
+**Correction.** It is the 32-bit key of rows whose type uses the 32-bit class. Every type uses exactly one of the two classes (RPF9-F57, RPF9-F59).
+
+## Linear row scan only
+
+**Old assumption.** All row lookups scanned the rows linearly. No sorted index existed.
+
+**Correction.** The resolver's row lookups use a binary search when the archive's sorted flag is set. Only the substring lookup is always linear (RPF9-F58).
+
+## Child enumeration
+
+**Old assumption.** `0x28CDA50` enumerated an archive's children from an array of entry IDs.
+
+**Correction.** It resolves an array of caller-supplied path strings. No native enumeration of all rows was found (RPF9-F21).
 
 ## Size columns were location records
 
@@ -58,7 +81,7 @@ Interpretations that were once used for RPF9 and later corrected. The current mo
 
 ## Enumeration base offset
 
-**Old assumption.** Enumeration descriptor `+0x18` held the device base offset.
+**Old assumption.** The descriptor written by `0x28CDA50` held the device base offset at `+0x18`.
 
 **Correction.** It holds the `u64` at file object `+0x30`. Payload reads add file object `+0x20` (RPF9-F21, RPF9-F33).
 
@@ -110,4 +133,7 @@ Some earlier notes used "A" and "B" for `hdr[0x04]` and `hdr[0x08]`. Those lette
 - The stored state of the secondary area and of archives other than the inspected ones. One earlier note called the primary regions "post-transform" from the order of initialization alone. The step 4 span and the archive scan now support that for the inspected archives (RPF9-F28, RPF9-F48).
 - The signature algorithm, cipher algorithms 1, 2, `0x11` and `0x12`, AES equivalence of algorithm `0x10`, and the role of the `B` trailer.
 - The payload transform algorithm and key source.
-- Directory structure.
+- Directory structure outside the traced paths, and enumeration in the device layer or above.
+- CityHash32 identity of the fingerprint hash, the concrete startup fingerprint and the contents of `B` sub-block 9 in real archives.
+- Release and reuse of entry ID tags.
+- Path normalization and device selection for archive-backed devices.

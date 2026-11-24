@@ -51,6 +51,7 @@ Sub-block IDs used by the engine (RPF9-F39, RPF9-F43):
 | 2 | Key identifier and 256-byte signature | Signature check, if sub-block 6 is missing | Confirmed (layout) |
 | 3 | Requested after validation by a path that was not traced | | Unknown |
 | 6 | Message type, key identifier and 256-byte signature | Signature check, first choice | Confirmed (layout) |
+| 9 | `u8` count `n`, then `n` `u8` type IDs | Type classification fingerprint, when header `u8@0x2D` bit 3 is set, see [names.md](names.md#sorted-flag) | Confirmed (layout, RPF9-F63) |
 
 Both regions lie inside the spans that validation step 1 processes (see [cryptography/rpf9](../../../cryptography/rpf9/README.md#processed-spans)). The lookups run after step 1, so this layout describes the bytes after processing. Whether the bytes on disk have the same layout is not established.
 
