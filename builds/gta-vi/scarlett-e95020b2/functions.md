@@ -187,9 +187,10 @@ Reads and seeks:
 |---|---|---|---|
 | `0x314330` | Read dispatcher: chunk fast path, compressed stream or plain | Confirmed | F34 |
 | `0x28CD3B0` | Seek: modes 0, 1, 2, clamp to logical size, 4 KiB decode-and-discard for compressed forward seeks | Confirmed | F37 |
-| `0x28CF820` | Called by seek for chunked entries without the transform flag. Not analyzed | Confirmed (call) | F37 |
+| `0x28CF820` | Seek helper for chunked entries: finds the chunk holding the target with 32-bit sums, moves position and stored cursor to its start | Confirmed | F37, F79 |
+| `0x13307C0` | Sets the current chunk index and clears the per-chunk decoder counters | Confirmed | F79 |
 | `0x28CF940` | Plain read, clamped to the logical size | Confirmed | F34 |
-| `0x13308E0` | Compressed stream read: fills the stream buffer in pieces of up to 0x10000 bytes, then decodes | Confirmed | F34 |
+| `0x13308E0` | Compressed stream read: fills the stream buffer in pieces of up to 0x10000 bytes, then decodes. Traps on decoder failure, returns without status on read failure | Confirmed | F34, F80 |
 | `0x1330B60` | Stored-byte read. Branches on the payload transform flag | Confirmed | F33, F38 |
 | `0x1330C10` | Device read at `fileObject[+0x20] + payloadOffset + position` | Confirmed | F33 |
 | `0x4F60AB0` | Read-source index, key `0xCBB68FF7B7078DB7`, `0xFFFFFFFF` if absent | Confirmed | F41 |
@@ -205,22 +206,29 @@ Decoding and chunks:
 |---|---|---|---|
 | `0x1330A50` | Decode dispatch: chunk decoder if the chunk table is present, else by entry compression mode | Confirmed | F35 |
 | `0x1331380` | Decode by entry mode: 0 copy, 2 fail, other codec table slot | Confirmed | F35 |
-| `0x1331210` | Codec decode slot. Drives a zlib `z_stream`-shaped structure, end of stream on return value 1 | Confirmed (structure), Probable (zlib) | F35 |
-| `0x5532220` | Inner decode call of `0x1331210`. Not analyzed | Probable (`inflate`) | F35 |
-| `0x13315F0` | Resets the stream decoder for an entry | Confirmed | F37 |
-| `0x1330CD0` | Chunk decoder: per-chunk method, codec or copy | Confirmed | F36 |
+| `0x1331210` | Codec decode slot `+0x30`. Drives a zlib `z_stream`-shaped structure, failure on negative result, end of stream on 1 | Confirmed | F35, F77 |
+| `0x5532220` | DEFLATE decoder state machine with zlib's error messages | Confirmed (DEFLATE), Probable (zlib `inflate`) | F35, F77 |
+| `0x13B9050` | Decoder initializer with `inflateInit2` semantics: window sign selects raw or zlib container | Confirmed | F77 |
+| `0x1331190` | Sets up the `z_stream` of a decoder slot and calls `0x13B9050` with the caller's window parameter | Confirmed | F77 |
+| `0x1331660` | Codec slot `+0x28`: initializes with window -15, raw DEFLATE | Confirmed | F77 |
+| `0x1331100` | Codec slot `+0x38`: releases the decoder before a chunk is reinitialized | Probable | F78 |
+| `0x1331310` | One-shot chunk decode through `0x2158744`. Credits the full chunk sizes on success | Confirmed | F78, F80 |
+| `0x2158744` | One-shot zlib decode: checks the RFC 1950 header, decodes, compares the checksum trailer | Confirmed | F77 |
+| `0x13315F0` | Resets the stream decoder for an entry: chunk index 0, decoder slot 1 initialized as raw DEFLATE | Confirmed | F37, F77 |
+| `0x1330CD0` | Chunk decoder: per-chunk method, zlib decoder reinitialized per method-3 chunk, or copy. Finishes a chunk on exact compressed and logical sizes, then skips padding | Confirmed | F36, F78 |
 | `0x550DB40` | Decodes one chunk table entry, encodings 2, 3 and 4 | Confirmed | F36 |
-| `0x13310F0`, `0x1331110` | Chunk method 3 selects the codec object. Other methods select copy | Confirmed | F36 |
+| `0x13310F0`, `0x1331110` | Chunk method 3 selects decoder slot 1 and the codec object. Other methods select copy | Confirmed | F36, F78 |
 | `0x141D8A0` | Tests whether the chunk fast path applies | Confirmed | F36 |
 | `0x1330560` | Chunk fast path read: groups chunks into runs | Confirmed | F36 |
 | `0x13307E0` | Submits a chunk run with its disk address to the decompression service through `0x28CFA70` | Confirmed | F36 |
+| `0x28CFA70` | Calls the decompression service through slot `+0x230` of its inner object. Target not resolved | Confirmed (call) | F36 |
 
 Data:
 
 | RVA | Content | Confidence | Finding |
 |---|---|---|---|
 | `0x66FDD10` | Codec table by entry compression mode. Slot 0 null, slot 1 `0x6DD5B08`, slot 2 null | Confirmed | F35 |
-| `0x6DD5B08` | Codec object, vtable `0x66FDD40`, decode slot `+0x30` | Confirmed | F35 |
+| `0x6DD5B08` | Codec object, vtable `0x66FDD40`: `+0x28` raw init, `+0x30` decode, `+0x38` release | Confirmed | F35, F77 |
 | `0x79F6D70` | Pointer to the decompression service used by the chunk fast path | Confirmed (use) | F36 |
 | `0x7A0B000`, `0x7A0B100` | Namespace tables of the 32-bit and 64-bit class, `u8` per type ID, filled at runtime | Confirmed | F31, F59 |
 | `0x65B23B0` | 256-byte folding table: ASCII upper case to lower case, `\` to `/` | Confirmed | F56 |

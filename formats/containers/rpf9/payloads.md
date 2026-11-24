@@ -82,7 +82,20 @@ The read dispatcher takes an archive, an open stream, a destination and a length
 2. **Compressed stream.** The entry's compression mode is nonzero, or the chunk table is present. The engine reads stored bytes into the stream's buffer in pieces of at most 0x10000 bytes, up to the stored size, and decodes them. A failed decode traps.
 3. **Plain.** Otherwise the engine reads `min(length, logicalSize - position)` bytes directly.
 
-Outside the chunk fast path, all stored-byte reads go through one routine. It reads through the device when the payload transform flag is clear. When the flag is set, it uses the [payload transform](#payload-transform).
+Outside the chunk fast path, all stored-byte reads go through one routine. It reads through the device when the payload transform flag is clear. When the flag is set, it uses the [payload transform](#payload-transform). The transform flag is independent of the compression mode and the chunk table. A transformed compressed entry is first transformed, then decoded.
+
+The decoder behind the chunk fast path is reached through an indirect call on a global service object and was not resolved (RPF9-F36). It reads the same chunk table and stored bytes as the compressed stream path.
+
+### Failure handling
+
+The compressed stream path handles errors as follows (RPF9-F80):
+
+- A decoder failure traps the process.
+- A failed device read returns without an error status and without moving the position.
+- When no stored bytes are left, the read ends short.
+- A decoder that makes no progress still returns success. If stored bytes remain, the read loop calls it again.
+
+The native reader does not compare decoded sizes with the entry's logical size or with the chunk sizes. See [reader requirements](#reader-requirements).
 
 ## Seek
 
@@ -91,7 +104,9 @@ The archive's stream seek takes an offset and a mode: 0 from the start, 1 from t
 - Plain stream: the engine stores the new position. With the transform flag set, it also repositions the transform context.
 - Compressed stream, backward seek: the engine resets the decoder and both positions to zero, then decodes forward.
 - Compressed stream, forward seek: the engine decodes and discards in steps of at most 0x1000 bytes until it reaches the target.
-- Compressed stream with a chunk table and the transform flag clear: the engine calls RVA `0x28CF820` before the loop. That function was not analyzed.
+- Compressed stream with a chunk table and the transform flag clear: before the loop, the engine finds the chunk that contains the target (RPF9-F79). If the target lies outside the current chunk, it sets the logical position to that chunk's logical start, the stored cursor to its stored start, and resets the decoder for that chunk. A seek then decodes at most one chunk. Backward seeks into an earlier chunk do not restart from zero.
+
+The chunk walk sums logical and stored sizes in 32 bits. The skip loop truncates the remaining distance to 32 bits.
 
 The 0x1000-byte (4 KiB) step exists only in this skip loop. It is not the block size of payload reads.
 
@@ -106,15 +121,26 @@ The mode byte of the location record (RPF9-F35):
 | Mode | Effect |
 |---|---|
 | 0 | Plain path. The decoder also has a copy branch for 0, but no traced path reaches it with mode 0 |
-| 1 | Codec in slot 1 of the codec table |
+| 1 | Raw DEFLATE through the codec in slot 1 of the codec table (RPF9-F77) |
 | 2 | Decoding fails |
-| other | Codec table slot `mode`. Slots 0 and 2 are empty. The bytes after slot 2 are not pointers, so no codec for higher modes is established |
+| other | Codec table slot `mode`. Slots 0 and 2 are empty. The bytes after slot 2 are not pointers, so the engine would call through data. No codec for higher modes is established |
 
 With a chunk table present, the entry's mode does not pick the decoder. Each chunk carries its own method instead.
 
 ### Codec
 
-Codec table slot 1 holds the codec object at RVA `0x6DD5B08`. Its decode slot drives a structure whose field offsets match the Win64 layout of zlib's `z_stream`: `next_in`, `avail_in`, `total_in`, `next_out`, `avail_out`, `total_out`. It loops on one function and treats return value 1 as end of stream. That function is probably zlib `inflate` (Probable, RPF9-F35). It was not analyzed further.
+Codec table slot 1 holds the codec object at RVA `0x6DD5B08`. It drives a DEFLATE decoder through a structure with the Win64 layout of zlib's `z_stream` (RPF9-F35, RPF9-F77).
+
+The decoder's initialization takes a window parameter with the semantics of zlib's `inflateInit2`: the sign selects the container, the magnitude the window size, and sizes below 2^8 are rejected. The engine uses two settings:
+
+| Use | Window parameter | Container |
+|---|---|---|
+| Whole entry, mode 1, no chunk table | -15 | Raw DEFLATE (RFC 1951). No header, no checksum |
+| Each chunk with method 3 | 15 | zlib (RFC 1950). Two-byte header, DEFLATE data, Adler-32 trailer |
+
+The decoder loop treats a negative result as failure and 1 as end of stream. It references zlib's diagnostic messages for header, distance and checksum errors.
+
+A second, one-shot decoder handles a whole method-3 chunk when the full chunk fits in the input and output buffers. It checks the zlib header itself: compression method 8, no preset dictionary, header check value divisible by 31. It then decodes the DEFLATE data and compares a checksum seeded with 1 against the big-endian `u32` trailer. The container format is therefore Confirmed. That the checksum is Adler-32 is Probable.
 
 ### Chunk table
 
@@ -142,9 +168,41 @@ Each entry is a `u64`. The decoder produces five values:
 
 Any other encoding decodes to all zeros.
 
-In encoding 3 the padding field, bits 16..19, lies inside the field the compressed size comes from, bits 16..31. The code reads both from the same bits. The reason is not known.
+In encoding 3 the padding field, bits 16..19, lies inside the field the compressed size comes from, bits 16..31. With `X` = bits 16..31, the compressed size is `0x10000 - X` and the padding `X & 0xF`, so the stored size is `0x10000 - (X & 0xFFF0)`. Padding is the fill from the end of the compressed data to the next 16-byte boundary. In encodings 2 and 4 the stored size is in 16-byte units. Every chunk is therefore a multiple of 16 bytes long (RPF9-F78).
 
-Chunk method 3 selects the same codec object as entry mode 1. Any other chunk method copies the chunk unchanged.
+#### Chunk layout and decoding
+
+Chunks are stored back to back. Chunk `i` starts at the sum of the stored sizes of chunks `0` to `i-1`, relative to the entry's payload offset. Within a chunk, the compressed bytes come first, then the padding (RPF9-F78).
+
+| Chunk method | Decoding |
+|---|---|
+| 3 | One zlib stream. The decoder is released and initialized again at the start of every such chunk, so no state carries over between chunks |
+| 0, 1, 2 | Copy. The engine copies the compressed bytes unchanged |
+
+The engine finishes a chunk only when it has consumed exactly the compressed size and produced exactly the logical size. Then it skips the padding and decodes the next entry. A copy chunk whose compressed size differs from its logical size never finishes. A method-3 chunk that ends early or would produce more output does not finish either. The engine does not report either case as an error. The last chunk has no special handling.
+
+The one-shot decoder credits the full logical size of the chunk after any successful decode. It does not compare the number of bytes produced with that size.
+
+### Reader requirements
+
+The native code checks less than a reader can afford to. A reader that decodes entries without the payload transform SHOULD follow these rules (RPF9-F80):
+
+- Reject entries with the payload transform flag. Decoding them is outside non-cryptographic reading.
+- Without a chunk table:
+  - read mode 0 as plain data;
+  - for mode 1, raw-inflate at most the stored size, and require end of stream with output equal to the logical size;
+  - reject every other mode.
+- With a chunk table:
+  - check that the table and its entries lie inside the value pool;
+  - reject encodings other than 2, 3 and 4;
+  - compute all offsets in 64 bits;
+  - require the stored sizes to sum to at most the entry's stored size and the logical sizes to sum to its logical size.
+- For each chunk:
+  - with method 3, zlib-inflate exactly the compressed bytes, and require end of stream, a valid checksum and output equal to the logical size;
+  - with any other method, require the compressed size to equal the logical size and copy;
+  - then skip the padding.
+- Seek through the chunk table and decode only the chunk that holds the target.
+- Report every failure as an error. A reader MUST NOT trap, loop without progress, or return bytes the decoder did not produce.
 
 ## Payload transform
 
@@ -161,10 +219,10 @@ The same flag disables the chunk fast path. Seeks reposition the context. The al
 | Data observation (RPF9-F29) | Code finding |
 |---|---|
 | Streams start on 16-byte boundaries | Payload offsets and stored sizes are in 16-byte units |
-| zlib streams that inflate completely | The codec's driver matches zlib `inflate` (Probable) |
+| zlib streams that inflate completely | Chunk method 3 decodes one zlib stream per chunk |
 | One stream per 64 KiB of inflated data | Chunk encoding 3 measures sizes from 0x10000 |
 
-These agree. The data observations were made by scanning, not by following native offsets.
+These agree. The data observations were made by scanning, not by following native offsets. Entries with mode 1 and no chunk table hold raw DEFLATE, which the scan does not detect. Whether the data contains such entries is not established.
 
 ## Observed storage layout
 
@@ -193,7 +251,7 @@ Recovering payloads by scanning has these limits:
 
 - No names, paths or directory structure. Entries are known only by their offsets.
 - An entry that does not start with a recognized signature cannot be told apart from a chunk of a larger file.
-- Data that is stored uncompressed or with another method is not found as zlib streams.
+- Data that is stored uncompressed, as raw DEFLATE or with another method is not found as zlib streams.
 - Entries behind the payload transform are found as zlib streams only if the transform leaves the stored bytes in that form, which is not established.
 - Chunk grouping assumes consecutive streams belong together. A gap or an unrelated stream ends a group.
 
