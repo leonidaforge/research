@@ -15,11 +15,47 @@ Every payload read goes to (RPF9-F33):
 address = fileObject[+0x20] + payloadOffset + position
 ```
 
-- `fileObject[+0x20]` is the archive base offset in the file object.
+- `fileObject[+0x20]` is the archive base offset in the file object. The device's open method sets it. For a nested archive it is the payload offset of its row in the parent.
 - `payloadOffset` is the location record's offset field shifted left by 4, see [entries.md](entries.md#derived-values). Offsets are therefore in 16-byte units and relative to the archive base.
 - `position` is the logical position for plain reads and the stored-byte cursor for compressed reads.
 
 The device read goes through the device object at file object `+0x10`, vtable slot `+0x60`. The handle comes from a helper that combines file object `+0x18`, file object `+0x50` and the read-source index of key `0xCBB68FF7B7078DB7` (RPF9-F41).
+
+### Offset frames
+
+| Frame | Meaning |
+|---|---|
+| Logical position | Position in the decoded entry, clamped to the logical size. Kept by the entry stream |
+| Stored position | Position in the entry's stored bytes. Equal to the logical position for plain reads, the stored-byte cursor for compressed reads |
+| Archive-relative | `payloadOffset + stored position` |
+| Device-relative | `fileObject[+0x20] + archive-relative`, passed to the device |
+| Physical | Device-relative positions summed over all device layers |
+
+For a root archive opened from a file, the device is the physical file device. For a nested archive, the device is the parent archive (RPF9-F70).
+
+### Nested reads
+
+An archive object passes raw reads on to its own device (RPF9-F71):
+
+```text
+read(archive, handle, pos, length):
+  n = (pos + length <= size) ? length : size - pos      # 32-bit result
+  device.read(handle, pos + base, n)
+```
+
+`size` is file object `+0x28` and `base` is file object `+0x20`. The read is positional, so it keeps no cursor.
+
+For an entry `e` of a nested archive `C`, which is row `r` of parent `P`:
+
+```text
+physical = base(P) + payloadOffset_P(r) + payloadOffset_C(e) + storedPosition
+```
+
+The child's read first reaches `P`'s raw read, clamped to `C`'s size (the logical size of `r`). Then it reaches `P`'s device, clamped to `P`'s size. Every further level of nesting adds one such step. Confirmed for the call structure. No depth limit and no cycle check were found.
+
+The native clamp has a weakness. `size - pos` is truncated to 32 bits, and nothing rejects `pos > size`. A position past the end yields a negative length, which is passed to the next device unchanged. How the physical device handles that is not established. A reader MUST check `pos <= size` and compute lengths in 64 bits.
+
+No layer of this path decompresses, decrypts or applies the payload transform. Decoding happens only inside the archive that owns an entry, as described [below](#engine-read-path). See [names.md](names.md#nested-archives) for what this implies for nested archive storage.
 
 ## Engine read path
 

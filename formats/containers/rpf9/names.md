@@ -20,32 +20,49 @@ The row lookup is described [below](#row-lookup).
 
 ## Mount prefix
 
-The archive object sets its prefix once, during construction, from the path of its own file object (RPF9-F61):
+The archive stores a prefix length and the [folded 64-bit hash](#64-bit-hash) of the prefix. Two operations set them (RPF9-F61):
 
+| Operation | Prefix | Confidence |
+|---|---|---|
+| Construction | Default derived from the archive's own path, see below | Confirmed |
+| Mounting through the archive's mount method | The caller's mount prefix. It replaces the default | Confirmed |
+
+The effective prefix is the mount prefix for a mounted archive. It is the default only for an archive that was never mounted that way, for example a nested archive that is opened but not mounted.
+
+Default prefix at construction:
 1. Take the file object's stored path. That is the archive's resolved device path ([engine](../../../engine/README.md#file-objects-and-devices)).
 2. If the path starts with `memory:`, the prefix ends just after the next `:` following `memory:`.
 3. Otherwise the prefix ends just after the last `/` or `\`. Without either, the prefix is empty.
 4. The prefix is cut to at most 255 bytes.
-5. The archive stores the prefix length and the [folded 64-bit hash](#64-bit-hash) of the prefix. The empty prefix has length 0 and hash 0.
+
+The empty prefix has length 0 and hash 0.
+
+Mount prefix: the mount table accepts a prefix only if it is non-empty, ends in `/` or `\` and is at most 253 bytes long ([engine](../../../engine/README.md#mount-table)). The same string becomes the archive's prefix.
 
 Consequences:
-- The prefix is derived from the archive itself, not supplied by a caller as a mount point.
-- It includes the trailing separator.
-- Entries are addressed as `<directory of the archive><stem>.<ext>`. The archive's own file name is not part of an entry path.
-- The resolver compares only the first `P` bytes of a request by folded hash, so case and separator style do not matter in the prefix either.
+- Both prefixes include the trailing separator.
+- With the default prefix, entries are addressed as `<directory of the archive><stem>.<ext>`. With a mount prefix, they are addressed as `<mount prefix><stem>.<ext>`. The archive's own file name is part of neither.
+- The resolver compares only the first `P` bytes of a request by folded hash, so case and separator style do not matter in the prefix.
+- The mount prefixes used by the game are runtime state set by engine code. They are not stored in the archive.
 
-How the path normalizers that produce the stored path format it is not established. Because matching folds case and separators, only the directory structure matters.
+How the path normalizers that produce the stored path format it is not established. Because matching folds case and separators, only the directory structure matters for the default prefix.
 
 ## Nested archives
 
-A nested archive is a row of type 0 (`rpf`). It is opened by path like any file (RPF9-F65):
+A nested archive is a row of type 0 (`rpf`) in a parent archive. It is opened by path like any file. The parent archive object is itself the device that serves the path ([engine](../../../engine/README.md#archives-as-devices), RPF9-F65, RPF9-F67, RPF9-F70):
 
-- The device that serves the path is backed by the parent archive. The parent resolves the path with the same resolver and returns that row's logical size, which becomes the nested archive's size.
-- The nested archive gets its own file object, tag and archive object. Its mount prefix is the directory part of its own path.
+1. Device selection finds the parent, because the path lies under a prefix the parent is mounted at.
+2. The parent resolves the path to a row with the same resolver. An unresolved path fails the open.
+3. The row's payload offset, relative to the parent's base, becomes the child's base offset.
+4. The row's logical size becomes the child's size.
+5. The child reads with the parent's physical file handle.
+6. The child gets its own file object, tag and archive object. Its prefix is the default derived from its own path, unless it is mounted itself.
 
-Matching a nested archive therefore works in two steps. Find `<parent directory><stem>.rpf` in the parent. Then match the nested archive's entries under the directory of that path.
+All child reads then go through the parent as [positional reads with added bases](payloads.md#nested-reads).
 
-That the device test identifies an archive-backed device is Probable. It is inferred from the sequence of archive interface calls that follow it. How the device layer chooses that device for a path was not traced.
+Matching a nested archive therefore works in two steps. Find `<parent prefix><stem>.rpf` in the parent. Then match the nested archive's entries under its own effective prefix.
+
+Raw storage: the nested read path does not decompress, decrypt or apply the payload transform, and the open checks neither the compression mode nor the transform flag. A nested archive is readable through this path only if its row stores the archive bytes as they are, starting at the payload offset. All reads are clamped to the row's logical size, not its stored size. That every nested archive in valid game data is stored this way is Probable. It follows from the code, not from a check found in it.
 
 ## Normalization
 
@@ -163,7 +180,7 @@ An empty requested part matches every row that has a string. This lookup depends
 A tool can match entries by hashing candidate paths. It needs:
 - the plain metadata, i.e. descriptors, cells and pools;
 - candidate paths from outside the archive;
-- the archive's resolved path, to derive the [mount prefix](#mount-prefix);
+- the archive's effective [mount prefix](#mount-prefix): the runtime mount prefix, or the default derived from the archive's resolved path;
 - the extension-to-type table, to choose the class and the type ID.
 
 With those, a candidate matches a row when its stem hash or 32-bit key and its type ID agree. Rows that match no candidate can only be shown by type ID, hash and size.

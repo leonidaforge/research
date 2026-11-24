@@ -14,9 +14,38 @@ RVAs for image base `0x140000000`. Roles are descriptive labels, not recovered s
 | `0x55B2550` | Claims the first free slot from 1 upwards in the global file object registry and returns its index | Confirmed | F64 |
 | `0x28CD1A0` | Offset of the file name in a path, stored at file object `+0x0E` | Probable | F64 |
 | `0xFC2490` | Allocates the 0x80-byte archive object. File object vtable `+0x08`. Can cache the archive at file object `+0x58` | Confirmed | F07 |
-| `0xA57F70` | Derives the mount prefix from the file object path. Archive vtable `+0x3C0` | Confirmed | F61 |
+| `0xA57F70` | Derives the default mount prefix from the file object path. Archive vtable `+0x3C0` | Confirmed | F61 |
 | `0x54524E0` | End of the directory part of a path, with the `memory:` exception | Confirmed | F61 |
-| `0xA58030` | Stores the prefix length and folded hash in the archive object | Confirmed | F61 |
+| `0xA58030` | Stores the prefix length and folded hash in the archive object. Called at construction and by the mount method | Confirmed | F61 |
+| `0x12C5630` | Archive mount method, vtable `+0x3B8`: mounts with flag 1, then stores the mount prefix as resolver prefix | Confirmed | F61, F69 |
+| `0x22372C0` | Mount routine: creates the file object and archive for a path, mounts the archive, keeps both in owner lists | Confirmed | F69 |
+| `0x56DD530` | File object destructor: releases the registry slot, releases handles through the device, frees the path | Confirmed | F72 |
+| `0x56DD5F0` | Releases a file object registry slot | Confirmed (call) | F72 |
+
+## Devices and mount table
+
+| RVA | Role | Confidence | Finding |
+|---|---|---|---|
+| `0x968490` | Device for a path: fixed schemes and drive prefixes, else the mount table | Confirmed | F68 |
+| `0x28C8EC0` | Mount table lookup: longest prefix, then the newest device whose existence test succeeds, else the fallback device | Confirmed | F68 |
+| `0x12C5670` | Mounts a device at a prefix, or sets the fallback device for `default` | Confirmed | F68 |
+| `0x55B2370` | Bounded prefix compare, ASCII case-insensitive, `\` equal to `/` | Confirmed | F68 |
+| `0x28CB450` | Unmounts a prefix. Does not release devices | Confirmed | F68 |
+| `0x28CB640` | Removes one device from every prefix. Does not release it | Confirmed | F68 |
+| `0x28C33E0`, `0x28CB380` | Clear the mount table. `0x28CB380` also stops the request worker | Confirmed | F68 |
+| `0x78F5EC8`, `0x78F5EC4`, `0x78F5EC0`, `0x78F5ED0` | Mount table array of 0x20-byte records, count, capacity, lock | Confirmed | F68 |
+| `0x693A270` | Fallback device pointer | Confirmed | F68 |
+
+Mount record, 0x20 bytes:
+
+| Offset | Content | Confidence |
+|---|---|---|
+| `+0x00` | Prefix string | Confirmed |
+| `+0x08` | `u16` flag. Lookups with mode 0 skip the record when it is set | Confirmed (use), Probable (read-only) |
+| `+0x0A` | `u16` prefix length | Confirmed |
+| `+0x10` | `u32` device array capacity | Confirmed |
+| `+0x14` | `u32` device count | Confirmed |
+| `+0x18` | Device pointer array | Confirmed |
 | `0xFC2540` | Archive object constructor: header read, view descriptor, validation, view layout | Confirmed | F07 |
 | `0x1FB2600` | Header and metadata reader. Magic compares at `0x1FB2619` (preloaded header) and `0x1FB2692` (disk) | Confirmed | F01, F02 |
 | `0x28CDFC0` | Mode-0 metadata read helper, archive vtable `+0x398` | Confirmed | F02 |
@@ -203,11 +232,11 @@ Archive object vtable at RVA `0x62FD480`.
 
 | Slot | RVA | Role | Confidence |
 |---|---|---|---|
-| `+0x28` | `0x28CD2E0` | Open entry by key, returns a handle or -1 | Probable |
+| `+0x28` | `0x28CD2E0` | Open by path: row payload offset as base, own physical handle, -1 if unresolved | Confirmed |
 | `+0x30` | `0x2758940` | Open entry, variant with an extra argument | Probable |
-| `+0x60` | `0x28CD360` | Read or seek on a handle | Probable |
+| `+0x60` | `0x28CD360` | Positional raw read: 32-bit clamp to file object `+0x28`, adds `+0x20`, forwards to the device | Confirmed |
 | `+0x80` | `0x28CD3B0` | Seek | Confirmed |
-| `+0x90` | `0x503F490` | Release handle | Probable |
+| `+0x90` | `0x503F490` | Release handle. Returns 0 without action | Confirmed |
 | `+0x108` | `0x28CD580` | Fetch an entry field or size by ID | Probable |
 | `+0x120` | `0x28CD5B0` | Substring lookup | Confirmed |
 | `+0x1A0` | `0x28CDA50` | Batch path resolution | Confirmed |
@@ -223,7 +252,11 @@ Archive object vtable at RVA `0x62FD480`.
 | `+0x2F0` | `0x4F885C0` | Compression mode is nonzero | Confirmed |
 | `+0x2F8` | `0xF62E0` | Compression mode | Confirmed |
 | `+0x398` | `0x28CDFC0` | Mode-0 metadata read | Confirmed |
+| `+0x168` | `0x5305860` | Path exists, through the resolver | Confirmed |
+| `+0x1D0` | `0x4870` | Archive-backed device test, returns 1 | Confirmed |
+| `+0x1E0` | `0x6151A0` | Parent archive, returns the object itself | Confirmed |
 | `+0x3A8` | `0xFA87E0` | Reruns view layout and validation | Confirmed |
+| `+0x3B8` | `0x12C5630` | Mount at a prefix | Confirmed |
 | `+0x3C0` | `0xA57F70` | Mount prefix setup | Confirmed |
 | `+0x3D0` | `0x5305EC0` | Entry ID high half | Confirmed |
 | `+0x3F0` | `0x28CE0A0` | Field value getter | Confirmed |
@@ -237,7 +270,6 @@ Enumeration search (RPF9-F66). Further inspected slots, none of which iterates r
 | `+0xF0` | `0x28C6500` | Batch over a path list through slot `+0xF8` | Confirmed |
 | `+0x100` | `0x28C6610` | Batch over a path list through slot `+0x108` | Confirmed |
 | `+0x128` | `0x28CD920` | Opens a stream from a substring lookup result | Confirmed |
-| `+0x168` | `0x5305860` | Path exists, through the resolver | Confirmed |
 | `+0x190` | `0x28C68E0` | Read loop until N bytes | Confirmed |
 | `+0x1A8` | `0x28CDDD0` | Path to descriptor, through the resolver | Confirmed |
 | `+0x1C8` | `0x28CDE50` | Path to payload offset, through the resolver | Confirmed |
@@ -295,12 +327,13 @@ File object, 0x60 bytes:
 | `+0x0C` | `u16` tag, high half of entry IDs. `0xFFFF` until registration | Confirmed |
 | `+0x0E` | `u16` offset of the file name in the stored path | Probable |
 | `+0x10` | Device. Payload reads call its vtable slot `+0x60` | Confirmed |
-| `+0x18` | Handle, -1 when the open failed. Input to the read-handle selection `0x4F60A90` | Probable |
-| `+0x20` | Archive base offset. Added to every payload read address | Confirmed (use) |
+| `+0x18` | Handle from the device's open method, -1 when the open failed. For a nested archive the parent's physical handle. Input to the read-handle selection `0x4F60A90` | Confirmed |
+| `+0x20` | Base offset written by the device's open method. Added to every read. For a nested archive the row's payload offset in the parent | Confirmed |
 | `+0x28` | Archive size: device slot `+0xF8`, the caller block, or the parent row's logical size | Confirmed |
 | `+0x30` | `u64` from device slot `+0x108` or the caller block. Copied into batch resolution and substring lookup records. Probably the modification time | Confirmed (source), Probable (meaning) |
 | `+0x38` | Resolved path, 16-byte string object, inline when the sign bit of `+0x47` is set | Confirmed |
-| `+0x50` | Input to the read-handle selection `0x4F60A90` | Confirmed (use) |
+| `+0x4C` | `u32` count of alternate handles | Confirmed (use) |
+| `+0x50` | Alternate handle array. Input to the read-handle selection `0x4F60A90`, released by the destructor | Confirmed (use) |
 | `+0x58` | Cached archive object | Confirmed (use) |
 
 The device interface reads through vtable slot `+0x60` and reports size and time through `+0xF8` and `+0x108`. The device read implementation is not traced.

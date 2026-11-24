@@ -121,6 +121,12 @@ Interpretations that were once used for RPF9 and later corrected. The current mo
 
 **Correction.** `0x536A70` is the initializer. It calls the table lookup `0x536AC0` and then the factory and key setup `0x613880` (RPF9-F25).
 
+## Mount prefix from the archive path
+
+**Old assumption.** An archive's resolver prefix always came from the directory of its own resolved path, so it was a property of the archive and never a mount point supplied by a caller.
+
+**Correction.** The directory-derived prefix is only the default set during construction. Mounting the archive through its mount method replaces it with the caller's mount prefix. Mounted archives therefore resolve entries under the mount prefix (RPF9-F61, RPF9-F69).
+
 ## Header field letters
 
 Some earlier notes used "A" and "B" for `hdr[0x04]` and `hdr[0x08]`. Those letters name the prefix fields at `0x1A` and `0x1C`. Header fields are now referred to by offset.
@@ -135,5 +141,5 @@ Some earlier notes used "A" and "B" for `hdr[0x04]` and `hdr[0x08]`. Those lette
 - The payload transform algorithm and key source.
 - Directory structure outside the traced paths, and enumeration in the device layer or above.
 - CityHash32 identity of the fingerprint hash, the concrete startup fingerprint and the contents of `B` sub-block 9 in real archives.
-- Release and reuse of entry ID tags.
-- Path normalization and device selection for archive-backed devices.
+- Path normalization, the physical device implementation, and the mount prefixes the game uses.
+- Whether any nested archive is stored compressed or transformed, which the native nested read path cannot read.

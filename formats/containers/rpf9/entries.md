@@ -25,7 +25,9 @@ The file object constructor sets the tag to `0xFFFF`. After the device open succ
 - The registry has two tables, slots 1 to 999 and slots from 1000 up to a stored capacity. A full registry traps.
 - A failed device open leaves the tag at `0xFFFF`.
 
-The tag depends on the order in which file objects are created and on which slots are free. It is not derived from the archive. That tags are not stable across sessions or mount orders is Probable. When a slot is released, and therefore how tags are reused, was not traced.
+Destroying a file object releases its slot and resets the tag to `0xFFFF` (RPF9-F72). A later file object can then receive the same tag.
+
+The tag depends on the order in which file objects are created and on which slots are free. It is not derived from the archive. That tags are not stable across sessions or mount orders is Probable.
 
 A tool MUST NOT persist tags or use them as archive identifiers. Row indices are stable only within one archive.
 

@@ -34,8 +34,8 @@ Evidence: [evidence/rpf9/INDEX.md](../../../evidence/rpf9/INDEX.md). Corrections
 | Payload address | Confirmed |
 | Read path, seek, decoder dispatch, chunk tables | Confirmed. Codec identity probable (zlib) |
 | Path resolution and name hashes | Confirmed. Folded MurmurHash3 x64-128 variant and joaat. Type tables not published |
-| Mount prefix, sorted flag, entry ID tag | Confirmed (origin). Fingerprint hash identity probable |
-| Nested archives | Confirmed (opened by path, sized from the parent row). Device selection not traced |
+| Mount prefix, sorted flag, entry ID tag | Confirmed (origin). Mounting replaces the default prefix. Fingerprint hash identity probable |
+| Nested archives | Confirmed (opened through the parent archive as device, positional reads without decoding). Raw storage requirement probable |
 | `A` table, `B` sub-blocks | Confirmed (index into `B`). Uses of sub-blocks 1, 2, 6 and 9 known, sub-block 3 unknown |
 | Validation chain order and conditions | Confirmed |
 | Metadata cipher spans | Confirmed. CBC decryption without authentication for the observed cipher type. Block transform not reproducible with standard AES |
