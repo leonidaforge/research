@@ -155,6 +155,8 @@ The fixed tables decompose exactly (RPF9-F85, RPF9-F86, RPF9-F87, RPF9-F89):
 
 The linear layer is identified as well. Each 8→32 table map factors exactly as `E_i P_j`, where `E_i` is a byte-diagonal 32-bit encoding and `P_j` is the `InvMixColumns` coefficient column, and the per-position encodings compose across rounds: each output byte encoding is the inverse of the input decoding of the table that reads that byte next, with the affine constants absorbed into the encoded round key. The fixed tables therefore implement the AES-256 equivalent-inverse-cipher round function on a fixed byte-wise affine state encoding, with the round key supplied in the encoded domain (RPF9-F90). With the thirteen rounds, the substitution-only final round and the initial key addition, the block function is an encoded AES-256 decryption.
 
+The round model is verified against the instructions, not only against its own algebra. Symbolic execution of the 272-instruction listing derives the stage-0 packing and key-byte order, both half-round table and lane formulas, the 13-round control flow and the final permutation; Ghidra and objdump agree on all instruction boundaries. A synthetic encoded AES-256 instance, built from the recovered encodings and a synthetic key blob and executed with the real fixed tables, reproduces the FIPS-197 AES-256 decryption vector and further blocks (RPF9-F91). The layout is fixed: a code word is an AES column and its lane `r` is AES row `3-r`, with the caller block in column-major order.
+
 The round-key material supplies the rest of the structure. Whitening uses schedule words 0 to 3, 13 rounds use words 4 to 55, and the last 16 schedule bytes are never read. That fits the AES-256 equivalent-inverse-cipher layout, whose 15th round key is folded into the 16 key-dependent final-round byte tables instead of being XORed (RPF9-F88).
 
 These properties were measured read-only from the two fixed table regions at RVAs `0x6036F30` (4 KiB) and `0x6037F30` (16 KiB) in build e95020b2, from the Ghidra 12.2 listing of `0x5642C50` and local scripts that recompute the difference distribution, the Walsh spectrum, the table relations and the affine-equivalence witnesses.
@@ -236,7 +238,7 @@ Whether RPF9 shares any cryptography with earlier RPF versions is unknown. Nothi
 ## Open questions
 
 - Algorithms 1, 2, `0x11` and `0x12`.
-- The key schedule and the key-dependent final-round tables of algorithm `0x10`. The S-box and linear layers are established as encoded AES-256 (RPF9-F89, RPF9-F90).
+- The key schedule and the key-dependent final-round tables of algorithm `0x10`. The S-box, linear layer, round model and layout are established as encoded AES-256 (RPF9-F89, RPF9-F90, RPF9-F91); only the protected key material remains.
 - The cipher type of `B` sub-block 1 in real archives.
 - Whether the key lookup succeeds for the default descriptor, which decides whether algorithm 0 archives open at all.
 - The signature algorithm.
