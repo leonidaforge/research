@@ -75,7 +75,15 @@ After the first successful validation of a file object, the engine processes the
 3. It reads the companion's first 16 bytes. The first 8 bytes MUST be `00 00 00 39 56 46 50 52`, the next 8 bytes MUST equal the record's identifier. That magic differs from the RPF9 header magic. Nothing else in the companion is checked.
 4. It appends the handle to the file object's alternate handle array, or -1 if the check failed.
 
-Record `i` therefore becomes the source that [read-source index](payloads.md#read-source) `i` selects. The open passes the archive's own base offset field as the output for the companion's base. What the physical file device writes there is not established.
+Record `i` therefore becomes the source that [read-source index](payloads.md#read-source) `i` selects.
+
+The open passes the archive's own base offset field as the output for the companion's base (RPF9-F83, RPF9-F84):
+
+- The physical file device writes 0 there and opens a new read-only file handle. A root archive opened through that device already has base 0, so nothing changes.
+- The archive device writes the companion row's payload offset there and returns the parent's handle. For a nested archive with sub-block 3, every companion path that resolves in the parent replaces the nested archive's base, and nothing restores it. This happens after the nested archive's metadata was read, so its later payload reads use the companion's base. A reader MUST NOT reproduce this.
+- An open that fails on the archive device writes nothing.
+
+Only the companion check reads companion bytes outside entry payloads. No other parser for the companion format exists in the executable.
 
 Both regions lie inside the spans that validation step 1 processes (see [cryptography/rpf9](../../../cryptography/rpf9/README.md#processed-spans)). The lookups run after step 1, so this layout describes the bytes after processing. Whether the bytes on disk have the same layout is not established.
 

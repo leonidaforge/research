@@ -33,6 +33,7 @@ The handle for the read comes from the entry's read-source index, the `u32` valu
 - The engine does not check `i` against the number of alternate handles, does not check that the array exists, and does not check the handle it gets. An index past the end reads past the array.
 - The handle choice does not change the address. The same `fileObject[+0x20] + payloadOffset + position` goes to the device whichever handle is chosen.
 - Alternate handle `i` is the companion file listed as record `i` of `B` [sub-block 3](metadata.md#sub-block-3) (RPF9-F81). The payload address does not change, so a row with index `i` is read from that companion at the same `base + payloadOffset + position`.
+- On the physical file device the base is 0, so the address is an absolute offset into the companion file (RPF9-F83). The 16-byte companion header is part of that address space. Nothing skips it.
 
 The alternate array starts empty when the file object is constructed, and the destructor releases its entries (RPF9-F74). It is filled once, after the first successful validation:
 
@@ -53,6 +54,15 @@ A reader SHOULD treat an absent index or `0xFFFFFFFF` as the main source. Any ot
 | Physical | Device-relative positions summed over all device layers |
 
 For a root archive opened from a file, the device is the physical file device. For a nested archive, the device is the parent archive (RPF9-F70).
+
+The physical file device keeps no cursor (RPF9-F83):
+
+- Its open writes base 0 and returns a new read-only OS file handle.
+- Its read is positional: it passes the 64-bit position with each request and loops until the length is read.
+- End of file returns the bytes read so far. An invalid handle returns -1.
+- Other read errors are retried without limit.
+
+A reader SHOULD use positional reads and MUST report I/O errors instead of retrying forever.
 
 ### Nested reads
 

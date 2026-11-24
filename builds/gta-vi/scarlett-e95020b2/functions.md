@@ -42,7 +42,11 @@ RVAs for image base `0x140000000`. Roles are descriptive labels, not recovered s
 | `0x28CB640` | Removes one device from every prefix. Does not release it | Confirmed | F68 |
 | `0x28C33E0`, `0x28CB380` | Clear the mount table. `0x28CB380` also stops the request worker | Confirmed | F68 |
 | `0x78F5EC8`, `0x78F5EC4`, `0x78F5EC0`, `0x78F5ED0` | Mount table array of 0x20-byte records, count, capacity, lock | Confirmed | F68 |
-| `0x693A270` | Fallback device pointer | Confirmed | F68 |
+| `0x693A270` | Fallback device pointer. Initially the physical file device `0x78F5EB0` | Confirmed | F68, F83 |
+| `0x28C21A9` | Static initializer: stores vtable `0x62FDAE0` into the physical file device object `0x78F5EB0` | Confirmed | F83 |
+| `0x28C8220` | Physical device open, vtable `+0x28`: writes base 0, then `CreateFileW` read-only | Confirmed | F83 |
+| `0x314200` | Physical device read, vtable `+0x60`: positional `ReadFile` loop, unbounded retry on unexpected errors | Confirmed | F83 |
+| `0x28C8400` | Physical device release, vtable `+0x90`: `CloseHandle` | Confirmed | F83 |
 
 Mount record, 0x20 bytes:
 
