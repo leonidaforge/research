@@ -100,6 +100,20 @@ A standard 32-byte AES key is not accepted by algorithm `0x10`. Separate provide
 
 The key material is embedded and build-specific. A read-only probe did not reproduce a structured `A` table for the local archive sample with any registered algorithm-`0x10` blob (RPF9-F96). The blob-to-archive binding is therefore unconfirmed. A build mismatch is a hypothesis, not an established explanation; a matching executable/archive pair has not been demonstrated. Do not treat the identified key supply as a demonstrated archive decryption.
 
+### Recognition
+
+The static registry can be located without a fixed storage address by a bounded scan of read-only sections (RPF9-F97). A candidate run of `0x18`-byte records is accepted only if:
+
+- every state pointer lies inside the image,
+- every algorithm-`0x10` state has length `0x10F4`; the provider-0 default entry may be `0x20`,
+- the schedule is nonzero,
+- each of the 16 final tables is a permutation,
+- at least one state carries the algorithm-`0x10` magic.
+
+On build e95020b2 this yields one candidate run with 24 records and 10 algorithm-`0x10` states. Selectors, pointers and state contents are not published.
+
+The method is public; the concrete result is verified only for this build. A missing, malformed or ambiguous candidate fails closed. No cross-build compatibility is established.
+
 
 ### Cipher types
 
@@ -184,11 +198,11 @@ The fixed tables decompose exactly (RPF9-F85, RPF9-F86, RPF9-F87, RPF9-F89):
 
 The linear layer is identified as well. Each 8→32 table map factors exactly as `E_i P_j`, where `E_i` is a byte-diagonal 32-bit encoding and `P_j` is the `InvMixColumns` coefficient column, and the per-position encodings compose across rounds: each output byte encoding is the inverse of the input decoding of the table that reads that byte next, with the affine constants absorbed into the encoded round key. The fixed tables therefore implement the AES-256 equivalent-inverse-cipher round function on a fixed byte-wise affine state encoding, with the round key supplied in the encoded domain (RPF9-F90). With the thirteen rounds, the substitution-only final round and the initial key addition, the block function is an encoded AES-256 decryption.
 
-The round model is verified against the instructions, not only against its own algebra. Symbolic execution of the 272-instruction listing derives the stage-0 packing and key-byte order, both half-round table and lane formulas, the 13-round control flow and the final permutation; Ghidra and objdump agree on all instruction boundaries. A synthetic encoded AES-256 instance, built from the recovered encodings and a synthetic key blob and executed with the real fixed tables, reproduces the FIPS-197 AES-256 decryption vector and further blocks (RPF9-F91). The layout is fixed: a code word is an AES column and its lane `r` is AES row `3-r`, with the caller block in column-major order.
+The round model is verified against the instructions, not only against its own algebra. Symbolic execution of the 272-instruction listing derives the stage-0 packing and key-byte order, both half-round table and lane formulas, the 13-round control flow and the final permutation; Ghidra and objdump agree on all instruction boundaries. A synthetic encoded AES-256 instance, built from the recovered encodings and a synthetic key blob and executed with the real fixed tables read from a user-provided executable, reproduces the FIPS-197 AES-256 decryption vector and further blocks (RPF9-F91). The layout is fixed: a code word is an AES column and its lane `r` is AES row `3-r`, with the caller block in column-major order.
 
 The round-key material supplies the rest of the structure. Whitening uses schedule words 0 to 3, 13 rounds use words 4 to 55, and the last 16 schedule bytes are never read. That fits the AES-256 equivalent-inverse-cipher layout, whose 15th round key is folded into the 16 key-dependent final-round byte tables instead of being XORed (RPF9-F88).
 
-These properties were measured read-only from the two fixed table regions at RVAs `0x6036F30` (4 KiB) and `0x6037F30` (16 KiB) in build e95020b2, from the Ghidra 12.2 listing of `0x5642C50` and local scripts that recompute the difference distribution, the Walsh spectrum, the table relations and the affine-equivalence witnesses.
+These properties were measured read-only from the two fixed table regions at RVAs `0x6036F30` (4 KiB) and `0x6037F30` (16 KiB) in build e95020b2, from the Ghidra 12.2 listing of `0x5642C50` and local scripts that recompute the difference distribution, the Walsh spectrum, the table relations and the affine-equivalence witnesses. The fixed table bytes and witness files are not in this repository. The mathematical statements and synthetic model are public; the table-specific verification is private-evidence supported. A reader with a compatible executable can re-run the scripts.
 
 Differing table bytes do not by themselves decide AES equivalence, because a table-encoded cipher with per-position affine encodings necessarily differs from the textbook constants. The constructive result settles both layers from the fixed tables: the S-box layer is the AES inverse S-box and the linear layer is InvMixColumns, each up to the recovered affine encodings, and the encodings compose across rounds. Algorithm `0x10` is therefore an encoded AES-256 decryption. What remains outside the fixed data is the key-dependent state: the 240-byte schedule and the 16 key-dependent final-round tables. That state is embedded in a static registry (RPF9-F94, RPF9-F95). Private validation found that the registered algorithm-`0x10` states match the recovered final-table encodings on all 16 tables, so they are encoded AES-256 states. Their bytes, fingerprints and registry locations are not published. Whether the schedule is the standard AES-256 expansion of a raw key in encoded form was not determined from public data.
 
@@ -251,7 +265,7 @@ EM         = 00 01 FF...FF 00 || digestInfo
 accept     = RSA public operation on the signature yields exactly EM
 ```
 
-The verifier builds the DigestInfo itself. It requires the recovered payload to be 51 bytes and compares it with the computed DigestInfo; a raw 32-byte digest is rejected. The signature length is fixed at 256 bytes, so the key is 2048-bit. The RSA type is fixed in the verifier call and does not come from the archive.
+The verifier builds the DigestInfo itself. It requires the recovered payload to be 51 bytes and compares it with the computed DigestInfo; a raw 32-byte digest is rejected. The signature length is fixed at 256 bytes, so the key is 2048-bit. The RSA type is fixed in the verifier call and does not come from the archive. The synthetic rule is publicly reproducible with a synthetic key; the executable-specific verifier mapping and any real archive signature are private-evidence supported. No stored archive signature was verified.
 
 The key record carries a 16-bit or 32-bit identifier, resolved through a static key registry. This build supplies a DER `rsaEncryption` SubjectPublicKeyInfo with exponent 65537 (RPF9-F93). The registry location, identifier mapping and fingerprint are not published; the modulus bytes are not reproduced.
 
