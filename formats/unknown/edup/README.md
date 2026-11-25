@@ -57,7 +57,7 @@ The second field was tested against the 64-bit key tables of the local RDS5/ETPF
 
 In the 17,431-entry table every first-field key is absent from every store key table and every second-field key is present. The second field is therefore the stored texture key in that table. The mapping direction is alias to stored key, not stored key to alias. The first field is a separate key space that no sampled store indexes.
 
-The 1,176 repeated second-field values cover 6,845 distinct stored keys; the largest repeat count is 723. The table therefore maps many distinct first-field keys to one stored key.
+The table maps 17,431 first-field keys to 6,845 distinct stored keys; 1,176 of those stored keys have more than one alias, and the largest alias group is 723.
 
 The direction is **Confirmed** for `textures.rpf` row 20 and **Unknown** for the other two nonempty tables. Their second-field keys do not occur in the 46-store set. The local set is smaller than the 57-store sample used by the RDS5 document, so a missing store is the first explanation to test. The direction is not refuted: no table maps a stored key to an absent key.
 

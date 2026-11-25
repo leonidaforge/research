@@ -155,7 +155,7 @@ Block ids are not uniform.
 | Small | 1, 2, 6, 7, 8, 12 | 62 | Do not occur in the `PSCH` id table |
 | Hashed | all other observed ids | 459 | Every hashed id occurs in the `PSCH` id table (62 of 62 payloads) |
 
-Id 1 marks a name block in 41 payloads. Its bytes are NUL-terminated printable ASCII in 41 of 41: 8,342 names, with repeats across payloads. The names are data, not format semantics. The other block bodies are opaque.
+Id 1 marks a name block in 41 payloads. Its bytes are NUL-terminated printable ASCII in 41 of 41: 8,342 name strings, 1,385 distinct, with repeats across payloads. The names are data, not format semantics. The other block bodies are opaque.
 
 ### `PSCH` section
 
