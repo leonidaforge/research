@@ -124,11 +124,15 @@ def population(manifests: list[dict]) -> tuple[list[dict], dict]:
             if not isinstance(size, int) or size < 0:
                 missing_size += 1
                 continue
+            try:
+                index = int(row["row"])
+            except (KeyError, TypeError, ValueError) as error:
+                raise CensusError(f"a type-0 row in {relative} has no integer row index") from error
             selected.append(
                 {
                     "relative": relative,
                     "archive": archive,
-                    "row": int(row["row"]),
+                    "row": index,
                     "logical_size": size,
                     "stored_size": row.get("stored_size"),
                     "layout": row.get("layout"),
@@ -205,6 +209,8 @@ def ensure_output_dir(output: Path, inventory_dir: Path) -> None:
     inventory_dir = Path(inventory_dir).resolve()
     if output == inventory_dir or inventory_dir in output.parents:
         raise CensusError("the output directory MUST NOT lie inside the inventory directory")
+    if output in inventory_dir.parents:
+        raise CensusError("the inventory directory MUST NOT lie inside the output directory")
     if output.exists() and output.is_file():
         for candidate in Path(inventory_dir).glob("*"):
             if candidate.is_file() and os.path.samefile(output, candidate):
@@ -314,10 +320,10 @@ class Census:
         failures = Counter()
         succ = 0
         for record in completed.values():
-            if record["attempt"]["ok"]:
+            if record_succeeded(record):
                 succ += 1
             else:
-                failures[record["attempt"]["stage"]] += 1
+                failures[record["attempt"].get("stage") or "incomplete pipeline"] += 1
         state = {
             "schema": SCHEMA,
             "stage": stage,
@@ -346,7 +352,7 @@ class Census:
             for record in sorted(
                 completed.values(), key=lambda value: (str(value["relative"]).lower(), value["row"])
             ):
-                if record["attempt"]["ok"]:
+                if record_succeeded(record):
                     continue
                 sink.write(
                     json.dumps(
@@ -387,7 +393,7 @@ class Census:
             os.replace(partial, path)
         try:
             return self.read_manifest(path)
-        except (OSError, UnicodeError, CensusError) as error:
+        except (OSError, UnicodeError, json.JSONDecodeError, CensusError) as error:
             return {"ok": False, "error": str(error)[:500]}, {}
 
     def read_manifest(self, path: Path) -> tuple[dict, dict]:
@@ -494,6 +500,7 @@ class Census:
                 "sha256": None,
                 "stage": None,
                 "reason": None,
+                "failed_step": None,
             },
             "manifest": None,
             "header": None,
@@ -502,6 +509,7 @@ class Census:
         if not parent.exists():
             record["attempt"]["stage"] = "missing input"
             record["attempt"]["reason"] = "the top-level archive is absent"
+            record["attempt"]["failed_step"] = "input"
             return record
         temporary = self.tmp_dir / f"row_{re.sub(r'[^A-Za-z0-9._-]+', '_', relative)}_{row}.rpf"
         use_copy = expected > self.cli_output_limit
@@ -521,6 +529,7 @@ class Census:
                         "the row exceeds the CLI output limit and its location record "
                         "is not a plain stored range"
                     )
+                    record["attempt"]["failed_step"] = "extraction"
                     return record
                 record["attempt"]["mode"] = "stored-copy"
                 copy_stored_row(
@@ -553,42 +562,59 @@ class Census:
                     text = (result.stderr or result.stdout).strip()
                     record["attempt"]["stage"] = classify_failure(text, result.returncode, None, expected)
                     record["attempt"]["reason"] = text[:500]
+                    record["attempt"]["failed_step"] = "extraction"
                     return record
             actual = temporary.stat().st_size if temporary.exists() else None
             record["attempt"]["actual_size"] = actual
             if actual != expected:
                 record["attempt"]["stage"] = "incomplete reconstruction"
                 record["attempt"]["reason"] = f"extracted {actual} of {expected} bytes"
+                record["attempt"]["failed_step"] = "extraction"
                 return record
             digest = sha256_file(temporary)
             record["attempt"]["sha256"] = digest
-            record["attempt"]["ok"] = True
             if self.keep_archives:
                 shutil.copyfile(temporary, self.archive_dir / f"{digest}.rpf")
             summary, _ = self.manifest(digest, temporary)
             if not summary.get("ok"):
-                record["attempt"]["ok"] = False
                 record["attempt"]["stage"] = "metadata readability"
                 record["attempt"]["reason"] = summary.get("error")
+                record["attempt"]["failed_step"] = "manifest"
+                return record
+            try:
+                record["header"] = read_header(temporary)
+            except CensusError as error:
+                record["attempt"]["stage"] = "framing error"
+                record["attempt"]["reason"] = str(error)[:500]
+                record["attempt"]["failed_step"] = "header"
                 return record
             record["manifest"] = summary
-            record["header"] = read_header(temporary)
+            record["attempt"]["ok"] = True
             return record
         except CopyRangeError as error:
             record["attempt"]["stage"] = "framing error"
             record["attempt"]["reason"] = str(error)[:500]
+            record["attempt"]["failed_step"] = "extraction"
+            return record
+        except (ValueError, TypeError) as error:
+            record["attempt"]["stage"] = "framing error"
+            record["attempt"]["reason"] = f"manifest field error: {error}"[:500]
+            record["attempt"]["failed_step"] = "extraction"
             return record
         except CensusError as error:
             record["attempt"]["stage"] = "operational limit"
             record["attempt"]["reason"] = str(error)[:500]
+            record["attempt"]["failed_step"] = record["attempt"].get("failed_step") or "extraction"
             return record
         except OSError as error:
             record["attempt"]["stage"] = "operational limit"
             record["attempt"]["reason"] = f"I/O error: {error}"[:500]
+            record["attempt"]["failed_step"] = record["attempt"].get("failed_step") or "io"
             return record
         except subprocess.TimeoutExpired:
             record["attempt"]["stage"] = "operational limit"
             record["attempt"]["reason"] = f"the command exceeded {self.runner.timeout} seconds"
+            record["attempt"]["failed_step"] = record["attempt"].get("failed_step") or "timeout"
             return record
         finally:
             temporary.unlink(missing_ok=True)
@@ -639,22 +665,50 @@ class Census:
         self.log(f"batch complete: {len(completed)} of {len(self.rows)} rows")
 
 
-def aggregate(output_dir: Path) -> dict:
+def record_succeeded(record: dict) -> bool:
+    attempt = record.get("attempt") or {}
+    return attempt.get("ok") is True and bool(record.get("manifest")) and bool(record.get("header"))
+
+
+def aggregate(output_dir: Path, allow_partial: bool = False) -> dict:
     rows_path = output_dir / "rows.jsonl"
     if not rows_path.exists():
         raise CensusError("rows.jsonl is absent")
+    state_path = output_dir / "state.json"
+    if not state_path.exists():
+        raise CensusError("state.json is absent, so the declared population is unknown")
+    try:
+        state = json.loads(state_path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as error:
+        raise CensusError(f"state.json is unreadable: {error}") from error
+    declared_total = state.get("declared_total")
+    committed = state.get("attempted")
+    if not isinstance(declared_total, int) or not isinstance(committed, int):
+        raise CensusError("state.json does not carry the declared and attempted totals")
     identity = None
     identity_path = output_dir / "identity.json"
     if identity_path.exists():
         try:
             identity = json.loads(identity_path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
+        except (OSError, UnicodeError, json.JSONDecodeError):
             identity = None
     records = []
     with rows_path.open("r", encoding="utf-8") as handle:
-        for line in handle:
-            if line.strip():
+        for line_number, line in enumerate(handle, 1):
+            if not line.strip():
+                continue
+            try:
                 records.append(json.loads(line))
+            except json.JSONDecodeError as error:
+                raise CensusError(f"rows.jsonl line {line_number} is not JSON: {error}") from error
+    population_complete = (
+        len(records) == declared_total == committed and state.get("stage") == "complete"
+    )
+    if not population_complete and not allow_partial:
+        raise CensusError(
+            f"the census is incomplete: declared {declared_total}, written {len(records)}, "
+            f"committed {committed}; use --allow-partial for a diagnostic report"
+        )
     unique = {}
     duplicates = 0
     for record in records:
@@ -678,6 +732,7 @@ def aggregate(output_dir: Path) -> dict:
     depth2_manifests = 0
     header_values = {name: [] for name, *_ in HEADER_FIELDS}
     header_sizes = []
+    header_incomplete = 0
     auth = Counter()
     manifest_rows = 0
 
@@ -711,9 +766,12 @@ def aggregate(output_dir: Path) -> dict:
             unreadable_states[state] += count
         header = record.get("header")
         if header:
-            for name, *_ in HEADER_FIELDS:
-                header_values[name].append(header[name])
-            header_sizes.append(header["file_size"])
+            if all(name in header for name, *_ in HEADER_FIELDS):
+                for name, *_ in HEADER_FIELDS:
+                    header_values[name].append(header[name])
+                header_sizes.append(header["file_size"])
+            else:
+                header_incomplete += 1
 
     header_ranges = []
     for name, offset, width, kind in HEADER_FIELDS:
@@ -740,13 +798,30 @@ def aggregate(output_dir: Path) -> dict:
         }
         for type_id, count in sorted(type_rows.items(), key=lambda item: str(item[0]))
     ]
+    succeeded = sum(1 for record in records if record_succeeded(record))
     summary = {
         "schema": SCHEMA,
         "identity": identity,
-        "declared_total": len(records),
+        "declared_total": declared_total,
         "attempted": len(records),
-        "succeeded": sum(1 for record in records if record["attempt"].get("ok")),
-        "failed": sum(1 for record in records if not record["attempt"].get("ok")),
+        "completed": succeeded,
+        "committed": committed,
+        "succeeded": succeeded,
+        "failed": len(records) - succeeded,
+        "pipeline_incomplete": sum(
+            1
+            for record in records
+            if (record.get("attempt") or {}).get("ok") is True and not record_succeeded(record)
+        ),
+        "population_complete": population_complete,
+        "population": {
+            "status": "complete" if population_complete else "incomplete",
+            "publishable": population_complete,
+            "declared": declared_total,
+            "written": len(records),
+            "committed": committed,
+        },
+        "success_definition": "attempt.ok and a nested manifest and an archive header are present",
         "unique_archive_contents": len(unique),
         "duplicate_rows": duplicates,
         "histogram_population": "unique_archive_contents",
@@ -761,6 +836,7 @@ def aggregate(output_dir: Path) -> dict:
         "layout_encoding": dict(sorted(layout_encoding.items())),
         "unreadable_states": dict(sorted(unreadable_states.items())),
         "header_ranges": header_ranges,
+        "header_incomplete": header_incomplete,
         "header_file_size": {
             "count": len(header_sizes),
             "min": min(header_sizes) if header_sizes else None,
@@ -782,6 +858,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--timeout", type=int, default=3600)
     parser.add_argument("--keep-archives", action="store_true")
     parser.add_argument("--summarize-only", action="store_true")
+    parser.add_argument("--allow-partial", action="store_true")
     return parser
 
 
@@ -789,8 +866,19 @@ def main() -> int:
     args = build_parser().parse_args()
     ensure_output_dir(args.output_dir, args.inventory_dir)
     if args.summarize_only:
-        summary = aggregate(args.output_dir)
-        print(json.dumps({key: summary[key] for key in ("attempted", "succeeded", "failed")}))
+        summary = aggregate(args.output_dir, args.allow_partial)
+        print(
+            json.dumps(
+                {
+                    "declared_total": summary["declared_total"],
+                    "attempted": summary["attempted"],
+                    "completed": summary["completed"],
+                    "succeeded": summary["succeeded"],
+                    "failed": summary["failed"],
+                    "population_complete": summary["population_complete"],
+                }
+            )
+        )
         return 0
     if args.lforge is None or args.executable is None:
         raise CensusError("--lforge and --executable are required unless --summarize-only is set")
@@ -824,4 +912,8 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    except CensusError as error:
+        print(f"error: {error}", file=sys.stderr)
+        sys.exit(2)

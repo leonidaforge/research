@@ -84,6 +84,8 @@ class FakeRunner:
         if command[1:3] == ["archive", "manifest"]:
             archive = Path(command[3])
             output = Path(command[command.index("--output") + 1])
+            if archive.read_bytes() not in self.manifests:
+                return subprocess.CompletedProcess(command, 1, "", "synthetic manifest failure")
             documents = [{"kind": "header", "archive": str(archive), "authentication": {"status": "authenticated"}}]
             documents.extend(self.manifests[archive.read_bytes()])
             output.write_text("\n".join(json.dumps(document) for document in documents) + "\n", encoding="utf-8")
@@ -198,6 +200,103 @@ class CensusTests(unittest.TestCase):
             )
             census.run()
             self.assertEqual(runner.calls, [])
+
+    def test_manifest_failure_after_extraction_is_not_a_success(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            manifest_dir, _, payloads, _ = make_inputs(temporary)
+            runner = FakeRunner(payloads, {})
+            census = full_census.Census(
+                full_census.inventory.discover_manifests(manifest_dir)[0],
+                Path(temporary) / "out",
+                runner,
+                batch_size=10,
+            )
+            census.run()
+            summary = full_census.aggregate(Path(temporary) / "out")
+            self.assertEqual(summary["succeeded"], 0)
+            self.assertEqual(summary["failed"], 2)
+            self.assertEqual(summary["failure_stages"], {"metadata readability": 2})
+            record = json.loads((Path(temporary) / "out" / "rows.jsonl").read_text(encoding="utf-8").splitlines()[0])
+            self.assertFalse(record["attempt"]["ok"])
+            self.assertEqual(record["attempt"]["failed_step"], "manifest")
+
+    def test_header_failure_after_manifest_is_not_a_success(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            manifest_dir, _, _, _ = make_inputs(temporary)
+            archive = Path(json.loads((manifest_dir / "top.jsonl").read_text(encoding="utf-8").splitlines()[0])["archive"])
+            (manifest_dir / "top.jsonl").write_text(
+                "\n".join(
+                    json.dumps(document)
+                    for document in [
+                        {"kind": "header", "archive": str(archive), "relative": "top.rpf", "authentication": {"status": "authenticated"}},
+                        row(0, 4, offset=0x100),
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            short = b"9FPR"
+            runner = FakeRunner({0: short}, {short: [nested_row(0, 5, 1)]})
+            census = full_census.Census(
+                full_census.inventory.discover_manifests(manifest_dir)[0],
+                Path(temporary) / "out",
+                runner,
+                batch_size=10,
+            )
+            census.run()
+            summary = full_census.aggregate(Path(temporary) / "out")
+            self.assertEqual(summary["succeeded"], 0)
+            self.assertEqual(summary["failure_stages"], {"framing error": 1})
+            record = json.loads((Path(temporary) / "out" / "rows.jsonl").read_text(encoding="utf-8").splitlines()[0])
+            self.assertEqual(record["attempt"]["failed_step"], "header")
+
+    def test_summary_refuses_an_interrupted_population(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            output = Path(temporary) / "out"
+            output.mkdir()
+            (output / "rows.jsonl").write_text(
+                json.dumps(
+                    {
+                        "schema": full_census.ROW_SCHEMA,
+                        "relative": "top.rpf",
+                        "row": 0,
+                        "attempt": {"ok": True, "sha256": "a", "stage": None},
+                        "manifest": {"ok": True},
+                        "header": {"file_size": 64},
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            (output / "state.json").write_text(
+                json.dumps(
+                    {
+                        "schema": full_census.SCHEMA,
+                        "stage": "running",
+                        "declared_total": 2,
+                        "attempted": 1,
+                        "accounting": {"declared_total": 2},
+                    }
+                ),
+                encoding="utf-8",
+            )
+            with self.assertRaises(full_census.CensusError):
+                full_census.aggregate(output)
+            summary = full_census.aggregate(output, allow_partial=True)
+            self.assertEqual(summary["declared_total"], 2)
+            self.assertEqual(summary["attempted"], 1)
+            self.assertEqual(summary["completed"], 1)
+            self.assertEqual(summary["committed"], 1)
+            self.assertFalse(summary["population_complete"])
+            self.assertFalse(summary["population"]["publishable"])
+
+    def test_input_directory_inside_the_output_is_refused(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            inventory = root / "inventory"
+            inventory.mkdir()
+            with self.assertRaises(full_census.CensusError):
+                full_census.ensure_output_dir(root, inventory)
 
     def test_output_directory_inside_the_inventory_is_refused(self):
         with tempfile.TemporaryDirectory() as temporary:
