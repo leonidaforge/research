@@ -46,6 +46,7 @@ Documents:
 
 - [pages.md](pages.md): stored entry, segment split, page map, page sizes, raw pages and reconstruction.
 - [pointers.md](pointers.md): pointer encoding, bounds and false positives.
+- [textures.md](textures.md): texture dictionary root, `0x70`-byte record grammar, allocation extents and drawable reference namespace.
 - Evidence: [evidence/resources/INDEX.md](../../evidence/resources/INDEX.md).
 
 ## 0DRP root header
