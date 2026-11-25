@@ -7,6 +7,7 @@
 - [rbf0](rbf0/README.md): structural inspector for RBF0 payloads.
 - [PSIN structural sampler](psin/README.md): reports the observed PSIN header
   and tagged-section walk.
+- [ptfx](ptfx/README.md): line-structure inspector for a decoded PTFX payload.
 - [type14](type14/README.md): header and table inspector for a decoded type 14
   payload.
 - [kb2j](kb2j/README.md): bounded `KB2j`/`KB2n` header and frame-table

@@ -7,6 +7,7 @@ Entries here are identified by observable payload bytes only. A signature is not
 | `EDUP`    | 3 stored / 5 decoded | 5             | [edup](edup/README.md)     |
 | `KB2j`    | 10                   | `movies.rpf`  | [kb2j](kb2j/README.md)     |
 | `KB2n`    | 505                  | `movies.rpf`  | [kb2j](kb2j/README.md)     |
+| `PTFX`    | 1                    | `common.rpf`  | [ptfx](ptfx/README.md)     |
 | `SGD5`    | 2                    | `shaders.rpf` | [sgd5](sgd5/README.md)     |
 | none      | 1                    | `data.rpf`    | [type14](type14/README.md) |
 | `PSIN`    | 18 sampled           | 5 archives    | [psin](psin/README.md)     |
