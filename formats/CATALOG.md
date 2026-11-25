@@ -15,19 +15,19 @@ Confidence values:
 
 ## Identified file formats
 
-"Repository category" is where this repository keeps the document. It is not evidence about the payload's role. Two entries below state a role explicitly and the rest do not.
+"Repository category" is where this repository keeps the document. "Role" is what the payload actually is. Only RPF9 and KB2j/KB2n have an established role; the rest are **Unknown**, because their documents state that no role is established.
 
-| Identifier | Repository category | Confidence | Signature | Native types | Population | Investigated | Document |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| RPF9 | Container | Confirmed | `9FPR` (`0x52504639`) | Container; carried by type 0 | 22 top-level archives, 6,534 unique `(archive, row)` pairs | All 22 manifests; 782 nested archives extracted | [rpf9](containers/rpf9/README.md) |
-| RBF0 | Metadata | Confirmed (sample) | `RBF0` (`52 42 46 30`) at offset 0 | 11 | 156 rows in one nested archive | 18 of 156 rows decoded | [rbf0](metadata/rbf0/README.md) |
-| EDUP | Unknown | Confirmed (sample) | `EDUP` (`45 44 55 50`) at offset 0 | 255 | 5 rows, 5 archives | 4 distinct payloads | [edup](unknown/edup/README.md) |
-| KB2j / KB2n | Container family | Confirmed (sample) | `KB2j`, `KB2n` at offset 0 | 255 | 515 rows in `movies.rpf` (505 / 10) | Header, frame index and frame region of all 515 | [kb2j](unknown/kb2j/README.md) |
-| SGD5 | Unknown | Supported | `SGD5` (`53 47 44 35`) at offset 0 | 255 | 2 rows, `shaders.rpf` rows 1 and 2 | 2 of 2 | [sgd5](unknown/sgd5/README.md) |
-| PSIN | Unknown | Confirmed (sample) | `PSIN` (`50 53 49 4E`) at offset 0 | 11, 93, 94 | 103 unique decoded payloads | 103 of 103 | [psin](unknown/psin/README.md) |
-| Type 14 payload | Unknown | Confirmed (single sample) | None | 14 | 2 rows, 1 decoded | 1 decoded, 1 behind the payload transform | [type14](unknown/type14/README.md) |
-| GFX* | Unknown | Supported | `GFX*` (`47 46 58 2A`) at offset 0 of decoded payload | 66 | 49 rows, 6 depth-1 archives under `data.rpf` | Header sample only | [gfx](unknown/gfx/README.md) |
-| ADAT | Unknown | Supported | `ADAT` (`41 44 41 54`) at offset 0 | 255 | 729 rows, 59 of 60 depth-1 `audio.rpf` archives | Two sample groups | [adat](unknown/adat/README.md) |
+| Identifier | Repository category | Role | Confidence | Signature | Native types | Population | Investigated | Document |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| RPF9 | Container | Archive container | Confirmed | `9FPR` (`0x52504639`) | Container; carried by type 0 | 22 top-level archives, 6,534 unique `(archive, row)` pairs | All 22 manifests; 782 nested archives extracted | [rpf9](containers/rpf9/README.md) |
+| RBF0 | Metadata | Unknown | Confirmed (sample) | `RBF0` (`52 42 46 30`) at offset 0 | 11 | 156 rows in one nested archive | 18 of 156 rows decoded | [rbf0](metadata/rbf0/README.md) |
+| EDUP | Unknown | Unknown | Confirmed (sample) | `EDUP` (`45 44 55 50`) at offset 0 | 255 | 5 rows, 5 archives | 4 distinct payloads | [edup](unknown/edup/README.md) |
+| KB2j / KB2n | Unknown | Container family, two signature variants | Confirmed (sample) | `KB2j`, `KB2n` at offset 0 | 255 | 515 rows in `movies.rpf` (505 / 10) | Header, frame index and frame region of all 515 | [kb2j](unknown/kb2j/README.md) |
+| SGD5 | Unknown | Unknown | Supported | `SGD5` (`53 47 44 35`) at offset 0 | 255 | 2 rows, `shaders.rpf` rows 1 and 2 | 2 of 2 | [sgd5](unknown/sgd5/README.md) |
+| PSIN | Unknown | Unknown | Confirmed (sample) | `PSIN` (`50 53 49 4E`) at offset 0 | 11, 93, 94 | 103 unique decoded payloads | 103 of 103 | [psin](unknown/psin/README.md) |
+| Type 14 payload | Unknown | Unknown | Confirmed (single sample) | None | 14 | 2 rows, 1 decoded | 1 decoded, 1 behind the payload transform | [type14](unknown/type14/README.md) |
+| GFX* | Unknown | Unknown | Supported | `GFX*` (`47 46 58 2A`) at offset 0 of decoded payload | 66 | 49 rows, 6 depth-1 archives under `data.rpf` | Header sample only | [gfx](unknown/gfx/README.md) |
+| ADAT | Unknown | Unknown | Supported | `ADAT` (`41 44 41 54`) at offset 0 | 255 | 729 rows, 59 of 60 depth-1 `audio.rpf` archives | Two sample groups | [adat](unknown/adat/README.md) |
 
 RDS5 and the resource container are not in the table because their format documents are not yet on `main`. For RDS5 the verification evidence is on `main`, but the format document it verifies is on a branch; see [Pending integration](#pending-integration).
 
@@ -35,7 +35,7 @@ RDS5 and the resource container are not in the table because their format docume
 
 | Identifier | Evidence for a family | Missing | Where |
 | --- | --- | --- | --- |
-| PTFX | One plaintext row whose decoded payload carries `PTFX` (UPL-F01) | Structure, variant spread, second sample | No evidence index is committed; the family is under active research |
+| PTFX | One printable `PTFX` payload in the stored-byte census (UPL-F01); the decoded-payload scan also records `PTFX` without stating a count (UPL-F14) | Structure, variant spread, total occurrence count | [evidence/unknown-payloads](../evidence/unknown-payloads/INDEX.md) |
 | Resource page serialization | Page map, system and graphics pages, compressed streams and pointer tables observed in extracted resources | Object grammar, pointer semantics, engine allocation path | [Pending integration](#pending-integration) |
 
 ## Unidentified payload structures

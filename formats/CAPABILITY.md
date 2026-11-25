@@ -20,7 +20,7 @@ What research establishes and what the application implements are separate quest
 
 | Format | Recognition | Inspection | Parsing | Decoding | Reconstruction | Export | Rendering | Writing |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| RPF9 | Established (F01) | Established (F01–F123) | Established (F10–F60) | Partially established: chunk encodings 2 and 3 (F119–F122). Encoding 4 is in the field domain but appears in no observed row (INV-F20). Rows behind the payload transform are undecoded | Partially established: metadata region and payload placement; no writer | Experimental: native row extraction verified on 782 archives and 144 payloads (INV-F18, INV-F23) | Not applicable | Unsupported: no writer researched |
+| RPF9 | Established (F01) | Established (F01–F123) | Established (F10–F60) | Established for encodings 2 and 3: 929 chunk-decoded rows across 22 archives (F119, F120, F122). Encoding 4 is in the field domain but appears in no observed row (INV-F20). Rows behind the payload transform are undecoded | Partially established: metadata region and payload placement; no writer | Experimental: native row extraction verified on 782 archives and 144 payloads (INV-F18, INV-F23) | Not applicable | Unsupported: no writer researched |
 | RBF0 | Established (RBF0-F01) | Established (RBF0-F01–F12) | Established (RBF0-F02–F11) | Partially established: 15,305 strings and 14,127 attributes decoded (RBF0-F12); field semantics Unknown | Unsupported | Experimental: `tools/rbf0` | Not applicable | Not investigated |
 | EDUP | Established (5 rows) | Established | Established: `size = 8 + 16 × count + 4 + length` on 4 distinct payloads | Partially established: entry fields read; meanings Unknown | Unsupported | Not investigated: no tool is committed; the sample decode was ad hoc | Not applicable | Not investigated |
 | KB2j / KB2n | Established (515 rows) | Established | Established: header, frame index table, frame-data region | Partially established: frame index decoded; frame payload encoding Unknown | Unsupported | Experimental: `tools/kb2j` | Unsupported: no codec; external demuxers stop at `Bink 2 video is not implemented` | Not investigated |
@@ -29,8 +29,10 @@ What research establishes and what the application implements are separate quest
 | Type 14 | Established (1 decoded row) | Established | Established: header, string table, 8 records of `0x28` (T14-F01–F10) | Established for the single decoded row | Unsupported | Experimental: `tools/type14` | Not applicable | Not investigated |
 | GFX* | Established (49 rows) | Partially established: header sample only | Not investigated | Partially established: chunk decoding only | Unsupported | Experimental: extraction via the CLI | Unsupported | Not investigated |
 | ADAT | Established (729 rows) | Partially established: two sample groups | Not investigated | Partially established: chunk decoding only | Unsupported | Experimental: extraction via the CLI | Unsupported | Not investigated |
-| RDS5 / ETPF | Established on the unmerged branch `research/textures-rds5`; independently verified in [evidence/rds5-verification](../evidence/rds5-verification/INDEX.md). No format document exists on `main`, so nothing here is integrated | Partially established: the verification read 57 files, 1,026,833 blocks and 357,115 entries | Partially established: header, record array and block catalogue described on the branch | Partially established: delta bounds and zlib blocks; codec identity Unknown | Partially established: ETPF chunk extent; no object reconstruction | Not investigated: the branch tool is not on `main` | Unsupported: no pixel format established | Not investigated |
-| Resource page serialization | Unknown on `main`. The findings exist only on the unmerged branch `research/shared/resource-serialization` | Unknown on `main` | Unknown on `main` | Unknown on `main` | Unknown on `main` | Unknown on `main` | Not applicable | Unsupported |
+| RDS5 / ETPF | Unknown on `main`; see the note below the table | Unknown on `main` | Unknown on `main` | Unknown on `main` | Unknown on `main` | Unknown on `main` | Unknown on `main` | Unknown on `main` |
+| Resource page serialization | Unknown on `main`; findings exist only on the unmerged branch `research/shared/resource-serialization` | Unknown on `main` | Unknown on `main` | Unknown on `main` | Unknown on `main` | Unknown on `main` | Not applicable | Unsupported |
+
+RDS5 note: the container claims are established on `research/textures-rds5` at `5a54ae8` and were independently verified in [evidence/rds5-verification](../evidence/rds5-verification/INDEX.md), which read 57 files, 1,026,833 blocks and 357,115 entries and checked the header, record array and block catalogue layout, the delta bounds and the zlib blocks. Codec identity and object reconstruction remain Unknown there too. None of it is integrated, so the table records `Unknown on main`.
 
 Recognition means the signature is identified. It does not mean the format is understood. RPF9 recognition in this table is the research result, not the application's.
 
@@ -55,9 +57,9 @@ Support levels are read from `FormatInfo` in `crates/core/src/inspect.rs`: `stru
 - Container parsing is not object reconstruction. RDS5 records and blocks parse; the objects they describe are not rebuilt.
 - Synthetic tests are not real-sample compatibility. Every `tools/` inspector is validated on authored fixtures only.
 - Research tools are not application features. `tools/rbf0`, `tools/sgd5`, `tools/type14`, `tools/psin` and `tools/kb2j` are independent of the application's inspectors, and the application's RDS5 and RBF0 support has no committed research tool on `main`.
+- Recognition is not support. PSIN is recognised from its magic and nothing else.
 
 Findings are indexed per subject under [evidence/](../evidence/README.md); the format documents linked from [CATALOG.md](CATALOG.md) carry the detail behind every `Established` cell.
-- Recognition is not support. PSIN is recognised from its magic and nothing else.
 
 ## Evidence gaps
 
