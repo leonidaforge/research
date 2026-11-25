@@ -2,7 +2,7 @@
 
 Reads a RAGE resource from an RPF9 payload, or from an already decoded resource, and reports its segments, pages and page map.
 
-Each stored zlib stream is one RPF9 chunk in the observed encoding-2 resource rows. A page is one chunk, except that a page larger than 32 MiB is stored as several streams; the declared page count resolves the grouping.
+Each stored chunk is one RPF9 chunk in the observed encoding-2 resource rows. A chunk is a zlib stream or a raw page. A zlib page is one stream, except that a page larger than 32 MiB is stored as several streams; the declared page count resolves the grouping. The companion [page_reconstruct](#page_reconstruct) implements the corrected rule, including raw pages, without invoking the CLI.
 
 The tool is a research instrument. It reads only, bounds every stream and the total inflated size, and reports what it cannot establish instead of guessing. The documented layout is in [formats/resources](../../formats/resources/README.md).
 
@@ -74,7 +74,9 @@ Issue codes: `payload_error`, `not_a_resource`, `map_in_header`, `map_outside`, 
 python -m unittest discover -s tools/resources/tests
 ```
 
-The 26 tests build every input with `zlib` and `struct`. They cover a valid one-page-per-segment resource, a map in a later system page, a split 32 MiB page, a page of exactly 32 MiB, missing and extra pages, a page-size violation, an outside pointer, and the negative cases: truncated stream, zero system-page count, map outside the system data, nonzero slot, nonzero prefix, nonzero padding, stream and total caps, and data without a resource header.
+The 26 `rage_resource` tests build every input with `zlib` and `struct`. They cover a valid one-page-per-segment resource, a map in a later system page, a split 32 MiB page, a page of exactly 32 MiB, missing and extra pages, a page-size violation, an outside pointer, and the negative cases: truncated stream, zero system-page count, map outside the system data, nonzero slot, nonzero prefix, nonzero padding, stream and total caps, and data without a resource header.
+
+The suite also holds 14 `page_reconstruct` tests and 8 `root_tables` tests. All 48 tests pass with the standard library only.
 
 ## Limits
 
@@ -83,3 +85,41 @@ The 26 tests build every input with `zlib` and `struct`. They cover a valid one-
 - Pointer values are counted, not interpreted. The tool does not resolve targets.
 - The tool does not authenticate the RPF9 metadata and does not decode the payload transform. It expects the bytes it is given to be the stored chunks.
 - The tool does not trace or model engine page allocation, which remains **Unknown**.
+
+## page_reconstruct
+
+Reconstructs a stored resource row independently of the CLI, including a raw last page.
+
+```text
+python page_reconstruct.py --file <ARCHIVE> --offset <PAYLOAD_OFFSET> --length <STORED_SIZE> [--json]
+```
+
+- `--offset` is the entry's payload offset; the tool reads the 16-byte prefix itself.
+- `--length` is the stored length of the entry.
+- Exit code is 0 when the status is `complete`, 1 for `partial` or `unverified`, and 2 for invalid usage.
+
+The reconstruction:
+
+1. reads every chunk after the 16-byte zero prefix;
+2. reconstructs the page map from all system bytes, so a map in a later system page is readable;
+3. groups zlib streams into pages, merging a stream of exactly `0x2000000` bytes into the page it continues;
+4. treats a raw last chunk as a page only when the declared page count requires it, and otherwise reports `trailing_raw`;
+5. splits a packed zlib stream only when the declared count and the `0x10000` size pattern force it, and records that the split is untested;
+6. reports `partial` only when a declared page is absent.
+
+The JSON report adds `chunks` with the stored offset, stored size, reconstructed size and kind, and pages carry `storage`: `zlib`, `split`, `raw` or `packed`.
+
+The synthetic tests cover a two-page row with the map near the end of page 0, a single-page row, a missing declared page, a packed page, a raw tail that is not a page, a map in a second system page, a first page larger than 64 KiB, a split page, a page-size violation and malformed prefixes or streams. A row without the raw second page reconstructs as `partial`; the same row with it reconstructs as `complete`.
+
+## root_tables
+
+A bounded reader for the 0DRP root header and its block table.
+
+```text
+import root_tables
+root, issues = root_tables.parse_root(system_bytes, graphics_len)
+```
+
+- `parse_root` requires the zero first qword and the `0DRP` tag, resolves every nonzero root pointer inside the system segment, and returns the four `u16` counts.
+- `walk_blocks` reads 16-byte entries (`u32` identifier, `u32` size, `u64` pointer) and stops at the first entry that does not fit. A target outside its selected segment is reported as `block_outside`, not resized.
+- The module has no CLI and does not invoke the application. The tests cover a valid header, an out-of-bounds table, a target outside its segment, a huge count, an out-of-bounds root pointer, a missing tag and a short buffer.
