@@ -18,9 +18,7 @@ The 918 files collapse to 757 unique payloads because overlapping nested archive
 
 ### Relation to earlier counts
 
-The earlier public figure of 103 unique payloads describes a narrower convenience sample: the first 18 type 11 payloads, 85 additional payloads from nine top-level archives at or below 1 MiB selected by a per-archive quantile rule, and 13 depth-1 payloads. That figure remains a subset scope.
-
-A separate private count of 109 payloads (100 `LSCH`, 9 `PMAP`) came from a selection that is not published. It is not reproduced here. The full recount in this document is 757 unique payloads, with 695 `LSCH` and 62 `PMAP`.
+The PSIN-F01 claim in the earlier revision recorded 103 unique payloads. That figure describes a narrower convenience sample: the first 18 type 11 payloads, 85 additional payloads from nine top-level archives at or below 1 MiB selected by a per-archive quantile rule, and 13 depth-1 payloads. The full recount in this document is 757 unique payloads, with 695 `LSCH` and 62 `PMAP`.
 
 ## Evidence types
 
@@ -80,7 +78,7 @@ python -m unittest discover -s tools/psin
 
 - The sample is not random. It covers readable type 11 rows in the selected archives and a nested-archive bound of 2 MiB.
 - One build and one local archive set were examined.
-- The 103 and 109 figures describe narrower selections; neither is the full reachable population.
+- The earlier 103 figure describes a narrower selection; the 757 figure covers the stated scope.
 - No executable path was traced and no historical RAGE format is claimed as a match.
 - Fields and tags were not assigned meanings. Section bodies were not decoded into records.
 - The `PMAP` pre-section grammar is Unknown.

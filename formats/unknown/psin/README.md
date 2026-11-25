@@ -27,7 +27,7 @@ The family split is 695 `LSCH` and 62 `PMAP`. The first-section offset is aligne
 
 ### Earlier counts
 
-The previously recorded 103 unique payloads describe a narrower convenience sample: 18 earlier payloads, 85 additional top-level payloads at or below 1 MiB selected by a per-archive quantile rule, and 13 depth-1 payloads. A separate private count of 109 payloads (100 `LSCH`, 9 `PMAP`) came from another unpublished selection. Neither figure is the full reachable population. Uniqueness in this document is the SHA-256 of the decoded payload; overlapping nested archives and repeated rows account for the difference between 918 files and 757 unique payloads.
+The PSIN-F01 claim in the earlier revision recorded 103 unique payloads. That figure describes a narrower convenience sample: 18 earlier payloads, 85 additional top-level payloads at or below 1 MiB selected by a per-archive quantile rule, and 13 depth-1 payloads. The full recount in this document is 757 unique payloads, with 695 `LSCH` and 62 `PMAP`. Uniqueness is the SHA-256 of the decoded payload; overlapping nested archives and repeated rows account for the difference between 918 files and 757 unique payloads.
 
 ## Shared outer framing
 
@@ -171,7 +171,7 @@ python -m unittest discover -s tools/psin
 
 - The sample is not random. It covers readable type 11 rows in the selected archives and a nested-archive bound of 2 MiB.
 - One build and one local archive set were examined.
-- The 103 and 109 figures describe narrower selections; neither is the full reachable population.
+- The earlier 103 figure describes a narrower selection; the 757 figure covers the stated scope.
 - No executable path was traced and no historical RAGE format is claimed as a match.
 - Tags and section bodies were not assigned meanings. The `PMAP` pre-section grammar is undecoded.
 - The descriptor `+0x00` word is uninterpreted.

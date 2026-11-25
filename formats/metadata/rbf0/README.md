@@ -32,9 +32,9 @@ The tested population is 447 decoded RBF0 payloads, 238 unique by SHA-256 of the
 - all readable type 11 rows of 17 more RPF9 archives extracted from `<GAME_ROOT>/data.rpf`, selected at or below 2 MiB;
 - all readable top-level type 11 rows that begin with `RBF0`, nine unique payloads.
 
-The independent parser consumes 238 of 238 unique payloads and 447 of 447 decoded occurrences with no unsupported token. The original 18-row sample remains a subset.
+The independent parser consumes 238 of 238 unique payloads and 447 of 447 decoded occurrences with no unsupported token.
 
-An earlier private walker reported 31 of 31 payloads: 18 nested rows plus 13 top-level payloads. That 31-payload selection is not published. The 18 nested rows are reproducible, and every reachable top-level RBF0 row adds nine unique payloads (27 total), all of which parse. The full recount is larger, so the private 31-payload figure is treated as a subset result, not as the tested population.
+The original 18-row sample remains a subset. All 18 original rows and every reachable top-level RBF0 payload (nine unique) parse. The coverage claim in this document rests on the measured 238 unique payloads described above.
 
 ## Header variants
 
