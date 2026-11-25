@@ -35,6 +35,18 @@ python drawable_inspect.py inspect --file <DECODED> --system-length <BYTES> [--j
 Exit code is 0 when the report status is `complete`, 1 when it is `partial` or
 `unverified`, and 2 for invalid usage.
 
+## Census
+
+```text
+python aabb_census.py --manifest <MANIFEST.jsonl> [--json]
+```
+
+The manifest is JSON Lines with `{"id", "file", "system_length"}` per decoded
+resource. The tool runs the inspector on every file and aggregates the
+per-model AABB union and the header AABB union. It reports the model and
+drawable counts, pass/fail counts, and the header-exception causes by null LOD
+slot count. It reads only. The manifest and files are local inputs.
+
 ## Output
 
 The text report lists the segment sizes, the page-map counts, the header bounds,
@@ -49,6 +61,7 @@ The JSON report has the same values. The main fields are:
 | `status`         | `complete`, `partial` or `unverified`                                      |
 | `page_map`       | Offset and the two page counts, when the header page-map pointer resolves  |
 | `header`         | Header fields, bounds, LOD slots, distances, flags and unresolved values   |
+| `header_aabb_union` | Union of the walked model aggregates against the header AABB, its delta, model count and null LOD slots |
 | `lod_slots`      | One entry per populated LOD slot: model array, counts, shader indices, models |
 | `materials`      | Shader group, shader records, parameter counts, bound slots and key counts |
 | `graphics_base`  | Base derived from at least two vertex-buffer graphics pointers             |
@@ -66,7 +79,9 @@ Each model reports `aabb_record_count`, `aabb_aggregate`, `aabb_records` and
 `aabb_union_matches`. The records are eight `f32` values each: `minimum.xyz`,
 `minimum.x`, `maximum.xyz`, `maximum.x`. Record 0 is the aggregate, and a
 one-geometry model stores only that record. The tool checks the union within
-`2e-3`.
+`2e-3` and adds `aabb_union` when it fails. The drawable-level
+`header_aabb_union` reports the union of the walked model aggregates against the
+header AABB; a mismatch there is a diagnostic, not a `partial` status.
 
 Each index buffer reports its first three `u32` as `header`, whether they match
 the descriptor as `header_matches_descriptor`, and the longest ascending `u16`
@@ -75,9 +90,10 @@ is not a triangle list. The tool measures and bounds the index bytes; it does
 not reconstruct triangles.
 
 Each shader reports `shader_hash` (the `u32` at `+0x00`). Each parameter table
-reports `key_join` with `direct_store`, `edup_indirection`, `null_key` and
-`unresolved` counts. Every unbound slot is reported with key
-`0x0000000000000000` and status `unbound`.
+reports `keys` with `declared`, `bound`, `unbound`, `null_key`, `bound_with_key`,
+`join_attempted` and `resolved`. Every unbound slot is reported with key
+`0x0000000000000000` and status `unbound`. No store join is attempted, so
+`resolved` is `null` rather than zero.
 
 Issue codes include `input_cap`, `size`, `truncated_header`, `header_zero`,
 `missing_pointer`, `pointer_outside`, `pointer_segment`, `pointer_undecodable`,
@@ -131,12 +147,14 @@ They cover a one-LOD drawable with two geometries, a four-LOD drawable, a null
 LOD slot, overrunning model, geometry, shader and texture-slot arrays,
 undecodable and segment-mismatched pointers, a page-map read across the system
 boundary, a shared graphics pointer, a single shifted base and an ambiguous
-base. They also cover the AABB record array and its union, the declaration
-table and its layout offsets, the index header and ascending run, and the key
-join counts. Negative cases include a truncated header, a nonzero header zero
-word, an out-of-range geometry pointer, an out-of-range graphics pointer, a
-declared buffer-size mismatch, a truncated index buffer and a declaration entry
-that names no layout attribute. They do not use game files.
+base. They also cover the AABB record array and its union, the header AABB union, the
+declaration table and its layout offsets, the index header and ascending run,
+the masked count B, and the key counts. Negative cases include a truncated
+header, a nonzero header zero word, an out-of-range geometry pointer, an
+out-of-range graphics pointer, a declared buffer-size mismatch, a truncated
+index buffer, a declaration entry that names no layout attribute and an AABB
+union mismatch. A separate test covers the census aggregation and manifest
+validation. They do not use game files.
 
 ## Limits
 
@@ -144,14 +162,14 @@ that names no layout attribute. They do not use game files.
   reconstruct the segments. It expects the decoded bytes and the system length.
   The input is capped at 512 MiB.
 - Vertex attribute semantics and format codes are reported as indices, codes and
-  declaration bytes, not names. No position is decoded: the four 16-bit lanes
-  are reported raw because the dequantization scale and origin are not
-  established. The `0x80`-byte prefix is read only as the declaration table and
-  as raw bytes.
+  declaration bytes, not names. The tool does not read the attribute payload as
+  values; it reports no positions. The dequantization scale and origin are not
+  established, so the eight bytes at the first attribute stay undecoded. The
+  `0x80`-byte prefix is read only as the declaration table and as raw bytes.
 - Material parameter hashes and 64-bit keys are opaque values. The tool does not
   read the name string a key record points to and does not resolve a key to a
-  texture. The key join is exact for the decoded slots; a direct-store or EDUP
-  match requires a texture store the tool does not read.
+  texture. It reports the bound and unbound slot counts and the null-key count;
+  it attempts no store join, so it reports no resolved count.
 - The index buffer is measured, bounded and scanned for an ascending run; the
   cluster grammar is not resolved and no triangles are reconstructed.
 - No engine code path was traced. Pointer validation, record allocation and

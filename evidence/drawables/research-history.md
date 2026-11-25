@@ -61,7 +61,19 @@ uninterpreted.
 is zero in all ten samples. The index buffer begins with
 `0x80000000 | cluster_count`, count A and count B, and all three agree with the
 descriptor (DRAW-F25). The index body is clustered; its ascending `u16` run is
-not a flat triangle list (DRAW-F26).
+not a flat triangle list (DRAW-F26). The reader MUST mask both the low byte and
+the high byte: `(value >> 8) & 0xFFFF` (DRAW-F25).
+
+## The position experiment was read as excluding every linear map
+
+**Candidate.** The lane-span mismatch in A-2 was described as ruling out a
+per-axis linear map.
+
+**Correction.** It rules out a **uniform scalar across the two lanes**, not a
+per-axis map. A-2's lanes span 288 and 256 units against AABB long axes of
+`0.996094` and `0.995606`; a per-axis affine can fit each lane separately and
+was not tested. The claim is narrowed to the tested families: `f32`, `f16`, a
+uniform scalar and `4.0/2^k` (DRAW-F24).
 
 ## The graphics pointer was expected to start with packed descriptors
 

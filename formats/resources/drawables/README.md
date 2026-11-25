@@ -29,8 +29,7 @@ It holds 316 rows: 92 of local type ID 2 and 224 of local type ID 3.
 
 Both rows were re-located in the `levels.rpf` recovery population at archive
 offsets `0x10112BE010` (A) and `0x1010FBD010` (B); the decoded bytes and header
-bounds match this table. A third recovered drawable with seven geometries in one
-model (`0x00F9C86010`) is used in the AABB and declaration checks.
+Bounds match this table.
 
 The CLI decoded both rows as chunked resources. The stored and decoded sizes,
 the chunk counts and the page counts are observations. The system/graphics byte
@@ -130,12 +129,40 @@ record. The aggregate equals the union of the per-geometry records within
 | A | 1 | 3 (aggregate + 2) | yes, both geometries |
 | B | 4 | 3 (aggregate + 2) | yes, all four models |
 
-Across 2,006 models in the first 6,000 decoded recovery candidates below
-400 KiB that carried a model chain, the aggregate equalled the union of the
-per-geometry records in 2,006. In 1,932 of those 1,990 drawables, the union of
-all model aggregates equalled the header AABB within `2e-3`; the header is the
-union across models and LOD slots, so a single model is not expected to match it
-in a multi-model drawable.
+The per-model union is checked by the inspector (`aabb_union_matches`). The
+drawable-level header check is `header_aabb_union`: the union of every walked
+model aggregate against the header AABB. `tools/drawables/aabb_census.py`
+aggregates both checks over a JSON Lines manifest of decoded resources.
+
+| Census result | Count |
+| ------------- | ----: |
+| Decoded resources in the selection | 6,000 |
+| Drawables with at least one walked model aggregate | 1,990 |
+| Models | 2,006 |
+| Models with one geometry (union check trivially true) | 669 |
+| Models with at least two geometries | 1,337 |
+| Model union pass / fail | 2,006 / 0 |
+| Multi-geometry union pass / fail | 1,337 / 0 |
+| Header union pass / fail | 1,932 / 58 |
+
+All 1,337 models with at least two geometries pass the model union check. The
+669 single-geometry models are not evidence for the union; they are counted
+separately. The selection rule is the first 6,000 recovery candidates of
+`levels.rpf` with the resource signature, decoded size at most 400,000 bytes and
+one to four streams. The manifest and decoded files are local inputs; they are
+not published.
+
+The 58 header exceptions have two named causes:
+
+- 57 drawables have exactly three null LOD slots. The header is the union across
+  all four LOD slots, including the models in the three slots that are not
+  present, so the present-model union need not equal it.
+- One drawable (`0x01066B9010`) has four populated LOD slots and four models,
+  but its aggregate minimum on one axis is `0.1849` below the header minimum.
+  The header is not the union of the four model aggregates there. No cause is
+  established beyond the disagreement.
+
+For the named rows A and B, the header union matches.
 
 This corrects the earlier reading that the target "starts with the model
 min/max". The array is a bounds structure, not a decoded vertex stream. The
@@ -248,32 +275,42 @@ A parser MUST match declaration entries to layout offsets and MUST NOT treat
 
 Format byte `0x42` with an 8-byte layout entry is the position candidate: the
 first entry of every observed declaration table, before any other attribute.
-The eight bytes carry four 16-bit lanes. They are the only stored values with a
-per-vertex three-lane structure, and no other attribute has enough lanes.
+The eight bytes carry four 16-bit lanes. They are the only stored attribute wide
+enough to carry three 16-bit lanes, and no other attribute has enough bytes.
 
-No dequantization was established. These alternatives were checked and rejected:
+No dequantization was established. Each experiment below is scoped to what it
+actually rules out; none is a general disproof.
 
-- two `f32` lanes: NaN in two of A-2's four vertices;
-- four `f16` lanes: non-finite values;
-- a uniform step of `1/256`: A-2's long axes would span `1.125` and `1.0`
-  world units, and the stored AABB spans are both `0.996`;
-- the prefix `4.0` at `+0x7C` as a numerator with `2^k`, `k = 8..15`: no `k`
-  makes both long axes agree within `1e-3`;
-- the `0x70` f16 halves as per-axis steps: they do not reproduce the AABB;
-- a per-axis affine fitted to the stored AABB: circular, not accepted.
+- **Two `f32` lanes.** In A-2 two of the four vertices produce NaN in the first
+  `f32` lane. This rules out an `f32` pair for A-2's eight bytes; it does not
+  rule out `f32` in other geometries.
+- **Four `f16` lanes.** A-2 produces non-finite `f16` values. This rules out an
+  `f16` quartet for A-2's eight bytes.
+- **One uniform scalar across both long lanes.** A-2's two varying lanes span
+  288 and 256 raw units, a ratio of `1.125`. Its per-geometry AABB record has
+  long-axis spans `0.996094` (x) and `0.995606` (z), a ratio of `1.00049`. A
+  single scalar applied to both lanes cannot produce both spans. This rules out
+  a uniform scale for A-2; it does not rule out a per-axis scale.
+- **The prefix `4.0` at `+0x7C` as a uniform numerator with `2^k`,
+  `k = 8..15`.** The closest case is `k = 10`, giving a step of `1/256`: the x
+  lane would span `1.125` (error `0.1289` against `0.996094`) and the z lane
+  `1.0` (error `0.00439` against `0.995606`). No `k` in the range puts both
+  axes within `1e-3`. This rules out that family of uniform scales for A-2.
 
-In A-2 the two varying lanes span 288 and 256 raw units, while the stored AABB
-spans are equal in the two long axes (`0.996`). A single per-axis linear map
-therefore cannot map both lanes to that AABB, and no field among the
-vertex-buffer record, the layout, or the decoded `0x80` prefix carries a
-per-axis scale and origin pair that reproduces the AABB independently. The
-positions are **not accepted** and no point cloud is published. The layout,
+A **per-axis affine** remains untested and is not excluded. It could map each
+lane to a different AABB axis by construction, but that is a fit to the stored
+bounds, not a decode of the stored format. The `0x70` block was not identified
+as a per-axis scale and origin; no decoded field was found to supply one.
+
+The positions are **not accepted** and no point cloud is published. The layout,
 declaration and AABB are structural; the position semantics remain **Unknown**.
 
-Discriminating experiment: find a vertex buffer whose declaration byte is a
-float format and read positions directly, or trace the engine decoder for
-format `0x42` and locate the scale/origin it applies. Until then, a parser
-SHOULD report the four lanes as raw values and MUST NOT name them POSITION.
+Discriminating experiment: test a per-axis affine independently of the AABB it
+is fitted to (for example, fit on one LOD and predict another), find a vertex
+buffer whose declaration byte is a float format and read positions directly, or
+trace the engine decoder for format `0x42` and locate the scale and origin it
+applies. Until then, a parser SHOULD report the four lanes as raw values and
+MUST NOT name them POSITION.
 
 ### Buffer sizing
 
@@ -333,7 +370,7 @@ The geometry `+0x40` pointer targets a 0x20-byte descriptor:
 | `+0x00` | 8 | Observed in 10/10 | System pointer to the index-buffer record |
 | `+0x08` | 2 | Observed in 10/10 | `u16` cluster count |
 | `+0x0A` | 2 | Observed in 10/10 | `u16` count A; equals the index buffer's second `u32` |
-| `+0x0C` | 4 | Observed in 10/10 | `u32`; bits 8..23 are count B, equal to the index buffer's third `u32`. The low byte is zero in all ten samples and is uninterpreted |
+| `+0x0C` | 4 | Observed in 10/10 | `u32`; bits 8..23 are count B, equal to the index buffer's third `u32`. Read it as `(value >> 8) & 0xFFFF`. The low byte is zero in all ten samples; the high byte was not exercised by the samples |
 | `+0x10` | 16 | Observed in 10/10 | Zero |
 
 The descriptor is followed at `+0x20` by another 0x20-byte record whose `+0x10`
@@ -466,18 +503,24 @@ shader is a second counterexample to "parameter count equals bound count".
 The two A parameter tables carry the same six texture-parameter `u32` hashes:
 `0xC8E8C282`, `0x739E3D0D`, `0x2C8D7182`, `0x0CD27763`, `0xC6F46E79` and
 `0x1E77BF4C`. The set is stable across the sampled drawables and is not
-per-payload. Four of the six equal `joaat` of a short parameter name; the
-remaining two stay hashes. The parameter hash algorithm is the same
-one-at-a-time hash used for 32-bit name keys.
+per-payload. Five parameter hashes equal folded `joaat` of a candidate spelling;
+the others stay hashes.
 
-| Hash | `joaat` preimage | Confidence |
-| ---- | ---------------- | ---------- |
-| `0xC8E8C282` | `DiffuseTex` | Confirmed (hash match) |
-| `0x1E77BF4C` | `BumpTex` | Confirmed (hash match) |
-| `0xC6F46E79` | `SpecularTex` | Confirmed (hash match) |
-| `0x739E3D0D` | `SpecularTex2` | Confirmed (hash match) |
-| `0x0DF47048` | `DiffuseTex2` | Confirmed (hash match) |
-| `0x2C8D7182`, `0x0CD27763` | unknown | Unknown |
+The candidate spellings were supplied by the researcher as common RAGE texture
+parameter names; they were not extracted from the game data or the executable.
+Each candidate was hashed with folded `joaat` and compared to the observed
+value. The occurrence count is the number of texture slots carrying that hash in
+the eight-drawable material census. A single occurrence is weaker evidence for a
+name than a repeated one.
+
+| Hash | Candidate `joaat` preimage | Occurrences | Confidence |
+| ---- | -------------------------- | ----------: | ---------- |
+| `0xC8E8C282` | `DiffuseTex` | 48 | Confirmed (hash match) |
+| `0x1E77BF4C` | `BumpTex` | 48 | Confirmed (hash match) |
+| `0xC6F46E79` | `SpecularTex` | 48 | Confirmed (hash match) |
+| `0x739E3D0D` | `SpecularTex2` | 47 | Confirmed (hash match) |
+| `0x0DF47048` | `DiffuseTex2` | 7 | Confirmed (hash match) |
+| `0x2C8D7182`, `0x0CD27763` | unknown | 52 each | Unknown |
 
 `joaat("alpha/beta") = 0x75438640` reproduces the published control vector. A
 hash match proves a preimage; it does not prove that the engine's author chose
@@ -491,18 +534,17 @@ parameters and 55 total parameters; `0x512937B5` always carries 7 and 68;
 share `0xF28992E6`, and sample B shader 0 is `0x512937B5`. This makes the `u32`
 a probable shader hash, not a per-material identifier and not a name.
 
-### Key join
+### Keys
 
 Every bound slot yields a 64-bit key from its name record. Every unbound slot
 is reported with the key `0x0000000000000000` and status `unbound`, not with a
-missing value. Across eight recovered drawables (the first eight in recovery order with at least
-two shaders) there are 348 declared texture slots: 278 bound, 70 unbound, 0 null
-keys, 0 direct-store matches, 0 EDUP indirections and 278 unresolved keys. Every
-unbound slot is reported with key `0x0000000000000000`; every bound slot yields
-a 64-bit key. A null key means a bound name record whose key is zero; none
-occurred. A direct-store match or an EDUP indirection requires a texture store
-that was not reached, so both counts are zero. The join is exact for these
-inputs and does not claim a resolution.
+missing value. Across eight recovered drawables (the first eight in recovery
+order with at least two shaders) there are 348 declared texture slots: 278
+bound, 70 unbound and 0 null keys. All 278 bound slots carry a nonzero key.
+
+No store join was attempted. The resolved count is left unset rather than zero,
+because a direct-store or EDUP match cannot be counted without a texture store.
+No key was resolved.
 
 No local texture store was reached from these samples. Resolving a key depends
 on a resource-side texture dictionary or store reference path that was not
@@ -575,10 +617,11 @@ column lists what remains uninterpreted.
 - No engine code path was traced. Pointer validation, allocation and runtime
   meanings remain **Unknown**.
 - Payload ASCII names are not reproduced.
-- No vertex position was accepted. The four 16-bit lanes are reported raw; a
-  fit to the stored AABB would be circular.
+- No vertex position was accepted. For A-2, an `f32` pair, an `f16` quartet, a
+  uniform scalar across the lanes and `4.0/2^k` are excluded; a per-axis affine
+  remains untested and is not excluded.
 - No triangles were reconstructed. The ascending `u16` run is cluster-local.
-- Four texture parameter hashes resolve to `joaat` preimages; two of the six
+- Five texture parameter hashes resolve to `joaat` preimages; two of the six
   standard hashes and the remaining material-specific hashes stay hashes. No
   key, texture or material name is resolved.
 - The system-wide pointer sweep, the `+0xB0` list shape and the texture-store

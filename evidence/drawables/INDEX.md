@@ -72,21 +72,22 @@ re-inflated independently for this index.
 | DRAW-F19 | No key was resolved to a texture and no texture store was reached from these samples. Resolution depends on a resource-side texture-dictionary or store-reference path that was not found. | `BINARY` (absence), `CROSS_SAMPLE` | Confirmed (absence in samples); Unknown (dependency) | No texture dependency path |
 | DRAW-F20 | The shader-group `+0x08` pointer is nonzero in A and zero in B. The header skeleton `+0x18` is null in both. LOD slots are sparse. The header distance values can be the sentinel `9998`. No single fixed header size is established. | `BINARY`, `CROSS_SAMPLE` | Confirmed (presence); Unknown (versioning rule) | Two samples |
 | DRAW-F21 | The first 16 `u32` words at a graphics pointer were not attribute descriptors. Each vertex-buffer target begins with a 0x80-byte prefix whose first four bytes are `42 40 00 00`; the attributes are the separate offset, size and format arrays in the layout at vertex buffer `+0x40`. The candidate packed form (`format`, `size << 3`, `offset << 7`) was not observed. | `BINARY`, `CROSS_SAMPLE` | Rejected (candidate descriptor reading) | Ten geometries; the prefix is not interpreted |
-| DRAW-F22 | The model `+0x18` target is an array of eight-`f32` records: `minimum.xyz`, `minimum.x`, `maximum.xyz`, `maximum.x`. The fourth word duplicated the first in all 9,579 records read. Record 0 is the aggregate; records 1..N are per-geometry AABBs in geometry-array order. A single-geometry model stores only record 0. The aggregate equals the per-geometry union within `2e-3` in 2,006 of 2,006 models, and the union of all model aggregates equals the header AABB within `2e-3` in 1,932 of 1,990 drawables. This supersedes the "model min/max at the target start" part of DRAW-F03/F06. | `BINARY`, `CROSS_SAMPLE` | Confirmed (values and union) | First 6,000 decoded recovery candidates below 400 KiB with a model chain; the header is a union across models and LOD slots |
+| DRAW-F22 | The model `+0x18` target is an array of eight-`f32` records: `minimum.xyz`, `minimum.x`, `maximum.xyz`, `maximum.x`. The fourth word duplicated the first in all 9,579 records read. Record 0 is the aggregate; records 1..N are per-geometry AABBs in geometry-array order. A single-geometry model stores only record 0. In the census: 2,006 models, 669 with one geometry, 1,337 with at least two; all 1,337 multi-geometry models pass the union check. Header union passes in 1,932 of 1,990 drawables. Of 58 exceptions, 57 have exactly three null LOD slots (the header includes absent LODs); one (`0x01066B9010`) has four populated slots and a z-min 0.1849 below the header, cause not established. This supersedes the "model min/max at the target start" part of DRAW-F03/F06. | `BINARY`, `CROSS_SAMPLE` | Confirmed (values and union) | First 6,000 `levels.rpf` recovery candidates with the resource signature, decoded size ≤ 400,000 bytes and 1-4 streams; the manifest is not published |
 | DRAW-F23 | A vertex-buffer graphics prefix begins with a declaration table: each `u32` is `u8 format` in bits 0..7 and `offset / 2` in bits 8..31; a zero word ends it. One entry exists per present attribute, in position-first order, and every entry offset equals a layout offset. The table format byte is not the layout `u8` format code. | `BINARY`, `CROSS_SAMPLE` | Confirmed (positions and offsets); Unknown (format byte meaning) | Ten geometries; the entry order and byte meaning are not generalised |
-| DRAW-F24 | The first declaration entry has format `0x42`, points at the `0x80` offset and covers the 8-byte layout entry. Those eight bytes are four 16-bit lanes. No dequantization was established: in A-2 the two varying lanes span 288 and 256 raw units while its stored AABB has equal long-axis spans. Rejected alternatives: two `f32` (NaN), four `f16` (non-finite), uniform `1/256`, `4.0/2^k` for `k = 8..15`, and the `0x70` f16 halves as steps. A per-axis fit to the AABB is circular. No position was accepted. | `BINARY`, `CROSS_SAMPLE` | Confirmed (layout); Unknown (semantics) | One four-vertex geometry and the ten baseline geometries |
+| DRAW-F24 | The first declaration entry has format `0x42`, points at the `0x80` offset and covers the 8-byte layout entry. Those eight bytes are four 16-bit lanes. A-2's two varying lanes span 288 and 256 raw units, ratio `1.125`; its per-geometry AABB long axes span `0.996094` and `0.995606`, ratio `1.00049`. This rules out a uniform scalar across the lanes, an `f32` pair (NaN), an `f16` quartet (non-finite) and `4.0/2^k` for `k = 8..15` for A-2. A per-axis affine remains untested and is not excluded. No position was accepted. | `BINARY`, `CROSS_SAMPLE` | Confirmed (layout); Unknown (semantics) | One four-vertex geometry and the ten baseline geometries; the negatives are scoped to A-2 |
 | DRAW-F25 | The index descriptor `+0x0A` is count A and `+0x0C` bits 8..23 are count B; the low byte of `+0x0C` is zero in all ten samples. The index bytes begin with `0x80000000 \| cluster_count`, then count A and count B, and the header matches the descriptor in 10/10 geometries. | `BINARY`, `CROSS_SAMPLE` | Confirmed (counts and header) | Ten geometries; the low byte is uninterpreted |
 | DRAW-F26 | Each sampled index body contains an ascending `u16` run starting at zero. The run length is not the vertex count in general: A-1 32/32, A-2 4/4, B-1 115/902, B-3 114/540. The run is cluster-local; the cluster boundaries and the triangle grammar are Unknown, and no flat triangle list was produced. | `BINARY`, `CROSS_SAMPLE` | Confirmed (run structure); Unknown (grammar) | Ten geometries; no triangles reconstructed |
 | DRAW-F27 | The shader `+0x00` `u32` is stable for a parameter schema: `0xBCF03FC1` carries 6 texture and 55 total parameters, `0x512937B5` carries 7 and 68, and `0xF28992E6` carries 6 and 54 in both A and B and in recovered drawables. It is a probable shader hash, not a per-material identifier or a name. | `BINARY`, `CROSS_SAMPLE` | Probable (stable hash) | Ten shader hashes over eight drawables; the hash namespace is Unknown |
-| DRAW-F28 | Four of the six standard texture-parameter hashes equal `joaat` of a short name: `0xC8E8C282` = `DiffuseTex`, `0x1E77BF4C` = `BumpTex`, `0xC6F46E79` = `SpecularTex`, `0x739E3D0D` = `SpecularTex2`; `0x0DF47048` = `DiffuseTex2` also occurs. `0x2C8D7182` and `0x0CD27763` stay hashes. The control `joaat("alpha/beta") = 0x75438640` reproduces. A match proves a preimage, not the original spelling. | `BINARY`, `SYNTHETIC` (control) | Confirmed (hash match); candidate names | Eight drawables; no name dictionary for the remaining hashes |
-| DRAW-F29 | Across eight recovered drawables (the first eight in recovery order with at least two shaders) there are 348 declared texture slots: 278 bound, 70 unbound, 0 null keys, 0 direct-store matches, 0 EDUP indirections and 278 unresolved keys. Every unbound slot is reported with key `0x0000000000000000`; every bound slot yields a 64-bit key. | `BINARY`, `CROSS_SAMPLE` | Confirmed (counts); Unknown (store) | No texture store was reached |
+| DRAW-F28 | Five texture-parameter hashes equal folded `joaat` of a researcher-supplied candidate spelling: `0xC8E8C282` = `DiffuseTex` (48 occurrences), `0x1E77BF4C` = `BumpTex` (48), `0xC6F46E79` = `SpecularTex` (48), `0x739E3D0D` = `SpecularTex2` (47) and `0x0DF47048` = `DiffuseTex2` (7). `0x2C8D7182` and `0x0CD27763` stay hashes (52 each). The candidates were not extracted from game data or the executable; each was hashed and compared to the observed value. The control `joaat("alpha/beta") = 0x75438640` reproduces. A match proves a preimage, not the original spelling. | `BINARY`, `SYNTHETIC` (control) | Confirmed (hash match); candidate names | Eight drawables; `DiffuseTex2` has 7 occurrences; no name dictionary for the remaining hashes |
+| DRAW-F29 | Across eight recovered drawables (the first eight in recovery order with at least two shaders) there are 348 declared texture slots: 278 bound, 70 unbound and 0 null keys. All 278 bound slots carry a nonzero 64-bit key; every unbound slot is reported with key `0x0000000000000000`. No store join was attempted, so no key was resolved and the resolved count is unset rather than zero. | `BINARY`, `CROSS_SAMPLE` | Confirmed (bound, unbound and null counts); Unknown (store) | No texture store was reached; no direct-store or EDUP count is claimed |
 | DRAW-F30 | The two named rows were re-located in the `levels.rpf` recovery population at archive offsets `0x10112BE010` (A, 7,840 bytes, 2 streams) and `0x1010FBD010` (B, 90,624 bytes, 3 streams); their header bounds and chain counts match the named rows. | `BINARY`, `CROSS_SAMPLE` | Confirmed (reproduction) | One archive; recovery offsets are not native row indices |
 
 ## Method per finding
 
-`Yes` means the published inspector reads the value. `No` means the value is a
-manual byte observation. `Partly` means the inspector supplies part of the
-evidence and a manual step supplies the rest.
+`Yes` means the published inspector (or, for the aggregate, the committed census)
+reads the value. `No` means the value is a manual byte observation. `Partly`
+means the published tools supply part of the evidence and a manual step supplies
+the rest.
 
 | ID | Method | Inspector |
 | -- | ------ | --------- |
@@ -111,14 +112,14 @@ evidence and a manual step supplies the rest.
 | DRAW-F19 | Manual absence check; no texture store was reached | No |
 | DRAW-F20 | Inspector optional-field read | Yes |
 | DRAW-F21 | Inspector layout and marker read; manual candidate rejection | Partly |
-| DRAW-F22 | Inspector AABB-array read and union check over recovered resources | Yes |
+| DRAW-F22 | Inspector per-model AABB read and union check; committed `aabb_census.py` for the header union and exception causes | Yes |
 | DRAW-F23 | Inspector declaration-table read | Yes |
-| DRAW-F24 | Inspector raw-lane read; manual span comparison | Partly |
+| DRAW-F24 | Inspector layout read; manual lane-span comparison | Partly |
 | DRAW-F25 | Inspector index descriptor and header read | Yes |
 | DRAW-F26 | Inspector ascending-run read | Yes |
 | DRAW-F27 | Inspector shader-hash read; cross-drawable comparison | Yes |
 | DRAW-F28 | Manual `joaat` comparison over candidate names; synthetic control vector | No |
-| DRAW-F29 | Inspector key join over eight drawables | Yes |
+| DRAW-F29 | Inspector key counts over eight drawables | Yes |
 | DRAW-F30 | Recovery export and inspector comparison with the named rows | Partly |
 
 ## Counters and negative results
@@ -144,8 +145,9 @@ evidence and a manual step supplies the rest.
   index-buffer count B (DRAW-F25).
 - **The ascending index run is not a flat triangle list.** Its length is not
   the vertex count in general (DRAW-F26).
-- **No vertex position is accepted.** The four lanes are raw; the AABB cannot
-  supply the missing scale without circularity (DRAW-F24).
+- **No vertex position is accepted.** For A-2, an `f32` pair, an `f16`
+  quartet, a uniform scalar across the lanes and `4.0/2^k` are excluded; a
+  per-axis affine remains untested and is not excluded (DRAW-F24).
 - **No texture is resolved.** No local texture store was reached
   (DRAW-F19, DRAW-F29).
 
@@ -164,23 +166,30 @@ lforge archive recover <GAME_ROOT>/levels.rpf --id 0x10112BE010 --output <WORK>/
 lforge archive recover <GAME_ROOT>/levels.rpf --id 0x1010FBD010 --output <WORK>/drawB.bin --overwrite
 python tools/drawables/drawable_inspect.py inspect --file <WORK>/drawA.bin --system-length 0x16F0 --json
 python tools/drawables/drawable_inspect.py inspect --file <WORK>/drawB.bin --system-length 0x40F0 --json
+python tools/drawables/aabb_census.py --manifest <WORK>/census.jsonl --json
 python -m unittest discover -s tools/drawables -p "test_*.py"
 ```
+
+The census manifest is JSON Lines with `{"id", "file", "system_length"}` per
+decoded resource. The selection and the manifest are local inputs; the manifest
+is not published.
 
 The `archive ls` output supplies the row type IDs, stored sizes, decoded sizes
 and chunk counts. The recovery commands reproduce the two named rows by archive
 offset; a recovery offset is not a native row index. The inspector commands
-reproduce the findings marked `Yes` or `Partly` above. They do not reproduce
-DRAW-F08, DRAW-F09, DRAW-F28 or DRAW-F19: those are manual reads or an external
-name comparison, and DRAW-F19 remains not demonstrated. The system-length values
+reproduce the findings marked `Yes` or `Partly` above. The census reproduces
+DRAW-F22's header counts and exception causes. The manual reads do not reproduce
+DRAW-F08, DRAW-F09, DRAW-F28 or DRAW-F19; DRAW-F19 remains not demonstrated. The system-length values
 are derived from the graphics targets and the page counts, not from a stored
 field.
 
 ## Limits
 
-- One build. The named rows are two rows of one nested archive; the AABB checks
-  cover 2,006 models and 1,990 drawables from recovered `levels.rpf` resources;
-  the material checks cover 8 drawables. Other type IDs and builds were not
+- One build. The named rows are two rows of one nested archive. The AABB census
+  selects the first 6,000 `levels.rpf` recovery candidates with the resource
+  signature, decoded size ≤ 400,000 bytes and 1-4 streams; it yields 1,990
+  drawables and 2,006 models. The material checks cover the first 8 drawables in
+  recovery order with at least two shaders. Other type IDs and builds were not
   inspected.
 - The local type ID 2 is a CLI assignment, not a format identity; the label
   "drawable" is the subject name used by this iteration.
