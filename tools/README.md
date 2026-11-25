@@ -1,6 +1,8 @@
 # Tools
 
-No tools are published yet.
+Published tools:
+
+- [inventory](inventory/README.md): deterministic sampler for nested RPF9 archives and payload prefixes.
 
 A tool added here MUST:
 
