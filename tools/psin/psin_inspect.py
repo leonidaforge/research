@@ -224,7 +224,15 @@ def inspect_bytes(
         offset = end
 
     tag_sequence = [section["tag"] for section in sections]
-    family = tag_sequence[0] if tag_sequence else None
+    first_tag = tag_sequence[0] if tag_sequence else None
+    if first_tag == "LSCH":
+        family = "LSCH"
+    elif first_tag == "PMAP":
+        family = "PMAP"
+    elif first_tag is not None:
+        family = "OTHER"
+    else:
+        family = None
 
     header = {
         "first_section_offset": first_offset,
@@ -298,6 +306,7 @@ def inspect_bytes(
         "sha256": hashlib.sha256(data).hexdigest(),
         "magic": "PSIN",
         "family": family,
+        "first_tag": first_tag,
         "header": header,
         "family_data": family_data,
         "sections": sections,
@@ -313,6 +322,7 @@ def _print_text(report: dict, stream) -> None:
     print(f"size: {report['size']} bytes", file=stream)
     print(f"sha256: {report['sha256']}", file=stream)
     print(f"family: {report['family']}", file=stream)
+    print(f"first_tag: {report['first_tag']}", file=stream)
     header = report["header"]
     print(
         "header:"

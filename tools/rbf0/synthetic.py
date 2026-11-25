@@ -41,13 +41,13 @@ class Builder:
     def value_existing(self, code: int, index: int, payload: bytes) -> bytes:
         return u16((code << 12) | index) + payload
 
-    def element(self, name: bytes, attributes=(), body=()) -> bytes:
+    def element(self, name: bytes, attributes=(), body=(), reserved: int = 0) -> bytes:
         head = self.name_token(0, name)
         attribute_bytes = b"".join(build() for build in attributes)
         body_bytes = b"".join(build() for build in body)
         return (
             head
-            + u32(0)
+            + u32(reserved)
             + u16(len(attributes))
             + attribute_bytes
             + body_bytes
@@ -130,6 +130,11 @@ def name_reuse_document() -> bytes:
     return versioned(root)
 
 
+def nonzero_reserved_document() -> bytes:
+    b = Builder()
+    return versioned(b.element(b"root", reserved=0x12345678))
+
+
 def nested_document(depth: int) -> bytes:
     b = Builder()
 
@@ -189,6 +194,7 @@ FIXTURES = {
     "versioned_all_types": all_value_types,
     "versionless": versionless_document,
     "name_reuse": name_reuse_document,
+    "nonzero_reserved": nonzero_reserved_document,
     "malformed_truncated_token": lambda: malformed("truncated_token"),
     "malformed_truncated_version": lambda: malformed("truncated_version"),
     "malformed_name_length": lambda: malformed("name_length_past_end"),

@@ -76,6 +76,15 @@ class InspectTests(unittest.TestCase):
         )
         self.assertTrue(report["integrity"]["total_length_equals_size"])
 
+    def test_unknown_first_tag_is_reported_as_other(self):
+        prefix = b"PSIN" + struct.pack(">I", 16) + b"\0" * 8
+        raw = synthetic.with_checksum(prefix, [(b"ZZZZ", b"\0" * 16)])
+        report = psin_inspect.inspect_bytes(raw)
+        self.assertEqual(report["family"], "OTHER")
+        self.assertEqual(report["first_tag"], "ZZZZ")
+        self.assertIsNone(report["family_data"])
+        self.assertTrue(report["checks"]["checksum_ok"])
+
     def test_report_is_json_serializable(self):
         raw = synthetic.lsch_document([4, 8])
         report = psin_inspect.inspect_bytes(raw)

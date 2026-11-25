@@ -287,6 +287,11 @@ def _print_text(report: Report, stream) -> None:
         print(f"{key}: {counts.get(key, 0)}", file=stream)
     for code in sorted(counts.get("values_by_type", {})):
         print(f"value_type_{code}: {counts['values_by_type'][code]}", file=stream)
+    for entry in header.get("nonzero_reserved", []):
+        print(
+            f"nonzero reserved: offset 0x{entry['offset']:X} value 0x{entry['value']:08X}",
+            file=stream,
+        )
     print(f"definitions: {len(definitions)}", file=stream)
     for entry in definitions:
         print(

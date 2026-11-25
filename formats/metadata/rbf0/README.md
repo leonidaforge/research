@@ -26,11 +26,12 @@ The `metadata/` category is used because the payloads carry a name table and typ
 
 ## Population
 
-The tested population is 447 decoded RBF0 payloads, 238 unique by SHA-256 of the decoded bytes:
+The tested population is 447 decoded RBF0 payloads, 238 unique by SHA-256 of the decoded bytes. The 447 occurrences include the original row 0 extraction and a second extraction of the same archive inside the 18-archive set; removing that duplicate leaves 291 occurrences and the same 238 unique payloads. Repeated rows contribute further duplicate occurrences but no new unique payload.
 
-- 156 type 11 rows of the original nested archive, row 0 of `<GAME_ROOT>/data.rpf`;
-- all readable type 11 rows of 17 more RPF9 archives extracted from `<GAME_ROOT>/data.rpf`, selected at or below 2 MiB;
-- all readable top-level type 11 rows that begin with `RBF0`, nine unique payloads.
+Selection:
+
+- Nested archives: the 18 RPF9 archives stored as type 0 rows of `<GAME_ROOT>/data.rpf` with logical size at or below 2 MiB, namely rows 0, 1, 3, 7, 8, 9, 13, 14, 15, 16, 19, 20, 23, 31, 32, 35, 37 and 38. Every readable type 11 row from each was extracted.
+- Top-level archives: all 22 `.rpf` files in the game root and the `pack/` tree: `anim.rpf`, `appdata0.rpf`, `audio.rpf`, `common.rpf`, `data.rpf`, `levels.rpf`, `movies.rpf`, `navmeshes.rpf`, `packs.rpf`, `script.rpf`, `shaders.rpf`, `textures.rpf`, `pack/core_bvh4/core_bvh4.rpf`, `pack/core_licenses/core_licenses_data.rpf`, `pack/core_restofworld/core_restofworld.rpf`, `pack/core_restofworld001/core_restofworld001.rpf`, `pack/shared_minigame000/shared_minigame000.rpf`, `pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf`, `pack/story000/story000.rpf`, `pack/story000/story000_script.rpf`, `pack/story000_bvh4/story000_bvh4.rpf` and `pack/story000_restofworld/story000_restofworld.rpf`. Every readable type 11 row whose decoded payload begins with `RBF0` was included.
 
 The independent parser consumes 238 of 238 unique payloads and 447 of 447 decoded occurrences with no unsupported token.
 
@@ -45,11 +46,13 @@ All integers are little-endian unless stated otherwise.
 | Offset | Type | Value | Meaning |
 | ------ | ---- | ----- | ------- |
 | `+0x00` | 4 bytes | `52 42 46 30` | Magic `RBF0` |
-| `+0x04` | `u16` | `0xFFFB` | Version marker |
-| `+0x06` | `u16` | `1` in every observed sample | Version |
+| `+0x04` | `u16` | `0xFFFB` | Unknown. Candidate version marker; interpretation **Speculative** |
+| `+0x06` | `u16` | `1` in every observed sample | Unknown. Candidate version; interpretation **Speculative** |
 | `+0x08` | token stream | first token `0x0000` | Root element token |
 
 Numbers in this form are 8 bytes. The versioned form occurs in 235 of the 238 unique payloads.
+
+The header split and the number-width difference are confirmed. The labels `version marker` and `version` are descriptive; the reading of the two words as a version pair is **Speculative**.
 
 ### Versionless form
 

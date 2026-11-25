@@ -18,7 +18,7 @@ The 918 files collapse to 757 unique payloads because overlapping nested archive
 
 ### Relation to earlier counts
 
-The PSIN-F01 claim in the earlier revision recorded 103 unique payloads. That figure describes a narrower convenience sample: the first 18 type 11 payloads, 85 additional payloads from nine top-level archives at or below 1 MiB selected by a per-archive quantile rule, and 13 depth-1 payloads. The full recount in this document is 757 unique payloads, with 695 `LSCH` and 62 `PMAP`.
+The PSIN-F01 claim in the earlier revision recorded 103 unique payloads: 18 earlier payloads plus 85 additional payloads. The 85 additions combine the deterministic top-level sample and the depth-1 payloads; duplicates are removed by SHA-256 before the total is taken. The rows for the 82 expanded-extraction payloads and the 13 depth-1 payloads describe the two source sets, not additional components. The full recount in this document is 757 unique payloads, with 695 `LSCH` and 62 `PMAP`.
 
 ## Evidence types
 

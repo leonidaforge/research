@@ -105,6 +105,20 @@ class ParserTests(unittest.TestCase):
             inspect.inspect_bytes(synthetic.malformed("bad_magic"))
         self.assertEqual(raised.exception.token, "magic")
 
+    def test_nonzero_reserved_word_is_reported_in_text_output(self) -> None:
+        document = synthetic.nonzero_reserved_document()
+        report = inspect.inspect_bytes(document)
+        self.assertEqual(report.header["nonzero_reserved"][0]["value"], 0x12345678)
+        with tempfile.TemporaryDirectory() as directory:
+            path = os.path.join(directory, "reserved.rbf0")
+            with open(path, "wb") as handle:
+                handle.write(document)
+            output = io.StringIO()
+            with contextlib.redirect_stdout(output):
+                self.assertEqual(inspect.main([path]), 0)
+        self.assertIn("nonzero reserved", output.getvalue())
+        self.assertIn("0x12345678", output.getvalue())
+
     def test_cli_exit_codes(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             good = os.path.join(directory, "good.rbf0")

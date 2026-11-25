@@ -27,7 +27,7 @@ The family split is 695 `LSCH` and 62 `PMAP`. The first-section offset is aligne
 
 ### Earlier counts
 
-The PSIN-F01 claim in the earlier revision recorded 103 unique payloads. That figure describes a narrower convenience sample: 18 earlier payloads, 85 additional top-level payloads at or below 1 MiB selected by a per-archive quantile rule, and 13 depth-1 payloads. The full recount in this document is 757 unique payloads, with 695 `LSCH` and 62 `PMAP`. Uniqueness is the SHA-256 of the decoded payload; overlapping nested archives and repeated rows account for the difference between 918 files and 757 unique payloads.
+The PSIN-F01 claim in the earlier revision recorded 103 unique payloads: 18 earlier payloads plus 85 additional payloads. The 85 additions combine the deterministic top-level sample and the depth-1 payloads; duplicates are removed by SHA-256 before the total is taken. The 82 PSIN payloads from the expanded top-level extraction and the 13 depth-1 payloads reported in the evidence index are the two source sets, not additional components. The full recount in this document is 757 unique payloads, with 695 `LSCH` and 62 `PMAP`. Uniqueness is the SHA-256 of the decoded payload; overlapping nested archives and repeated rows account for the difference between 918 files and 757 unique payloads.
 
 ## Shared outer framing
 
@@ -107,7 +107,7 @@ The remaining pre-section area is not constant:
 | Fixed-stride table | Negative. The number of `0x70` runs ranges from 1 to 41 and their positions vary |
 | Compressed data | Negative for the tested signatures and decoders. No zlib, gzip, xz, bzip2, LZ4 or zstd signature occurs at `+0x10`; zlib, gzip, bzip2 and LZMA produced no non-empty output |
 | Embedded payload | Negative. No `PSIN`, `RBF0` or section tag occurs inside the pre-section area |
-| Length pattern | The area length is 16-byte aligned after the first eight bytes in 52 of 62 payloads, with nine length-8 and one length-4 exceptions |
+| Length pattern | In 52 of 62 payloads `(pre_section_length - 8) mod 16` is 0; nine have remainder 8 and one has remainder 4 |
 
 The cheapest first case is the 216-byte payload: a 40-byte pre-section area with two `0x70` runs, zero bytes and two small big-endian words. It does not decode as a compressed stream or an embedded payload.
 
@@ -147,7 +147,7 @@ Identification MUST use the payload bytes. The classifier reports the family fro
 
 - `LSCH` is reported with its descriptor count and formula result.
 - `PMAP` is reported as a second grammar with its `0x70` marker and pre-section length, not as a failed parse.
-- An unknown first tag is reported as `OTHER`.
+- An unknown first tag is reported as `OTHER`; `first_tag` reports the raw tag bytes.
 
 The RPF9 type ID alone is not sufficient.
 

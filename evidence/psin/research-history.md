@@ -18,7 +18,7 @@ Interpretations that were once used for PSIN and later corrected. The current mo
 
 **Old assumption.** The recorded sample of 103 unique payloads was treated as the reachable PSIN population.
 
-**Correction.** The 103 figure is a narrower convenience sample: 18 earlier payloads, 85 additional top-level payloads at or below 1 MiB selected by a per-archive quantile rule, and 13 depth-1 payloads. The full recount in the current scope is 757 unique payloads: 695 `LSCH` and 62 `PMAP`.
+**Correction.** The 103 figure is the earlier 18 payloads plus 85 additional payloads. The 85 additions combine the deterministic top-level sample and the depth-1 payloads; duplicates are removed by SHA-256 before the total is taken. The 82 expanded-extraction payloads and the 13 depth-1 payloads are the two source sets, not additional components. The full recount in the current scope is 757 unique payloads: 695 `LSCH` and 62 `PMAP`.
 
 ## The pre-section area was undecoded
 
