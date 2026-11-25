@@ -231,9 +231,9 @@ of the `0x48` page stride. A page starts with a sentinel block (`u32`
 `0xFFFFFFFF`) and one metadata block, or two metadata blocks in 26 of the 27
 pages with a 882-block stride. Data blocks follow, then zero blocks to the page
 boundary. The page count equals the `0x48` page-count field in 275/275 rows.
-The 1,768 pages have strides of 256 blocks (257 rows), 231 (1), 60 (15), 882
-(1) and 54 (1). No page has an unexplained block or a data block that fails the
-framing rule.
+The 1,768 pages come from 275 rows with strides of 256 blocks (257 rows), 231
+(1 row), 60 (15 rows), 882 (1 row) and 54 (1 row). No page has an unexplained
+block or a data block that fails the framing rule.
 
 Codec byte `0x02` does not use the length framing. Its `0x55` record size is
 `4 * declared` in 227/227 records, where `declared` is the `0x76` `u32` at
