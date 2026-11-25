@@ -118,7 +118,7 @@ of model pointers. Each model points to an array of geometry pointers.
 
 The model `+0x18` pointer targets an array of eight-`f32` records. Each
 record is `minimum.xyz`, `minimum.x`, `maximum.xyz`, `maximum.x`; the fourth
-word of each triple repeats its first word in every record observed. The array
+word of each triple repeats its first word in all 9,579 records read. The array
 holds the aggregate record first, then one record per geometry in
 geometry-array order. A model with one geometry stores only the aggregate
 record. The aggregate equals the union of the per-geometry records within
@@ -503,8 +503,9 @@ shader is a second counterexample to "parameter count equals bound count".
 The two A parameter tables carry the same six texture-parameter `u32` hashes:
 `0xC8E8C282`, `0x739E3D0D`, `0x2C8D7182`, `0x0CD27763`, `0xC6F46E79` and
 `0x1E77BF4C`. The set is stable across the sampled drawables and is not
-per-payload. Five parameter hashes equal folded `joaat` of a candidate spelling;
-the others stay hashes.
+per-payload. Four of these six hashes, plus one further observed hash
+(`0x0DF47048`), equal folded `joaat` of a candidate spelling; the others stay
+hashes.
 
 The candidate spellings were supplied by the researcher as common RAGE texture
 parameter names; they were not extracted from the game data or the executable.
