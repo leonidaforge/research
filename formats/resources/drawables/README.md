@@ -138,8 +138,8 @@ union across models and LOD slots, so a single model is not expected to match it
 in a multi-model drawable.
 
 This corrects the earlier reading that the target "starts with the model
-min/max". It is also the per-geometry bounds source used by the material and
-geometry records; it is not the vertex-position source.
+min/max". The array is a bounds structure, not a decoded vertex stream. The
+fourth word duplicated the first in all 9,579 records read for this check.
 
 | Sample | Populated slots | Models | Geometries | Shader indices |
 | ------ | --------------- | -----: | ---------: | -------------- |
