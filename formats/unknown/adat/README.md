@@ -297,7 +297,7 @@ families. Archive placement is provenance; the predicates are header arithmetic.
 
 | Hypothesis | Result | Population | Confidence |
 | --- | --- | --- | --- |
-| H1: codec byte `0x0B` and `[u16 length][packet]` framing in 2,048-byte blocks | Framing rule holds with zero violations. The byte is consistent with a codec selector; its identity is not established | 14,940 `0x55` records, 4,961,453 packets | Confirmed (framing); Unknown (codec identity) |
+| H1: codec byte `0x0B` and `[u16 length][packet]` framing in 2,048-byte blocks | Framing rule holds with zero violations and zero exceptions. The byte is consistent with a codec selector; its identity is not established | 14,940 `0x55` records, 4,961,453 packets | Confirmed (framing); Unknown (codec identity) |
 | H2: codec byte `0x05` is a 32 kHz mono stream | Rejected for this population: no descriptor carries `0x05` and no rate field is 32,000 | 15,265 descriptor entries | Rejected (absence) |
 | H3: codec byte `0x02` is 4 bytes per declared sample | `size == 4 * declared` in 227/227 records | 227 records in 43 rows | Confirmed (size relation); Unknown (sample type) |
 | H4: low `u16` of the `0x76` descriptor is a source rate | The rate is the low `u16` at `+0x08`, not the descriptor's lowest `u16`. It is 48,000 in 14,625 `0x76` records and 12,000, 22,050 or 11,025 in 40 records. `0x48` entries carry the rate in the high `u16` of their third word. 48 kHz decode is not verified | 14,665 `0x76` records, 373 `0x48` entries | Confirmed (field position and values); Unknown (decode rate) |
