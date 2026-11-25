@@ -253,7 +253,7 @@ per-vertex three-lane structure, and no other attribute has enough lanes.
 
 No dequantization was established. These alternatives were checked and rejected:
 
-- two `f32` lanes: NaN in A-2 for three of four vertices;
+- two `f32` lanes: NaN in two of A-2's four vertices;
 - four `f16` lanes: non-finite values;
 - a uniform step of `1/256`: A-2's long axes would span `1.125` and `1.0`
   world units, and the stored AABB spans are both `0.996`;
