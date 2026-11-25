@@ -28,15 +28,15 @@ Confidence values:
 | PSIN | Unknown | Unknown | Confirmed (sample) | `PSIN` (`50 53 49 4E`) at offset 0 | 11, 93, 94 | 103 unique decoded payloads | 103 of 103 | [psin](unknown/psin/README.md) |
 | Type 14 payload | Unknown | Unknown | Confirmed (single sample) | None | 14 | 2 rows, 1 decoded | 1 decoded, 1 behind the payload transform | [type14](unknown/type14/README.md) |
 | GFX* | Unknown | Unknown | Supported | `GFX*` (`47 46 58 2A`) at offset 0 of decoded payload | 66 | 49 rows, 6 depth-1 archives under `data.rpf` | Header sample only | [gfx](unknown/gfx/README.md) |
-| ADAT | Unknown | Unknown | Supported | `ADAT` (`41 44 41 54`) at offset 0 | 255 | 729 rows, 59 of 60 depth-1 `audio.rpf` archives | Two sample groups | [adat](unknown/adat/README.md) |
+| ADAT | Unknown | Unknown | Supported | `ADAT` (`41 44 41 54`) at offset 0 | 255 | 768 rows, 65 depth-1 archives under 4 top-level archives | Header structure and two sample groups | [adat](unknown/adat/README.md) |
+| `PTFX` | Unknown | Unknown | Confirmed (single sample) | `PTFX` (`50 54 46 58`) at offset 0 | 255 | 1 row, `common.rpf` | 1 of 1 | [ptfx](unknown/ptfx/README.md) |
 
-RDS5 and the resource container are not in the table because their format documents are not yet on `main`. For RDS5 the verification evidence is on `main`, but the format document it verifies is on a branch; see [Pending integration](#pending-integration).
+RDS5/ETPF and the resource container are established on `main`: [RDS5](../formats/containers/rds5/README.md) is a container with record and block tables whose codec is Unknown, and [resources](resources/README.md) is the page and pointer serialization used inside resources. Neither has a pixel format, an object grammar or an engine allocation path established.
 
 ## Suspected format families
 
 | Identifier | Evidence for a family | Missing | Where |
 | --- | --- | --- | --- |
-| PTFX | One printable `PTFX` payload in the stored-byte census (UPL-F01); the decoded-payload scan also records `PTFX` without stating a count (UPL-F14) | Structure, variant spread, total occurrence count | [evidence/unknown-payloads](../evidence/unknown-payloads/INDEX.md) |
 | Resource page serialization | Page map, system and graphics pages, compressed streams and pointer tables reported on an unmerged branch | Object grammar, pointer semantics, engine allocation path | Pending integration; not verified on `main` |
 
 ## Unidentified payload structures
@@ -59,7 +59,7 @@ These are not game file formats and MUST NOT be listed as formats.
 | RPF9 name hashing | `hash64` and `key32` values derived from paths; resolves names and selects key classes | [names.md](containers/rpf9/names.md), [evidence/shared](../evidence/shared/INDEX.md) |
 | Chunked storage | Chunk table plus per-chunk encoding, shared by every chunked row across families | [payloads.md](containers/rpf9/payloads.md) |
 | Payload transform | A stored payload transform the reader rejects; rows behind it are unreadable and their decoded contents unobserved. The algorithm is unknown, so the transform is a storage mechanism of unknown effect, not a format | [payloads.md](containers/rpf9/payloads.md) |
-| Resource page serialization | Page map, segment pages and stream containers used inside resources | Pending integration |
+| Resource page serialization | Page map, segment pages and compressed stream containers used inside resources | [resources](resources/README.md) |
 
 ## Research utilities
 
@@ -71,14 +71,14 @@ Not formats, not evidence of format support.
 | `tools/rbf0`, `tools/sgd5`, `tools/type14`, `tools/kb2j`, `tools/psin` | Structural inspectors with synthetic tests |
 | `lforge` CLI | Application-side inspection, extraction and resource reconstruction |
 
-## Pending integration
+## Transferred from research branches
 
-Two research workstreams are Research-owned and in progress. Their findings are not yet on `main`, so this catalog does not cite them as established.
+Two workstreams were transferred from unmerged branches. Their unique findings are recorded, and the claims that could not be re-derived are stated as Unknown rather than carried.
 
-| Workstream | Source | State |
+| Workstream | Source branch | State on `main` |
 | --- | --- | --- |
-| Resource serialization | `research/shared/resource-serialization` at `666facc`, successor `research/resources-v2` | Unique findings being re-verified before transfer |
-| RDS5 and ETPF container | `research/textures-rds5` at `5a54ae8`, independent verification in `evidence/rds5-verification`, successor `research/rds5-v2` | 57 files and 1,026,833 blocks verified; transfer in progress |
+| Resource serialization | `research/shared/resource-serialization` at `666facc`, transferred by `research/resources-v2` | Page, pointer and split-page rules established; engine allocation Unknown |
+| RDS5 and ETPF container | `research/textures-rds5` at `5a54ae8`, verified in [evidence/rds5-verification](../evidence/rds5-verification/INDEX.md), transferred by `research/rds5-v2` | Container and record layout established; codec and pixel format Unknown |
 
 ## Dependencies between entries
 
