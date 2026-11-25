@@ -6,4 +6,4 @@ On-disk structures and parsing rules, grouped by category. [STRUCTURE.md](../STR
 | ---------------------------------- | ------- |
 | [containers](containers/README.md) | RPF9    |
 | [metadata](metadata/README.md)     | RBF0    |
-| [unknown](unknown/README.md)       | EDUP, KB2j, KB2n, type 14 |
+| [unknown](unknown/README.md)       | EDUP, KB2j, KB2n, PSIN, type 14 |

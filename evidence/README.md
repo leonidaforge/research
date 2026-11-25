@@ -11,4 +11,5 @@ Subjects:
 
 - [RPF9](rpf9/INDEX.md)
 - [RBF0](rbf0/INDEX.md)
+- [PSIN](psin/INDEX.md)
 - [Unknown payloads](unknown-payloads/INDEX.md)
