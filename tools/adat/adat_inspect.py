@@ -702,6 +702,8 @@ def _summarize(reports):
         "samples": len(reports),
         "variants": {},
         "codec_counts": {},
+        "codec_rows": {},
+        "codec_variant_rows": {},
         "descriptor_counts": {},
         "codec_totals": {},
         "a3": {
@@ -745,6 +747,13 @@ def _summarize(reports):
         )
         for key, value in framing["codec_counts"].items():
             summary["codec_counts"][key] = summary["codec_counts"].get(key, 0) + value
+        codecs_in_sample = {stream["codec"] for stream in framing["streams"]}
+        for codec in codecs_in_sample:
+            summary["codec_rows"][codec] = summary["codec_rows"].get(codec, 0) + 1
+            key = f"{framing['variant']}:{codec}"
+            summary["codec_variant_rows"][key] = (
+                summary["codec_variant_rows"].get(key, 0) + 1
+            )
         for key, totals in framing["codec_totals"].items():
             target = summary["codec_totals"].setdefault(key, _empty_totals())
             for field, value in totals.items():
@@ -852,6 +861,8 @@ def _print_summary(summary, stream):
     print(f"samples: {summary['samples']}", file=stream)
     print(f"variants: {summary['variants']}", file=stream)
     print(f"codec_counts: {summary['codec_counts']}", file=stream)
+    print(f"codec_rows: {summary['codec_rows']}", file=stream)
+    print(f"codec_variant_rows: {summary['codec_variant_rows']}", file=stream)
     print(f"descriptor_counts: {summary['descriptor_counts']}", file=stream)
     for codec, totals in sorted(summary["codec_totals"].items()):
         print(
