@@ -152,8 +152,8 @@ Block ids are not uniform.
 
 | Class | Ids | Blocks | Observation |
 | ----- | --- | -----: | ----------- |
-| Small | 1, 2, 6, 7, 8, 12 | 62 | Do not occur in the `PSCH` id table |
-| Hashed | all other observed ids | 459 | Every hashed id occurs in the `PSCH` id table (62 of 62 payloads) |
+| Small (below `0x100`) | 1, 2, 6, 7, 8, 12 | 62 | Do not occur in the `PSCH` id table |
+| Other | all other observed ids | 459 | Every other id occurs in the `PSCH` id table (62 of 62 payloads) |
 
 Id 1 marks a name block in 41 payloads. Its bytes are NUL-terminated printable ASCII in 41 of 41: 8,342 name strings, 1,385 distinct, with repeats across payloads. The names are data, not format semantics. The other block bodies are opaque.
 
@@ -170,7 +170,7 @@ The `PSCH` body holds a count and a table of `(id, offset)` pairs, followed by o
 
 The table tiles the body exactly in 62 of 62 payloads: the first offset is the table end plus 8, offsets increase, and the last value ends at the body length. The value bytes are opaque. Their internal layout is not decoded.
 
-The `PSCH` id set contains every hashed `PMAP` block id in 62 of 62 payloads. The reverse does not hold: `PSCH` carries ids that no `PMAP` block uses.
+The `PSCH` id set contains every other `PMAP` block id in 62 of 62 payloads. The reverse does not hold: `PSCH` carries ids that no `PMAP` block uses.
 
 ### Negative tests for the values
 
@@ -287,7 +287,7 @@ python -m unittest discover -s tools/psin
 ## Open questions
 
 - What selects the `LSCH` and `PMAP` grammars?
-- What do the `PSCH` values encode, and why does every hashed `PMAP` block id occur in `PSCH`?
+- What do the `PSCH` values encode, and why does every `PMAP` block id at or above `0x100` occur in `PSCH`?
 - What do the `LSCH` marker-record fields and tail encode?
 - What does the `LENM` count delimit, and what follows the first chain?
 - Do the `LSCH` descriptor words identify data blocks, schemas or record counts?
