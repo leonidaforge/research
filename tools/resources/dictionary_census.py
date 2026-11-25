@@ -222,7 +222,7 @@ def drawable_census(sources, hash_records):
             "draw_f18_overlap": stats["draw_f18_overlap"],
             "decode_or_parse_fail": stats["decode_or_parse_fail"],
         },
-        "states": dict(states),
+        "states": {key: states[key] for key in ("bound", "null", "class", "index", "bad")},
         "distinct_name_hashes": len(name_hashes),
         "distinct_matched_hashes": len(matched),
         "matched_hash_multiplicity": dict(matched_multiplicity),
