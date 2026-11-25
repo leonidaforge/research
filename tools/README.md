@@ -12,7 +12,8 @@
   payload.
 - [kb2j](kb2j/README.md): bounded `KB2j`/`KB2n` header and frame-table
   inspector.
-- [resources](resources/README.md): RAGE resource page and pointer inspector.
+- [resources](resources/README.md): RAGE resource page and pointer inspector, with raw-page reconstruction and 0DRP table walks.
+- [rpf9](rpf9/README.md): bounded encoding-2 framing, trailer and secondary-area probes.
 - [drawables](drawables/README.md): bounded drawable, LOD, geometry and material inspector.
 - [adat](adat/README.md): ADAT header and chunk-table inspector.
 - [GFx container inspector](gfx/README.md): identifies the `GFX` container, checks the internal length and walks the tag stream with a depth bound.
