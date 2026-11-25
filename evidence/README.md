@@ -20,5 +20,6 @@ Subjects:
 - [GFX*](gfx/INDEX.md)
 - [ADAT](adat/INDEX.md)
 - [Inventory](inventory/INDEX.md)
+- [RDS5](rds5/INDEX.md)
 - [RDS5 verification](rds5-verification/INDEX.md)
 - [Shared hashing](shared/INDEX.md)

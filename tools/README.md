@@ -14,6 +14,8 @@
 - [resources](resources/README.md): RAGE resource page and pointer inspector.
 - [GFX* structural sampler](gfx/README.md): reports the observed `GFX*` decoded
   header, variant bytes, interstitial and trailer.
+- [RDS5 structural parser](rds5/README.md): bounds-checked RDS5/ETPF reader
+  with single-block zlib inflation.
 
 A tool added here MUST:
 
