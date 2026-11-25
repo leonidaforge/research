@@ -27,6 +27,11 @@ It holds 316 rows: 92 of local type ID 2 and 224 of local type ID 3.
 | A      |   5 |    2 |        2,352 |         7,840 |      2 | 1 system, 1 graphics | 5,872 (`0x16F0`) | 1,968 (`0x7B0`) |
 | B      |  10 |    2 |       54,752 |        90,624 |      3 | 1 system, 2 graphics | 16,624 (`0x40F0`) | 74,000 (`0x12110`) |
 
+Both rows were re-located in the `levels.rpf` recovery population at archive
+offsets `0x10112BE010` (A) and `0x1010FBD010` (B); the decoded bytes and header
+bounds match this table. A third recovered drawable with seven geometries in one
+model (`0x00F9C86010`) is used in the AABB and declaration checks.
+
 The CLI decoded both rows as chunked resources. The stored and decoded sizes,
 the chunk counts and the page counts are observations. The system/graphics byte
 boundary is **not stored**: it is inferred from the highest resolved system
@@ -105,10 +110,35 @@ of model pointers. Each model points to an array of geometry pointers.
 | Model | `+0x10` | 2 | Observed | `u16` geometry count |
 | Model | `+0x12` | 2 | Observed | `u16` capacity; equals the count in both samples |
 | Model | `+0x14` | 4 | Observed | `0x00020000` in all five models |
-| Model | `+0x18` | 8 | Observed | AABB pointer; the target starts with the model min/max `f32` values |
+| Model | `+0x18` | 8 | Observed | AABB-array pointer; the target holds one record per geometry plus an aggregate record (see [Model AABB array](#model-aabb-array)) |
 | Model | `+0x20` | 8 | Observed | Shader-index array pointer; it aliases the owning LOD group's `+0x10` |
 | Model | `+0x28` | 8 | Observed | `0` in both |
 | Model | `+0x30` | 8 | Observed | Flags; values differ per model and are uninterpreted |
+
+### Model AABB array
+
+The model `+0x18` pointer targets an array of eight-`f32` records. Each
+record is `minimum.xyz`, `minimum.x`, `maximum.xyz`, `maximum.x`; the fourth
+word of each triple repeats its first word in every record observed. The array
+holds the aggregate record first, then one record per geometry in
+geometry-array order. A model with one geometry stores only the aggregate
+record. The aggregate equals the union of the per-geometry records within
+`2e-3`.
+
+| Drawable | Models | Records per model | Aggregate equals union |
+| -------- | -----: | ----------------: | ---------------------- |
+| A | 1 | 3 (aggregate + 2) | yes, both geometries |
+| B | 4 | 3 (aggregate + 2) | yes, all four models |
+
+Across 2,006 models in the recovered `levels.rpf` population whose array shape
+matched, the aggregate equalled the union of the per-geometry records in
+2,006. In 1,932 of 1,990 drawables, the union of all model aggregates equalled
+the header AABB within `2e-3`; the header is the union across models and LOD
+slots, so a single model is not expected to match it in a multi-model drawable.
+
+This corrects the earlier reading that the target "starts with the model
+min/max". It is also the per-geometry bounds source used by the material and
+geometry records; it is not the vertex-position source.
 
 | Sample | Populated slots | Models | Geometries | Shader indices |
 | ------ | --------------- | -----: | ---------: | -------------- |
@@ -191,6 +221,50 @@ The per-geometry offsets in the second set are determined by the vertex count;
 for example B-1 starts at `0x80`, `0x1CB0`, `0x2AC8`, `0x38E0` and `0x46F8`.
 The format codes are observable bytes, not decoded formats.
 
+### Declaration table in the graphics prefix
+
+The first four-byte words of a vertex-buffer graphics target are not payload
+data. Each word is `u8 format` in bits 0..7 and `offset / 2` in bits 8..31; a
+zero word ends the table. There is one entry per present attribute, and the
+entry's offset equals the layout offset. The table is ordered position first,
+then the remaining attributes; this order differs from the layout's semantic
+index order.
+
+| Geometry | Declaration entries (`format` at offset) |
+| -------- | ---------------------------------------- |
+| A-1 | `0x42` at `0x80`, `0x26` at `0x200`, `0x21` at `0x180`, `0x28` at `0x280` |
+| A-2 | `0x42` at `0x80`, `0x26` at `0xB0`, `0x21` at `0xA0`, `0x28` at `0xC0`, `0x28` at `0xD0` |
+| B-1 | `0x42` at `0x80`, `0x26` at `0x2AC8`, `0x21` at `0x1CB0`, `0x28` at `0x38E0`, `0x28` at `0x46F8` |
+
+The first entry has format byte `0x42` and its layout size is 8 bytes in every
+geometry observed. The declaration format byte is not the layout's `u8` format
+code: A-1's entries `0x21`, `0x26`, `0x28` sit at layout entries whose codes are
+`0x29`, `0x1C` and `0x26`. What the declaration byte encodes is **Unknown**.
+A parser MUST match declaration entries to layout offsets and MUST NOT treat
+`0x42` as a universal position tag without that check.
+
+### Position candidate is not validated
+
+Format byte `0x42` with an 8-byte layout entry is the position candidate: the
+first entry of every observed declaration table, before any other attribute.
+The eight bytes carry four 16-bit lanes. They are the only stored values with a
+per-vertex three-lane structure, and no other attribute has enough lanes.
+
+No dequantization was established. In A-2 (four vertices, a flat quad) the two
+varying lanes span 288 and 256 raw units, while the stored AABB spans are equal
+in the two long axes (`0.996`). A single per-axis linear map therefore cannot
+map both lanes to that AABB, and no field among the vertex-buffer record, the
+layout, or the decoded `0x80` prefix carries a per-axis scale and origin pair
+that reproduces the AABB independently. Fitting a scale to the AABB would be
+circular, so the positions are **not accepted** and no point cloud is
+published. The layout, declaration and AABB are structural; the position
+semantics remain **Unknown**.
+
+Discriminating experiment: find a vertex buffer whose declaration byte is a
+float format and read positions directly, or trace the engine decoder for
+format `0x42` and locate the scale/origin it applies. Until then, a parser
+SHOULD report the four lanes as raw values and MUST NOT name them POSITION.
+
 ### Buffer sizing
 
 For all ten geometries:
@@ -207,9 +281,9 @@ give 640 bytes, and the attributes end at 768 because the first array starts at
 `0x80`. B-1 declares 21,776 bytes; 902 vertices with sizes 24 give 21,648
 bytes, again 128 bytes short of the declared size. The prefix is **Unknown**.
 
-Vertex positions were **not** checked against the AABB. The position semantic
-and the format codes are not established, so a plausible point cloud would not
-validate the reading.
+Vertex positions are **not** accepted. The position candidate and the reason no
+dequantization was established are in
+[Position candidate is not validated](#position-candidate-is-not-validated).
 
 The candidate's packed form `count << 10 | 1` is **contradicted**. The observed
 low ten bits are `0x51` (A-1) and `0x61` (the other nine); the count is the high
@@ -248,8 +322,8 @@ The geometry `+0x40` pointer targets a 0x20-byte descriptor:
 | -----: | ---: | ----------- | ----- |
 | `+0x00` | 8 | Observed in 10/10 | System pointer to the index-buffer record |
 | `+0x08` | 2 | Observed in 10/10 | `u16` cluster count |
-| `+0x0A` | 2 | Observed in 10/10 | Uninterpreted |
-| `+0x0C` | 4 | Observed in 10/10 | Uninterpreted |
+| `+0x0A` | 2 | Observed in 10/10 | `u16` count A; equals the index buffer's second `u32` |
+| `+0x0C` | 4 | Observed in 10/10 | `u32`; bits 8..23 are count B, equal to the index buffer's third `u32`. The low byte is zero in all ten samples and is uninterpreted |
 | `+0x10` | 16 | Observed in 10/10 | Zero |
 
 The descriptor is followed at `+0x20` by another 0x20-byte record whose `+0x10`
@@ -265,6 +339,25 @@ The index-buffer record has the same shape as a vertex buffer:
 | `+0x18` | 8 | Observed in 10/10 | Graphics pointer to the index bytes |
 | `+0x28` | 8 | Observed in 10/10 | System pointer; uninterpreted |
 
+The index bytes begin with three `u32`:
+
+| Offset | Observation | Notes |
+| -----: | ----------- | ----- |
+| `+0x00` | `0x80000000 \| cluster_count` | Top bit set; low bits equal the descriptor `+0x08` |
+| `+0x04` | Count A | Equals the descriptor `+0x0A` |
+| `+0x08` | Count B | Equals the descriptor `+0x0C` bits 8..23 |
+
+The header matches the descriptor in all ten geometries. The body is
+clustered: it contains a two-`u16` table-like region and one or more ascending
+`u16` runs that start at zero. A run of `0, 1, ... , K-1` is present in every
+sampled geometry, but `K` is not the vertex count in general: A-1 gives 32 and
+A-2 gives 4, while B-1 gives 115 for 902 vertices and B-3 gives 114 for 540.
+The run is therefore one cluster-local index list, not a flat triangle stream
+for the whole geometry. The cluster boundaries and the triangle grammar are
+**Unknown**; no triangles are reconstructed and the run MUST NOT be presented
+as the full index list. What is verified is the declared byte range, the
+descriptor/header count agreement, and the ascending-run structure.
+
 | Geometry | Clusters | Elements | Bytes | Graphics range | In bounds |
 | -------- | -------: | -------: | ----: | -------------- | --------- |
 | A-1 | 1 | 40 | 160 | `0x6E0..0x780` | yes |
@@ -278,8 +371,10 @@ The index-buffer record has the same shape as a vertex buffer:
 | B-7 | 2 | 252 | 1,008 | `0xFBF0..0xFFE0` | yes |
 | B-8 | 1 | 52 | 208 | `0x12040..0x12110` | yes; ends at the graphics end |
 
-No triangles were reconstructed. The element counts, byte sizes and bounds are
-structural; the cluster count is the only index field read as a count.
+No triangles were reconstructed. The element counts, byte sizes, bounds and the
+descriptor/header count agreement are structural. Each sampled body contains an
+ascending local run that starts at zero, but its length is not the vertex count
+in general, so it is not a flat index list. The cluster grammar is **Unknown**.
 
 The walked vertex-buffer and index-buffer ranges do not cover every graphics
 byte. A's ranges cover `0x300..0x7B0`; the first `0x300` bytes are not addressed
@@ -287,11 +382,13 @@ by the walked pointers. B starts at graphics offset `0x0` with its first vertex
 buffer; later vertex and index ranges leave small gaps. The unaddressed bytes
 were not interpreted.
 
-## Materials (structure only)
+## Materials (structure and names)
 
-This section is **unvalidated beyond structure**. No key is resolved to a
-texture, no parameter hash is named and no material name is claimed. The
-`u32` at shader `+0x00` is not a name.
+No key is resolved to a texture and no material name is claimed. Five texture
+parameter hashes resolve to their `joaat` preimages; the rest stay hashes. The
+`u32` at shader `+0x00` is a stable shader hash, not a name. Bindings are
+counted exactly; the store join is unresolved because no texture store was
+reached.
 
 ### Chain
 
@@ -311,7 +408,7 @@ A shader is a 0x40-byte record:
 
 | Offset | Size | Observation | Notes |
 | -----: | ---: | ----------- | ----- |
-| `+0x00` | 4 | Observed both | Uninterpreted `u32`; not a name |
+| `+0x00` | 4 | Observed both | Shader hash; stable across drawables and tied to the parameter schema (see below) |
 | `+0x04` | 4 | Observed both | Constant `0x6D657461` |
 | `+0x08` | 8 | Observed both | Uninterpreted system pointer |
 | `+0x10` | 8 | Observed both | Texture-slot table pointer |
@@ -351,17 +448,49 @@ not reproduced; the key is not resolved.
 | B | 0 | 7 | 68 | 5 | 2 | 5 |
 | B | 1 | 6 | 54 | 4 | 2 | 4 |
 
-The two A parameter tables carry the same six texture-parameter `u32` hashes:
-`0xC8E8C282`, `0x739E3D0D`, `0x2C8D7182`, `0x0CD27763`, `0xC6F46E79` and
-`0x1E77BF4C`. The six values are format constants in these samples, not
-per-payload values; they are reported as uninterpreted values, not names.
-
 In A shader 0, slot 3 is null, so the fourth texture parameter is declared but
 unbound. In A shader 1, slots 2 and 3 are null. The union of the two A shaders
-has six distinct keys; shader 0 has five and shader 1 has four. The reported
-"six texture parameters and 55 total parameters; five bound slots and one
-declared-but-unbound slot; five distinct keys" matches A shader 0. The second
+has six distinct keys; shader 0 has five and shader 1 has four. The second
 shader is a second counterexample to "parameter count equals bound count".
+
+The two A parameter tables carry the same six texture-parameter `u32` hashes:
+`0xC8E8C282`, `0x739E3D0D`, `0x2C8D7182`, `0x0CD27763`, `0xC6F46E79` and
+`0x1E77BF4C`. The set is stable across the sampled drawables and is not
+per-payload. Four of the six equal `joaat` of a short parameter name; the
+remaining two stay hashes. The parameter hash algorithm is the same
+one-at-a-time hash used for 32-bit name keys.
+
+| Hash | `joaat` preimage | Confidence |
+| ---- | ---------------- | ---------- |
+| `0xC8E8C282` | `DiffuseTex` | Confirmed (hash match) |
+| `0x1E77BF4C` | `BumpTex` | Confirmed (hash match) |
+| `0xC6F46E79` | `SpecularTex` | Confirmed (hash match) |
+| `0x739E3D0D` | `SpecularTex2` | Confirmed (hash match) |
+| `0x0DF47048` | `DiffuseTex2` | Confirmed (hash match) |
+| `0x2C8D7182`, `0x0CD27763` | unknown | Unknown |
+
+`joaat("alpha/beta") = 0x75438640` reproduces the published control vector. A
+hash match proves a preimage; it does not prove that the engine's author chose
+that spelling. The names are candidate labels and the unknown hashes MUST stay
+hashes.
+
+The shader hash at `+0x00` is stable for a parameter schema. In the sample A
+shader 0 and several recovered drawables, `0xBCF03FC1` always carries 6 texture
+parameters and 55 total parameters; `0x512937B5` always carries 7 and 68;
+`0xF28992E6` always carries 6 and 54. Sample A shader 1 and sample B shader 1
+share `0xF28992E6`, and sample B shader 0 is `0x512937B5`. This makes the `u32`
+a probable shader hash, not a per-material identifier and not a name.
+
+### Key join
+
+Every bound slot yields a 64-bit key from its name record. Every unbound slot
+is reported with the key `0x0000000000000000` and status `unbound`, not with a
+missing value. Across eight recovered drawables (348 declared texture slots):
+278 bound, 70 unbound, 0 null keys, 0 direct-store matches, 0 EDUP
+indirections and 278 unresolved keys. A null key means a bound name record
+whose key is zero; none occurred. A direct-store match or an EDUP indirection
+requires a texture store that was not reached, so both counts are zero. The
+join is exact for these inputs and does not claim a resolution.
 
 No local texture store was reached from these samples. Resolving a key depends
 on a resource-side texture dictionary or store reference path that was not
@@ -386,40 +515,45 @@ size is published.
 
 ## Status
 
-| Sample | Reconstruction state | Verified chain elements | Structure only | Remaining dependencies |
-| ------ | -------------------- | ----------------------- | -------------- | ---------------------- |
-| A (row 5) | Decoded payload; page map system/graphics 1/1; 2 chunks; system/graphics split `0x16F0`/`0x7B0` derived | Header, one LOD slot, one model, two geometries, both vertex buffers, layout entries, buffer sizes, graphics base, index bounds, shader group and two parameter tables | Attribute semantics, format codes, 0x80 prefix, 0x4042 marker, index cluster layout, material keys, parameter meanings | Texture store/key resolution; engine record meanings; independent re-inflation |
-| B (row 10) | Decoded payload; page map system/graphics 1/2; 3 chunks; split `0x40F0`/`0x12110` derived | Header, four LOD slots, four models, eight geometries, eight vertex buffers, layout entries, buffer sizes, graphics base, index bounds, shader group and two parameter tables | Same as A | Same as A |
+| Sample | Reconstruction state | Verified chain elements | Not established | Remaining dependencies |
+| ------ | -------------------- | ----------------------- | --------------- | ---------------------- |
+| A (row 5; recovery `0x10112BE010`) | Decoded payload; page map system/graphics 1/1; 2 chunks; split `0x16F0`/`0x7B0` derived | Header, one LOD slot, one model, two geometries, both vertex buffers, declaration tables, layout entries, buffer sizes, graphics base, 3 AABB records with union match, index header and descriptor counts, shader group and two parameter tables | Position dequantization, attribute semantics, declaration format bytes, index cluster grammar, texture keys | Texture store/key resolution; engine record meanings; independent re-inflation |
+| B (row 10; recovery `0x1010FBD010`) | Decoded payload; page map system/graphics 1/2; 3 chunks; split `0x40F0`/`0x12110` derived | Header, four LOD slots, four models, eight geometries, eight vertex buffers, declaration tables, layout entries, buffer sizes, graphics base, 3 AABB records per model with union match, index header and descriptor counts, shader group and two parameter tables | Same as A | Same as A |
 
 The drawable is **not** reconstructed in the engine sense. The decoded payload
-is split into two segments at an inferred boundary. No texture is resolved.
+is split into two segments at an inferred boundary. No texture is resolved and
+no vertex position was accepted.
 
 "Verified" in the status table means the bytes, pointer targets and counts were
-checked. It does not mean the field meanings are known; the structure-only
+checked. It does not mean the field meanings are known; the "Not established"
 column lists what remains uninterpreted.
 
 ## Unknowns
 
-- The meaning of the 52-entry semantic indices and the `u8` format codes.
-- The 0x80-byte prefix before the first vertex attribute array.
+- The meaning of the 52-entry semantic indices and the `u8` layout format codes.
+- The declaration format byte (for example `0x42` for the 8-byte first entry)
+  and the per-axis position dequantization. The four 16-bit lanes are not
+  accepted as positions.
 - The `42 40 00 00` vertex-buffer marker, the `0x00001601` vertex-buffer word and
   the `0x00020000` model word.
 - The model flags at `+0x30`, the geometry `+0x30` word and the
   `0xFFFFFFFFFFFF0214` constant.
-- The index descriptor `+0x0A` and `+0x0C` fields, the cluster layout and how the
-  index bytes form triangles.
+- The index cluster layout, the meaning of the two descriptor counts beyond
+  their header agreement, and how the clustered local runs form triangles.
 - The parameter-table `+0x00` and `+0x06` words, the shader `+0x08` pointer, the
-  shader `+0x00` word, the name-record `+0x10`/`+0x18` fields and the 64-bit key
-  namespace.
+  name-record `+0x10`/`+0x18` fields and the 64-bit key namespace.
 - The header `+0xB0` list and the header `+0x80` flag words.
 - The LOD distance sentinel and the `+0x70` values in A.
 - Whether any of these layouts change with another type ID, archive family or
-  build. Only two rows of one nested archive were inspected.
+  build. The AABB and material checks cover recovered `levels.rpf` resources in
+  one build, not other archives.
 
 ## Limits
 
-- Two rows, one nested archive, one build. The cross-sample evidence is within
-  this population. Other type-2 rows and other type IDs were not inspected.
+- Two named rows from one nested archive plus recovered `levels.rpf` resources,
+  one build. The AABB checks cover 2,006 models and 1,990 drawables; the
+  material checks cover 8 drawables. Other type IDs and other builds were not
+  inspected.
 - The local type ID 2 is a CLI assignment, not a format identity; the label
   "drawable" is the subject name used by this iteration.
 - The stored rows were decoded by the CLI; the zlib streams were not
@@ -429,8 +563,12 @@ column lists what remains uninterpreted.
 - No engine code path was traced. Pointer validation, allocation and runtime
   meanings remain **Unknown**.
 - Payload ASCII names are not reproduced.
-- The material section is structural only. No key, texture or material name is
-  resolved.
-- The system-wide pointer sweep, the `+0xB0` list shape, the AABB arithmetic
-  and the texture-store absence are manual observations; the published
-  inspector does not produce them.
+- No vertex position was accepted. The four 16-bit lanes are reported raw; a
+  fit to the stored AABB would be circular.
+- No triangles were reconstructed. The ascending `u16` run is cluster-local.
+- Four texture parameter hashes resolve to `joaat` preimages; two of the six
+  standard hashes and the remaining material-specific hashes stay hashes. No
+  key, texture or material name is resolved.
+- The system-wide pointer sweep, the `+0xB0` list shape and the texture-store
+  absence are manual observations; the published inspector does not produce
+  them.

@@ -7,9 +7,10 @@ supported**: it is checkable against a local installation but not from this
 repository alone. The synthetic fixtures validate the tool, not native
 semantics.
 
-The subject is the decoded payload structure observed in two rows that carry
-local type ID 2. The type ID is a local CLI assignment, not a format identity;
-other type-2 rows and other type IDs were not inspected. Findings are cited from
+The subject is the decoded payload structure observed in two named rows that
+carry local type ID 2, plus recovered resources from the same `levels.rpf` used
+for the AABB and material checks. The type ID is a local CLI assignment, not a
+format identity. Findings are cited from
 [formats/resources/drawables/README.md](../../formats/resources/drawables/README.md).
 
 ## Samples
@@ -52,10 +53,10 @@ re-inflated independently for this index.
 | -- | ----- | -------- | ---------- | ------ |
 | DRAW-F01 | The nested archive has 316 rows: 92 of local type 2 and 224 of local type 3. Rows 5 and 10 carry local type 2, decode to 7,840 and 90,624 bytes, use 2 and 3 chunks, and declare 1/1 and 1/2 system/graphics pages. | `BINARY`, `CROSS_SAMPLE` | Confirmed (sample) | One nested archive, two rows |
 | DRAW-F02 | The header has a zero `u64` at `+0x00`, a system page-map pointer at `+0x08`, a shader-group pointer at `+0x10`, a zero skeleton pointer at `+0x18`, four LOD-slot pointers at `+0x50`, a name pointer at `+0xA8`, a list pointer at `+0xB0`, `0x103` at `+0xB8` and zero at `+0xC0`. | `BINARY`, `CROSS_SAMPLE` | Confirmed (bytes); field meanings partly Unknown | Two samples; the populated skeleton form was not observed |
-| DRAW-F03 | The centre at `+0x20` is three `f32`, the radius at `+0x2C` is one `f32`, and the AABB minimum at `+0x30` and maximum at `+0x40` are three `f32` each; the radius equals half the AABB diagonal to the displayed precision in both samples. The model AABB targets repeat min/max values consistent with the drawable AABB: A's single model matches within about 2e-4, and B's four model bounds lie inside the drawable bounds. | `BINARY` | Confirmed (arithmetic); Probable (bounds reading) | Two samples, five models; vertex positions were not checked against the AABB |
+| DRAW-F03 | The centre at `+0x20` is three `f32`, the radius at `+0x2C` is one `f32`, and the AABB minimum at `+0x30` and maximum at `+0x40` are three `f32` each; the radius equals half the AABB diagonal to the displayed precision in both samples. The model `+0x18` target is a record array, not one box (DRAW-F22); record 0 equals the header AABB in the sampled models. | `BINARY` | Confirmed (arithmetic); Probable (bounds reading) | Two samples, five models; vertex positions were not checked against the AABB |
 | DRAW-F04 | Four LOD-slot pointers occupy `+0x50..+0x6F`. A has one populated slot (slot 0) and three null slots; B has four populated slots. A zero slot is unpopulated. | `BINARY`, `CROSS_SAMPLE` | Confirmed | Two samples |
 | DRAW-F05 | A populated LOD slot points to a 0x20-byte group with a model pointer array, a `u16` count and capacity at `+0x08`, a two-`u16` shader-index value at `+0x10`, and a zero tail. A has one model with two geometries; B has four models with two geometries each. The LOD slot index is distinct from the model list index. | `BINARY`, `CROSS_SAMPLE` | Confirmed (bytes and counts) | Five models, ten geometries |
-| DRAW-F06 | A model is at least 0x38 bytes: geometry pointer array at `+0x08`, `u16` count and capacity at `+0x10`, `0x00020000` at `+0x14`, AABB pointer at `+0x18`, shader-index pointer at `+0x20`, zero at `+0x28` and flags at `+0x30`. The `+0x20` pointer aliases the owning LOD group's `+0x10`. | `BINARY`, `CROSS_SAMPLE` | Confirmed (offsets); Unknown (flags and `+0x14`) | Five models |
+| DRAW-F06 | A model is at least 0x38 bytes: geometry pointer array at `+0x08`, `u16` count and capacity at `+0x10`, `0x00020000` at `+0x14`, AABB-array pointer at `+0x18`, shader-index pointer at `+0x20`, zero at `+0x28` and flags at `+0x30`. The `+0x20` pointer aliases the owning LOD group's `+0x10`. The `+0x18` target is the record array in DRAW-F22. | `BINARY`, `CROSS_SAMPLE` | Confirmed (offsets); Unknown (flags and `+0x14`) | Five models |
 | DRAW-F07 | The four `f32` at `+0x70` are present in both samples. A holds the sentinel `9998` four times; B holds 8.994199, 12.711224, 17.967813 and 9998. The candidate's "one sample only" is contradicted. | `BINARY`, `CROSS_SAMPLE` | Confirmed (presence); Unknown (meaning) | Two samples |
 | DRAW-F08 | The `+0xB0` list pointer is nonzero in both samples and targets five `{u64 pointer, u16 count, u16 capacity}` records. The first counts are 8 in A and 32 in B. The candidate's "one sample only" is contradicted. | `BINARY`, `CROSS_SAMPLE` | Confirmed (presence and shape); Unknown (meaning) | Two samples |
 | DRAW-F09 | In system data, A holds 81 system-shaped and 5 graphics-shaped `u64` values with 0 outside; B holds 171 and 17 with one graphics-shaped value outside at system `0x3EE8` (`0x606B29BE`). That value sits in a name-record table and is best read as a 32-bit hash, not a pointer. | `BINARY`, `CROSS_SAMPLE` | Confirmed (counts); Probable (false-positive identity) | Two samples; the sweep matches the pointer encoding, not engine validation |
@@ -71,6 +72,15 @@ re-inflated independently for this index.
 | DRAW-F19 | No key was resolved to a texture and no texture store was reached from these samples. Resolution depends on a resource-side texture-dictionary or store-reference path that was not found. | `BINARY` (absence), `CROSS_SAMPLE` | Confirmed (absence in samples); Unknown (dependency) | No texture dependency path |
 | DRAW-F20 | The shader-group `+0x08` pointer is nonzero in A and zero in B. The header skeleton `+0x18` is null in both. LOD slots are sparse. The header distance values can be the sentinel `9998`. No single fixed header size is established. | `BINARY`, `CROSS_SAMPLE` | Confirmed (presence); Unknown (versioning rule) | Two samples |
 | DRAW-F21 | The first 16 `u32` words at a graphics pointer were not attribute descriptors. Each vertex-buffer target begins with a 0x80-byte prefix whose first four bytes are `42 40 00 00`; the attributes are the separate offset, size and format arrays in the layout at vertex buffer `+0x40`. The candidate packed form (`format`, `size << 3`, `offset << 7`) was not observed. | `BINARY`, `CROSS_SAMPLE` | Rejected (candidate descriptor reading) | Ten geometries; the prefix is not interpreted |
+| DRAW-F22 | The model `+0x18` target is an array of eight-`f32` records: `minimum.xyz`, `minimum.x`, `maximum.xyz`, `maximum.x`. Record 0 is the aggregate; records 1..N are per-geometry AABBs in geometry-array order. A single-geometry model stores only record 0. The aggregate equals the per-geometry union within `2e-3` in 2,006 of 2,006 models, and the union of all model aggregates equals the header AABB within `2e-3` in 1,932 of 1,990 drawables. This supersedes the "model min/max at the target start" part of DRAW-F03/F06. | `BINARY`, `CROSS_SAMPLE` | Confirmed (values and union) | Recovered `levels.rpf` population; the header is a union across models and LOD slots |
+| DRAW-F23 | A vertex-buffer graphics prefix begins with a declaration table: each `u32` is `u8 format` in bits 0..7 and `offset / 2` in bits 8..31; a zero word ends it. One entry exists per present attribute, in position-first order, and every entry offset equals a layout offset. The table format byte is not the layout `u8` format code. | `BINARY`, `CROSS_SAMPLE` | Confirmed (positions and offsets); Unknown (format byte meaning) | Ten geometries; the entry order and byte meaning are not generalised |
+| DRAW-F24 | The first declaration entry has format `0x42`, points at the `0x80` offset and covers the 8-byte layout entry. Those eight bytes are four 16-bit lanes. No dequantization was established: in A-2 the two varying lanes span 288 and 256 raw units while its stored AABB has equal long-axis spans, and no decoded field carries a per-axis scale and origin. No position was accepted. | `BINARY`, `CROSS_SAMPLE` | Confirmed (layout); Unknown (semantics) | One four-vertex geometry and the ten baseline geometries; a fit to the AABB would be circular |
+| DRAW-F25 | The index descriptor `+0x0A` is count A and `+0x0C` bits 8..23 are count B; the low byte of `+0x0C` is zero in all ten samples. The index bytes begin with `0x80000000 \| cluster_count`, then count A and count B, and the header matches the descriptor in 10/10 geometries. | `BINARY`, `CROSS_SAMPLE` | Confirmed (counts and header) | Ten geometries; the low byte is uninterpreted |
+| DRAW-F26 | Each sampled index body contains an ascending `u16` run starting at zero. The run length is not the vertex count in general: A-1 32/32, A-2 4/4, B-1 115/902, B-3 114/540. The run is cluster-local; the cluster boundaries and the triangle grammar are Unknown, and no flat triangle list was produced. | `BINARY`, `CROSS_SAMPLE` | Confirmed (run structure); Unknown (grammar) | Ten geometries; no triangles reconstructed |
+| DRAW-F27 | The shader `+0x00` `u32` is stable for a parameter schema: `0xBCF03FC1` carries 6 texture and 55 total parameters, `0x512937B5` carries 7 and 68, and `0xF28992E6` carries 6 and 54 in both A and B and in recovered drawables. It is a probable shader hash, not a per-material identifier or a name. | `BINARY`, `CROSS_SAMPLE` | Probable (stable hash) | Ten shader hashes over eight drawables; the hash namespace is Unknown |
+| DRAW-F28 | Four of the six standard texture-parameter hashes equal `joaat` of a short name: `0xC8E8C282` = `DiffuseTex`, `0x1E77BF4C` = `BumpTex`, `0xC6F46E79` = `SpecularTex`, `0x739E3D0D` = `SpecularTex2`; `0x0DF47048` = `DiffuseTex2` also occurs. `0x2C8D7182` and `0x0CD27763` stay hashes. The control `joaat("alpha/beta") = 0x75438640` reproduces. A match proves a preimage, not the original spelling. | `BINARY`, `SYNTHETIC` (control) | Confirmed (hash match); candidate names | Eight drawables; no name dictionary for the remaining hashes |
+| DRAW-F29 | Across eight recovered drawables there are 348 declared texture slots: 278 bound, 70 unbound, 0 null keys, 0 direct-store matches, 0 EDUP indirections and 278 unresolved keys. Every unbound slot is reported with key `0x0000000000000000`; every bound slot yields a 64-bit key. | `BINARY`, `CROSS_SAMPLE` | Confirmed (counts); Unknown (store) | No texture store was reached |
+| DRAW-F30 | The two named rows were re-located in the `levels.rpf` recovery population at archive offsets `0x10112BE010` (A, 7,840 bytes, 2 streams) and `0x1010FBD010` (B, 90,624 bytes, 3 streams); their header bounds and chain counts match the named rows. | `BINARY`, `CROSS_SAMPLE` | Confirmed (reproduction) | One archive; recovery offsets are not native row indices |
 
 ## Method per finding
 
@@ -101,6 +111,15 @@ evidence and a manual step supplies the rest.
 | DRAW-F19 | Manual absence check; no texture store was reached | No |
 | DRAW-F20 | Inspector optional-field read | Yes |
 | DRAW-F21 | Inspector layout and marker read; manual candidate rejection | Partly |
+| DRAW-F22 | Inspector AABB-array read and union check over recovered resources | Yes |
+| DRAW-F23 | Inspector declaration-table read | Yes |
+| DRAW-F24 | Inspector raw-lane read; manual span comparison | Partly |
+| DRAW-F25 | Inspector index descriptor and header read | Yes |
+| DRAW-F26 | Inspector ascending-run read | Yes |
+| DRAW-F27 | Inspector shader-hash read; cross-drawable comparison | Yes |
+| DRAW-F28 | Manual `joaat` comparison over candidate names; synthetic control vector | No |
+| DRAW-F29 | Inspector key join over eight drawables | Yes |
+| DRAW-F30 | Recovery export and inspector comparison with the named rows | Partly |
 
 ## Counters and negative results
 
@@ -118,7 +137,17 @@ evidence and a manual step supplies the rest.
   DRAW-F05).
 - **One graphics-shaped value is outside its segment.** It sits in a name-record
   table and is best read as a 32-bit hash, not a pointer (DRAW-F09).
-- **No texture is resolved.** No local texture store was reached (DRAW-F19).
+- **The "model min/max at the pointer start" reading is superseded.** The target
+  is a record array with a per-geometry record, not a single model box
+  (DRAW-F22).
+- **The `+0x0C` index field is not an opaque `u32`.** Its bits 8..23 equal the
+  index-buffer count B (DRAW-F25).
+- **The ascending index run is not a flat triangle list.** Its length is not
+  the vertex count in general (DRAW-F26).
+- **No vertex position is accepted.** The four lanes are raw; the AABB cannot
+  supply the missing scale without circularity (DRAW-F24).
+- **No texture is resolved.** No local texture store was reached
+  (DRAW-F19, DRAW-F29).
 
 ## Reproduction
 
@@ -130,36 +159,45 @@ lforge archive extract <GAME_ROOT>/levels.rpf --row 5 --output <WORK>/nested.rpf
 lforge archive ls <WORK>/nested.rpf --executable <EXECUTABLE> --limit 316 --json
 lforge archive extract <WORK>/nested.rpf --row 5 --output <WORK>/draw5.bin --executable <EXECUTABLE>
 lforge archive extract <WORK>/nested.rpf --row 10 --output <WORK>/draw10.bin --executable <EXECUTABLE>
-python tools/drawables/drawable_inspect.py inspect --file <WORK>/draw5.bin --system-length 0x16F0 --json
-python tools/drawables/drawable_inspect.py inspect --file <WORK>/draw10.bin --system-length 0x40F0 --json
-python -m unittest discover -s tools/drawables/tests
+lforge archive recover <GAME_ROOT>/levels.rpf --list --json
+lforge archive recover <GAME_ROOT>/levels.rpf --id 0x10112BE010 --output <WORK>/drawA.bin --overwrite
+lforge archive recover <GAME_ROOT>/levels.rpf --id 0x1010FBD010 --output <WORK>/drawB.bin --overwrite
+python tools/drawables/drawable_inspect.py inspect --file <WORK>/drawA.bin --system-length 0x16F0 --json
+python tools/drawables/drawable_inspect.py inspect --file <WORK>/drawB.bin --system-length 0x40F0 --json
+python -m unittest discover -s tools/drawables -p "test_*.py"
 ```
 
 The `archive ls` output supplies the row type IDs, stored sizes, decoded sizes
-and chunk counts. The inspector commands reproduce the findings marked `Yes` or
-`Partly` above. They do not reproduce DRAW-F03, DRAW-F08, DRAW-F09 or DRAW-F19:
-those are manual reads of the decoded bytes, and DRAW-F19 remains not
-demonstrated. The system-length values are derived from the graphics targets and
-the page counts, not from a stored field.
+and chunk counts. The recovery commands reproduce the two named rows by archive
+offset; a recovery offset is not a native row index. The inspector commands
+reproduce the findings marked `Yes` or `Partly` above. They do not reproduce
+DRAW-F08, DRAW-F09, DRAW-F28 or DRAW-F19: those are manual reads or an external
+name comparison, and DRAW-F19 remains not demonstrated. The system-length values
+are derived from the graphics targets and the page counts, not from a stored
+field.
 
 ## Limits
 
-- One build, one nested archive, two rows. Other type-2 rows and other type IDs
-  were not inspected.
+- One build. The named rows are two rows of one nested archive; the AABB checks
+  cover 2,006 models and 1,990 drawables from recovered `levels.rpf` resources;
+  the material checks cover 8 drawables. Other type IDs and builds were not
+  inspected.
 - The local type ID 2 is a CLI assignment, not a format identity; the label
   "drawable" is the subject name used by this iteration.
-- The cross-sample evidence covers two drawables, five models and ten
-  geometries.
+- The cross-sample evidence covers the named rows and the recovered population
+  stated per finding.
 - The stored rows were decoded by the CLI; no independent re-inflation was
   performed.
 - The system/graphics boundary is derived, not stored.
 - No engine code path was traced.
 - ASCII payload names are not reproduced.
-- The material section is structure-only; no key, texture or material name is
-  resolved.
+- No vertex position is accepted (DRAW-F24); no triangles were reconstructed
+  (DRAW-F26).
+- Five texture parameter hashes resolve to `joaat` preimages; the rest stay
+  hashes. The material section is not a resolved material graph.
 - The inspector's synthetic tests are `SYNTHETIC` and support no native claim.
-- Findings DRAW-F03, DRAW-F08, DRAW-F09 and DRAW-F19 are not reproduced by the
-  published inspector.
+- Findings DRAW-F08, DRAW-F09, DRAW-F28 and DRAW-F19 are not reproduced by a
+  single inspector run.
 
 ## Candidate corrections
 

@@ -39,6 +39,30 @@ has four distinct keys (DRAW-F18). The union of the two shaders has six distinct
 keys. The counts are per shader; the drawable does not have a single declared
 and bound count.
 
+## The model AABB was read as one box
+
+**Candidate.** The model `+0x18` pointer target was read as the model minimum
+and maximum: the first six `f32` values, with the remaining words uninterpreted.
+
+**Correction.** The target is an array of eight-`f32` records. Record 0 is the
+aggregate and records 1..N are the per-geometry AABBs; a one-geometry model
+stores only the aggregate. The aggregate equals the union of the per-geometry
+records in 2,006 of 2,006 sampled models, and the union of all models equals the
+header AABB in 1,932 of 1,990 drawables. The earlier reading described record 0
+of a multi-geometry model and did not identify the per-geometry records
+(DRAW-F22).
+
+## The index descriptor `+0x0C` was read as an opaque word
+
+**Candidate.** The `u32` at index descriptor `+0x0C` was reported as
+uninterpreted.
+
+**Correction.** Its bits 8..23 equal the index-buffer count B, and its low byte
+is zero in all ten samples. The index buffer begins with
+`0x80000000 | cluster_count`, count A and count B, and all three agree with the
+descriptor (DRAW-F25). The index body is clustered; its ascending `u16` run is
+not a flat triangle list (DRAW-F26).
+
 ## The graphics pointer was expected to start with packed descriptors
 
 **Candidate.** The first 16 `u32` words at the graphics pointer were read as

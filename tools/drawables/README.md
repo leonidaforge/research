@@ -55,18 +55,38 @@ The JSON report has the same values. The main fields are:
 | `issues`         | Codes and details                                                          |
 
 Per geometry, `vertex_buffer_record` holds the element count, element unit,
-declared bytes, graphics pointer, layout pointer and the parsed layout. The
-layout holds `vertex_count`, `flags`, `attribute_stride`, `attribute_end` and an
-`attributes` list of `{semantic, offset, size, format}`. `semantic` is the
+declared bytes, graphics pointer, layout pointer, the parsed layout and the
+declaration table. The declaration table is read from the graphics prefix: each
+`u32` is a `u8` format byte and an `offset / 2`, and a zero word ends the table.
+The layout holds `vertex_count`, `flags`, `attribute_stride`, `attribute_end` and
+an `attributes` list of `{semantic, offset, size, format}`. `semantic` is the
 zero-based index in the 52-entry table; it is not a recovered name.
+
+Each model reports `aabb_record_count`, `aabb_aggregate`, `aabb_records` and
+`aabb_union_matches`. The records are eight `f32` values each: `minimum.xyz`,
+`minimum.x`, `maximum.xyz`, `maximum.x`. Record 0 is the aggregate, and a
+one-geometry model stores only that record. The tool checks the union within
+`2e-3`.
+
+Each index buffer reports its first three `u32` as `header`, whether they match
+the descriptor as `header_matches_descriptor`, and the longest ascending `u16`
+run starting at zero as `sequential_run_length`. The run is cluster-local; it
+is not a triangle list. The tool measures and bounds the index bytes; it does
+not reconstruct triangles.
+
+Each shader reports `shader_hash` (the `u32` at `+0x00`). Each parameter table
+reports `key_join` with `direct_store`, `edup_indirection`, `null_key` and
+`unresolved` counts. Every unbound slot is reported with key
+`0x0000000000000000` and status `unbound`.
 
 Issue codes include `input_cap`, `size`, `truncated_header`, `header_zero`,
 `missing_pointer`, `pointer_outside`, `pointer_segment`, `pointer_undecodable`,
 `pointer_read`, `array_outside`, `lod_group`, `lod_count`, `model`,
-`model_count`, `geometry`, `vertex_buffer`, `buffer_size`,
-`buffer_outside_graphics`, `layout`, `index_descriptor`, `index_buffer`,
-`index_outside_graphics`, `shader_group`, `shader`, `shader_constant`,
-`shader_count`, `parameter_table`, `parameter_count` and `page_map`.
+`model_count`, `aabb`, `aabb_union`, `geometry`, `vertex_buffer`, `buffer_size`,
+`buffer_outside_graphics`, `declaration`, `layout`, `index_descriptor`,
+`index_buffer`, `index_outside_graphics`, `index_header`, `shader_group`,
+`shader`, `shader_constant`, `shader_count`, `parameter_table`,
+`parameter_count` and `page_map`.
 
 Status vocabulary:
 
@@ -103,7 +123,7 @@ observation, not a format signature.
 ## Tests
 
 ```text
-python -m unittest discover -s tools/drawables/tests
+python -m unittest discover -s tools/drawables -p "test_*.py"
 ```
 
 The tests build the system and graphics segments with `struct` and `bytearray`.
@@ -111,21 +131,28 @@ They cover a one-LOD drawable with two geometries, a four-LOD drawable, a null
 LOD slot, overrunning model, geometry, shader and texture-slot arrays,
 undecodable and segment-mismatched pointers, a page-map read across the system
 boundary, a shared graphics pointer, a single shifted base and an ambiguous
-base. Negative cases include a truncated header, a nonzero header zero word, an
-out-of-range geometry pointer, an out-of-range graphics pointer and a declared
-buffer-size mismatch. They do not use game files.
+base. They also cover the AABB record array and its union, the declaration
+table and its layout offsets, the index header and ascending run, and the key
+join counts. Negative cases include a truncated header, a nonzero header zero
+word, an out-of-range geometry pointer, an out-of-range graphics pointer, a
+declared buffer-size mismatch, a truncated index buffer and a declaration entry
+that names no layout attribute. They do not use game files.
 
 ## Limits
 
 - The tool does not verify the RPF9 metadata, inflate the stored chunks or
   reconstruct the segments. It expects the decoded bytes and the system length.
   The input is capped at 512 MiB.
-- Vertex attribute semantics and format codes are reported as indices and
-  codes, not names. The `0x80`-byte prefix before the first attribute array is
-  not described by the attribute table and is not interpreted.
-- Material parameter hashes and 64-bit keys are opaque values. The tool does
-  not read the name string a key record points to and does not resolve a key to
-  a texture.
-- The index buffer is measured and bounded, not decoded into triangles.
+- Vertex attribute semantics and format codes are reported as indices, codes and
+  declaration bytes, not names. No position is decoded: the four 16-bit lanes
+  are reported raw because the dequantization scale and origin are not
+  established. The `0x80`-byte prefix is read only as the declaration table and
+  as raw bytes.
+- Material parameter hashes and 64-bit keys are opaque values. The tool does not
+  read the name string a key record points to and does not resolve a key to a
+  texture. The key join is exact for the decoded slots; a direct-store or EDUP
+  match requires a texture store the tool does not read.
+- The index buffer is measured, bounded and scanned for an ascending run; the
+  cluster grammar is not resolved and no triangles are reconstructed.
 - No engine code path was traced. Pointer validation, record allocation and
   runtime meanings remain unknown.
