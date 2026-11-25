@@ -37,3 +37,9 @@ Interpretations that were once used for RAGE resources and later corrected. The 
 **Old state.** The originating branch recorded a second-system-page sample with its map at `0x24EC0` in a 192,240-byte system segment, and a system-only sample whose entry sits at `0x1B33B90` with a `0x40` map and 96 bytes of system data.
 
 **Correction.** The structural sample was re-derived from seven resources, recorded as RES-F23 and listed in the pages document. The earlier rows record no archive or row index for their subjects, so the change cannot be attributed to a recheck rather than to a different subject selection; the record does not distinguish the two. The earlier values are not retained because they cannot be matched to a named resource.
+
+## Stream-only reconstruction lost a raw stored page
+
+**Old assumption.** A page was reconstructed from one or more zlib streams. A declared page with no zlib stream was treated as missing, and the reader stopped when the page map became readable and the zlib page count was below the declared count.
+
+**Correction.** A stored chunk can be a raw page. The type 6 representative stores a 65,536-byte zlib first system page and an 8,768-byte raw second page, with the page map at `0xFD60` and a logical system size of 74,304 bytes. The stream-only view reports 65,536 bytes and `partial`; the corrected rule reconstructs both pages (RES-F24, RES-F25, RES-F26). A raw chunk is a page only when the declared page count requires it; otherwise it is trailing data and is not counted. A zlib stream is one page except a split page, and no packed page was observed (RES-F27). The 625,472-byte sample shows pages larger than 64 KiB, so `0x10000` is an allocation multiple, not a fixed page size (RES-F28).

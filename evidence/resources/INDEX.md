@@ -69,6 +69,8 @@ The `data.rpf` data area itself yielded 18,911 resources in the source CLI's sca
 
 The `data.rpf` nested archive at row 0 holds 156 type 11 rows in mode 1 without a chunk table. Those rows are layout `F`, not resources, and are documented under [RPF9-F118](../rpf9/INDEX.md). They do not contradict the resource survey's mode-0 encoding-2 observation.
 
+Terrain and instance-placement nested archives from `<GAME_ROOT>/levels.rpf` supplied the type 6 raw-page rows, the 0DRP root-header rows and the block-tiling sample. The raw-page representative is inner row 46 of a terrain tile; the tiling sample is 12 instance-placement nested archives. The archive families are named; individual nested archive paths are not retained.
+
 ## Evidence types
 
 Types follow [RESEARCH-POLICY.md](../../RESEARCH-POLICY.md#evidence-types). Each finding records its method and the type that method maps to.
@@ -79,7 +81,7 @@ Types follow [RESEARCH-POLICY.md](../../RESEARCH-POLICY.md#evidence-types). Each
 | `CROSS_SAMPLE` | The same property checked across the sample sets above. Each finding states its scope; the counts are in the tables above |
 | `SYNTHETIC`    | The parser's fixtures. They validate the tool, not native behavior, and support no finding in this index                  |
 
-"Payload data" and "Archive data" are `BINARY`. A claim checked across several archives or resources is also `CROSS_SAMPLE`. The parser's 26 tests are `SYNTHETIC` and are recorded under [tools/resources](../../tools/resources/README.md), not as evidence for the findings.
+"Payload data" and "Archive data" are `BINARY`. A claim checked across several archives or resources is also `CROSS_SAMPLE`. The parser's 26 tests, `page_reconstruct`'s 14 tests and `root_tables`' 8 tests are `SYNTHETIC` and are recorded under [tools/resources](../../tools/resources/README.md), not as evidence for the findings.
 
 ## Findings
 
@@ -106,6 +108,18 @@ Types follow [RESEARCH-POLICY.md](../../RESEARCH-POLICY.md#evidence-types). Each
 | RES-F21 | 38 rows carry the four bytes `0DRP` at system `+0x10..+0x13` and the byte `0x7a` at `+0x14`, with zero at `+0x18`. Other rows carry 0 or 1 at `+0x18`                                                                                 | Archive data (BINARY, CROSS_SAMPLE) | Confirmed (bytes); Unknown (meaning)                                                 | The correlation is with the local CLI's type ID 11. Rechecked on one type 11 resource; the CLI reports the same `0DRP` tag                                                                                                          |
 | RES-F22 | The source survey's pointer totals are 34,022 system-shaped and 6,609 graphics-shaped values in system data for the 1,466 authenticated rows, with 1,353 and 591 outside their segment. The 1,560 re-parsed `data.rpf` resources give 2,112,806 system-shaped values (44,463 outside) and 94,564 graphics-shaped values (52,873 outside) | Byte counts made by the originating survey (`BINARY`) | Probable; Not demonstrated as a whole | The originating survey's output is not preserved in this repository, so none of these totals can be re-derived here. They are recorded because the pointers document quotes them, and they carry the status of quoted figures rather than verified results |
 | RES-F23 | Seven resources define the structural sample: page map in the primary sample, in a second system page, in four split-page resources and in a system-only resource. Their map offsets, page counts, segment sizes and split-page counts are the rows listed in the pages document | Payload bytes read with the current CLI (`BINARY`) | Confirmed for the seven rows as stated | Each row identifies its subject only by stored payload offset, so a row can be re-read from a matching resource but not from a named archive and row index. Two rows share payload `0x1000`, so an offset alone does not identify a resource. The values replace an earlier set whose subjects are not recorded; the earlier set is not retained |
+| RES-F24 | A stored resource chunk can be a raw page: no zlib header, stored length equal to reconstructed length, and its bytes complete the row's logical size. The representative type 6 row stores a 65,536-byte zlib page and an 8,768-byte raw page (74,304 system bytes) with the page map at `0xFD60`. Three further type 6 rows store a raw 8,768-byte last system page | Payload bytes and stored-size arithmetic (`BINARY`) | Confirmed (bytes, arithmetic) | Four rows. A 16,384-byte raw page was not located. Whether the engine treats the raw range as a page or copies it through another transport is **Unknown** |
+| RES-F25 | The current CLI reconstructs only zlib streams. For the representative raw-page row it reports `system_size` 65,536, status `partial` and `1 of 2 system pages found`, although the second page is stored | CLI output and payload bytes (`BINARY`) | Confirmed (reproduced row) | One row. The command is in [Reproduction](#reproduction) |
+| RES-F26 | Corrected reconstruction rule: reconstruct every declared page, including a raw last page; a readable page map MUST NOT end reconstruction; report `partial` only when a declared page is genuinely absent | Payload bytes, CLI output, synthetic tests (`BINARY`, `SYNTHETIC`) | Confirmed (reader rule) | A reader requirement; no engine-side reconstruction was traced |
+| RES-F27 | A zlib stream is one page except a split page. A raw chunk is a page only when the declared page count requires it. No packed page, one stream covering two declared pages, was observed | Payload bytes (`BINARY`); synthetic packed-page fixture (`SYNTHETIC`) | Confirmed for zlib and raw pages in the sample; **Unknown** for packed pages | The 625,472-byte sample, the raw-page rows and the type 6 sample. The packed rule is untested outside the fixture |
+| RES-F28 | The 625,472-byte sample has system pages of 589,824 and 35,648 bytes and a graphics page of 196,608 bytes, reconstructed from 3 streams. A fixed 64 KiB page size is refuted; `0x10000` is the allocation multiple for every page but the last | Payload bytes and CLI page sizes (`BINARY`) | Confirmed (sample) | One resource. The sample does not establish a maximum page size |
+| RES-F29 | The 0DRP root header at `+0x10..+0x4F` reads as: `0DRP` at `+0x10`, `0x7A` at `+0x14`, zero at `+0x18`, a varying word at `+0x20`, pointers at `+0x28`, `+0x30`, `+0x38` and `+0x40`, and four `u16` at `+0x48`. A pointer at `+0x50` also appears in the type 73 and 74 samples | Payload bytes (`BINARY`) | Confirmed (bytes, three rows); **Unknown** (meanings) | One type 11, one type 73 and one type 74 resource. The private counts `3/0/3/0`, `13/2/7/1` and `32/4/27/41` were not all reproduced |
+| RES-F30 | Every nonzero root pointer in the three samples resolved inside the system segment. No out-of-bounds or cross-page root pointer was found | Payload bytes (`BINARY`) | Confirmed (three rows) | Three resources, not a population |
+| RES-F31 | The block table behind `+0x38` holds 16-byte entries: `u32` identifier, `u32` size, `u64` pointer. The third `u16` at `+0x48` is the entry count. The table need not end at the page map | Payload bytes (`BINARY`) | Confirmed (three rows) | One resource per family. The fourth `u16` and the `+0x20` word remain unknown |
+| RES-F32 | In 4,426 type 73 resources with a declared graphics page and at least one graphics block, graphics blocks tile the page exactly in 2,864; 606 leave a remainder; 464 have an internal gap; 492 address outside the reconstructed graphics extent; no overlap was found | Payload bytes (`BINARY`, `CROSS_SAMPLE`) | Confirmed (sample counts) | 12 instance-placement nested archives, type 73 only. The private rows with 7,840 and 23,360-byte graphics pages were not located |
+| RES-F33 | A block entry addresses a byte range inside the system or graphics segment. A page is not a block and not a stream; one page can contain several blocks, and a block can equal the page when the page contains one block | Payload bytes (`BINARY`) | Confirmed (samples) | Type 73 mainly; the type 11 and type 74 samples are too few to generalise |
+| RES-F34 | Block ranges are not page-aligned. In the type 74 sample a system block spans `0xBCB0..0x146D0`, across the boundary between its two system pages. The block table cannot be used to derive page boundaries | Payload bytes (`BINARY`) | Confirmed (sample) | One type 74 resource |
+| RES-F35 | Across 4,647 resources from 12 instance-placement nested archives, the corrected rule reconstructs all 4,647 as complete: 9,041 zlib pages and 496 raw pages, no packed page and no missing page. The CLI reports `partial` for many of the same rows | Payload bytes (`BINARY`, `CROSS_SAMPLE`); reconstruction tool (`SYNTHETIC` for its tests) | Confirmed (sample) | The completion test is the tool's page-count arithmetic, not an independent engine check. The 16,384-byte raw page variant was not located |
 
 ### Not carried
 
@@ -133,12 +147,16 @@ The commands below reproduce the checks. On 2026-11-25 the listing, resource and
 lforge archive extract <GAME_ROOT>/textures.rpf --row 1 --output <WORK>/tex-row1.rpf --executable <EXECUTABLE>
 lforge archive ls <WORK>/tex-row1.rpf --executable <EXECUTABLE> --json
 lforge archive resource <WORK>/tex-row1.rpf 0x1010 --json
+lforge archive resource <WORK>/tile.rpf 0x2EEB010 --json --no-cache
 python tools/resources/rage_resource.py payload --file <WORK>/tex-row1.rpf --offset 0x1000 --length 576 --json
 python tools/resources/rage_resource.py decoded --file <DECODED> --system-length 1888 --json
+python tools/resources/page_reconstruct.py --file <WORK>/tile.rpf --offset 0x2EEB000 --length 47520 --json
 python -m unittest discover -s tools/resources/tests
 ```
 
-The byte-level results come from the published parser, which does not use application code. The local CLI supplied the authenticated metadata and was used as a cross-check: the rechecked rows matched on page-map offset, page counts, segment sizes, page sizes, stream counts and pointer counts. That agreement is consistency, not independent evidence for the format.
+The byte-level results come from the published parser and `page_reconstruct`, which do not use application code. The local CLI supplied the authenticated metadata and was used as a cross-check: the rechecked rows matched on page-map offset, page counts, segment sizes, page sizes, stream counts and pointer counts. That agreement is consistency, not independent evidence for the format.
+
+`<WORK>/tile.rpf` is a terrain-tile nested archive. The payload offsets `0x2EEB000` and `0x2EEB010` are the entry and the first stream; they identify the representative raw-page row, not a path.
 
 ## Limits
 
@@ -147,7 +165,9 @@ The byte-level results come from the published parser, which does not use applic
 - Payload bytes are outside the RPF9 metadata signature.
 - The ASCII names below the page map are payload text. They are not reproduced in this repository; only their count and record stride are recorded.
 - Only 1,560 of the 18,911 `data.rpf` resources were re-parsed from bytes in the source survey; the rest are counts from the local CLI.
-- Archives other than `textures.rpf` and `data.rpf` were not scanned for resources. `common.rpf` and `script.rpf` reported none; `shaders.rpf` was not scanned for resources.
+- A raw stored page was observed only in type 6 rows. Its identity as a page is supported by the page count, the logical size and the size pattern, not by engine code.
+- The 0DRP root header and block table were read on three resources. The block-tiling population is type 73 only.
+- Archives other than `textures.rpf`, `data.rpf` and `levels.rpf` were not scanned for resources. `common.rpf` and `script.rpf` reported none; `shaders.rpf` was not scanned for resources.
 
 ## Next experiments
 
