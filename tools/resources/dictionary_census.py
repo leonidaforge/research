@@ -98,6 +98,7 @@ def dictionary_census(sources):
     formats = Counter()
     mips = Counter()
     dimensions = set()
+    record_counts = []
     for source in sources:
         for entry in rows(source, {5}):
             try:
@@ -111,6 +112,7 @@ def dictionary_census(sources):
             stats["empty"] += int(dictionary.record_count == 0)
             stats["nonempty"] += int(dictionary.record_count > 0)
             stats["records"] += dictionary.record_count
+            record_counts.append(dictionary.record_count)
             stats["counts_equal"] += int(dictionary.hash_count == dictionary.value_count)
             stats["capacities_ok"] += int(
                 dictionary.hash_capacity >= dictionary.hash_count
@@ -131,12 +133,24 @@ def dictionary_census(sources):
                 mips[record.mip_levels] += 1
                 dimensions.add((record.width, record.height))
     multiplicities = Counter(len(value) for value in hash_records.values())
+    format_values = sorted(formats)
+    mip_values = sorted(mips)
     return {
         "stats": dict(stats),
         "issues": dict(issues),
         "formats": dict(formats),
+        "format_ids": len(format_values),
+        "format_min": format_values[0] if format_values else None,
+        "format_max": format_values[-1] if format_values else None,
         "mips": dict(mips),
+        "mip_min": mip_values[0] if mip_values else None,
+        "mip_max": mip_values[-1] if mip_values else None,
         "distinct_dimensions": len(dimensions),
+        "dimension_min": min(dimensions) if dimensions else None,
+        "dimension_max": max(dimensions) if dimensions else None,
+        "records_min": min(record_counts) if record_counts else None,
+        "records_max": max(record_counts) if record_counts else None,
+        "records_min_nonempty": min((value for value in record_counts if value), default=None),
         "distinct_hashes": len(hash_records),
         "hash_multiplicity": dict(multiplicities),
     }, hash_records
