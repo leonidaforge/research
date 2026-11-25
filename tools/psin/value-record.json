@@ -1,0 +1,4492 @@
+{
+  "reports": [
+    {
+      "label": "anim-247",
+      "values": {
+        "width": {
+          "count": 11,
+          "length_min": 24,
+          "length_max": 1036,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 11,
+          "length_min": 24,
+          "length_max": 306320,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "anim-248",
+      "values": {
+        "width": {
+          "count": 17,
+          "length_min": 24,
+          "length_max": 1036,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 15,
+          "length_min": 16,
+          "length_max": 475888,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4,
+            8
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "anim-260",
+      "values": {
+        "width": {
+          "count": 3,
+          "length_min": 28,
+          "length_max": 36,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 2,
+          "length_min": 56,
+          "length_max": 180,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-109",
+      "values": {
+        "width": {
+          "count": 20,
+          "length_min": 24,
+          "length_max": 108,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 6,
+          "length_min": 64,
+          "length_max": 18240,
+          "common_divisors_1_to_64": [
+            1,
+            2
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-116",
+      "values": {
+        "width": {
+          "count": 20,
+          "length_min": 24,
+          "length_max": 108,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 6,
+          "length_min": 64,
+          "length_max": 17472,
+          "common_divisors_1_to_64": [
+            1,
+            2
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-118",
+      "values": {
+        "width": {
+          "count": 2,
+          "length_min": 36,
+          "length_max": 40,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 3,
+          "length_min": 8,
+          "length_max": 24,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4,
+            8
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-128",
+      "values": {
+        "width": {
+          "count": 10,
+          "length_min": 44,
+          "length_max": 228,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 5,
+          "length_min": 132,
+          "length_max": 360,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-142",
+      "values": {
+        "width": {
+          "count": 20,
+          "length_min": 24,
+          "length_max": 108,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 6,
+          "length_min": 64,
+          "length_max": 18624,
+          "common_divisors_1_to_64": [
+            1
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-164",
+      "values": {
+        "width": {
+          "count": 11,
+          "length_min": 24,
+          "length_max": 252,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 4,
+          "length_min": 8,
+          "length_max": 200,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4,
+            8
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-180",
+      "values": {
+        "width": {
+          "count": 20,
+          "length_min": 24,
+          "length_max": 108,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 6,
+          "length_min": 64,
+          "length_max": 28224,
+          "common_divisors_1_to_64": [
+            1
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-195",
+      "values": {
+        "width": {
+          "count": 20,
+          "length_min": 24,
+          "length_max": 108,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 6,
+          "length_min": 64,
+          "length_max": 15744,
+          "common_divisors_1_to_64": [
+            1
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-204",
+      "values": {
+        "width": {
+          "count": 12,
+          "length_min": 24,
+          "length_max": 120,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            3,
+            4,
+            6,
+            12
+          ],
+          "divisors_above_8": [
+            12
+          ]
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 6,
+          "length_min": 40,
+          "length_max": 6144,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-213",
+      "values": {
+        "width": {
+          "count": 20,
+          "length_min": 24,
+          "length_max": 108,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 6,
+          "length_min": 64,
+          "length_max": 24768,
+          "common_divisors_1_to_64": [
+            1
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-237",
+      "values": {
+        "width": {
+          "count": 1,
+          "length_min": 28,
+          "length_max": 28,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4,
+            7,
+            14,
+            28
+          ],
+          "divisors_above_8": [
+            14,
+            28
+          ]
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 2,
+          "length_min": 8,
+          "length_max": 16,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4,
+            8
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-242",
+      "values": {
+        "width": {
+          "count": 10,
+          "length_min": 44,
+          "length_max": 228,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 5,
+          "length_min": 160,
+          "length_max": 512,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4,
+            8
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-252",
+      "values": {
+        "width": {
+          "count": 20,
+          "length_min": 24,
+          "length_max": 108,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 6,
+          "length_min": 64,
+          "length_max": 29184,
+          "common_divisors_1_to_64": [
+            1,
+            2
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-277",
+      "values": {
+        "width": {
+          "count": 20,
+          "length_min": 24,
+          "length_max": 108,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 6,
+          "length_min": 64,
+          "length_max": 45120,
+          "common_divisors_1_to_64": [
+            1,
+            2
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-294",
+      "values": {
+        "width": {
+          "count": 20,
+          "length_min": 24,
+          "length_max": 108,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 6,
+          "length_min": 64,
+          "length_max": 14592,
+          "common_divisors_1_to_64": [
+            1
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-301",
+      "values": {
+        "width": {
+          "count": 20,
+          "length_min": 24,
+          "length_max": 108,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 6,
+          "length_min": 64,
+          "length_max": 25536,
+          "common_divisors_1_to_64": [
+            1
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-310",
+      "values": {
+        "width": {
+          "count": 21,
+          "length_min": 24,
+          "length_max": 108,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 7,
+          "length_min": 64,
+          "length_max": 30720,
+          "common_divisors_1_to_64": [
+            1,
+            2
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-314",
+      "values": {
+        "width": {
+          "count": 20,
+          "length_min": 24,
+          "length_max": 108,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 6,
+          "length_min": 64,
+          "length_max": 33792,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-316",
+      "values": {
+        "width": {
+          "count": 10,
+          "length_min": 44,
+          "length_max": 228,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 5,
+          "length_min": 320,
+          "length_max": 3584,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-336",
+      "values": {
+        "width": {
+          "count": 20,
+          "length_min": 24,
+          "length_max": 108,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 6,
+          "length_min": 64,
+          "length_max": 20736,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4,
+            8,
+            16
+          ],
+          "divisors_above_8": [
+            16
+          ]
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-344",
+      "values": {
+        "width": {
+          "count": 21,
+          "length_min": 24,
+          "length_max": 108,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 7,
+          "length_min": 64,
+          "length_max": 31104,
+          "common_divisors_1_to_64": [
+            1
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-345",
+      "values": {
+        "width": {
+          "count": 20,
+          "length_min": 24,
+          "length_max": 108,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 6,
+          "length_min": 64,
+          "length_max": 27264,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-353",
+      "values": {
+        "width": {
+          "count": 1,
+          "length_min": 88,
+          "length_max": 88,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4,
+            8,
+            11,
+            22,
+            44
+          ],
+          "divisors_above_8": [
+            11,
+            22,
+            44
+          ]
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 2,
+          "length_min": 8,
+          "length_max": 40,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4,
+            8
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-394",
+      "values": {
+        "width": {
+          "count": 4,
+          "length_min": 36,
+          "length_max": 2340,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 5,
+          "length_min": 16,
+          "length_max": 792,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4,
+            8
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-396",
+      "values": {
+        "width": {
+          "count": 20,
+          "length_min": 24,
+          "length_max": 108,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 6,
+          "length_min": 64,
+          "length_max": 25344,
+          "common_divisors_1_to_64": [
+            1
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-400",
+      "values": {
+        "width": {
+          "count": 20,
+          "length_min": 24,
+          "length_max": 108,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 6,
+          "length_min": 64,
+          "length_max": 25344,
+          "common_divisors_1_to_64": [
+            1
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-42",
+      "values": {
+        "width": {
+          "count": 20,
+          "length_min": 24,
+          "length_max": 108,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 6,
+          "length_min": 64,
+          "length_max": 18240,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4,
+            8
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-445",
+      "values": {
+        "width": {
+          "count": 41,
+          "length_min": 24,
+          "length_max": 600,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 19,
+          "length_min": 96,
+          "length_max": 50912,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4,
+            8,
+            16
+          ],
+          "divisors_above_8": [
+            16
+          ]
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-459",
+      "values": {
+        "width": {
+          "count": 20,
+          "length_min": 24,
+          "length_max": 108,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 6,
+          "length_min": 64,
+          "length_max": 32064,
+          "common_divisors_1_to_64": [
+            1
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-463",
+      "values": {
+        "width": {
+          "count": 7,
+          "length_min": 24,
+          "length_max": 228,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            3,
+            4,
+            6,
+            12
+          ],
+          "divisors_above_8": [
+            12
+          ]
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 4,
+          "length_min": 28,
+          "length_max": 3200,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-470",
+      "values": {
+        "width": {
+          "count": 20,
+          "length_min": 24,
+          "length_max": 108,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 6,
+          "length_min": 64,
+          "length_max": 33792,
+          "common_divisors_1_to_64": [
+            1,
+            2
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-481",
+      "values": {
+        "width": {
+          "count": 20,
+          "length_min": 24,
+          "length_max": 108,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 6,
+          "length_min": 64,
+          "length_max": 25344,
+          "common_divisors_1_to_64": [
+            1
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-491",
+      "values": {
+        "width": {
+          "count": 10,
+          "length_min": 44,
+          "length_max": 228,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 5,
+          "length_min": 160,
+          "length_max": 2048,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4,
+            8
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-512",
+      "values": {
+        "width": {
+          "count": 35,
+          "length_min": 36,
+          "length_max": 436,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 2,
+          "length_min": 16,
+          "length_max": 103968,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4,
+            8,
+            16
+          ],
+          "divisors_above_8": [
+            16
+          ]
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-514",
+      "values": {
+        "width": {
+          "count": 4,
+          "length_min": 36,
+          "length_max": 108,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            3,
+            4,
+            6,
+            12
+          ],
+          "divisors_above_8": [
+            12
+          ]
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 3,
+          "length_min": 32,
+          "length_max": 4416,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4,
+            8,
+            16,
+            32
+          ],
+          "divisors_above_8": [
+            16,
+            32
+          ]
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-515",
+      "values": {
+        "width": {
+          "count": 20,
+          "length_min": 24,
+          "length_max": 108,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 6,
+          "length_min": 64,
+          "length_max": 26688,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4,
+            8,
+            16,
+            32,
+            64
+          ],
+          "divisors_above_8": [
+            16,
+            32,
+            64
+          ]
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-52",
+      "values": {
+        "width": {
+          "count": 20,
+          "length_min": 24,
+          "length_max": 108,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 6,
+          "length_min": 64,
+          "length_max": 26880,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-536",
+      "values": {
+        "width": {
+          "count": 20,
+          "length_min": 24,
+          "length_max": 108,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 6,
+          "length_min": 64,
+          "length_max": 39360,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4,
+            8
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-548",
+      "values": {
+        "width": {
+          "count": 20,
+          "length_min": 24,
+          "length_max": 108,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 6,
+          "length_min": 64,
+          "length_max": 30720,
+          "common_divisors_1_to_64": [
+            1
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-553",
+      "values": {
+        "width": {
+          "count": 3,
+          "length_min": 36,
+          "length_max": 2044,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 2,
+          "length_min": 16,
+          "length_max": 624,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4,
+            8,
+            16
+          ],
+          "divisors_above_8": [
+            16
+          ]
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-577",
+      "values": {
+        "width": {
+          "count": 20,
+          "length_min": 24,
+          "length_max": 108,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 6,
+          "length_min": 64,
+          "length_max": 23040,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-60",
+      "values": {
+        "width": {
+          "count": 20,
+          "length_min": 24,
+          "length_max": 108,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 6,
+          "length_min": 64,
+          "length_max": 20352,
+          "common_divisors_1_to_64": [
+            1,
+            2
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-602",
+      "values": {
+        "width": {
+          "count": 10,
+          "length_min": 44,
+          "length_max": 228,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 5,
+          "length_min": 160,
+          "length_max": 1536,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4,
+            8
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-604",
+      "values": {
+        "width": {
+          "count": 20,
+          "length_min": 24,
+          "length_max": 108,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 6,
+          "length_min": 64,
+          "length_max": 25536,
+          "common_divisors_1_to_64": [
+            1
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-612",
+      "values": {
+        "width": {
+          "count": 3,
+          "length_min": 28,
+          "length_max": 60,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 3,
+          "length_min": 24,
+          "length_max": 64,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4,
+            8
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-629",
+      "values": {
+        "width": {
+          "count": 20,
+          "length_min": 24,
+          "length_max": 108,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 6,
+          "length_min": 64,
+          "length_max": 33984,
+          "common_divisors_1_to_64": [
+            1
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-645",
+      "values": {
+        "width": {
+          "count": 21,
+          "length_min": 24,
+          "length_max": 108,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 7,
+          "length_min": 64,
+          "length_max": 31104,
+          "common_divisors_1_to_64": [
+            1
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-648",
+      "values": {
+        "width": {
+          "count": 20,
+          "length_min": 24,
+          "length_max": 108,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 6,
+          "length_min": 64,
+          "length_max": 36672,
+          "common_divisors_1_to_64": [
+            1,
+            2
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-683",
+      "values": {
+        "width": {
+          "count": 2,
+          "length_min": 36,
+          "length_max": 280,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 3,
+          "length_min": 8,
+          "length_max": 104,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4,
+            8
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-69",
+      "values": {
+        "width": {
+          "count": 20,
+          "length_min": 24,
+          "length_max": 108,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 6,
+          "length_min": 64,
+          "length_max": 27648,
+          "common_divisors_1_to_64": [
+            1
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-690",
+      "values": {
+        "width": {
+          "count": 20,
+          "length_min": 24,
+          "length_max": 108,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 6,
+          "length_min": 64,
+          "length_max": 19776,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-696",
+      "values": {
+        "width": {
+          "count": 20,
+          "length_min": 24,
+          "length_max": 108,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 6,
+          "length_min": 64,
+          "length_max": 18816,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4,
+            8
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-76",
+      "values": {
+        "width": {
+          "count": 20,
+          "length_min": 24,
+          "length_max": 108,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 6,
+          "length_min": 64,
+          "length_max": 26112,
+          "common_divisors_1_to_64": [
+            1
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-77",
+      "values": {
+        "width": {
+          "count": 20,
+          "length_min": 24,
+          "length_max": 108,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 6,
+          "length_min": 64,
+          "length_max": 28800,
+          "common_divisors_1_to_64": [
+            1
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-81",
+      "values": {
+        "width": {
+          "count": 10,
+          "length_min": 24,
+          "length_max": 324,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 3,
+          "length_min": 8,
+          "length_max": 248,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4,
+            8
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "data-84",
+      "values": {
+        "width": {
+          "count": 2,
+          "length_min": 36,
+          "length_max": 136,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 3,
+          "length_min": 8,
+          "length_max": 56,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4,
+            8
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "packs-145",
+      "values": {
+        "width": {
+          "count": 3,
+          "length_min": 36,
+          "length_max": 64,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 3,
+          "length_min": 16,
+          "length_max": 800,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4,
+            8
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "packs-67",
+      "values": {
+        "width": {
+          "count": 1,
+          "length_min": 28,
+          "length_max": 28,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4,
+            7,
+            14,
+            28
+          ],
+          "divisors_above_8": [
+            14,
+            28
+          ]
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 2,
+          "length_min": 12,
+          "length_max": 16,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    },
+    {
+      "label": "packs-80",
+      "values": {
+        "width": {
+          "count": 224,
+          "length_min": 12,
+          "length_max": 5812,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      },
+      "blocks": {
+        "width": {
+          "count": 180,
+          "length_min": 8,
+          "length_max": 57560,
+          "common_divisors_1_to_64": [
+            1,
+            2,
+            4,
+            8
+          ],
+          "divisors_above_8": []
+        },
+        "signatures": {
+          "zlib": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "zstd": 0,
+          "lz4": 0
+        },
+        "decoders": {
+          "zlib": 0,
+          "deflate_raw": 0,
+          "gzip": 0,
+          "bz2": 0,
+          "xz": 0,
+          "lzma_alone": 0
+        },
+        "strict": {
+          "deflate_raw_complete": 0,
+          "lzma_auto_complete": 0
+        }
+      }
+    }
+  ],
+  "summary": {
+    "samples": 62,
+    "value_counts": [
+      11,
+      17,
+      3,
+      20,
+      20,
+      2,
+      10,
+      20,
+      11,
+      20,
+      20,
+      12,
+      20,
+      1,
+      10,
+      20,
+      20,
+      20,
+      20,
+      21,
+      20,
+      10,
+      20,
+      21,
+      20,
+      1,
+      4,
+      20,
+      20,
+      20,
+      41,
+      20,
+      7,
+      20,
+      20,
+      10,
+      35,
+      4,
+      20,
+      20,
+      20,
+      20,
+      3,
+      20,
+      20,
+      10,
+      20,
+      3,
+      20,
+      21,
+      20,
+      2,
+      20,
+      20,
+      20,
+      20,
+      20,
+      10,
+      2,
+      3,
+      1,
+      224
+    ],
+    "block_counts": [
+      11,
+      15,
+      2,
+      6,
+      6,
+      3,
+      5,
+      6,
+      4,
+      6,
+      6,
+      6,
+      6,
+      2,
+      5,
+      6,
+      6,
+      6,
+      6,
+      7,
+      6,
+      5,
+      6,
+      7,
+      6,
+      2,
+      5,
+      6,
+      6,
+      6,
+      19,
+      6,
+      4,
+      6,
+      6,
+      5,
+      2,
+      3,
+      6,
+      6,
+      6,
+      6,
+      2,
+      6,
+      6,
+      5,
+      6,
+      3,
+      6,
+      7,
+      6,
+      3,
+      6,
+      6,
+      6,
+      6,
+      6,
+      3,
+      3,
+      3,
+      2,
+      180
+    ],
+    "value_decoder_any": {
+      "zlib": 0,
+      "deflate_raw": 0,
+      "gzip": 0,
+      "bz2": 0,
+      "xz": 0,
+      "lzma_alone": 0
+    },
+    "block_decoder_any": {
+      "zlib": 0,
+      "deflate_raw": 0,
+      "gzip": 0,
+      "bz2": 0,
+      "xz": 0,
+      "lzma_alone": 0
+    },
+    "value_strict_any": {
+      "deflate_raw_complete": 0,
+      "lzma_auto_complete": 0
+    },
+    "block_strict_any": {
+      "deflate_raw_complete": 0,
+      "lzma_auto_complete": 0
+    },
+    "value_signature_any": {
+      "zlib": 0,
+      "gzip": 0,
+      "bz2": 0,
+      "xz": 0,
+      "zstd": 0,
+      "lz4": 0
+    },
+    "block_signature_any": {
+      "zlib": 0,
+      "gzip": 0,
+      "bz2": 0,
+      "xz": 0,
+      "zstd": 0,
+      "lz4": 0
+    }
+  }
+}
