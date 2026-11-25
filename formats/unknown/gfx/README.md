@@ -12,10 +12,11 @@ established.
 ## Population and predicate
 
 The recount used the 849 unique depth-1 manifests present in the cached
-inventory, which hold 183,144 row records. The run summary records 782 unique
-archives and 169,523 rows for its current sample; the cache directory holds 67
-further unique archives. All six type-66 archives are in the current sample,
-and the 67 further archives add no type-66 row.
+inventory, which hold 183,144 row records. Of these, 182,321 are readable and
+823 are unreadable. The run summary records 782 unique archives and 169,523 rows
+for its current sample; the cache directory holds 67 further unique archives
+with 13,621 rows. All six type-66 archives are in the current sample, and the 67
+further archives add no type-66 row.
 
 The predicate is an exact four-byte match at offset 0 of the decoded payload.
 It is not a whole-file hash and not a substring search anywhere in the payload.
@@ -115,9 +116,10 @@ variant but the variant does not imply multi-chunk.
   ([scarlett-e95020b2](../../../builds/gta-vi/scarlett-e95020b2/README.md)) and
   one local archive set.
 - All 49 type-66 rows in the population were decoded. The 37 non-type-66 rows
-  in the six GFX archives, all type 5, were also decoded; 0 begin `GFX*`. The
-  remaining 182,235 readable rows were read at their stored prefixes only; 0
-  stored rows begin `GFX*`. A bounded sample across eight non-type-66 encoding-3
+  in the six GFX archives, all type 5, were also decoded; 0 begin `GFX*`. A
+  stored-prefix scan covers all 182,321 readable rows and finds 0 stored `GFX*`;
+  the 86 decoded rows are part of that scan, so 182,235 rows were checked only
+  at the stored prefix. A bounded sample across eight non-type-66 encoding-3
   types decoded 37 rows and found no `GFX*`; one type-14 row was behind the
   payload transform. This is a bounded cross-type sample, not a decoded census
   of every row.

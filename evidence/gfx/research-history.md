@@ -34,3 +34,27 @@ The population recount also differs from the earlier frame: the cache contains
 849 unique depth-1 manifests and 183,144 row records, while the run summary
 records 782 archives and 169,523 rows. The extra cached archives contain no
 additional type-66 row, so the 49-row count is unchanged.
+
+## 2026-11-25: stored-prefix denominator and trailer boundary corrected
+
+The index and format document previously reported 182,321 and 182,235 as if they
+were competing totals for the same scan. Both are reproducible from the 849
+cached manifests at different stages:
+
+- 183,144 row records in total.
+- 823 unreadable rows removed, leaving 182,321 readable rows.
+- A stored-prefix scan of all 182,321 readable rows finds 0 `GFX*`.
+- 49 type-66 rows and 37 type-5 rows in the six GFX archives were also decoded.
+- 182,235 readable rows were checked only at the stored prefix.
+
+The figures did not come from different runs, selections or a defect. The earlier
+arithmetic removed the 49 and 37 rows from the 183,144 total, but they belong to
+the 182,321 readable population.
+
+GFX-F06 previously placed a 17 to 54 byte "final run" inside the ten-byte
+trailer. The trailer's printable run is five bytes (`.Main`); the 17 to 54 range
+is the second run. GFX-F06 now records the five-byte trailer run and leaves the
+second-run range to GFX-F05 and the format document.
+
+The GFX finding rows now carry the canonical `BINARY` and `CROSS_SAMPLE`
+evidence types.
