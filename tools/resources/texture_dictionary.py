@@ -105,6 +105,7 @@ class Record:
             "allocation_size": self.allocation_size,
             "allocation_extent": self.allocation_extent,
             "size_basis": self.size_basis,
+            "name_pointer": self.name_pointer,
             "record_offset": self.record_offset,
             "value_pointer": None
             if self.value_pointer is None

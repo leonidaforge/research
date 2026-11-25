@@ -149,9 +149,9 @@ class ParseTests(unittest.TestCase):
         self.assertEqual(record.field_60, 0xFFFFFFFFFFFF0241)
         self.assertEqual(record.field_68, 0)
         keys = set(record.as_dict())
-        self.assertTrue({"record_offset", "value_pointer", "field_00", "field_0c",
-                         "field_10", "field_20", "field_28", "field_44", "field_46",
-                         "field_48", "field_50", "field_58", "field_60",
+        self.assertTrue({"record_offset", "value_pointer", "name_pointer", "field_00",
+                         "field_0c", "field_10", "field_20", "field_28", "field_44",
+                         "field_46", "field_48", "field_50", "field_58", "field_60",
                          "field_68"}.issubset(keys))
 
     def test_partition_requires_a_zero_start(self):

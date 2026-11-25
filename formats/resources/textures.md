@@ -171,9 +171,10 @@ extent ends at the graphics end. The sum is therefore
 The parser requires every record to have an allocation pointer, no two starts
 to be equal, the first start to be zero, and the summed extents to equal the
 graphics size. It reports these as `allocations_in_bounds`, `partition_ok` and
-`starts_at_zero`. In the sample, 1,440 of 1,440 resources pass all three. The
-weaker `allocation_sum_ok` is the `<=` check and is kept for callers that only
-need a bound.
+`starts_at_zero`. In the sample, 1,440 of 1,440 resources pass all three (the 9
+empty dictionaries have no graphics bytes and pass trivially). The weaker
+`allocation_sum_ok` is the `<=` check and is kept for callers that only need a
+bound.
 
 A start equal to the graphics size is not accepted as in bounds; a missing
 allocation pointer is not in bounds. If two records share a start, the parser
@@ -197,7 +198,7 @@ extent remain as separate observations.
 | Candidate                                                       | Discriminating observation                                                                 | Result   |
 | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | -------- |
 | The record width is 0x50 or 0x38 because only part of the shape repeats | The value array points into a run whose sorted starts are 0x70 apart, and the run ends at the value array. The full 0x70 shape is identical in 5,484 records | Rejected |
-| `hash[i]` describes the record at `record_base + i × 0x70`       | The value array is a permutation; order differs in every multi-record dictionary | Rejected |
+| `hash[i]` describes the record at `record_base + i × 0x70`       | The value order differs from the index order in 107 of 1,422 multi-record dictionaries | Rejected |
 | The allocation size is the unit count in bytes                   | The record stores a count, not a byte size; no stored byte size exists to compare against | Rejected as a size; the extent is an upper bound |
 | A name hash is a 64-bit path hash                                 | Each stored hash equals 32-bit `joaat` of the referenced ASCII text (5,484/5,484) | Rejected |
 | The capacity fields can be ignored                                | The parser now compares each capacity with its count; the sample has capacity ≥ count in 1,440/1,440 | Rejected as a free field |
