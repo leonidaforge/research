@@ -180,6 +180,14 @@ Some earlier notes used "A" and "B" for `hdr[0x04]` and `hdr[0x08]`. Those lette
 
 **Correction.** Those addresses are withdrawn. Together they lead from a descriptor's key identifier to the executable's embedded key-material storage, which the research policy keeps out of this repository. The behavior stays documented: selector construction (RPF9-F94), the `0x10F4`-byte state and its `0x1100`-byte copy (RPF9-F95), and the structural recognition method (RPF9-F97). Ordinary cryptographic processing functions keep their RVAs, including the selector construction and the setup routine. Some rows had also been written as full virtual addresses. Those are withdrawn with the rows above, or corrected to RVAs against the image base recorded in the build document where they remain.
 
+## Payload transform reuses the metadata cipher
+
+**Old assumption.** The payload-transform routines `0x19C380`, `0x1616150` and `0x28CF9C0` were only known to be called; their algorithm, key source and relation to the metadata cipher were unknown (RPF9-F38).
+
+**Correction.** The three routines run the same encoded AES-256 CBC engine as the metadata cipher, through a separate per-stream algorithm object (RPF9-F109). The read stores the block-aligned position, reads whole 16-byte blocks and transforms them in place; a partial block reads the whole block, transforms it and copies the requested sub-range (RPF9-F110). The flag disables the chunk fast path and transforms stored bytes before inflation (RPF9-F111). The object's mode selects CBC continuation or an IV equal to the 16-byte parameter plus the block index, and the mode also selects the key-provider state (RPF9-F112).
+
+**Still open.** The key state is not the archive `B` sub-block 1 descriptor or the executable static descriptor in the tested combinations, under either provider mode, so real transformed rows do not decrypt (RPF9-F113). No speculative decoding was implemented; transformed rows stay refused.
+
 ## Open
 
 - Meaning of descriptor `+0x08`, and any use of `+0x12`.
@@ -187,7 +195,7 @@ Some earlier notes used "A" and "B" for `hdr[0x04]` and `hdr[0x08]`. Those lette
 - The content of the `B` sub-blocks.
 - The stored state of the secondary area and of archives other than the inspected ones, and how many bytes of the primary area change. One earlier note called the primary regions "post-transform" from the order of initialization alone. The step 4 pass, the archive scan and the verified signature now confirm the primary area is stored transformed in the inspected archives (RPF9-F28, RPF9-F48, RPF9-F102).
 - Whether a second executable build registers the same keys or binds to the same archives. Cipher algorithms 1, 2, `0x11` and `0x12`, whether the embedded schedule is the standard AES-256 expansion, and the role of the `B` trailer remain open.
-- The payload transform algorithm and key source. Payload bytes are not covered by the metadata signature.
+- The payload transform's key state: the descriptor or key-provider path that initializes its per-stream object. Its algorithm is the metadata cipher's engine (RPF9-F109), but the tested metadata descriptors do not decrypt real transformed rows (RPF9-F113). Payload bytes are not covered by the metadata signature.
 - Directory structure outside the traced paths, and enumeration in the device layer or above.
 - CityHash32 identity of the fingerprint hash, the concrete startup fingerprint and the contents of `B` sub-block 9 in real archives.
 - Path normalization, the physical device implementation, and the mount prefixes the game uses.

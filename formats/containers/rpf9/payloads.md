@@ -5,7 +5,7 @@ Payload data follows the metadata area. This document has two kinds of knowledge
 - The engine read path, traced in code: where an entry's bytes are, how they are read, and how they are decoded.
 - The storage layout observed in archive data. It is enough to recover payloads without the table of contents.
 
-The two agree where they overlap (see [below](#relation-between-code-and-data)). Stored rows and chunked rows can now be read by following the native field values, once the metadata authenticates ([native reads](#native-reads-from-authenticated-metadata)). The payload transform and raw DEFLATE without a chunk table remain untried on real data.
+The two agree where they overlap (see [below](#relation-between-code-and-data)). Stored rows and chunked rows can now be read by following the native field values, once the metadata authenticates ([native reads](#native-reads-from-authenticated-metadata)). The payload transform reuses the metadata cipher's engine, but its key state is unresolved; raw DEFLATE without a chunk table remains untried on real data.
 
 ## Payload address
 
@@ -220,13 +220,16 @@ The native code checks less than a reader can afford to. A reader that decodes e
 
 ## Payload transform
 
-When key `0x286030A358A789FB` is present, stored bytes do not come straight from the device (RPF9-F38):
+When key `0x286030A358A789FB` is present, stored bytes do not come straight from the device (RPF9-F38, RPF9-F109):
 
-1. The engine positions a per-stream context at `position & ~0xF`.
-2. It reads whole 16-byte blocks through the device and passes them in place through a processing routine.
-3. Partial blocks at the start and end go through a separate routine.
+1. The engine stores `position & ~0xF` in the per-stream context (`0x19C380`).
+2. It reads whole 16-byte blocks through the device into the destination and passes them in place to `0x1616150`, a buffered whole-block consumer.
+3. For each run the consumer calls slot `+0x30` (`0x140FC9040`) of the algorithm-`0x10` object. That method either continues the CBC chain (mode 1) or first resets the IV to the 16-byte parameter plus the block index (mode 3), then runs the same update (`0x6137D0`) and engine process (`0x1455DBCF0`) as the metadata cipher (RPF9-F109).
+4. A partial block at the start or end reads the whole 16-byte block at the block boundary, transforms it, and copies the requested sub-range (`0x28CF9C0`, RPF9-F110).
 
-The same flag disables the chunk fast path. Seeks reposition the context. The algorithm and its key source are unknown. See [cryptography/rpf9](../../../cryptography/rpf9/README.md#payload-transform).
+The same flag disables the chunk fast path. A transformed compressed entry is decrypted first and decoded second (RPF9-F111). Seeks reposition the context at the stored cursor. The block operation is the encoded AES-256 decryption of [cryptography/rpf9](../../../cryptography/rpf9/README.md#algorithm-0x10), with a 16-byte block and CBC chaining.
+
+The transform's key identifier, IV and descriptor are not the archive's `B` sub-block 1 descriptor or the executable's static descriptor in the tested combinations, under either provider mode (RPF9-F112, RPF9-F113). The state that initializes its per-stream cipher object is therefore unknown, and the transform stays unsupported for reading. See [cryptography/rpf9](../../../cryptography/rpf9/README.md#payload-transform).
 
 ## Relation between code and data
 
@@ -242,7 +245,7 @@ These agree. The data observations were made by scanning, not by following nativ
 
 Once the metadata signature verifies, payloads can be read through native location records rather than by scanning. In the 22 tested archives, 5150 rows were stored and 929 decoded through chunk tables; 455 rows carried the payload transform and were refused (RPF9-F103). Stored and chunked extractions produced exactly the logical size (RPF9-F104).
 
-No raw DEFLATE row without a chunk table was observed, so that path remains confirmed by code but unconfirmed by real extraction. The payload-transform path remains unknown. The metadata signature covers none of these payload bytes; successful extraction is not authentication.
+No raw DEFLATE row without a chunk table was observed, so that path remains confirmed by code but unconfirmed by real extraction. The payload transform runs the same encoded AES-256 CBC engine as the metadata cipher, but the key state that initializes it is not the archive descriptor in the tested combinations, so transformed rows are still refused (RPF9-F109, RPF9-F113). The metadata signature covers none of these payload bytes; successful extraction is not authentication.
 
 ## Observed storage layout
 

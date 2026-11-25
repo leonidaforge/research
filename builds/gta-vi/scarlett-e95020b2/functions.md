@@ -213,10 +213,12 @@ Reads and seeks:
 | `0x1330C10` | Device read at `fileObject[+0x20] + payloadOffset + position`                                                                                                    | Confirmed            | F33      |
 | `0x4F60AB0` | Read-source index, key `0xCBB68FF7B7078DB7`, `0xFFFFFFFF` if absent                                                                                              | Confirmed            | F41      |
 | `0x4F60A90` | Read handle: main handle for `0xFFFFFFFF`, else `alternates[index]` without bounds or null checks                                                                | Confirmed (assembly) | F41, F73 |
-| `0x1331470` | Transform read: positions the context at a 16-byte boundary, processes whole blocks, handles partial blocks                                                      | Confirmed            | F38      |
-| `0x19C380`  | Positions the payload transform context. Not analyzed                                                                                                            | Confirmed (call)     | F38      |
-| `0x1616150` | Processes whole 16-byte blocks in place. Not analyzed                                                                                                            | Confirmed (call)     | F38      |
-| `0x28CF9C0` | Reads a partial block for the transform. Not analyzed                                                                                                            | Confirmed (call)     | F38      |
+| `0x1331470` | Transform read: stores `position & ~0xF` in the context, reads whole blocks, processes them in place, handles partial blocks                                                     | Confirmed            | F38, F109, F110 |
+| `0x19C380`  | Positions the payload transform context: stores the aligned position at context `+0x38`                                                                          | Confirmed            | F38, F110 |
+| `0x1616150` | Buffered whole-block consumer; calls slot `+0x30` of the per-stream algorithm object for each run                                                                | Confirmed            | F109     |
+| `0x140FC9020` | Trampoline to the context's source object, vtable slot `+0x30`                                                                                                | Confirmed            | F109     |
+| `0x140FC9040` | Algorithm `0x10` slot `+0x30`: continue CBC (mode 1) or set the IV to the parameter plus the block index (mode 3), then update                                  | Confirmed            | F109, F112 |
+| `0x28CF9C0` | Partial block: reads the whole 16-byte block, transforms it, copies the requested sub-range                                                                      | Confirmed            | F110     |
 
 Decoding and chunks:
 
