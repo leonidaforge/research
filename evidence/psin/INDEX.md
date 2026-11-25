@@ -1,58 +1,68 @@
 # PSIN evidence index
 
-Payload observations from the Scarlett build [e95020b2](../../builds/gta-vi/scarlett-e95020b2/README.md). No executable code path was traced. Every finding is **Private-evidence supported**: the selection and the inspector are public, but the payloads remain outside this repository.
+Payload observations from the Scarlett build [e95020b2](../../builds/gta-vi/scarlett-e95020b2/README.md). No executable code path was traced. Every finding is **Private-evidence supported**: the selection and the tools are public, but the payloads remain outside this repository.
 
 ## Sample
 
-| Property              | Value                                                                                                                                                    |
-| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Payloads              | 103 unique PSIN payloads: the earlier 18 plus 85 additional                                                                                              |
-| Earlier sample        | 18 type 11 payloads from five top-level archives                                                                                                         |
-| Expanded extraction   | 86 decoded type 11 rows attempted from nine top-level archives; 82 began with `PSIN`, four with `RBF0`                                                    |
-| Selection             | decoded type 11 rows at or below 1 MiB from the top-level inventory manifests; per archive, sorted by `(logical size, row)` and quantile-spaced up to 16 |
-| Depth-1 payloads      | 13 unique payloads from the expanded inventory and earlier probes                                                                                         |
-| Sizes                 | 216 to 1,032,656 bytes                                                                                                                                   |
-| First section offsets | 48 to 972,552                                                                                                                                            |
-| Signature             | `50 53 49 4E` at offset 0 in all 103                                                                                                                     |
+| Property | Value |
+| -------- | ----- |
+| PSIN files | 918 decoded payloads |
+| Unique payloads | 757 by SHA-256 of the decoded bytes |
+| Family split | 695 `LSCH`, 62 `PMAP` |
+| Sources | all readable type 11 rows from the 22 top-level archives and from 18 nested archives under `<GAME_ROOT>/data.rpf` at or below 2 MiB |
+| Sizes | 216 to 17,406,784 bytes |
+| First section offsets | 48 to 16,684,176 |
+| Signature | `50 53 49 4E` at offset 0 in all 757 |
 
-The earlier 18 rows were `anim.rpf` 235, 238, 241, 244; `data.rpf` 42, 48, 49, 52; `levels.rpf` 2053, 2055, 2056, 2057; `packs.rpf` 61, 67, 70, 71; and `pack/story000/story000.rpf` 444, 457.
+The 918 files collapse to 757 unique payloads because overlapping nested archives and repeated rows carry identical bytes. Uniqueness is the SHA-256 of the decoded payload.
 
-The sample is a convenience sample. It does not establish the type's population, size range or type-ID range. The expanded extraction shows that type ID 11 carries both PSIN and RBF0.
+### Relation to earlier counts
+
+The earlier public figure of 103 unique payloads describes a narrower convenience sample: the first 18 type 11 payloads, 85 additional payloads from nine top-level archives at or below 1 MiB selected by a per-archive quantile rule, and 13 depth-1 payloads. That figure remains a subset scope.
+
+A separate private count of 109 payloads (100 `LSCH`, 9 `PMAP`) came from a selection that is not published. It is not reproduced here. The full recount in this document is 757 unique payloads, with 695 `LSCH` and 62 `PMAP`.
 
 ## Evidence types
 
-| Type           | Meaning                                                                                   |
-| -------------- | ----------------------------------------------------------------------------------------- |
-| `BINARY`       | Bytes read from decoded RPF9 payloads, not traced in executable code                      |
-| `CROSS_SAMPLE` | A property compared across distinct payloads. The sample count and selection rule are above |
+| Type | Meaning |
+| ---- | ------- |
+| `BINARY` | Bytes read from decoded RPF9 payloads, not traced in executable code |
+| `CROSS_SAMPLE` | A property compared across distinct payloads |
+| `SYNTHETIC` | Independently built fixtures that test the repository classifier and checksum implementation |
 
 ## Findings
 
-| ID       | Claim                                                                                                                                                                                                                                                                               | Evidence                 | Confidence                                 | Limits                                                                 |
-| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ | ------------------------------------------ | ---------------------------------------------------------------------- |
-| PSIN-F01 | Payloads start with ASCII `PSIN` (`0x4E495350`) at offset 0                                                                                                                                                                                                                          | `BINARY`, `CROSS_SAMPLE` | Confirmed                                  | 103 unique payloads, one build                                         |
-| PSIN-F02 | The big-endian `u32` at `+0x04` is the offset of the first tagged section. In 103 of 103 payloads a printable four-byte tag starts at that offset, and walking `tag + big-endian length` from there ends exactly at the payload size. The length includes the eight-byte tag and length header | `BINARY`, `CROSS_SAMPLE` | Confirmed (sample)                         | The meaning of each tag and section body is unknown                    |
-| PSIN-F03 | `+0x04` is not the payload size or a section count. 0 of 103 big-endian `u32` values at `+0x04` equal the payload size; the value ranges from 48 to 972,552 while sizes range from 216 to 1,032,656. `+0x06` is not the size either; it equals the low 16 bits of the `+0x04` offset in 103 of 103, and 28 offsets are above `0xFFFF` | `CROSS_SAMPLE`           | Confirmed (rejected readings)              | Only the tested integer readings were rejected                         |
-| PSIN-F04 | The tagged-section walk has three observed sequences: 94 payloads use `LSCH` -> `LENM` -> `LSNS` -> `LGID` -> `LRSC` -> `CHKS`; seven use `PMAP` -> `PSCH` -> `PSIG` -> `STNS` -> `CHKS`; two insert `STDN` before `STNS`. The walk ends at the payload size in 103 of 103 payloads | `BINARY`, `CROSS_SAMPLE` | Confirmed (sequences and boundary rule)    | Tag strings are raw bytes, not semantic names                          |
-| PSIN-F05 | Several section bodies have repeated length properties: `LSCH` body is a multiple of 16 in 94 of 94; `LRSC` body is 80 in 94 of 94; `CHKS` body is 12 in 103 of 103; `PMAP` and `STNS` bodies are multiples of 16 in nine of nine; `STDN` body is a multiple of 16 in two of two. `PSCH`, `PSIG`, `LENM`, `LSNS` and `LGID` have no single body modulus | `CROSS_SAMPLE`           | Confirmed (lengths); Unknown (meaning)     | Body contents were not decoded into records                            |
-| PSIN-F06 | Bytes `+0x08..+0x0F` take 84 distinct values in 103 payloads; nine payloads store eight `0x70` bytes there. The candidate readings are a big-endian `u32` at `+0x08` and a little-endian `u32` at `+0x0C`. Neither equals the payload size or a section length in the sample | `CROSS_SAMPLE`           | Unknown (probable integer readings only)   | No hash or identifier interpretation was tested to a conclusion        |
-| PSIN-F07 | Type ID does not identify PSIN. The expanded type 11 extraction produced 82 PSIN payloads and four `RBF0` payloads. The expanded inventory also has PSIN in type 93 and type 94 rows. PSIN therefore occurs in at least types 11, 93 and 94 | `BINARY`, `CROSS_SAMPLE` | Confirmed (sample)                         | Sample only; the full type-ID population was not surveyed              |
-| PSIN-F08 | The first section offset is not always 16-byte aligned. It is aligned in 100 of 103 payloads and unaligned in `anim.rpf` rows 260 (offset 260), 247 (offset 307,048) and 248 (offset 972,552)                                                                                          | `CROSS_SAMPLE`           | Confirmed (counterexamples)                | Three counterexamples found in 103 payloads                            |
-| PSIN-F09 | Many payloads contain runs of `0xAA` and `0x70` inside the region before the first section or inside section bodies                                                                                                                                | `BINARY`                 | Speculative                                | Could be padding, uninitialised bytes or meaningful data               |
+| ID | Claim | Evidence | Confidence | Limits |
+| -- | ----- | -------- | ---------- | ------ |
+| PSIN-F01 | Payloads start with ASCII `PSIN` (`0x4E495350`) at offset 0 | `BINARY`, `CROSS_SAMPLE` | Confirmed | 757 unique payloads, one build |
+| PSIN-F02 | The big-endian `u32` at `+0x04` is the offset of the first tagged section. A printable four-byte tag starts there, and walking `tag + big-endian length` from that offset ends exactly at the payload size in 757 of 757 payloads. The length includes the eight-byte tag and length header | `BINARY`, `CROSS_SAMPLE` | Confirmed (sample) | Tag and body meanings are Unknown |
+| PSIN-F03 | `+0x04` is not the payload size or a section count. 0 of 757 big-endian `u32` values at `+0x04` equal the payload size. `+0x06` is not the size either; it equals the low 16 bits of the `+0x04` offset, and 179 offsets are above `0xFFFF` | `CROSS_SAMPLE` | Confirmed (rejected readings) | Only the tested integer readings were rejected |
+| PSIN-F04 | The tagged-section walk has four observed sequences: 695 payloads use `LSCH` -> `LENM` -> `LSNS` -> `LGID` -> `LRSC` -> `CHKS`; 55 use `PMAP` -> `PSCH` -> `PSIG` -> `STNS` -> `CHKS`; six insert `STDN` before `STNS`; one inserts `STFN` before `STNS` | `BINARY`, `CROSS_SAMPLE` | Confirmed (sequences) | Tag strings are raw bytes, not semantic names |
+| PSIN-F05 | Several section bodies have repeated length properties: `LSCH` body is a multiple of 16 in 695 of 695; `LRSC` body is 80 in 695 of 695; `CHKS` body is 12 in 757 of 757; `PMAP` and `STNS` bodies are multiples of 16 in 62 of 62; `STDN` bodies are multiples of 16 in six of six. `PSCH`, `PSIG`, `LENM`, `LSNS` and `LGID` have no single body modulus | `CROSS_SAMPLE` | Confirmed (lengths); Unknown (meaning) | Body contents are not decoded into records |
+| PSIN-F06 | Bytes `+0x08..+0x0F` are family-specific, not a single unknown header field. In `LSCH` they are the first descriptor word and length. In `PMAP` they are eight `0x70` bytes in 62 of 62 payloads. The earlier 84-value aggregate mixed the two families | `BINARY`, `CROSS_SAMPLE` | Confirmed (sample) | The `LSCH` descriptor word is uninterpreted |
+| PSIN-F07 | Type ID does not identify PSIN. Decoded type 11 rows in this recount contain 757 PSIN payloads and 238 RBF0 payloads. An earlier inventory also found PSIN in type 93 and 94 rows; that claim is outside this type 11 recount | `BINARY`, `CROSS_SAMPLE` | Confirmed (sample) | Full type-ID population was not surveyed |
+| PSIN-F08 | The first section offset is not always 16-byte aligned. All 695 `LSCH` payloads are aligned, while 10 of 62 `PMAP` payloads are unaligned. The unaligned offsets are 72, 104, 152, 152, 260, 344, 888, 2456, 307048 and 972552 | `CROSS_SAMPLE` | Confirmed (counterexamples) | Ten counterexamples in 757 unique payloads |
+| PSIN-F09 | Runs of `0xAA` and `0x70` are partly structural. `LSCH` descriptors carry eight `0xAA` bytes at `+0x08`, and `PMAP` pre-section areas begin with eight `0x70` bytes. Other runs inside bodies or pre-section areas remain unassigned | `BINARY`, `CROSS_SAMPLE` | Confirmed (two markers); Speculative (other runs) | Other runs could be padding or data |
+| PSIN-F10 | The `LSCH` pre-section area holds a 16-byte descriptor table at `+0x08`. Each descriptor is an uninterpreted little-endian `u32` at `+0x00`, a little-endian `u32` length at `+0x04`, and eight `0xAA` bytes at `+0x08`. The count `C` is unique in 695 of 695 payloads under `0x10 + 16 * C + sum(align16(length_i)) == first_section_offset`. `C` ranges from 1 to 1093. Without per-descriptor alignment the unique count falls to 96 of 695; a table at `+0x10` or a length at `+0x00` fits 0 of 695. The relation has no solution for all 62 `PMAP` payloads | `BINARY`, `CROSS_SAMPLE` | Confirmed (sample) | The `+0x00` word is not established as a name or hash; the formula is validated only on this container family |
+| PSIN-F11 | The `CHKS` section has a 20-byte section length and a 12-byte body of big-endian total length, big-endian checksum, and ASCII `zppp`. The total-length word equals the payload size in 757 of 757 payloads. The checksum is a one-at-a-time hash over signed bytes seeded with `0x3FAC7125`, over the payload with the total-length and checksum words zeroed; it verifies in 757 of 757 payloads. An unsigned-byte variant matches 0 of 757 | `BINARY`, `CROSS_SAMPLE`, `SYNTHETIC` | Confirmed (sample) | The seed is unexplained; the variant is validated only on this container family |
+| PSIN-F12 | The `PMAP` family has a stable header-area marker: eight `0x70` bytes at `+0x08` in 62 of 62 unique payloads. The marker is absent from the `LSCH` descriptors | `BINARY`, `CROSS_SAMPLE` | Confirmed (sample) | Marker meaning is Unknown |
+| PSIN-F13 | The two families share the outer framing and the `CHKS` integrity section, but differ in the pre-section grammar. The descriptor arithmetic fits every `LSCH` payload and no `PMAP` payload; all unaligned first-section offsets are `PMAP`. They are two grammars of one container, not separate file formats | `BINARY`, `CROSS_SAMPLE` | Confirmed (sample) | Family purpose and record semantics are Unknown |
+| PSIN-F14 | The `PMAP` pre-section area is not constant. The 62 unique areas have 62 distinct SHA-256 values; only the first eight bytes are constant. It is not a fixed-stride table: the number of `0x70` runs ranges from 1 to 41 and their positions vary. No tested compressed-stream signature occurs at `+0x10`, and zlib, gzip, bzip2 and LZMA produced no non-empty output. No `PSIN`, `RBF0` or section tag occurs inside the area. It is probably a structured record area with `0x70` padding, but its grammar is not decoded | `BINARY`, `CROSS_SAMPLE` | Confirmed (negative tests); Speculative (structured area) | The 216-byte payload is the smallest case; larger areas were not decoded |
 
 ## Counterexamples
 
-| Reading                          | Counterexample                                                                                                                                       |
-| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `+0x04` as payload size          | `packs.rpf` row 67 is 248 bytes with `+0x04` = 48; `data.rpf` row 42 is 25,476 bytes with `+0x04` = 23,888; `anim.rpf` row 248 is 976,116 bytes with `+0x04` = 972,552 |
-| `+0x06` as payload size          | 0 of 103 `u16` values at `+0x06` equal the payload size                                                                                              |
-| `+0x06` as an independent offset | `levels.rpf` row 2056 is 169,316 bytes with first offset 152,352 (`0x00025320`); `+0x06` is `0x5320`, or 21,280                                      |
-| 16-byte alignment of `+0x04`     | `anim.rpf` rows 260, 247 and 248 have offsets 260, 307,048 and 972,552                                                                               |
-| Type ID 11 implies PSIN          | `core_restofworld.rpf` row 22, `data.rpf` row 698, `packs.rpf` row 121 and `story000.rpf` row 645 begin with `RBF0`                                  |
+| Reading | Counterexample |
+| ------- | -------------- |
+| `+0x04` as payload size | `packs.rpf` row 67 is 248 bytes with `+0x04` = 48; `anim.rpf` row 248 is 976,116 bytes with `+0x04` = 972,552 |
+| `+0x06` as payload size | 0 of 757 `u16` values at `+0x06` equal the payload size |
+| `+0x06` as an independent offset | `levels.rpf` row 2056 is 169,316 bytes with first offset 152,352 (`0x00025320`); `+0x06` is `0x5320`, or 21,280 |
+| 16-byte alignment of `+0x04` | 10 `PMAP` payloads are unaligned, including offsets 260, 307,048 and 972,552 |
+| Type ID 11 implies PSIN | The same rows include 238 unique RBF0 payloads |
+| One header model | `PMAP` has no descriptor solution, while `LSCH` has a unique solution in 695 of 695 payloads |
 
 ## Reproduction
 
-The following commands ran on 2026-11-25 with the `lforge` CLI built from `leonidaforge/leonida-forge` commit `92af6e2ef26f1f2819a757457a97003fd52029b4`. `<GAME_ROOT>` is a local installation, `<WORK>` a scratch directory outside it, and `<EXECUTABLE>` the game executable that matches the archive, used only to authenticate its metadata. `--executable` is required by this build for encrypted metadata.
+The following commands ran on 2026-11-25 with the `lforge` CLI built from `leonidaforge/leonida-forge` commit `92af6e2ef26f1f2819a757457a97003fd52029b4` and the release `0.1.0` binary. `<GAME_ROOT>` is a local installation, `<WORK>` a scratch directory outside it, and `<EXECUTABLE>` the game executable that matches the archive.
 
 ```text
 lforge archive manifest <ARCHIVE> --executable <EXECUTABLE> --format jsonl --output <WORK>/rows.jsonl
@@ -60,9 +70,7 @@ lforge archive extract <ARCHIVE> --row <ROW> --output <WORK>/row.bin --executabl
 python tools/psin/psin_inspect.py <WORK>/row.bin --json
 ```
 
-`archive manifest` lists each row's type ID, logical size and stored form. `archive extract` writes the decoded payload. The inspector reports the big-endian first-section offset, the eight bytes at `+0x08..+0x0F`, every tagged section, and whether the walk ends at the payload size.
-
-The tool tests build synthetic PSIN inputs:
+The tool tests build synthetic `LSCH` and `PMAP` payloads, including a corrupted payload:
 
 ```text
 python -m unittest discover -s tools/psin
@@ -70,15 +78,10 @@ python -m unittest discover -s tools/psin
 
 ## Limits
 
-- The sample is not random. The expanded extraction only covers decoded type 11 rows at or below 1 MiB in the selected top-level archives.
+- The sample is not random. It covers readable type 11 rows in the selected archives and a nested-archive bound of 2 MiB.
 - One build and one local archive set were examined.
-- Some depth-1 payloads repeat earlier content; the corpus is deduplicated by SHA-256.
+- The 103 and 109 figures describe narrower selections; neither is the full reachable population.
 - No executable path was traced and no historical RAGE format is claimed as a match.
-- Fields and tags were not assigned meanings. Section bodies were not decoded.
+- Fields and tags were not assigned meanings. Section bodies were not decoded into records.
+- The `PMAP` pre-section grammar is Unknown.
 - Exact payload bytes stay outside this repository.
-
-## Next experiments
-
-- Survey type 11 rows above 1 MiB and count PSIN against RBF0 over the full readable population.
-- Decode the repeated `LSCH`, `LRSC`, `CHKS`, `PMAP` and `STNS` bodies into candidate records and test their field alignment without assigning semantics.
-- Search the executable for the `PSIN` magic and section tags, without publishing key material or secret state.
