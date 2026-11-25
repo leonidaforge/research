@@ -1,6 +1,6 @@
 # RPF9 names
 
-RPF9 stores no file name text. A row holds a hash of its path. The engine opens an entry by hashing the requested path and searching the rows for that hash (RPF9-F55). It does not need to turn a stored hash back into a string to open a file.
+The RPF9 metadata table stores no file name text. A row holds a hash of its path. The engine opens an entry by hashing the requested path and searching the rows for that hash (RPF9-F55). It does not need to turn a stored hash back into a string to open a file. This statement covers the metadata table; the trailing region described in [header.md](header.md#trailing-region) has not been examined for text.
 
 A separate runtime dictionary can map hashes back to strings. It is optional, it is not filled from archives, and [path matching by substring](#substring-lookup) depends on it (RPF9-F60).
 
@@ -234,7 +234,7 @@ With those, a candidate matches a row when its stem hash or 32-bit key and its t
 
 ## Offline resolution limits
 
-The 22 authenticated local archives yielded 6534 rows, 6422 distinct 64-bit name hashes and 2145 distinct 32-bit keys (RPF9-F105). Without an external name source, no name was recovered and hashing the local archive file names as candidate paths matched no row. The archives store no name text, so a tool can test candidates but cannot enumerate names from hashes. With the published LUT candidates, 2525 rows resolve (RPF9-F108): 2266 type-0, 125 type-255 and 134 type-11 rows.
+The 22 authenticated local archives yielded 6534 rows, 6422 distinct 64-bit name hashes and 2145 distinct 32-bit keys (RPF9-F105). Without an external name source, no name was recovered and hashing the local archive file names as candidate paths matched no row. The metadata table stores no name text, so a tool can test candidates but cannot enumerate names from hashes. The trailing region was not examined for text. With the published LUT candidates, 2525 rows resolve (RPF9-F108): 2266 type-0, 125 type-255 and 134 type-11 rows.
 
 A local candidate table MAY hold:
 

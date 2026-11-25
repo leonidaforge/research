@@ -9,9 +9,9 @@ The engine reads a 16-byte header first. The following 48 bytes, up to offset `0
 | `0x00` | `u32` | Magic `0x52504639`, bytes `39 46 50 52` (`9FPR`) | Confirmed (RPF9-F01) |
 | `0x04` | `u32` | Total metadata size: the end of the metadata area | Confirmed (RPF9-F02) |
 | `0x08` | `u32` | Size of the primary area, start of the secondary area | Confirmed (RPF9-F02) |
-| `0x0C` | `u32` | Unknown | Unknown (RPF9-F03) |
+| `0x0C` | `u32` | Byte length of the trailing region after the stored payload data | Confirmed from data (RPF9-F129); not read on traced paths (RPF9-F03) |
 
-`hdr[0x0C]` is not read on any traced path. It is not bounded by `hdr[0x04]`, so it is not an offset inside the metadata.
+`hdr[0x0C]` is not read on any traced path, so its role comes from archive data. In every reachable archive `file_size - hdr[0x0C]` is a 16-byte-aligned boundary above the metadata end. Stored payload data ends at that boundary. The length is not an offset inside the metadata.
 
 ## Schema prefix
 
@@ -49,6 +49,21 @@ Mode 1 keeps the primary and secondary areas in separate buffers. Which callers 
 
 A caller can also pass in a header that is already in memory. The magic is checked there as well.
 
+## Trailing region
+
+An archive ends with a region whose byte length is `hdr[0x0C]`. Its start, and therefore the end of stored payload data, is `file_size - hdr[0x0C]`.
+
+A survey of 1,440 archives (22 top-level and 1,418 nested) found no violation of four bounds (RPF9-F129):
+
+- the boundary is 16-byte aligned;
+- it lies above the metadata end `hdr[0x04]`;
+- it lies below the file size;
+- every row's `payload_offset + stored_size` is at or below it.
+
+The observed trailing lengths range from 48 to 178,576 bytes and take 281 distinct values. The content is **undecoded**. The survey compared only lengths, offsets and equality classes; it did not interpret bytes or examine them for text.
+
+Equality between trailers is not determined by the header shape alone (RPF9-F130). Thirty archives of 720 bytes share one header shape and a byte-identical 64-byte trailing region. Among 40 header-shape groups that contain more than one archive, only four groups have a single full-trailer class, each 544 bytes; the other groups differ in at least the first 16 bytes.
+
 ## Validation
 
 Known checks before an archive is accepted:
@@ -59,4 +74,4 @@ Known checks before an archive is accepted:
 
 The validation chain and the layout builder do not check the prefix counts, region sizes, index stores or `A` offsets against each other or against `hdr[0x08]` and `hdr[0x04]` (RPF9-F47). Code outside those paths was not searched.
 
-A reader SHOULD at least require `0x40 <= hdr[0x08] <= hdr[0x04] <= file size`. This is a sanity rule consistent with observed archives, not a check found in the engine.
+A reader SHOULD at least require `0x40 <= hdr[0x08] <= hdr[0x04] <= file_size - hdr[0x0C] < file_size`, with `file_size - hdr[0x0C]` a multiple of 16. It SHOULD also require every row's stored range to end at or below that boundary, and MUST treat the trailing region as opaque. These are sanity rules consistent with observed archives, not checks found in the engine.

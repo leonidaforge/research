@@ -212,6 +212,18 @@ Some earlier notes used "A" and "B" for `hdr[0x04]` and `hdr[0x08]`. Those lette
 
 **Correction.** A nested archive contains 156 type 11 rows, all mode 1 without a chunk table. Eight sampled rows extracted as raw DEFLATE to exact logical sizes (RPF9-F118). The archive is nested, outside the 22 top-level archives of RPF9-F103, so that sample's counts do not change. One row failed with a DEFLATE error; the failure is not explained.
 
+## Header field `0x0C` was unknown
+
+**Old assumption.** `hdr[0x0C]` was not read on any traced path and its value was unknown. The header table marked it Unknown and the reader bound stopped at the file size.
+
+**Correction.** In 1,440 archives (22 top-level and 1,418 nested), `file_size - hdr[0x0C]` is a 16-byte-aligned boundary above the metadata end, below the file size, and at or above every row's stored end. `hdr[0x0C]` is the byte length of a trailing region, and stored payload data ends at `file_size - hdr[0x0C]` (RPF9-F129). No traced path was found that reads the field, so the correction is from archive data. The trailing content remains undecoded. The equality groups are in RPF9-F130.
+
+## Archive name text scoped to the metadata table
+
+**Old assumption.** An archive stores no file name text.
+
+**Correction.** The metadata table stores hashes rather than names. The trailing region was measured only by length, offset and equality; it has not been examined for text. The statement in [names.md](../../formats/containers/rpf9/names.md) is scoped to the metadata table, and the trailing region is recorded as unexamined (RPF9-F129, RPF9-F130).
+
 ## Open
 
 - Meaning of descriptor `+0x08`, and any use of `+0x12`.
