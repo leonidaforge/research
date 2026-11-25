@@ -65,6 +65,12 @@ class TransformCensusTests(unittest.TestCase):
             with self.assertRaises(census.TransformError):
                 census.ensure_output(root / "out", root)
 
+    def test_input_inside_the_output_directory_is_refused(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            with self.assertRaises(census.TransformError):
+                census.ensure_output(root, root / "manifests")
+
 
 if __name__ == "__main__":
     unittest.main()

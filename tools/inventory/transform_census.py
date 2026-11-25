@@ -69,6 +69,8 @@ def ensure_output(output: Path, *inputs: Path) -> None:
         source = Path(source).resolve()
         if output == source or source in output.parents:
             raise TransformError("the output directory MUST NOT lie inside an input directory")
+        if output in source.parents:
+            raise TransformError("an input directory MUST NOT lie inside the output directory")
 
 
 def census(manifest_dir: Path, rows_path: Path, output_dir: Path) -> dict:
