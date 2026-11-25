@@ -321,6 +321,8 @@ def summarize(results):
         "array1_ge_max_packet": 0,
         "track_id_exceptions": [],
         "keyframe_entries": 0,
+        "keyframe_min": None,
+        "keyframe_max": None,
     }
     for result in results:
         if "error" in result:
@@ -344,7 +346,12 @@ def summarize(results):
         summary["last_entry_even"] += int(table["last_is_even"])
         summary["masked_offsets_in_range"] += int(table["masked_in_range"])
         summary["intervals_within_largest"] += int(table["max_interval_within_largest"])
-        summary["keyframe_entries"] += result["validation"]["keyframe_entries"]
+        keyframe = result["validation"]["keyframe_entries"]
+        summary["keyframe_entries"] += keyframe
+        if summary["keyframe_min"] is None or keyframe < summary["keyframe_min"]:
+            summary["keyframe_min"] = keyframe
+        if summary["keyframe_max"] is None or keyframe > summary["keyframe_max"]:
+            summary["keyframe_max"] = keyframe
         tracks = result["audio_tracks"]
         summary["audio_tracks"] += len(tracks)
         if result["audio_track_count"]:
@@ -399,7 +406,11 @@ def _print_summary(summary, stream):
         f" array1 >= max packet: {summary['array1_ge_max_packet']}",
         file=stream,
     )
-    print(f"keyframe entries: {summary['keyframe_entries']}", file=stream)
+    print(
+        f"keyframe entries: {summary['keyframe_entries']}"
+        f" (min {summary['keyframe_min']}, max {summary['keyframe_max']})",
+        file=stream,
+    )
     for item in summary["track_id_exceptions"]:
         print(f"track id exception: {item}", file=stream)
 
