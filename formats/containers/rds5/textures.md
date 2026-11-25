@@ -6,11 +6,12 @@ Storage classes and the virtual mapping are defined in
 [specification.md](specification.md); the byte-level control chain is
 RDS5-F35 and the measurements here are RDS5-F38 to RDS5-F44.
 
-Population: 57 local stores, 357,115 descriptors, 305,959 descriptors whose
-whole virtual range uses storage classes `0x00` or `0x20`, and 305,253 of those
-with kind 2 and array size 1. All counts below come from that second subset
-unless a selection rule says otherwise. The input set is private evidence; the
-tool and the synthetic tests are public.
+Population: 57 local stores and 357,115 descriptors, as in the committed `scan`
+summary. A **clean descriptor** here means every block in its virtual range has
+storage class `0x00` or `0x20`, so its bytes can be decoded. A **clean simple-2D
+descriptor** additionally has kind 2 and array size 1. Counts of the clean
+subsets depend on a scratch driver and are not cited. The input set is private
+evidence; the tool and the synthetic tests are public.
 
 ## Method
 
@@ -58,23 +59,31 @@ or `mip + 1`, and the size model can admit more than one count when the smallest
 slots stay inside the same 0x1000 page. The field relation remains **Unknown**
 (RDS5-F44).
 
-## Storage units by format id
+## Storage-unit fits by format id
 
-A unit is the number of bytes each level needs per element. It is a size fit,
-not a codec name.
+A unit is the number of bytes each level needs per element. The table records
+**the unit sizes that reproduce the observed allocation extents in this sample**.
+It is a fit. It is not a codec name, not a pixel-format identification, and not
+independently confirmed for any format id.
 
-| Format id | Unit | Bytes | Evidence | Confidence |
+The last column states whether any consequence independent of the extent fit was
+tested. A mip check is independent of the fit only in the sense that it compares
+neighbouring levels; it uses the same unit to size them. Format 54 has no such
+consequence in this iteration.
+
+| Format id | Unit | Bytes | Extent fit | Independent consequence |
 |---|---|---|---|---|
-| 28 | L4 | 4 per texel | level-size fit on the single-level rows; multi-level tile-0 rows do not all fit and are excluded | Probable for the tested class |
-| 54 | L2 | 2 per texel | level-size fit on every sampled row | Confirmed for the tested class |
-| 71, 72 | B8 | 8 per 4 x 4 tile | total fits and BC1 mip check below | Confirmed for the tested class |
-| 80 | B8 | 8 per 4 x 4 tile | total fits and BC4 candidate mip check | Probable |
-| 83 | B16 | 16 per 4 x 4 tile | total fits; two 8-byte single-channel candidates pass the mip check | Probable |
-| 98, 99 | B16 | 16 per 4 x 4 tile | total fits; block-first-byte structure below | Probable; degenerate with L1 |
+| 28 | L4 | 4 per texel | single-level rows fit; multi-level tile-0 rows do not all fit and are excluded | none tested |
+| 54 | L2 | 2 per texel | sampled rows fit | **none**; no multi-level sample was tested |
+| 71, 72 | B8 | 8 per 4 x 4 tile | total fits | BC1 candidate mip check passes on a private sample |
+| 77 | B16 | 16 per 4 x 4 tile | total fits | single-plane BC4 candidate mip check passes on a few tile-mode 2 and 3 samples |
+| 80 | B8 | 8 per 4 x 4 tile | total fits | single-plane BC4 candidate mip check passes on a private sample |
+| 83 | B16 | 16 per 4 x 4 tile | total fits | two-plane BC4 candidate mip check passes on a private sample |
+| 98, 99 | B16 | 16 per 4 x 4 tile | total fits; degenerate with 1 byte per texel on dimensions divisible by 4 | none; the earlier layout rejection is withdrawn |
 
 For formats 98 and 99 the total alone cannot separate 16 bytes per 4 x 4 tile
 from 1 byte per texel: with dimensions divisible by 4 both give the same level
-sizes. The discriminator is the block-first-byte structure in RDS5-F41.
+sizes. Neither reading is selected here.
 
 ## Mip-check population
 
@@ -83,18 +92,24 @@ descriptors with a decoded extent at most 1 MiB, decoded through the table above
 Candidate decoders: BC1 for formats 71 and 72; single-plane BC4 for formats 77
 and 80; two-plane BC4 for format 83.
 
-Passing checks were observed for format ids 71, 72, 77, 80 and 83 at tile modes
-1, 2 and 3, on both 8-byte and 16-byte block candidates. The exact per-class
-counts were measured with the committed analyser but the selection driver is
-scratch-only and is not committed, so this document does not cite them. The
-per-class rate is not uniform across tile modes and formats. A mixed rate means
-the candidate decoder is incomplete for that class, not that the texture has no
-mip relation. Rejected pairs stay rejected.
+Passing checks were observed for every class in this measured coverage:
 
-The sampled run produced passing checks for five format ids on both 8-byte and
-16-byte block candidates. The number of passing textures and the selection
-driver are not committed, so the 20-texture acceptance threshold cannot be
-verified from this repository alone; the claim is private-evidence supported.
+| Format id | Tile modes tested | Block candidate |
+|---|---|---|
+| 71 | 1, 2, 3 | 8 bytes |
+| 72 | 1, 2, 3 | 8 bytes |
+| 77 | 2, 3 | 16 bytes |
+| 80 | 1, 2, 3 | 8 bytes |
+| 83 | 2, 3 | 16 bytes |
+
+The exact counts and the selection driver are scratch-only and are not
+committed, so they are not cited. The per-class rate is not uniform across tile
+modes and formats. A mixed rate means the candidate decoder is incomplete for
+that class, not that the texture has no mip relation. Rejected pairs stay
+rejected.
+
+The claim is private-evidence supported and is not reproducible from this
+repository alone.
 
 The check covers only levels that are whole storage blocks. The mip tail below
 those levels is not part of the pass count.
@@ -103,34 +118,38 @@ those levels is not part of the pass count.
 
 | Candidate | Format / sample | Observation | Status |
 |---|---|---|---|
-| 1 byte per texel, row-major | 98, 99, smoke sample | 65.54% of 16-byte block-first bytes are multiples of 16 against 32.53% over all bytes; the lowest-set-bit histogram covers only bits 0..7 with a mode-prefix shape | Rejected |
-| BC4, single channel | 71 | A scratch comparison of local spatial differences gave a larger error than the BC1 candidate; the exact scratch values are not committed | Rejected (scratch measurement) |
+| BC4, single channel | 71 | A scratch comparison of local spatial differences gave a larger error than the BC1 candidate; the exact scratch values are not committed | Rejected (scratch measurement, private evidence) |
 | Nibbles, 4 bits per texel | 71 | The same scratch comparison gave an error at the random level; the exact scratch values are not committed | Rejected (scratch measurement) |
 | BC1, BC3 and linear 8-bit | 98, tile 3 | A scratch mip comparison stayed far above the 25.0 threshold; the exact scratch values are not committed | Rejected (scratch measurement) |
 | 16 bytes per 4 x 4 tile identifies a codec | all | A block size is not a mode format; BC1, BC4, BC5-class and BC7-class candidates share byte ratios | Rejected as a claim |
 
+Linear 1 byte per texel is **untested**, not rejected. The earlier rejection was
+withdrawn: comparing a stride-16 sample with all bytes has no within-block
+control, and a lowest-set-bit histogram of byte values is tautological under
+either layout (RDS5-F41).
+
 ## Control sample
 
-`data/ttdb/ui/platform.ttpf` has one descriptor. The byte chain was reproduced
-independently of the committed parser with a separate scratch parser (RDS5-F38):
+The **control sample** is the single-descriptor file
+`data/ttdb/ui/platform.ttpf` (RDS5-F38). Its byte chain was reproduced with the
+committed tools and with a separate scratch parser:
 
 | Component | Measured | Confidence |
 |---|---|---|
-| Descriptor | 1,024 x 512, mip 0, flags 1, format 98, kind 2, tile 0, page 1 | Confirmed |
-| Stored blocks | one block, class `0x20`, stored span 218,624, padding 213, stream 218,411 | Confirmed |
-| Decompression | zlib to end-of-stream, 524,288 bytes, consumed 218,411 | Confirmed |
-| Virtual range | 0x1000 to 0x81000, 524,288 bytes; end record equals payload size | Confirmed |
-| Size check | level 1, unit B16 and unit L1 both give 524,288; the count is unique | Confirmed |
-| Block-first-byte structure | 32,768 blocks; 0 zero first bytes; 65.54% multiples of 16; all-byte fraction 32.53% | Confirmed |
-| Pixel interpretation | 16 bytes per 4 x 4 tile, mode-prefixed blocks; no codec name | Provisional |
-| Element ordering | order of the four elements inside a 16-byte block | Unknown |
-| Mip selection | one level, no lower level in the range; mip check not applicable | Confirmed |
-| Output dimensions | 1,024 x 512 texels | Confirmed |
+| Descriptor | 1,024 x 512, mip 0, flags 1, format 98, kind 2, tile 0, page 1 | Confirmed (private-evidence supported) |
+| Stored blocks | one block, class `0x20`, stored span 218,624, padding 213, stream 218,411 | Confirmed (private-evidence supported) |
+| Decompression | zlib to end-of-stream, 524,288 bytes, consumed 218,411 | Confirmed (private-evidence supported) |
+| Virtual range | 0x1000 to 0x81000, 524,288 bytes; end record equals payload size | Confirmed (private-evidence supported) |
+| Size check | one level of 524,288 bytes; unit B16 and unit L1 are degenerate | Fit only; no unit selected |
+| Pixel interpretation | 16 bytes per 4 x 4 tile or 1 byte per texel; neither selected | Unknown |
+| Element ordering | order of the elements inside a 16-byte block | Unknown |
+| Mip selection | one level; the mip check is not applicable and tile mode 0 is not covered | Not established |
+| Output dimensions | descriptor 1,024 x 512; decoded 524,288 = width x height | Probable (private-evidence supported); arrangement unknown |
 
-The block-first-byte test rejects the linear 1 byte per texel reading of the
-same extent. It does not identify the block encoding: a mode prefix and a
-1-byte-per-texel size are compatible with more than one 16-byte block format.
-Visual plausibility is not used as evidence.
+The block-first-byte statistics that the committed tool prints are descriptive.
+They do not discriminate a linear layout from a blocked layout: the stride-16
+sample and the all-byte baseline are not independent, and a low-bit histogram
+cannot show a mode field. No layout is selected for this sample.
 
 ## Eight components of a validated image
 
@@ -140,19 +159,22 @@ Visual plausibility is not used as evidence.
 | Stored block selection | Established | RDS5-F33, RDS5-F38 |
 | Decompression | Established | RDS5-F24, RDS5-F38 |
 | Virtual reconstruction | Established | RDS5-F28, RDS5-F38 |
-| Pixel-format interpretation | Partial: unit established, codec not identified | RDS5-F39, RDS5-F41 |
-| Element ordering | Unknown for 16-byte blocks; row-major validated for 71 under BC1 only | RDS5-F40 |
-| Mip selection | Established for the control sample; level-count recovery unresolved | RDS5-F44 |
-| Output dimensions and arrangement | Dimensions established; arrangement inside a 16-byte block unknown | RDS5-F38 |
+| Pixel-format interpretation | Fit only; codec and layout untested | RDS5-F39 |
+| Element ordering | Unknown; a BC1 row-major candidate exists for 71 only | RDS5-F40 |
+| Mip selection | Not established for the control sample; level-count recovery unresolved | RDS5-F44 |
+| Output dimensions and arrangement | Dimensions probable; arrangement unknown | RDS5-F38 |
 
 No complete image is claimed: the element ordering and the 16-byte block
 encoding remain speculative.
 
 ## Limits
 
+- The storage units are extent fits. No unit is individually confirmed, and
+  format 54 has no consequence independent of the fit.
 - The candidate decoders are standard specifications used as hypotheses. A
   passing mip check supports the element ordering and level layout, not a codec
-  identity.
+  identity or a pixel format.
+- Linear and blocked layouts are untested. The earlier rejection is withdrawn.
 - Format 83 is only tested as two independent 8-byte single-channel planes.
   Other partitionings were not tested.
 - Tile mode 0 is not covered by the mip check: its block starts do not coincide
