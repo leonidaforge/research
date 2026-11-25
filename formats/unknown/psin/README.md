@@ -105,6 +105,18 @@ The aligned `+0x04` form is the only variant that fits every `LSCH` payload. The
 
 The first section is `PMAP`. The family is separate from `LSCH`: it has no descriptor table, its block directory is inside the `PMAP` section, and all unaligned first-section offsets in the sample belong to it. All 62 `PMAP` payloads use `PMAP` -> `PSCH` -> `PSIG` -> [`STDN` or `STFN`] -> `STNS` -> `CHKS`; 55 carry neither extra section, six carry `STDN` and one carries `STFN`. The tag match rate is 62 of 62.
 
+The earlier whole-area negatives remain valid and are not replaced by the block table:
+
+| Test | Outcome |
+| ---- | ------- |
+| Constant bytes | Negative. The 62 areas have 62 distinct SHA-256 values; only the first eight bytes are constant |
+| Fixed-stride table | Negative. The number of `0x70` runs ranges from 1 to 41 and their positions vary |
+| Compressed data | Negative for the tested signatures and decoders. No zlib, gzip, xz, bzip2, LZ4 or zstd signature occurs at `+0x10`; zlib, gzip, bzip2 and LZMA produced no non-empty output |
+| Embedded payload | Negative. No `PSIN`, `RBF0` or section tag occurs inside the pre-section area |
+| Length pattern | In 52 of 62 payloads `(pre_section_length - 8) mod 16` is 0; nine have remainder 8 and one has remainder 4 |
+
+These tests describe the area as one unit. The block table below is a different partition of the same bytes.
+
 ### Pre-section block table
 
 The pre-section area starts at `+0x08`. It is the concatenation of a fixed prefix, one or more blocks, and `0x70` padding between blocks.
@@ -146,6 +158,8 @@ first_section_offset           == 0x10 + sum(align16(block[j].length)) for j < B
 
 The second relation omits padding after the last block. That omission is required: a model that pads after every block fits the 52 payloads whose last length is a multiple of 16 and fails the other ten. The ten unaligned first-section offsets are therefore predicted by the block table, not exceptional.
 
+The split and prediction are committed in `tools/psin/heldout-record.json` and can be regenerated with `tools/psin/pmap_heldout.py`. The 52/10 split is defined by first-offset alignment, the property that distinguishes the two models. It is a designed contrast, not a blind hold-out. The record also carries a seeded random reproduction split (seed 20261125); that split is a reproduction check, not a blind one. The arithmetic relation itself is confirmed on all 62 payloads.
+
 ### Block ids
 
 Block ids are not uniform.
@@ -174,7 +188,7 @@ The `PSCH` id set contains every other `PMAP` block id in 62 of 62 payloads. The
 
 ### Negative tests for the values
 
-Fixed record widths 1 to 64 do not consume all 1,170 `PSCH` values: only widths 1, 2 and 4 divide every value length, and those are byte granularities, not records. No zlib, gzip, bzip2, xz, LZMA, zstd or LZ4 signature occurs at a `PSCH` value or a block start. A strict inflate of every value and every block with raw deflate, zlib, gzip, bzip2 and LZMA yields no complete stream with zero unused input. Unlike the earlier whole-area test, this test isolates each value and block and checks end-of-stream. The value and block internals remain **Unknown**.
+Fixed record widths 1 to 64 do not consume all 1,170 `PSCH` values: only widths 1, 2 and 4 divide every value length, and those are byte granularities, not records. No zlib, gzip, bzip2, xz, LZMA, zstd or LZ4 signature occurs at a `PSCH` value or a block start. No value or block yields a complete stream under raw deflate, zlib, gzip, bzip2, LZMA or LZMA-alone. Permissive calls can return partial output; those are not accepted as streams. Unlike the earlier whole-area test, this test isolates each value and block and checks end-of-stream. The value and block internals remain **Unknown**.
 
 ## `LSCH` and `LENM` section bodies
 
@@ -208,16 +222,20 @@ A cross-section reference is not established. The first four body bytes equal th
 
 ### `LENM` body
 
-The body is empty in 254 top-level payloads. The 229 nonempty bodies share a header:
+The body is empty in 254 top-level payloads. The 229 nonempty bodies share a `0x20`-byte header:
 
 | Body offset | Type | Observation |
 | ----------- | ---- | ----------- |
 | `+0x00` | 8 bytes | Uninterpreted |
 | `+0x08` | 8 bytes | `0xEE` in 229 of 229 |
 | `+0x10` | `u32` little-endian | Count-like word `N`; meaning **Unknown** |
-| `+0x14` | bytes | Body continues; length minus `0x14` is a multiple of 8 in 229 of 229 |
+| `+0x14` | 12 bytes | Remaining header to `+0x20`. Twelve zero bytes in 42 of 229; other contents **Unknown** |
 
-`N` does not delimit the body. The relation `length == 0x18 + 16 * N` holds in 54 of 229 bodies. The other 175 are longer by a positive multiple of 8; the extra regions are 40 to 134,872 bytes, and only widths 1, 2, 4 and 8 divide every extra length. The chain and the extra region are **Unknown**; an 8-byte table is possible but not decoded.
+The header is `0x20` bytes, and `length - 0x20` is a multiple of 8 in 229 of 229 nonempty payloads.
+
+`N` does not delimit the body. For `N >= 1`, the chain is `16 * N - 8` bytes (`N` hashes and `N - 1` index words), so `length == 0x20 + (16N - 8) + extra == 0x18 + 16N + extra`. The `extra` term is 0 in 54 of 229 bodies and a positive multiple of 8 in the other 175. Extra regions are 40 to 134,872 bytes; only widths 1, 2, 4 and 8 divide every extra length. The chain and the extra region are **Unknown**; an 8-byte table is possible but not decoded.
+
+The arithmetic is consistent with the header test: `(0x18 + 16N + extra) - 0x20 = 16N - 8 + extra`, which is a multiple of 8 for every `N` and every multiple-of-8 `extra`. The rejected reading `length - 0x14` is not a multiple of 8 for the 54 bodies with `extra = 0`; for example, a 72-byte body with `N = 3` gives 52.
 
 Neither body contains a co-located plaintext name. The printable-byte ratio is at most 0.24 for `LSCH` and 0.20 for `LENM`; the short printable runs in `LSNS` and `LGID` are not names. No semantic label is assigned.
 
@@ -267,7 +285,14 @@ The RPF9 type ID alone is not sufficient.
 python tools/psin/psin_inspect.py <sample> [<sample> ...] [--json]
 ```
 
-`--max-bytes` and `--max-sections` bound the read and the section walk. The tool reads inputs read-only and has no default pointing at a game installation.
+`tools/psin/pmap_heldout.py` writes the committed prediction record, and `tools/psin/value_probe.py` writes the committed value and block test record:
+
+```text
+python tools/psin/pmap_heldout.py --samples <DIRECTORY> --output heldout-record.json
+python tools/psin/value_probe.py --samples <DIRECTORY> --output value-record.json
+```
+
+`--max-bytes` and `--max-sections` on the classifier bound the read and the section walk. The tools read inputs read-only and have no default pointing at a game installation.
 
 Synthetic fixtures are generated by `tools/psin/synthetic.py`. Tests include a valid `LSCH` document, a `PMAP` document with a block table, an unaligned `PMAP` document, and a corrupted payload that must fail the checksum:
 

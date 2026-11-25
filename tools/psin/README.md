@@ -18,15 +18,37 @@ All paths are required. The tool has no default pointing at a game installation.
 - Family from the first section tag: `LSCH`, `PMAP`, `OTHER`, or null when the walk is empty. `first_tag` reports the raw tag bytes.
 - Every tagged section: tag, offset, byte length, body length and body length modulo 16.
 - For `LSCH`: descriptor count, whether the count solution is unique, the descriptor list, the aligned-length sum and the formula result. Four candidate variants are reported under `family_data.variants`. The `LSCH` body marker run, tail length and `LENM` header summary are reported under `family_data.section_bodies`.
-- For `PMAP`: the pre-section length, the `0x70` marker, the block table (mode, count, block ids, offsets, lengths), the padding and offset formula checks, a name-block summary (count only, no strings) and the `PSCH` count and tiling result. The family is reported as a separate grammar, not as a failed parse.
+- For `PMAP`: the pre-section length, the `0x70` marker, the block table (mode, count, block ids, offsets, lengths), the per-block offset relation, the padding result, a name-block summary (count only, no strings), and the `PSCH` count, tiling and id-containment results. The family is reported as a separate grammar, not as a failed parse.
 - `CHKS`: total-length word, stored and computed checksum, the `zppp` tail, and whether the checksum verifies.
 
 The tool does not decode block or value internals and does not print payload text.
 
+## Prediction record
+
+`pmap_heldout.py` re-runs the padding comparison and writes the split record:
+
+```sh
+python tools/psin/pmap_heldout.py --samples <EXTRACTED_PAYLOAD_DIRECTORY> --json
+python tools/psin/pmap_heldout.py --samples <DIRECTORY> --output heldout-record.json
+```
+
+It applies the no-trailing-pad and pad-after-last rules, records the 52 aligned labels, the ten unaligned labels and a seeded random reproduction split. The 52/10 split is a designed contrast, not a blind hold-out. `heldout-record.json` is the committed record for the 62-payload population. The tool needs the extracted payloads; it has no default path.
+
+## Value and block probe
+
+`value_probe.py` re-runs the `PSCH` value and block width, signature and decoder tests:
+
+```sh
+python tools/psin/value_probe.py --samples <DIRECTORY> --json
+python tools/psin/value_probe.py --samples <DIRECTORY> --output value-record.json
+```
+
+`value-record.json` is the committed record for the 62 `PMAP` payloads: 1,170 values and 521 blocks. The probe rejects an output path equal to the sample directory and writes atomically.
+
 ## Tests
 
 ```sh
-python -m unittest discover -s tools/psin
+python -m unittest discover -s tools/psin -p "test_*.py"
 ```
 
 `tools/psin/synthetic.py` writes the synthetic fixtures used by the tests:
