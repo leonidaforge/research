@@ -16,6 +16,7 @@ Subjects:
 - [Type 14](type14/INDEX.md)
 - [Unknown payloads](unknown-payloads/INDEX.md)
 - [KB2j and KB2n](kb2j/INDEX.md)
+- [GFX* and ADAT](gfx-adat/INDEX.md)
 - [Inventory](inventory/INDEX.md)
 - [RDS5 verification](rds5-verification/INDEX.md)
 - [Shared hashing](shared/INDEX.md)
