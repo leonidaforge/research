@@ -1,0 +1,620 @@
+{
+  "reports": [
+    {
+      "label": "16",
+      "size": 28,
+      "count": 0,
+      "distinct_second": 0,
+      "blob_length": 16,
+      "entropy": 3.875,
+      "signatures": {
+        "zlib": false,
+        "gzip": false,
+        "bz2": false,
+        "xz": false,
+        "zstd": false,
+        "lz4": false
+      },
+      "decoders": {
+        "zlib": {
+          "ok": false,
+          "output_nonempty": false,
+          "complete": false,
+          "output_length": 0,
+          "error": "error"
+        },
+        "deflate_raw": {
+          "ok": false,
+          "output_nonempty": false,
+          "complete": false,
+          "output_length": 0,
+          "error": "error"
+        },
+        "gzip": {
+          "ok": false,
+          "output_nonempty": false,
+          "complete": false,
+          "output_length": 0,
+          "error": "error"
+        },
+        "bz2": {
+          "ok": false,
+          "output_nonempty": false,
+          "complete": false,
+          "output_length": 0,
+          "error": "OSError"
+        },
+        "xz": {
+          "ok": false,
+          "output_nonempty": false,
+          "complete": false,
+          "output_length": 0,
+          "error": "LZMAError"
+        },
+        "lzma_alone": {
+          "ok": false,
+          "output_nonempty": false,
+          "complete": false,
+          "output_length": 0,
+          "error": "LZMAError"
+        }
+      },
+      "strict_streams": {
+        "deflate_raw": {
+          "complete": false,
+          "error": "error"
+        },
+        "lzma_auto": {
+          "complete": false,
+          "error": "LZMAError"
+        }
+      },
+      "sixteen_byte_records": 1,
+      "sixteen_byte_distinct": 1,
+      "store_key_hits": 0,
+      "store_key_hits_be": 0,
+      "width_checks": [
+        {
+          "width": 1,
+          "records": 16,
+          "matches_entry_count": false,
+          "matches_distinct_second": false
+        },
+        {
+          "width": 2,
+          "records": 8,
+          "matches_entry_count": false,
+          "matches_distinct_second": false
+        },
+        {
+          "width": 4,
+          "records": 4,
+          "matches_entry_count": false,
+          "matches_distinct_second": false
+        },
+        {
+          "width": 8,
+          "records": 2,
+          "matches_entry_count": false,
+          "matches_distinct_second": false
+        },
+        {
+          "width": 16,
+          "records": 1,
+          "matches_entry_count": false,
+          "matches_distinct_second": false
+        }
+      ]
+    },
+    {
+      "label": "160",
+      "size": 236,
+      "count": 4,
+      "distinct_second": 4,
+      "blob_length": 160,
+      "entropy": 6.811,
+      "signatures": {
+        "zlib": false,
+        "gzip": false,
+        "bz2": false,
+        "xz": false,
+        "zstd": false,
+        "lz4": false
+      },
+      "decoders": {
+        "zlib": {
+          "ok": false,
+          "output_nonempty": false,
+          "complete": false,
+          "output_length": 0,
+          "error": "error"
+        },
+        "deflate_raw": {
+          "ok": false,
+          "output_nonempty": false,
+          "complete": false,
+          "output_length": 0,
+          "error": "error"
+        },
+        "gzip": {
+          "ok": false,
+          "output_nonempty": false,
+          "complete": false,
+          "output_length": 0,
+          "error": "error"
+        },
+        "bz2": {
+          "ok": false,
+          "output_nonempty": false,
+          "complete": false,
+          "output_length": 0,
+          "error": "OSError"
+        },
+        "xz": {
+          "ok": false,
+          "output_nonempty": false,
+          "complete": false,
+          "output_length": 0,
+          "error": "LZMAError"
+        },
+        "lzma_alone": {
+          "ok": false,
+          "output_nonempty": false,
+          "complete": false,
+          "output_length": 0,
+          "error": "LZMAError"
+        }
+      },
+      "strict_streams": {
+        "deflate_raw": {
+          "complete": false,
+          "error": "error"
+        },
+        "lzma_auto": {
+          "complete": false,
+          "error": "LZMAError"
+        }
+      },
+      "sixteen_byte_records": 10,
+      "sixteen_byte_distinct": 10,
+      "store_key_hits": 0,
+      "store_key_hits_be": 0,
+      "width_checks": [
+        {
+          "width": 1,
+          "records": 160,
+          "matches_entry_count": false,
+          "matches_distinct_second": false
+        },
+        {
+          "width": 2,
+          "records": 80,
+          "matches_entry_count": false,
+          "matches_distinct_second": false
+        },
+        {
+          "width": 4,
+          "records": 40,
+          "matches_entry_count": false,
+          "matches_distinct_second": false
+        },
+        {
+          "width": 5,
+          "records": 32,
+          "matches_entry_count": false,
+          "matches_distinct_second": false
+        },
+        {
+          "width": 8,
+          "records": 20,
+          "matches_entry_count": false,
+          "matches_distinct_second": false
+        },
+        {
+          "width": 10,
+          "records": 16,
+          "matches_entry_count": false,
+          "matches_distinct_second": false
+        },
+        {
+          "width": 16,
+          "records": 10,
+          "matches_entry_count": false,
+          "matches_distinct_second": false
+        },
+        {
+          "width": 20,
+          "records": 8,
+          "matches_entry_count": false,
+          "matches_distinct_second": false
+        },
+        {
+          "width": 32,
+          "records": 5,
+          "matches_entry_count": false,
+          "matches_distinct_second": false
+        },
+        {
+          "width": 40,
+          "records": 4,
+          "matches_entry_count": true,
+          "matches_distinct_second": true
+        }
+      ]
+    },
+    {
+      "label": "1008",
+      "size": 1548,
+      "count": 33,
+      "distinct_second": 21,
+      "blob_length": 1008,
+      "entropy": 7.815,
+      "signatures": {
+        "zlib": false,
+        "gzip": false,
+        "bz2": false,
+        "xz": false,
+        "zstd": false,
+        "lz4": false
+      },
+      "decoders": {
+        "zlib": {
+          "ok": false,
+          "output_nonempty": false,
+          "complete": false,
+          "output_length": 0,
+          "error": "error"
+        },
+        "deflate_raw": {
+          "ok": false,
+          "output_nonempty": false,
+          "complete": false,
+          "output_length": 0,
+          "error": "error"
+        },
+        "gzip": {
+          "ok": false,
+          "output_nonempty": false,
+          "complete": false,
+          "output_length": 0,
+          "error": "error"
+        },
+        "bz2": {
+          "ok": false,
+          "output_nonempty": false,
+          "complete": false,
+          "output_length": 0,
+          "error": "OSError"
+        },
+        "xz": {
+          "ok": false,
+          "output_nonempty": false,
+          "complete": false,
+          "output_length": 0,
+          "error": "LZMAError"
+        },
+        "lzma_alone": {
+          "ok": false,
+          "output_nonempty": false,
+          "complete": false,
+          "output_length": 0,
+          "error": "LZMAError"
+        }
+      },
+      "strict_streams": {
+        "deflate_raw": {
+          "complete": false,
+          "error": "error"
+        },
+        "lzma_auto": {
+          "complete": false,
+          "error": "LZMAError"
+        }
+      },
+      "sixteen_byte_records": 63,
+      "sixteen_byte_distinct": 63,
+      "store_key_hits": 0,
+      "store_key_hits_be": 0,
+      "width_checks": [
+        {
+          "width": 1,
+          "records": 1008,
+          "matches_entry_count": false,
+          "matches_distinct_second": false
+        },
+        {
+          "width": 2,
+          "records": 504,
+          "matches_entry_count": false,
+          "matches_distinct_second": false
+        },
+        {
+          "width": 3,
+          "records": 336,
+          "matches_entry_count": false,
+          "matches_distinct_second": false
+        },
+        {
+          "width": 4,
+          "records": 252,
+          "matches_entry_count": false,
+          "matches_distinct_second": false
+        },
+        {
+          "width": 6,
+          "records": 168,
+          "matches_entry_count": false,
+          "matches_distinct_second": false
+        },
+        {
+          "width": 7,
+          "records": 144,
+          "matches_entry_count": false,
+          "matches_distinct_second": false
+        },
+        {
+          "width": 8,
+          "records": 126,
+          "matches_entry_count": false,
+          "matches_distinct_second": false
+        },
+        {
+          "width": 9,
+          "records": 112,
+          "matches_entry_count": false,
+          "matches_distinct_second": false
+        },
+        {
+          "width": 12,
+          "records": 84,
+          "matches_entry_count": false,
+          "matches_distinct_second": false
+        },
+        {
+          "width": 14,
+          "records": 72,
+          "matches_entry_count": false,
+          "matches_distinct_second": false
+        },
+        {
+          "width": 16,
+          "records": 63,
+          "matches_entry_count": false,
+          "matches_distinct_second": false
+        },
+        {
+          "width": 18,
+          "records": 56,
+          "matches_entry_count": false,
+          "matches_distinct_second": false
+        },
+        {
+          "width": 21,
+          "records": 48,
+          "matches_entry_count": false,
+          "matches_distinct_second": false
+        },
+        {
+          "width": 24,
+          "records": 42,
+          "matches_entry_count": false,
+          "matches_distinct_second": false
+        },
+        {
+          "width": 28,
+          "records": 36,
+          "matches_entry_count": false,
+          "matches_distinct_second": false
+        },
+        {
+          "width": 36,
+          "records": 28,
+          "matches_entry_count": false,
+          "matches_distinct_second": false
+        },
+        {
+          "width": 42,
+          "records": 24,
+          "matches_entry_count": false,
+          "matches_distinct_second": false
+        },
+        {
+          "width": 48,
+          "records": 21,
+          "matches_entry_count": false,
+          "matches_distinct_second": true
+        },
+        {
+          "width": 56,
+          "records": 18,
+          "matches_entry_count": false,
+          "matches_distinct_second": false
+        },
+        {
+          "width": 63,
+          "records": 16,
+          "matches_entry_count": false,
+          "matches_distinct_second": false
+        }
+      ]
+    },
+    {
+      "label": "687056",
+      "size": 965964,
+      "count": 17431,
+      "distinct_second": 6845,
+      "blob_length": 687056,
+      "entropy": 8.0,
+      "signatures": {
+        "zlib": false,
+        "gzip": false,
+        "bz2": false,
+        "xz": false,
+        "zstd": false,
+        "lz4": false
+      },
+      "decoders": {
+        "zlib": {
+          "ok": false,
+          "output_nonempty": false,
+          "complete": false,
+          "output_length": 0,
+          "error": "error"
+        },
+        "deflate_raw": {
+          "ok": false,
+          "output_nonempty": false,
+          "complete": false,
+          "output_length": 0,
+          "error": "error"
+        },
+        "gzip": {
+          "ok": false,
+          "output_nonempty": false,
+          "complete": false,
+          "output_length": 0,
+          "error": "error"
+        },
+        "bz2": {
+          "ok": false,
+          "output_nonempty": false,
+          "complete": false,
+          "output_length": 0,
+          "error": "OSError"
+        },
+        "xz": {
+          "ok": false,
+          "output_nonempty": false,
+          "complete": false,
+          "output_length": 0,
+          "error": "LZMAError"
+        },
+        "lzma_alone": {
+          "ok": false,
+          "output_nonempty": false,
+          "complete": false,
+          "output_length": 0,
+          "error": "LZMAError"
+        }
+      },
+      "strict_streams": {
+        "deflate_raw": {
+          "complete": false,
+          "error": "error"
+        },
+        "lzma_auto": {
+          "complete": false,
+          "error": "LZMAError"
+        }
+      },
+      "sixteen_byte_records": 42941,
+      "sixteen_byte_distinct": 42941,
+      "store_key_hits": 0,
+      "store_key_hits_be": 0,
+      "width_checks": [
+        {
+          "width": 1,
+          "records": 687056,
+          "matches_entry_count": false,
+          "matches_distinct_second": false
+        },
+        {
+          "width": 2,
+          "records": 343528,
+          "matches_entry_count": false,
+          "matches_distinct_second": false
+        },
+        {
+          "width": 4,
+          "records": 171764,
+          "matches_entry_count": false,
+          "matches_distinct_second": false
+        },
+        {
+          "width": 8,
+          "records": 85882,
+          "matches_entry_count": false,
+          "matches_distinct_second": false
+        },
+        {
+          "width": 16,
+          "records": 42941,
+          "matches_entry_count": false,
+          "matches_distinct_second": false
+        },
+        {
+          "width": 23,
+          "records": 29872,
+          "matches_entry_count": false,
+          "matches_distinct_second": false
+        },
+        {
+          "width": 46,
+          "records": 14936,
+          "matches_entry_count": false,
+          "matches_distinct_second": false
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "samples": 4,
+    "blob_lengths": [
+      16,
+      160,
+      1008,
+      687056
+    ],
+    "common_divisors_1_to_64": [
+      1,
+      2,
+      4,
+      8,
+      16
+    ],
+    "common_divisors_above_16": [],
+    "width_matches": [
+      {
+        "blob_length": 160,
+        "width": 40,
+        "records": 4,
+        "matches_entry_count": true,
+        "matches_distinct_second": true
+      },
+      {
+        "blob_length": 1008,
+        "width": 48,
+        "records": 21,
+        "matches_entry_count": false,
+        "matches_distinct_second": true
+      }
+    ],
+    "any_entry_count_match": true,
+    "any_distinct_second_match": true,
+    "decoder_any_ok": {
+      "zlib": false,
+      "deflate_raw": false,
+      "gzip": false,
+      "bz2": false,
+      "xz": false,
+      "lzma_alone": false
+    },
+    "strict_any_complete": {
+      "deflate_raw": false,
+      "lzma_auto": false
+    },
+    "signature_any": {
+      "zlib": false,
+      "gzip": false,
+      "bz2": false,
+      "xz": false,
+      "zstd": false,
+      "lz4": false
+    },
+    "store_key_hits": {
+      "test_run": true,
+      "little_endian": 0,
+      "big_endian": 0
+    }
+  }
+}
