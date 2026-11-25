@@ -205,7 +205,8 @@ The sample is the 92 type-2 drawables of the nested archive at
 
 - all 969 parameters resolve to a slot index in range; the index equals the
   parameter's position in the table in all 969;
-- 770 slots hold a system texture record, 199 are null and 0 are invalid;
+- 770 slots hold a system texture record (4 to 29 per drawable; every drawable
+  has at least 4), 199 are null and 0 are invalid;
 - 678 name records have the `6` variant at `+0x10`; 92 have a system pointer
   there and do not carry the dictionary hash;
 - of the 678 hash-bearing records, 264 match a name hash in the 1,440 sampled
