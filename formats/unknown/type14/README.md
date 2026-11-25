@@ -49,7 +49,7 @@ Each record has this layout:
 
 | Offset | Type | Use |
 | --- | --- | --- |
-| `+0x00` | `u32` | Identifier, uninterpreted |
+| `+0x00` | `u32` | Identifier, uninterpreted (T14-F10) |
 | `+0x04` | `u16` | Name length |
 | `+0x06` | bytes | ASCII name |
 | remainder | bytes | Zero padding to `+0x28` |
@@ -108,8 +108,9 @@ remain unknown.
 - One decoded payload. The second type 14 row is behind the payload transform
   and was not compared.
 - A local scan of 293 extracted files found no other payload beginning `30 03`
-  or sharing the first 16 bytes. This is not a game-wide census.
-- The high-entropy header values and the record IDs are not interpreted.
+  or sharing the first 16 bytes (T14-F03). This is not a game-wide census.
+- The high-entropy header values and the record IDs are not interpreted
+  (T14-F10).
 - No executable code path was traced.
 - String contents are game data and are not reproduced here.
 
