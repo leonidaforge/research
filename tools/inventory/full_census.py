@@ -332,8 +332,35 @@ class Census:
         }
         inventory.write_json(self.state_path, state)
 
-    def record(self, record: dict) -> None:
-        inventory.append_jsonl(self.rows_path, record)
+    def write_rows(self, completed: dict[str, dict]) -> None:
+        temporary = self.rows_path.with_name(self.rows_path.name + ".tmp")
+        with temporary.open("w", encoding="utf-8", newline="\n") as sink:
+            for record in sorted(
+                completed.values(), key=lambda value: (str(value["relative"]).lower(), value["row"])
+            ):
+                sink.write(json.dumps(record, sort_keys=True))
+                sink.write("\n")
+        os.replace(temporary, self.rows_path)
+        failures = self.failures_path.with_name(self.failures_path.name + ".tmp")
+        with failures.open("w", encoding="utf-8", newline="\n") as sink:
+            for record in sorted(
+                completed.values(), key=lambda value: (str(value["relative"]).lower(), value["row"])
+            ):
+                if record["attempt"]["ok"]:
+                    continue
+                sink.write(
+                    json.dumps(
+                        {
+                            "relative": record["relative"],
+                            "row": record["row"],
+                            "stage": record["attempt"]["stage"],
+                            "reason": record["attempt"]["reason"],
+                        },
+                        sort_keys=True,
+                    )
+                )
+                sink.write("\n")
+        os.replace(failures, self.failures_path)
 
     def manifest(self, digest: str, archive: Path) -> tuple[dict, dict]:
         path = self.manifest_dir / f"{digest}.jsonl"
@@ -606,18 +633,8 @@ class Census:
     def _flush(self, batch: list[dict], completed: dict[str, dict]) -> None:
         for item in batch:
             record = self.process(item)
-            self.record(record)
             completed[row_key(record)] = record
-            if not record["attempt"]["ok"]:
-                inventory.append_jsonl(
-                    self.failures_path,
-                    {
-                        "relative": record["relative"],
-                        "row": record["row"],
-                        "stage": record["attempt"]["stage"],
-                        "reason": record["attempt"]["reason"],
-                    },
-                )
+        self.write_rows(completed)
         self.write_state(completed, "running")
         self.log(f"batch complete: {len(completed)} of {len(self.rows)} rows")
 
