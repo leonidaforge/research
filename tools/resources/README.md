@@ -76,7 +76,7 @@ python -m unittest discover -s tools/resources -p "test_*.py"
 
 The 26 `rage_resource` tests build every input with `zlib` and `struct`. They cover a valid one-page-per-segment resource, a map in a later system page, a split 32 MiB page, a page of exactly 32 MiB, missing and extra pages, a page-size violation, an outside pointer, and the negative cases: truncated stream, zero system-page count, map outside the system data, nonzero slot, nonzero prefix, nonzero padding, stream and total caps, and data without a resource header.
 
-The suite also holds 18 `page_reconstruct` tests, 8 `root_tables` tests, 21 `texture_dictionary` tests and 14 `pool_reference` tests. All 87 tests pass with the standard library only.
+The suite also holds 18 `page_reconstruct` tests, 8 `root_tables` tests, 22 `texture_dictionary` tests, 16 `pool_reference` tests and 1 `dictionary_census` test. All 91 tests pass with the standard library only.
 
 ## Limits
 
@@ -129,7 +129,7 @@ root, issues = root_tables.parse_root(system_bytes, graphics_len)
 ## texture_dictionary
 
 Reads a texture dictionary: the hash and value arrays, the 0x70-byte records
-and the allocation arithmetic.
+and the allocation extents.
 
 ```text
 python texture_dictionary.py --file <FILE> --offset <ENTRY> --length <STORED> [--logical-size BYTES] [--check-names] [--json]
@@ -142,22 +142,29 @@ python texture_dictionary.py --file <DECODED> --system-length <BYTES> [--check-n
   known.
 - `parse_dictionary(system, graphics_length)` is the library entry point. It
   raises `TextureDictionaryError` for a short root, a nonzero first qword, a
-  missing page-map pointer, a count above the 65,536-record cap, or an array
-  that leaves the buffer. Per-record problems are issues.
-- The report gives the hash count, value count and record count, every record's
-  name hash, width, height, format id, mip count, allocation offset, allocation
-  size and allocation extent, plus the allocated total, the in-bounds test and
-  the sum test.
+  missing page-map pointer, a count above the `max_records` argument, or an array
+  that leaves the buffer. The default `max_records` is 65,536, above the `u16`
+  maximum, so the default never triggers on a real count; a caller can pass a
+  lower cap. Per-record problems are issues.
+- The report gives the hash count, value count, record count and each
+  capacity, every record's name hash, width, height, format id, mip count,
+  allocation offset, raw unit count, allocation size and allocation extent, plus
+  the in-bounds and partition tests.
+- `allocation_size` is the extent to the next distinct allocation start, an
+  upper bound. The `+0x08` value is a unit count whose byte scale is
+  **Unknown**; the tool does not multiply it.
 - `--check-names` reports only how many records' hashes equal the one-at-a-time
-  hash of their ASCII name; the text is never printed.
-- The tool does not decode pixels. A format id selects an allocation unit from
-  the observed table; it is not interpreted as a channel layout.
+  hash of their ASCII name; the text is never printed. The hash folds `A`–`Z`
+  and `\`, reads at most 64 bytes and skips a text without a terminator in that
+  window.
+- The tool does not decode pixels and does not map the format id to an enum.
 
 The tests cover a valid two-record dictionary, the empty form, count mismatch,
-unsorted and duplicate hashes, record pointers and records outside the segment,
-allocation outside, overrun, duplicate starts and sum, an unknown format, zero
-dimensions and mip bounds, sparse record tables, the refusal cases, the name
-check, a stored row through `page_reconstruct`, and the JSON CLI.
+capacities below the counts, unsorted and duplicate hashes, record pointers and
+records outside the segment, allocation outside and duplicate starts, a raw
+unknown format id, zero dimensions and mip bounds, the refusal cases, the folded
+hash and the 64-byte window, a stored row through `page_reconstruct`, and the
+JSON CLI.
 
 ## pool_reference
 
@@ -177,13 +184,43 @@ python pool_reference.py --file <DECODED> --system-length <BYTES> [--json]
   low-two-bit class and the slot index. `control_acceptance(values, slot_count)`
   applies the same rule to a control block.
 - The report gives the shader count, texture-entry count, index-in-range count,
-  bound/null/bad slot counts, the number of other-class entries, the 0x5/0x6
-  pointer counts with their outside counts, and every reference.
+  bound/null/bad slot counts, the number of entries whose low class bits are
+  nonzero, the 0x5/0x6 pointer counts with their system and graphics outside
+  counts, and every reference.
+- The shader array extent and each parameter and slot table extent are checked
+  before the loops. A texture count above the declared parameter count is
+  clamped to the parameter count and reported as `parameter_count`.
 - A bound reference also reports the name record's 64-bit key and, when the
-  name record's `+0x10` is `6`, its 32-bit dictionary name hash. The tool does
-  not resolve hashes to names or decode pixels.
+  name record's `+0x10` is `6`, its 32-bit dictionary namespace value. The tool
+  does not resolve hashes to names or decode pixels.
 
 The tests cover a bound slot and a null slot, a class mismatch, an index out of
-range, a bad slot target, a parameter count below the texture count, the shader
-cap, short and non-system buffers, an out-of-bounds parameter table, the scalar
-control, and a stored row and the JSON CLI.
+range, a bad slot target, a parameter count below the texture count, a shader
+array at the end of the segment, a clamped texture count with no table slack,
+the shader cap, short and non-system buffers, an out-of-bounds parameter table,
+the scalar control, and a stored row and the JSON CLI.
+
+## dictionary_census
+
+Reproduces the aggregates in [formats/resources/textures.md](../../formats/resources/textures.md).
+
+```text
+python dictionary_census.py --dictionary ARCHIVE LISTING [--dictionary ...] \
+    --drawable ARCHIVE LISTING [--drawable ...] \
+    --negative ARCHIVE LISTING TYPE [TYPE ...] [--json]
+```
+
+- A `LISTING` is the JSON object printed by `lforge archive ls <ARCHIVE> --json`.
+  Rows are selected by the listing's `type_id`: 5 for dictionaries, 2 for
+  drawables, and the type IDs given to `--negative`.
+- The script reconstructs each selected stored row with `page_reconstruct`,
+  parses dictionaries with `texture_dictionary` and walks drawables with
+  `pool_reference`. It invokes no application code and reads the inputs only.
+- The report holds the dictionary counts, format and mip distributions, the
+  distinct-hash count and the hash multiplicity; the drawable slot counts, the
+  distinct name values, the namespace matches, the per-drawable match counts,
+  the matched-hash multiplicity, the DRAW-F18 overlap and the 64-bit key
+  comparison; the negative accepted/rejected counts; and the seeded 10,000-value
+  controls.
+- The test builds a synthetic dictionary and a synthetic non-dictionary, runs the
+  CLI and checks the dictionary, negative and control sections.

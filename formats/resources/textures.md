@@ -1,31 +1,35 @@
 # Texture dictionaries
 
 A texture dictionary is one RAGE resource: a system segment that holds a sorted
-name-hash array, a parallel value array, and a dense table of 0x70-byte texture
-records, plus a graphics segment that holds the texture allocations. This
-document describes the container grammar and the allocation arithmetic. It does
-not decode pixels.
+name-hash array, a parallel value array, and a table of 0x70-byte texture
+records, plus a graphics segment that holds the allocations. This document
+describes the container grammar and the allocation bounds. It does not decode
+pixels and does not establish a byte size for an allocation.
 
 The layout is read from payload data of the Scarlett build
-[e95020b2](../../builds/gta-vi/scarlett-e95020b2/README.md). No engine code
-path was traced. Field positions are **Confirmed** on the sample below; field
-meanings are **Probable** unless a row says otherwise. The label "texture
-dictionary" is the subject name used by this iteration, not a recovered symbol.
-Findings are cited as `RES-F36` and listed in
+[e95020b2](../../builds/gta-vi/scarlett-e95020b2/README.md). No engine code path
+was traced. Field positions are **Confirmed** on the sample below; field
+meanings are **Probable** only where the text says so, and several remain
+**Unknown**. The label "texture dictionary" is the subject name used by this
+iteration, not a recovered symbol. Findings are cited as `RES-F36` and listed in
 [evidence/resources/INDEX.md](../../evidence/resources/INDEX.md).
 
 ## Sample
 
-The sample is every type-5 row of the 25 nested archives below: 1,440
-resources, 5,484 records. The rows are type-0 rows of `<GAME_ROOT>/textures.rpf`
-and `<GAME_ROOT>/data.rpf`. The selection rule is the local CLI type ID 5 inside
-those nested archives; no other type-5 row was found in the scanned archives.
-The counts and digests are in
+The positive sample is every type-5 row of the 25 nested archives below: 1,440
+resources, 5,484 records. The rows are type-0 rows of
+`<GAME_ROOT>/textures.rpf` and `<GAME_ROOT>/data.rpf`. The selection rule is the
+local CLI type ID 5 inside those nested archives. The counts and digests are in
 [Sample locators](../../evidence/resources/INDEX.md#texture-dictionary-sample).
+
+The negative sample is 469 rows of other local type IDs in the same nested
+archives and one additional `levels.rpf` nested archive: 80 type 66, 224 type 3,
+164 type 73 and 1 type 74. They were selected with the same listing command and
+the type IDs stated here.
 
 | Property                    | Value                                                       |
 | --------------------------- | ----------------------------------------------------------- |
-| Resources                   | 1,440                                                       |
+| Positive resources          | 1,440                                                       |
 | Non-empty dictionaries      | 1,431                                                       |
 | Empty dictionaries          | 9                                                           |
 | Records                     | 5,484                                                       |
@@ -33,34 +37,41 @@ The counts and digests are in
 | Dimensions                  | 94 distinct pairs, 4×4 to 4,096×1,024                       |
 | Format ids                  | 22 distinct values, `10` to `99`                            |
 | Mip counts                  | 1 to 12                                                     |
-| Allocation bytes            | 794,218,496 of 795,594,752 graphics bytes                   |
-| Resources with `sum(sizes) == graphics` | 1,375 (non-empty)                              |
-| Resources with `sum(sizes) < graphics`  | 56 (non-empty)                                  |
+| Distinct name hashes        | 2,852                                                       |
+| Negative rows               | 469 selected, 0 accepted                                    |
 
-## Recognition rule
+## Recognition test
 
-A reader can recognise a texture dictionary by arithmetic, not by a name or a
-type ID:
+A reader applies these structural tests to a decoded resource:
 
 1. The system segment starts with a zero `u64` and a system pointer at `+0x08`.
 2. `+0x20` is a system pointer to a `u32` hash array; `+0x28` holds its `u16`
    count and `u16` capacity.
 3. `+0x30` is a system pointer to a `u64` value array; `+0x38` holds its `u16`
    count and `u16` capacity.
-4. The two counts are equal and the two capacities are at least the count.
-5. The hash array is in ascending order and has no duplicate.
-6. Every value is a system pointer to a 0x70-byte record table.
-7. Every record's `+0x18` value is a graphics pointer and
-   `allocation_units × unit_bytes` stays inside the graphics segment.
+4. The two counts are equal.
+5. Each capacity is at least its count.
+6. The hash array is in ascending order and has no duplicate.
+7. Every value is a system pointer to a 0x70-byte record.
 
 All 1,431 non-empty dictionaries pass steps 1–7. The 9 empty dictionaries have
-zero hash and value pointers and zero counts; their system segment is 96 bytes
-and the page map declares one system page and no graphics page.
+zero pointers and counts and pass steps 1–5 trivially. The 469 negative rows
+fail at least one step: 0 were accepted as empty dictionaries and 0 as
+non-empty ones.
+
+This is a structural test, not a proof of format identity. Steps 1–2 are generic
+resource-header fields, and the positive sample was selected by type ID 5. The
+test is useful because 469 nearby resources of other types were rejected by the
+same code; it does not show that every type-5 resource is a dictionary or that
+no other type can pass.
 
 The name hash is the 32-bit one-at-a-time hash (`joaat`) of the ASCII text
 reached from the record's name pointer, with the text starting at the pointer
-`+8`. All 5,484 records match. The text and the hashes are payload data and are
-not reproduced here. A name hash is a key, not a recovered filename.
+`+8`. The implementation folds `A`–`Z` and `\`, matching the published engine
+behaviour (HSH-F04). The check reads at most 64 bytes and skips a record whose
+text has no terminator inside that window. All 5,484 records match. The text and
+the hashes are payload data and are not reproduced here. A name hash is a key,
+not a recovered filename.
 
 ## Root header
 
@@ -89,10 +100,14 @@ value array is `count` 8-byte values in the same order: `hash[i]` and
 record table; a reader MUST follow `value[i]`, not compute a record address from
 `i`.
 
+Across the 2,852 distinct hashes, 2,842 occur in one record, 8 occur in two
+records and 2 occur in 1,313 records. A hash is therefore not unique to one
+dictionary; the same texture name can appear in many dictionaries.
+
 The record table is normally a dense run of 0x70-byte records. One dictionary
-of 1,198 records has a 0x20-byte gap at system `0x1ff70..0x20000`, on a
-`0x10000` boundary. A reader MUST therefore accept a non-contiguous record
-table. The gap does not change the record width.
+of 1,198 records has a 0x20-byte gap at system offset `0x1ff70..0x20000` in that
+resource, on a `0x10000` boundary. A reader MUST therefore accept a
+non-contiguous record table. The gap does not change the record width.
 
 ## Record
 
@@ -102,20 +117,20 @@ records.
 | Offset | Width | Content                                                       | Confidence |
 | ------ | ----- | ------------------------------------------------------------- | ---------- |
 | `+0x00` | 8    | zero                                                          | Confirmed (sample) |
-| `+0x08` | 4    | allocation size in format units                               | Confirmed (arithmetic) |
+| `+0x08` | 4    | allocation unit count; byte scale **Unknown**                 | Bytes confirmed; meaning **Unknown** |
 | `+0x0C` | 4    | two `u16`; not interpreted                                    | Bytes confirmed; meaning **Unknown** |
 | `+0x10` | 8    | `2432` in 5,464 records and `2434` in 20; not interpreted      | Bytes confirmed; meaning **Unknown** |
-| `+0x18` | 8    | graphics pointer to the allocation start                      | Confirmed (arithmetic) |
+| `+0x18` | 8    | graphics pointer to the allocation start                      | Confirmed (sample) |
 | `+0x20` | 8    | zero                                                          | Confirmed (sample) |
 | `+0x28` | 8    | system pointer to this record `+0x50`                         | Confirmed (sample) |
 | `+0x30` | 8    | system pointer to a name record; ASCII text at pointer `+8`   | Confirmed (sample) |
-| `+0x38` | 2    | width                                                         | Probable (arithmetic) |
-| `+0x3A` | 2    | height                                                        | Probable (arithmetic) |
+| `+0x38` | 2    | candidate width                                               | Probable (position) |
+| `+0x3A` | 2    | candidate height                                              | Probable (position) |
 | `+0x3C` | 2    | `1` in 5,307 records; other small values; not interpreted      | Bytes confirmed; meaning **Unknown** |
 | `+0x3E` | 1    | `1` in 5,363 records, `3` in 120, `2` in 1; not interpreted    | Bytes confirmed; meaning **Unknown** |
-| `+0x3F` | 1    | format id                                                     | Probable (arithmetic) |
+| `+0x3F` | 1    | format id; not mapped to an enum                              | Bytes confirmed; meaning **Unknown** |
 | `+0x40` | 2    | `5` in every record; not interpreted                          | Bytes confirmed; meaning **Unknown** |
-| `+0x42` | 2    | mip count in bits 0..14; bit 15 is set in some records         | Probable (arithmetic) |
+| `+0x42` | 2    | candidate mip count in bits 0..14; bit 15 is set in some records | Probable (position) |
 | `+0x44` | 2    | zero                                                          | Confirmed (sample) |
 | `+0x46` | 2    | `1`                                                           | Confirmed (sample) |
 | `+0x48` | 8    | `0x0000000200000000` in every record                          | Confirmed (sample); meaning **Unknown** |
@@ -123,57 +138,53 @@ records.
 | `+0x60` | 8    | high 48 bits set; low 16 bits vary (`0x0241` in 5,307)         | Bytes confirmed; meaning **Unknown** |
 | `+0x68` | 8    | zero                                                          | Confirmed (sample) |
 
-## Allocation arithmetic
+Width, height, format id and mip count are the fields the acceptance criteria
+require the parser to expose. Their positions are confirmed; their meanings are
+**Probable at best**. The only arithmetic check is that the mip count is at most
+`bit_length(max(width, height))` in 5,484 of 5,484 records, which is weak
+because most records declare one mip level. No independent support for the four
+meanings is claimed.
 
-`allocation_size = allocation_units × unit_bytes(format id)`. The unit is the
-number of bytes in one 4×4 block for the block formats or one pixel for the
-uncompressed formats. The unit values below are the ones that reproduce the
-allocation extents; they are not a pixel decoder.
+## Allocation bounds
 
-| Format id | Unit bytes | Format id | Unit bytes | Format id | Unit bytes |
-| --------: | ---------: | --------: | ---------: | --------: | ---------: |
-| 10 | 8 | 41 | 4 | 78 | 16 |
-| 24 | 4 | 49 | 2 | 80 | 8 |
-| 28 | 4 | 54 | 2 | 83 | 16 |
-| 29 | 4 | 56 | 2 | 87 | 4 |
-| 34 | 4 | 61 | 1 | 95 | 16 |
-| 65 | 1 | 71 | 8 | 98 | 16 |
-| 72 | 8 | 74 | 16 | 99 | 16 |
-| 77 | 16 | | | | |
+The allocation size reported by the parser is the extent to the next distinct
+allocation start, with the last allocation ending at the graphics end:
 
-The id values coincide with DXGI format numbers, but this document does not
-decode pixels and does not state a channel layout, a swizzle, sRGB handling or a
-block layout. The arithmetic only establishes the unit width.
+```text
+extent[i] = start[i + 1] - start[i]   (the last uses graphics length)
+```
 
-Checks over the 5,484 records:
+This is an upper bound. The record's `+0x08` value is a unit count, not a byte
+count; its byte scale is not established. The parser reports the unit count and
+the extent separately and does not multiply them.
 
-- every allocation starts inside the graphics segment;
-- `allocation_offset + allocation_size` never leaves the graphics segment;
-- the allocation sizes sum to at most the graphics size in all 1,431 non-empty
-  resources (equality in 1,375, strict inequality in 56); the 9 empty
-  dictionaries have no graphics segment;
-- no two records share an allocation start;
-- the 4 KiB-aligned mip-chain size computed from width, height, format unit and
-  mip count is at most `allocation_size` in 5,484 of 5,484 records;
-- it equals `allocation_size` in 4,901 records; the other 583 are larger, which
-  is consistent with padding or additional surfaces not modelled here.
+The extents partition the graphics segment when the allocation starts are
+distinct, so their sum equals the graphics size by construction. The parser
+reports that equality as a partition check, not as independent evidence. If two
+records share a start, the parser reports `allocation_duplicate` and the summed
+extents can exceed the graphics size.
 
-The gap between successive distinct allocation starts (last to the graphics
-end) is an upper bound on the allocation. In the 56 resources where the stored
-sizes sum to less than the graphics size, that gap is larger than the stored
-size. A reader that needs a bound MUST use the gap; a reader that needs the
-stored size MUST use the unit count.
+Across the sample, every allocation start is inside the graphics segment, no
+two records share a start and the partition check passes in all 1,440
+resources. Those are reader checks on the sampled layout, not a proof of engine
+allocation policy.
+
+An earlier draft fitted a unit table that made `units × unit` equal the extent
+for each format id and reported a mip-chain comparison. That table was fitted
+to the same extents it was then compared against, so it was not independent
+evidence and the mip-chain comparison was not produced by committed code. The
+table and its claims are withdrawn. The format id, the unit count and the
+extent remain as separate observations.
 
 ## Competing models
 
 | Candidate                                                       | Discriminating observation                                                                 | Result   |
 | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | -------- |
 | The record width is 0x50 or 0x38 because only part of the shape repeats | The value array points into a run whose sorted starts are 0x70 apart, and the run ends at the value array. The full 0x70 shape is identical in 5,484 records | Rejected |
-| `hash[i]` describes the record at `record_base + i × 0x70`       | The value array is a permutation of the record run; the record order differs from the hash order in every dictionary with more than one record | Rejected |
-| The allocation size is the gap to the next allocation            | In 56 resources the gaps sum to more than the stored sizes, and the stored unit count never exceeds the gap. The gap is an upper bound | Rejected as the size; kept as a bound |
-| The mip count is the `u16` at `+0x3C`                            | `+0x3C` is `1` in most records and does not track the dimensions or the allocation; `+0x42` is at most the maximum level for the dimensions in 5,484 of 5,484 | Rejected |
-| The `u8` at `+0x3F` is an opaque flag                            | Dividing the allocation by the stored unit count gives one consistent unit per value; the 22 values fall into unit groups of 1, 2, 4, 8 and 16 bytes and reproduce the extents | Rejected |
-| A name hash is a 64-bit path hash                                 | Each stored hash equals the 32-bit one-at-a-time hash of the ASCII name text in 5,484 of 5,484 records | Rejected |
+| `hash[i]` describes the record at `record_base + i × 0x70`       | The value array is a permutation; order differs in every multi-record dictionary | Rejected |
+| The allocation size is the unit count in bytes                   | The record stores a count, not a byte size; no stored byte size exists to compare against | Rejected as a size; the extent is an upper bound |
+| A name hash is a 64-bit path hash                                 | Each stored hash equals 32-bit `joaat` of the referenced ASCII text (5,484/5,484) | Rejected |
+| The capacity fields can be ignored                                | The parser now compares each capacity with its count; the sample has capacity ≥ count in 1,440/1,440 | Rejected as a free field |
 
 ## Empty and incomplete dictionaries
 
@@ -195,7 +206,7 @@ fields are repeated here.
 | Family | Field | Reading | Confidence |
 | ------ | ----- | ------- | ---------- |
 | Shader texture parameter | `u32` at parameter entry `+0x04` | bits 0..1 are the entry class; class `0` means a texture entry and bits 2..31 are the slot index. `index = value >> 2`, accepted when `index < texture count` | Probable (969/969 texture entries, 0/7,920 non-texture entries) |
-| Texture name record | `u32` at record `+0x18` when the `u64` at `+0x10` is `6` | a 32-bit dictionary name hash | Probable (264 matches, see below) |
+| Texture name record | `u32` at record `+0x18` when the `u64` at `+0x10` is `6` | a 32-bit value that shares the dictionary name-hash namespace | Probable (namespace match, see below) |
 | Texture name record | `u64` at record `+0x08` | a separate 64-bit key; neither 32-bit half is a dictionary hash | Rejected as a dictionary reference |
 
 The sample is the 92 type-2 drawables of the nested archive at
@@ -203,52 +214,67 @@ The sample is the 92 type-2 drawables of the nested archive at
 `450B6A5A95578A31133F686AE5D1D8151B4C7A38197F039895311D44742DBC96`). It holds
 164 shaders and 969 texture parameters:
 
-- all 969 parameters resolve to a slot index in range; the index equals the
+- all 969 parameters select a slot index in range; the index equals the
   parameter's position in the table in all 969;
 - 770 slots hold a system texture record (4 to 29 per drawable; every drawable
   has at least 4), 199 are null and 0 are invalid;
-- 678 name records have the `6` variant at `+0x10`; 92 have a system pointer
-  there and do not carry the dictionary hash;
-- of the 678 hash-bearing records, 264 match a name hash in the 1,440 sampled
-  dictionaries and 414 do not. The 414 are unresolved, not false: the sampled
-  dictionary set does not cover every texture name. The 264 matches cover 4
-  distinct hashes and 86 of the 92 drawables; a hash can occur in more than one
-  dictionary;
-- all 404 dictionary records reached by the 264 references have an in-bounds
-  allocation;
-- no 32-bit half of the 64-bit key is a dictionary hash (0 of 770).
+- 678 name records have the `6` variant at `+0x10` and carry a 32-bit value at
+  `+0x18`; 92 have a system pointer there and do not carry that value;
+- the 678 values are 254 distinct values. 264 references to 4 distinct values
+  match a name hash in the sampled dictionaries; 414 references to the other
+  250 values do not. A matching hash is a namespace match, not a resolution to a
+  specific resource: a hash can occur in more than one dictionary;
+- of the 4 matched values, 2 occur in two dictionary records and 2 occur in one
+  record each;
+- 86 of the 92 drawables have at least one namespace match. Their per-drawable
+  match counts are 1: 15, 2: 11, 3: 43, 4: 6, 5: 3, 6: 1, 7: 5, 8: 1, 10: 1;
+- none of the 4 matched values equals one of the six constant texture-parameter
+  values recorded by DRAW-F18 (`0xC8E8C282`, `0x739E3D0D`, `0x2C8D7182`,
+  `0x0CD27763`, `0xC6F46E79`, `0x1E77BF4C`);
+- no 32-bit half of the 64-bit key is a dictionary hash (0 of 770 lower halves
+  and 0 of 770 upper halves).
+
+The 92 pointer-variant name records and the 414 unmatched references are
+unresolved. The sample does not show which dictionaries contain the unmatched
+names; the containing dictionaries were not selected or were not available.
 
 Control: 10,000 random `u32` values produce no accepted slot reference and no
-dictionary-hash match. The 7,920 non-texture parameter words produce no
-accepted slot reference.
+dictionary-hash match; the threshold is 1% of the trials. The 7,920 non-texture
+parameter words produce no accepted slot reference.
+
+The `tools/resources/dictionary_census.py` script produces every count in this
+section from caller-supplied archives and `lforge archive ls` listings. The
+selection rule is the type ID in those listings.
 
 ## Limits
 
-- One build, two top-level archives, 25 nested archives. The sample is a census
-  of the type-5 rows in those nested archives, not of the game.
+- One build. The positive sample is a census of the type-5 rows in 25 nested
+  archives of two top-level archives; the negative sample is 469 rows of four
+  other type IDs. This is not a game-wide census.
 - The record grammar is established from payload bytes and arithmetic. No
   engine code that builds, validates or uploads a dictionary was traced.
-- Width, height, format id and mip count are supported by the allocation
-  arithmetic, not by pixel decoding. A separate texture-format document would be
-  needed to decode pixels.
-- The meanings of `+0x08`'s high half, `+0x10`, `+0x3C`, `+0x3E`, `+0x40`,
-  `+0x48`, `+0x60` and the root `+0x18`/`+0x48`/`+0x50`/`+0x58` are **Unknown**.
-- The 583 records whose allocation exceeds the 4 KiB-aligned mip chain are not
-  explained. Additional surfaces, padding or an unread count are candidates.
-  None was established.
+- Width, height, format id and mip count are exposed at confirmed positions but
+  their meanings are not independently established. No pixel format is claimed.
+- The byte scale of the allocation unit count is **Unknown**. The reported
+  allocation size is the extent upper bound.
+- The meanings of `+0x08`, `+0x0C`, `+0x10`, `+0x3C`, `+0x3E`, `+0x40`, `+0x48`,
+  `+0x60` and the root `+0x18`/`+0x48`/`+0x50`/`+0x58` are **Unknown**.
 - The name text is payload data. It is read for the hash check only and is not
   published.
-- The drawable reference sample is one nested archive of `levels.rpf` and one
-  build. The 414 unresolved references are not shown to be absent from every
-  dictionary. The slot index equals the parameter position in all 969 cases, so
-  an independent cross-reference is not demonstrated.
+- The drawable reference sample is one nested archive of `levels.rpf`. The 414
+  unmatched references are not shown to be absent from every dictionary. The
+  slot index equals the parameter position in all 969 cases, so an independent
+  cross-reference is not demonstrated.
 
 ## Tool
 
 [tools/resources/texture_dictionary.py](../../tools/resources/texture_dictionary.py)
 implements the dictionary grammar. It reads a decoded resource or a stored row
 through `page_reconstruct`, bounds the counts, reports every record field and
-the allocation checks, and does not decode pixels.
+the allocation extents, and does not decode pixels.
 [tools/resources/pool_reference.py](../../tools/resources/pool_reference.py)
 reads the drawable slot and name-record references and reports them separately
-from 0x5/0x6 pointers. Their synthetic tests are under `tools/resources/tests/`.
+from 0x5/0x6 pointers.
+[tools/resources/dictionary_census.py](../../tools/resources/dictionary_census.py)
+reproduces the aggregates in this document. Their synthetic tests are under
+`tools/resources/tests/`.
