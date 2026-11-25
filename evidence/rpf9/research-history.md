@@ -188,14 +188,24 @@ Some earlier notes used "A" and "B" for `hdr[0x04]` and `hdr[0x08]`. Those lette
 
 **Still open.** The key state is not the archive `B` sub-block 1 descriptor or the executable static descriptor in the tested combinations, under either provider mode, so real transformed rows do not decrypt (RPF9-F113). No speculative decoding was implemented; transformed rows stay refused.
 
+**Later corrected.** The relation to the metadata cipher held only for the object class, not for the algorithm. See [Payload transform descriptor](#payload-transform-descriptor) below.
+
+## Payload transform descriptor
+
+**Old assumption.** The payload transform initialized its per-stream cipher from the archive `B` sub-block 1 descriptor or the executable static descriptor, and its algorithm was the metadata cipher's algorithm `0x10` with CBC chaining (RPF9-F109, RPF9-F112, RPF9-F113).
+
+**Correction.** The descriptor is the value of the entry's own transform field `0x286030A358A789FB` (RPF9-F114): key identifier, cipher type and parameter, handed to the same initializer the metadata descriptors use. The type selects the algorithm, and the sampled rows carry type `0x11`, which selects algorithm `0x11` (RPF9-F115). That object carries mode 3, so the slot repositions a counter instead of continuing CBC, and the engine is a counter-mode keystream rather than the CBC engine. The key identifier resolves through the static registry to a provider-2 state carrying the magic algorithm `0x11` accepts (RPF9-F116). The earlier negatives are therefore evidence about the archive and static descriptors only.
+
+**Still open.** The block generator's round program is not reproduced, so no chunk decodes and the reader keeps refusing transformed rows (RPF9-F117).
+
 ## Open
 
 - Meaning of descriptor `+0x08`, and any use of `+0x12`.
 - What selects location layout F over A, and whether real rows carry more than one layout.
 - The content of the `B` sub-blocks.
 - The stored state of the secondary area and of archives other than the inspected ones, and how many bytes of the primary area change. One earlier note called the primary regions "post-transform" from the order of initialization alone. The step 4 pass, the archive scan and the verified signature now confirm the primary area is stored transformed in the inspected archives (RPF9-F28, RPF9-F48, RPF9-F102).
-- Whether a second executable build registers the same keys or binds to the same archives. Cipher algorithms 1, 2, `0x11` and `0x12`, whether the embedded schedule is the standard AES-256 expansion, and the role of the `B` trailer remain open.
-- The payload transform's key state: the descriptor or key-provider path that initializes its per-stream object. Its algorithm is the metadata cipher's engine (RPF9-F109), but the tested metadata descriptors do not decrypt real transformed rows (RPF9-F113). Payload bytes are not covered by the metadata signature.
+- Whether a second executable build registers the same keys or binds to the same archives. Cipher algorithms 1, 2 and `0x12`, whether the embedded schedule is the standard AES-256 expansion, and the role of the `B` trailer remain open.
+- The block program of the payload transform's algorithm `0x11`: its round structure, table roles and key use, without which no transformed payload can be decoded (RPF9-F117). The descriptor, the algorithm selection and the key state are established (RPF9-F114 to RPF9-F116). Payload bytes are not covered by the metadata signature.
 - Directory structure outside the traced paths, and enumeration in the device layer or above.
 - CityHash32 identity of the fingerprint hash, the concrete startup fingerprint and the contents of `B` sub-block 9 in real archives.
 - Path normalization, the physical device implementation, and the mount prefixes the game uses.
