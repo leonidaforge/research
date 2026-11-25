@@ -61,7 +61,7 @@ Confirmed properties across 57 samples (RDS5-F03, RDS5-F04, RDS5-F05):
 
 - `hi[0:16]` behaves as `floor(cumulative_uncompressed_before_block / 0x4000) mod
   0x10000`. It matches exactly in the two samples that were fully decompressed and
-  matches the sampled blocks of three more files (RDS5-F12). A reader SHOULD NOT treat
+  matches the two complete samples (RDS5-F12). A reader SHOULD NOT treat
   it as an exact byte size: it quantises to 0x4000 bytes and wraps at 65536 counters
   (1 GiB of uncompressed data).
 - `hi[16:32]` takes 19,174 distinct values across 1,026,833 block records, with a
@@ -115,7 +115,7 @@ A reader MUST NOT infer a codec from the selector alone.
 | `+0x08` | u32 | `entry_count` | Number of 16-byte entries |
 | `+0x0C` | u32 | `field_m` | Multiple of 16. Adds to the length of the region after the entry table |
 | `+0x10` | `N * 16` | entries | One 16-byte entry per `entry_count` |
-| `+0x10 + 16N` | `16N + M` | high-entropy region | Not zlib. Length **Probable**, content **Unknown** |
+| `+0x10 + 16N` | `16N + M` | opaque region | Not zlib. Length **Probable**, content **Unknown** |
 
 The chunk position is `align_up(0x10 + 8 * record_count, 0x100)` and equals record 0's
 offset (RDS5-F03, RDS5-F07). The entry table is fully consumed by `entry_count`
@@ -177,10 +177,12 @@ zlib block of nine files and eight sampled blocks of a tenth. The remaining 916,
 zlib blocks were classified by their first two bytes only. Uncompressed sizes are
 multiples of 0x1000 in every measured case, up to 4 MiB.
 
-Non-zlib blocks (RDS5-F11, RDS5-F18): 108,610 ranges are not zlib streams. Their stored spans and selector values are recorded; no content test was applied to them. They are
-not zlib, gzip or raw DEFLATE, under the rule that the whole stored range must decode
-as one stream with no leftover bytes. The test allowed the stream to start at offset 0
-to 8. The codec is **Unknown**. No LZ4 result is claimed here because independent
+Non-zlib blocks (RDS5-F11, RDS5-F18): 108,610 ranges are not zlib streams by their
+first two bytes. Two of them were offered to decoders: under the rule that the whole
+stored range must decode as one stream with no leftover bytes, and allowing a start
+at offset 0 to 8, they are not zlib, gzip or raw DEFLATE. That negative result covers
+those two blocks only. The content of the remaining ranges was not tested and their
+codec is **Unknown**. No LZ4 result is claimed here because independent
 verification could not reproduce one.
 
 ## Reader requirements
