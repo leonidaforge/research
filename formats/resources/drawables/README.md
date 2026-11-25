@@ -154,9 +154,9 @@ not published.
 
 The 58 header exceptions have two named causes:
 
-- 57 drawables have exactly three null LOD slots. The header is the union across
-  all four LOD slots, including the models in the three slots that are not
-  present, so the present-model union need not equal it.
+- 57 drawables have exactly three null LOD slots. The header is not the union of
+  the present models; its larger extent is consistent with the three absent LOD
+  models, which are not in the resource.
 - One drawable (`0x01066B9010`) has four populated LOD slots and four models,
   but its aggregate minimum on one axis is `0.1849` below the header minimum.
   The header is not the union of the four model aggregates there. No cause is
