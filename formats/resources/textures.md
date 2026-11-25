@@ -237,11 +237,17 @@ accepted slot reference.
   None was established.
 - The name text is payload data. It is read for the hash check only and is not
   published.
+- The drawable reference sample is one nested archive of `levels.rpf` and one
+  build. The 414 unresolved references are not shown to be absent from every
+  dictionary. The slot index equals the parameter position in all 969 cases, so
+  an independent cross-reference is not demonstrated.
 
 ## Tool
 
 [tools/resources/texture_dictionary.py](../../tools/resources/texture_dictionary.py)
-implements the grammar. It reads a decoded resource or a stored row through
-`page_reconstruct`, bounds the counts, reports every record field and the
-allocation checks, and does not decode pixels. Its synthetic tests are under
-`tools/resources/tests/`.
+implements the dictionary grammar. It reads a decoded resource or a stored row
+through `page_reconstruct`, bounds the counts, reports every record field and
+the allocation checks, and does not decode pixels.
+[tools/resources/pool_reference.py](../../tools/resources/pool_reference.py)
+reads the drawable slot and name-record references and reports them separately
+from 0x5/0x6 pointers. Their synthetic tests are under `tools/resources/tests/`.
