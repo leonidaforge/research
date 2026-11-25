@@ -185,6 +185,42 @@ stored size MUST use the unit count.
 - A dictionary whose value pointer leaves the system segment was not observed.
   A reader MUST report it, not resize the segment.
 
+## References from drawables
+
+A drawable names a texture in two places: a shader parameter entry selects a
+slot, and a bound slot's texture record reaches a name record. The drawable
+layout is documented in [drawables](drawables/README.md); only the reference
+fields are repeated here.
+
+| Family | Field | Reading | Confidence |
+| ------ | ----- | ------- | ---------- |
+| Shader texture parameter | `u32` at parameter entry `+0x04` | bits 0..1 are the entry class; class `0` means a texture entry and bits 2..31 are the slot index. `index = value >> 2`, accepted when `index < texture count` | Probable (969/969 texture entries, 0/7,920 non-texture entries) |
+| Texture name record | `u32` at record `+0x18` when the `u64` at `+0x10` is `6` | a 32-bit dictionary name hash | Probable (264 matches, see below) |
+| Texture name record | `u64` at record `+0x08` | a separate 64-bit key; neither 32-bit half is a dictionary hash | Rejected as a dictionary reference |
+
+The sample is the 92 type-2 drawables of the nested archive at
+`<GAME_ROOT>/levels.rpf` row 5 (SHA-256
+`450B6A5A95578A31133F686AE5D1D8151B4C7A38197F039895311D44742DBC96`). It holds
+164 shaders and 969 texture parameters:
+
+- all 969 parameters resolve to a slot index in range; the index equals the
+  parameter's position in the table in all 969;
+- 770 slots hold a system texture record, 199 are null and 0 are invalid;
+- 678 name records have the `6` variant at `+0x10`; 92 have a system pointer
+  there and do not carry the dictionary hash;
+- of the 678 hash-bearing records, 264 match a name hash in the 1,440 sampled
+  dictionaries and 414 do not. The 414 are unresolved, not false: the sampled
+  dictionary set does not cover every texture name. The 264 matches cover 4
+  distinct hashes and 86 of the 92 drawables; a hash can occur in more than one
+  dictionary;
+- all 404 dictionary records reached by the 264 references have an in-bounds
+  allocation;
+- no 32-bit half of the 64-bit key is a dictionary hash (0 of 770).
+
+Control: 10,000 random `u32` values produce no accepted slot reference and no
+dictionary-hash match. The 7,920 non-texture parameter words produce no
+accepted slot reference.
+
 ## Limits
 
 - One build, two top-level archives, 25 nested archives. The sample is a census

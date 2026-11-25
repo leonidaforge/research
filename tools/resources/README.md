@@ -76,7 +76,7 @@ python -m unittest discover -s tools/resources -p "test_*.py"
 
 The 26 `rage_resource` tests build every input with `zlib` and `struct`. They cover a valid one-page-per-segment resource, a map in a later system page, a split 32 MiB page, a page of exactly 32 MiB, missing and extra pages, a page-size violation, an outside pointer, and the negative cases: truncated stream, zero system-page count, map outside the system data, nonzero slot, nonzero prefix, nonzero padding, stream and total caps, and data without a resource header.
 
-The suite also holds 18 `page_reconstruct` tests, 8 `root_tables` tests and 21 `texture_dictionary` tests. All 73 tests pass with the standard library only.
+The suite also holds 18 `page_reconstruct` tests, 8 `root_tables` tests, 21 `texture_dictionary` tests and 14 `pool_reference` tests. All 87 tests pass with the standard library only.
 
 ## Limits
 
@@ -158,3 +158,32 @@ unsorted and duplicate hashes, record pointers and records outside the segment,
 allocation outside, overrun, duplicate starts and sum, an unknown format, zero
 dimensions and mip bounds, sparse record tables, the refusal cases, the name
 check, a stored row through `page_reconstruct`, and the JSON CLI.
+
+## pool_reference
+
+Reads the drawable shader texture-slot chain and reports slot references
+separately from 0x5/0x6 pointers.
+
+```text
+python pool_reference.py --file <FILE> --offset <ENTRY> --length <STORED> [--logical-size BYTES] [--json]
+python pool_reference.py --file <DECODED> --system-length <BYTES> [--json]
+```
+
+- `parse_shader_pool(system, graphics_length=None)` is the library entry point.
+  It walks the shader group, each shader's parameter table and slot table,
+  reads the first `texture count` parameter words, and reports each slot as
+  `bound`, `null` or `bad`.
+- `decode_slot_reference(value, slot_count)` splits a parameter word into the
+  low-two-bit class and the slot index. `control_acceptance(values, slot_count)`
+  applies the same rule to a control block.
+- The report gives the shader count, texture-entry count, index-in-range count,
+  bound/null/bad slot counts, the number of other-class entries, the 0x5/0x6
+  pointer counts with their outside counts, and every reference.
+- A bound reference also reports the name record's 64-bit key and, when the
+  name record's `+0x10` is `6`, its 32-bit dictionary name hash. The tool does
+  not resolve hashes to names or decode pixels.
+
+The tests cover a bound slot and a null slot, a class mismatch, an index out of
+range, a bad slot target, a parameter count below the texture count, the shader
+cap, short and non-system buffers, an out-of-bounds parameter table, the scalar
+control, and a stored row and the JSON CLI.
