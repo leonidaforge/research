@@ -804,15 +804,15 @@ def main() -> int:
         depth2_plan.append((record, selected, candidate_count))
 
     depth2_candidates = sum(candidate_count for _, _, candidate_count in depth2_plan)
-    if not depth2_plan:
+    if len(sampler.nested_records) >= args.max_nested:
+        depth2_reason = "nested archive cap reached after depth-1 extraction"
+    elif not depth2_plan:
         depth2_reason = "no depth-1 archive was extracted"
     elif depth2_candidates == 0:
         depth2_reason = (
             "no readable type-0 row at or below the archive size limit in any "
             "extracted depth-1 archive"
         )
-    elif len(sampler.nested_records) >= args.max_nested:
-        depth2_reason = "nested archive cap reached after depth-1 extraction"
     else:
         depth2_reason = None
 
