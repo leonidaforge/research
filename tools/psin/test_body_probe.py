@@ -1,6 +1,8 @@
 import contextlib
 import io
+import os
 import struct
+import tempfile
 import unittest
 
 import body_probe
@@ -34,11 +36,18 @@ class BodyProbeTests(unittest.TestCase):
         self.assertGreaterEqual(report["psch"]["unused_by_blocks"], 0)
 
     def test_output_inside_sample_directory_is_refused(self):
-        with contextlib.redirect_stderr(io.StringIO()):
-            result = body_probe.main([
-                "--samples", ".", "--output", "body-child.json", "--summary-only"
-            ])
+        with tempfile.TemporaryDirectory() as directory:
+            with open(os.path.join(directory, "sample.bin"), "wb") as handle:
+                handle.write(synthetic.pmap_document())
+            stderr = io.StringIO()
+            with contextlib.redirect_stderr(stderr):
+                result = body_probe.main([
+                    "--samples", directory,
+                    "--output", os.path.join(directory, "child.json"),
+                    "--summary-only",
+                ])
         self.assertEqual(result, 1)
+        self.assertIn("inside the sample directory", stderr.getvalue())
 
 
 if __name__ == "__main__":
