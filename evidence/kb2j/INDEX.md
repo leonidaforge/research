@@ -36,6 +36,7 @@ they are the finding.
 | KB2-F10 | No ASCII identifier appears beyond the four-byte signature. Printable runs inside frame data are consistent with compressed data; `Bink`, `BIK` and `RAD` do not occur as stable markers | String scan of 12 extracted payloads | Confirmed (sample) | Absence in the sample does not rule out identifiers in other variants |
 | KB2-F11 | `+0x24`, `+0x26` and `+0x2C` are observed but unexplained. `+0x24` is 18 or 19; `+0x26` is 0, 4, 16 or 20; `+0x2C` is `0x02070D00` for all `KB2j` rows and `0x87E90500`, `0x87E80400` or `0x87E70200` for `KB2n` rows | Header census | Confirmed (values); Unknown (meaning) | Values may be codec or encoder identifiers |
 | KB2-F12 | Two `KB2n` counts describe different `movies.rpf` populations. The current 515-row manifest inspected every row, excluded none and reads 505 `KB2n` and 10 `KB2j`. An earlier census reported 787 `KB2n`; its implied population was 797 rows (787 `KB2n` + 10 `KB2j`), but its source manifest, duplicate handling and exclusions were not preserved | Current manifest, signature census; earlier census record | Confirmed (current 515-row manifest); Unknown (earlier 797-row population) | The earlier figure is not reproducible from the current archive. `KB2n` content duplicates in the current archive were not measured. The figures MUST NOT be combined |
+| KB2-F13 | The `KB2n` stored prefix is not confined to `movies.rpf`. A stored-byte census of the top-level rows reads `KB2n` in 787 rows across four archives: `movies.rpf` 505, `story000.rpf` 264, `core_restofworld.rpf` 11, `story000_restofworld.rpf` 7. `KB2j` occurs only in `movies.rpf`. Only the `movies.rpf` 515-row population has been inspected structurally; the other 282 rows are counted by first stored bytes only. This corrects the earlier confinement claim (UPL-F06). The four-archive total of 787 is not the historical 787 of KB2-F12 and the two MUST NOT be combined | Top-level stored-byte census over 6,079 of 6,534 rows; current `movies.rpf` manifest | Confirmed (prefix count); Unknown (format identity outside `movies.rpf`) | First eight stored bytes only; nothing outside `movies.rpf` was parsed, validated as a container, or decoded |
 
 ## Census reconciliation
 
@@ -43,6 +44,13 @@ they are the finding.
 | --- | --- | --- | --- | --- | --- | --- |
 | 787 `KB2n` | Not preserved. Recorded by `UPL-F01`; the companion KB2j document recorded a 797-row `movies.rpf` population | `movies.rpf` | Not recorded. The figure is a stored-byte prefix class; its selection rule and exclusions are not preserved | Not recorded | Not recorded | 787 `KB2n`; implied population 797 |
 | 505 `KB2n` | Current manifest for `movies.rpf`, SHA-256 `a0647c0325333dd42b25b00d85ee9b3915a55ce99127b97ef00662ef4866cba4` | `movies.rpf` | First 48 header bytes at every row's payload offset; prefix class from the first eight bytes | Rows counted individually; 10 `KB2j` payloads reduce to four unique payloads; `KB2n` content duplicates not measured | 0 within the archive; all 515 rows are unchunked and untransformed | 515 (505 `KB2n` + 10 `KB2j`) |
+| 787 `KB2n` across four archives | Top-level stored-byte census, recorded as `INV-F31`; no per-archive manifest is attached to the figure | `movies.rpf` 505; `story000.rpf` 264; `core_restofworld.rpf` 11; `story000_restofworld.rpf` 7 | First eight stored bytes of every untransformed top-level row with at least eight stored bytes; rows behind the payload transform skipped | Rows counted individually; duplicates not measured | 455 rows behind the payload transform | 6,079 of 6,534 rows |
+
+Two different figures both read 787. The historical figure in KB2-F12 is a
+`movies.rpf`-only count over a 797-row population that is not preserved. The
+`INV-F31` figure is a four-archive sum in which `movies.rpf` contributes 505 and
+three further archives contribute 282. They are not the same measurement and
+neither may be substituted for the other.
 
 The 787 figure is not a misreading of the current archive: the current
 `movies.rpf` manifest contains 515 rows, so it cannot yield 787 `KB2n` rows.
@@ -66,6 +74,12 @@ census uses the audio track count at `+0x28` to find the table start and reads
 
 ## Research history
 
+- 2026-11-25: `UPL-F06` confined `KB2n` to `movies.rpf`. The top-level
+  stored-byte census contradicts the confinement: `KB2n` appears in four
+  archives and totals 787 rows, of which `movies.rpf` contributes 505. The
+  confinement claim is corrected by KB2-F13. The historical 787 of KB2-F12 is a
+  different, `movies.rpf`-only population; the shared number is a coincidence and
+  the two figures are not interchangeable.
 - 2026-11-25: `UPL-F05` said `u32 @+0x04` equals the stored size minus 8 in four
   extracted `KB2j` samples. Re-census shows the field equals the extracted
   (logical) size minus 8 in all 515 rows and differs from stored size minus 8 in

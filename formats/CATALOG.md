@@ -16,35 +16,30 @@ Confidence values:
 
 ## Identified file formats
 
-"Repository category" is where this repository keeps the document. "Role" is what the payload actually is. Only RPF9 has an established role; KB2j/KB2n is Probable, and the rest are **Unknown**, because their documents state that no role is established.
+"Repository category" is where this repository keeps the document. "Role" is what the payload actually is. Only RPF9 has an established role; KB2j/KB2n and RDS5/ETPF are Probable, and the rest are **Unknown**, because their documents state that no role is established.
 
 | Identifier | Repository category | Role | Confidence | Signature | Native types | Population | Investigated | Document |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | RPF9 | Container | Archive container | Confirmed | `9FPR` (`0x52504639`) | Container; carried by type 0 | 22 top-level archives, 6,534 unique `(archive, row)` pairs | All 22 manifests; 782 nested archives extracted | [rpf9](containers/rpf9/README.md) |
+| RDS5 / ETPF | Container | Probable texture data store; content model Unknown | Confirmed (sample) | `RDS5` at offset 0; one `ETPF` chunk per file | 5 and others | 57 stores, 1,026,833 block records, 357,115 descriptors | Header, record array, descriptor table, block catalogue and zlib blocks; no codec, pixel format or object grammar | [rds5](containers/rds5/README.md) |
 | RBF0 | Metadata | Unknown | Confirmed (sample) | `RBF0` (`52 42 46 30`) at offset 0 | 11 | 156 rows in one nested archive | 18 of 156 rows decoded | [rbf0](metadata/rbf0/README.md) |
 | EDUP | Unknown | Unknown | Confirmed (sample) | `EDUP` (`45 44 55 50`) at offset 0 | 255 | 5 rows, 5 archives | 4 distinct payloads | [edup](unknown/edup/README.md) |
-| KB2j / KB2n | Unknown | Container family, two signature variants (Probable) | Confirmed (sample) | `KB2j`, `KB2n` at offset 0 | 255 | 515 rows in `movies.rpf` (505 / 10) | Header, frame index and frame region of all 515 | [kb2j](unknown/kb2j/README.md) |
+| KB2j / KB2n | Unknown | Container family, two signature variants (Probable) | Confirmed (sample) | `KB2j`, `KB2n` at offset 0 | 255 | `movies.rpf`: 515 rows (505 `KB2n`, 10 `KB2j`). The `KB2n` stored prefix appears in 787 top-level rows across four archives | Header, frame index and frame region of all 515 `movies.rpf` rows; the other 282 `KB2n` rows are counted by stored prefix only | [kb2j](unknown/kb2j/README.md) |
 | SGD5 | Unknown | Unknown | Supported | `SGD5` (`53 47 44 35`) at offset 0 | 255 | 2 rows, `shaders.rpf` rows 1 and 2 | 2 of 2 | [sgd5](unknown/sgd5/README.md) |
 | PSIN | Unknown | Unknown | Confirmed (sample) | `PSIN` (`50 53 49 4E`) at offset 0 | 11, 93, 94 | 103 unique decoded payloads | 103 of 103 | [psin](unknown/psin/README.md) |
 | Type 14 payload | Unknown | Unknown | Confirmed (single sample) | None | 14 | 2 rows, 1 decoded | 1 decoded, 1 behind the payload transform | [type14](unknown/type14/README.md) |
 | GFX* | Unknown | Unknown | Supported | `GFX*` (`47 46 58 2A`) at offset 0 of decoded payload | 66 | 49 rows, 6 depth-1 archives under `data.rpf` | All 49 rows decoded; header, variant bytes and trailer described | [gfx](unknown/gfx/README.md) |
 | ADAT | Unknown | Unknown | Supported | `ADAT` (`41 44 41 54`) at offset 0 | 255 | 768 rows, 65 depth-1 archives under 4 top-level archives | Header structure and two sample groups | [adat](unknown/adat/README.md) |
-| `PTFX` | Unknown | Unknown | Confirmed (single sample) | `PTFX` (`50 54 46 58`) at offset 0 | 255 | 1 row, `common.rpf` | 1 of 1 | [ptfx](unknown/ptfx/README.md) |
 
-RDS5/ETPF and the resource container are established on `main`: [RDS5](../formats/containers/rds5/README.md) is a container with record and block tables whose codec is Unknown, and [resources](resources/README.md) is the page and pointer serialization used inside resources. Neither has a pixel format, an object grammar or an engine allocation path established.
-
-## Suspected format families
-
-| Identifier | Evidence for a family | Missing | Where |
-| --- | --- | --- | --- |
-| Resource page serialization | Page map, system and graphics pages, compressed streams and pointer tables reported on an unmerged branch | Object grammar, pointer semantics, engine allocation path | Pending integration; not verified on `main` |
+RDS5/ETPF is a container with record, descriptor and block tables whose codec is Unknown; [resources](resources/README.md) is the page and pointer serialization used inside resources, and it is a shared mechanism rather than a file format. Neither has a pixel format, an object grammar or an engine allocation path established.
 
 ## Unidentified payload structures
 
 | Structure | Population | State |
 | --- | --- | --- |
+| `PTFX` text payload | 1 row, `common.rpf` row 151 | Structurally characterised: two CRLF-terminated key/value records, 47 printable-ASCII bytes, no binary header (PTFX-F05, PTFX-F06, PTFX-F07). Format identity, purpose and loader are Unknown, and the signature is the first segment of a text key rather than an established magic |
 | Type 14 row behind the payload transform | 1 row, in the expanded nested manifests | Not decoded, not compared |
-| Unreadable rows inside sampled nested manifests | 823 of 169,523 rows | Counted, not classified |
+| Unreadable rows inside sampled nested manifests | 823 of 169,523 rows | Split by row state into 746 type-89 encoding-2, 76 type-11 encoding-3 and 1 type-14 encoding-3 row (INV-F30); failure stage not enumerated |
 | Nested archives outside the sample | 3,188 eligible type-0 rows plus 381 above the 64 MiB cap | Not extracted |
 | Rows whose decoded payload begins with zlib-looking data but is not one of the families above | Unknown | Not investigated |
 

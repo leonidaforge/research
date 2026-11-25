@@ -7,6 +7,14 @@ without the payload transform. The local archive contains 505 `KB2n` rows and
 797-row `movies.rpf` population; its manifest is not preserved (KB2-F01,
 KB2-F12).
 
+The `KB2n` stored prefix is not confined to `movies.rpf`. A stored-byte census
+over the top-level rows found it in 787 rows across four archives: `movies.rpf`
+505, `story000.rpf` 264, `core_restofworld.rpf` 11 and
+`story000_restofworld.rpf` 7. Only the `movies.rpf` 515-row population has been
+inspected structurally. The four-archive total of 787 and the historical
+797-row total of 787 are different populations that happen to share a number;
+they MUST NOT be treated as one figure (KB2-F13).
+
 | Signature | Rows | Logical size range            | Audio tracks |
 | --------- | ---- | ----------------------------- | ------------ |
 | `KB2n`    | 505  | 82,320 to 373,705,456 bytes   | 0, 1, 2 or 4 |
@@ -136,8 +144,10 @@ the engine stores both `KB2j` and `KB2n`, is **Unknown**.
 
 ## Limits
 
-- One archive and one build. No `KB2j` or `KB2n` payload was found outside
-  `movies.rpf`.
+- One archive was inspected structurally. The `KB2n` stored prefix occurs in
+  three further top-level archives (282 rows, counted by prefix only); no
+  `KB2j` prefix was found outside `movies.rpf`. Nothing outside `movies.rpf`
+  was parsed or decoded (KB2-F13).
 - The earlier 787 `KB2n` count covers a different `movies.rpf` population whose
   manifest is not preserved. The current 505 count covers the 515-row manifest;
   the figures are not interchangeable (KB2-F12).
