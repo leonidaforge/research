@@ -2,6 +2,8 @@
 
 - [inventory](inventory/README.md): recursive, content-addressed RPF9
   inventory sampler.
+- [SGD5 structural sampler](sgd5/README.md): reports the observed SGD5 header,
+  table blocks and data-region prefix.
 
 A tool added here MUST:
 

@@ -12,6 +12,7 @@ Subjects:
 - [RPF9](rpf9/INDEX.md)
 - [RBF0](rbf0/INDEX.md)
 - [PSIN](psin/INDEX.md)
+- [SGD5](sgd5/INDEX.md)
 - [Unknown payloads](unknown-payloads/INDEX.md)
 - [Inventory](inventory/INDEX.md)
 - [RDS5 verification](rds5-verification/INDEX.md)
