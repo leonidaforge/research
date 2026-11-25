@@ -24,13 +24,7 @@ Interpretations that were once used for PSIN and later corrected. The current mo
 
 **Old assumption.** The bytes before the first section were not decoded beyond repeated `0xAA` and `0x70` runs.
 
-**Correction.** The `LSCH` area contains a descriptor table whose count satisfies `0x10 + 16 * C + sum(align16(length_i)) == first_section_offset` with a unique solution in 695 of 695 payloads. The `PMAP` area has a stable eight-byte `0x70` marker but no descriptor solution. That grammar was decoded later; see the next entry.
-
-## The `PMAP` pre-section area was a record area with no decoded grammar
-
-**Old assumption.** The `PMAP` pre-section area was treated as an undecoded structured area with `0x70` padding, and the `PMAP` section body was not decoded.
-
-**Correction.** The area is a block table (PSIN-F15). The `PMAP` body holds a big-endian mode word, a second word, a `u16` block count and 16-byte block records. The blocks start at `0x10`, are 16-byte aligned, and are separated by `0x70` padding to the next boundary; the last block ends at the first-section offset with no trailing padding (PSIN-F16). The `PSCH` body holds a count, an `(id, offset)` table and one opaque value per id; the table tiles the body exactly (PSIN-F17). Block and value contents remain undecoded.
+**Correction.** The `LSCH` area contains a descriptor table whose count satisfies `0x10 + 16 * C + sum(align16(length_i)) == first_section_offset` with a unique solution in 695 of 695 payloads. The `PMAP` area has a stable eight-byte `0x70` marker but no descriptor solution. The `PMAP` record grammar remains undecoded.
 
 ## The `CHKS` section was a length-only observation
 
