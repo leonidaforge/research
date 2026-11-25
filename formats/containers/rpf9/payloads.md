@@ -212,6 +212,8 @@ The encoding-2 row is `data.rpf` row 476: 7,462,544 stored bytes, 14,876,672 log
 
 Four encoding-3 rows do not carry a zlib stream: three store `EDUP` payloads and one stores a printable `PTFX` payload. Their stored length minus padding equals the logical size, which is the requirement the engine places on a copy chunk. That these four chunks use the copy method is **Probable**: the method bits were not read from the chunk table. The entry encoding therefore does not determine the chunk method, and a reader MUST read the method bits per chunk.
 
+Two further encoding-3 zlib rows decode to payloads beginning `EDUP`: `core_restofworld.rpf` row 15 (one chunk) and `textures.rpf` row 20 (15 chunks). The stored-byte signature census therefore reports three `EDUP` rows, while decoding finds five. A stored-byte prefix is not a reliable signature for a chunked payload; see [EDUP](../../unknown/edup/README.md).
+
 The survey counted 6,952 row records across 23 manifest files. The manifests repeat 418 `(archive, row)` pairs, so the figures above use 6,534 unique rows.
 
 ### Reader requirements
