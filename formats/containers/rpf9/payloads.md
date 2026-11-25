@@ -5,7 +5,7 @@ Payload data follows the metadata area. This document has two kinds of knowledge
 - The engine read path, traced in code: where an entry's bytes are, how they are read, and how they are decoded.
 - The storage layout observed in archive data. It is enough to recover payloads without the table of contents.
 
-The two agree where they overlap (see [below](#relation-between-code-and-data)). No archive has yet been decoded by following the native field values.
+The two agree where they overlap (see [below](#relation-between-code-and-data)). Stored rows and chunked rows can now be read by following the native field values, once the metadata authenticates ([native reads](#native-reads-from-authenticated-metadata)). The payload transform and raw DEFLATE without a chunk table remain untried on real data.
 
 ## Payload address
 
@@ -275,4 +275,4 @@ Recovering payloads by scanning has these limits:
 - Entries behind the payload transform are found as zlib streams only if the transform leaves the stored bytes in that form, which is not established.
 - Chunk grouping assumes consecutive streams belong together. A gap or an unrelated stream ends a group.
 
-The native table of contents would remove these limits. See the [blockers](README.md#blockers-for-native-toc-extraction).
+The limits above apply to recovery only. With a compatible local executable, the authenticated table of contents addresses each entry directly (RPF9-F103), so entries are no longer groups of streams guessed from signatures, and stored, chunked and uncompressed rows can be read. Two limits remain: names stay hashes, because the table stores no names, and rows behind the payload transform are identified but refused. The metadata signature still covers no payload bytes. See [Limits of native TOC extraction](README.md#limits-of-native-toc-extraction).
