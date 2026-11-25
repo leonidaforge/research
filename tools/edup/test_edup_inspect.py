@@ -31,6 +31,8 @@ class EdubInspectTests(unittest.TestCase):
         test = report["store_test"]
         self.assertEqual(test["keys_in_store_union"], 0)
         self.assertEqual(test["stored_keys_in_store_union"], 2)
+        self.assertEqual(test["keys_in_store_union_be"], 0)
+        self.assertEqual(test["stored_keys_in_store_union_be"], 0)
         self.assertIn("resolves", test["direction"])
 
     def test_store_parser_reads_the_etpf_key_table(self):

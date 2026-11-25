@@ -47,6 +47,20 @@ def _align_up(value: int, alignment: int) -> int:
     return (value + alignment - 1) & ~(alignment - 1)
 
 
+def blob_bytes(data: bytes) -> bytes:
+    if len(data) < HEADER_SIZE + LENGTH_SIZE or data[:4] != MAGIC:
+        raise EdError("not an EDUP payload")
+    count = _le32(data, 4)
+    table_end = HEADER_SIZE + ENTRY_SIZE * count
+    if table_end + LENGTH_SIZE > len(data):
+        raise EdError("entry table overruns the payload")
+    length = _le32(data, table_end)
+    start = table_end + LENGTH_SIZE
+    if start + length > len(data):
+        raise EdError("trailing blob overruns the payload")
+    return data[start:start + length]
+
+
 def _multiplicity(values) -> dict:
     counts = {}
     for value in values:
@@ -91,10 +105,14 @@ def inspect_bytes(
 
     keys = []
     stored_keys = []
+    keys_be = []
+    stored_keys_be = []
     for index in range(count):
         base = HEADER_SIZE + ENTRY_SIZE * index
         keys.append(_le64(data, base))
         stored_keys.append(_le64(data, base + 8))
+        keys_be.append(struct.unpack_from(">Q", data, base)[0])
+        stored_keys_be.append(struct.unpack_from(">Q", data, base + 8)[0])
 
     key_set = set(keys)
     stored_set = set(stored_keys)
@@ -122,12 +140,16 @@ def inspect_bytes(
             union |= keyset
         first_hits = sum(1 for key in keys if key in union)
         stored_hits = sum(1 for key in stored_keys if key in union)
+        first_hits_be = sum(1 for key in keys_be if key in union)
+        stored_hits_be = sum(1 for key in stored_keys_be if key in union)
         report["store_test"] = {
             "stores": len(store_keys),
             "store_keys": sum(len(keyset) for keyset in store_keys.values()),
             "union_keys": len(union),
             "keys_in_store_union": first_hits,
             "stored_keys_in_store_union": stored_hits,
+            "keys_in_store_union_be": first_hits_be,
+            "stored_keys_in_store_union_be": stored_hits_be,
             "direction": (
                 "stored-key field resolves, key field does not"
                 if first_hits == 0 and count and stored_hits == count
@@ -217,6 +239,8 @@ def _print_report(report: dict, stream) -> None:
             f" union={test['union_keys']}"
             f" key_field_hits={test['keys_in_store_union']}"
             f" stored_field_hits={test['stored_keys_in_store_union']}"
+            f" key_field_hits_be={test['keys_in_store_union_be']}"
+            f" stored_field_hits_be={test['stored_keys_in_store_union_be']}"
             f" direction={test['direction']}",
             file=stream,
         )
