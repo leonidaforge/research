@@ -21,12 +21,12 @@ The current CLI reports the same sizes, page counts and pointer counts for this 
 
 | Offset  | Content                                                               | Confidence                                    |
 | ------- | --------------------------------------------------------------------- | --------------------------------------------- |
-| `+0x00` | 16 zero bytes                                                         | Confirmed in rechecked rows and the survey (RES-F10) |
+| `+0x00` | 16 zero bytes                                                         | Confirmed in rechecked rows (RES-F10) |
 | `+0x10` | One chunk per page, except a split page's several streams; 16-byte aligned, zero fill between chunks | Confirmed (RES-F10, RES-F19, RES-F24) |
 
-- In the reported 1,466 authenticated rows the location record's stored range starts at the 16-byte header, and the first chunk starts 16 bytes later.
+- In every rechecked resource row the location record's stored range starts at the 16-byte header, and the first chunk starts 16 bytes later.
 - In those rows the number of stored zlib streams equals the RPF9 chunk count, and the inflated lengths sum to the row's logical size. One zlib stream is one chunk (RES-F10).
-- Every resource row in the reported survey used compression mode 0 with chunk encoding 2. A resource stored as raw DEFLATE (mode 1) or with another encoding would lose the chunk sizes that the page layout depends on; whether such a resource exists is **Unknown** (RES-F10).
+- Every rechecked resource row used compression mode 0 with chunk encoding 2. A resource stored as raw DEFLATE (mode 1) or with another encoding would lose the chunk sizes that the page layout depends on; whether such a resource exists is **Unknown** (RES-F10).
 - The 64 KiB stream rule in [RPF9 payloads](../containers/rpf9/payloads.md) describes the generic encoding-3 path. It does not describe these rows: an encoding-2 chunk can reconstruct a whole page of several megabytes, which is why one zlib stream is one page unless the page is split at 32 MiB.
 - A chunk can be a raw page instead of a zlib stream. The chunk starts with no zlib header, its stored length equals its reconstructed length, and its bytes are part of the row's logical size. The type 6 rows in [Raw stored page](#raw-stored-page) are the observed instance (RES-F24).
 - The 16 bytes are not part of the decoded payload. Their meaning is **Unknown**.
@@ -46,7 +46,7 @@ A reader MUST reconstruct every page the page map declares. A readable page map 
 1. Read the 16-byte zero prefix and every chunk it is followed by. A chunk is a zlib stream if it starts with a valid zlib header and inflates; otherwise it is a raw stored range.
 2. Reconstruct the page map from the system bytes. The map may lie in a later system page, so it becomes readable only after enough pages are present.
 3. Group zlib streams into pages. A stream of exactly `0x2000000` bytes continues the previous page; every other zlib stream starts a page (RES-F15).
-4. Treat a raw stored range after the last zlib stream as the last declared page only when the declared page count requires exactly that page. If the declared pages are already present, the same range is trailing data and MUST NOT be counted as a page (RES-F24, RES-F27).
+4. Treat a raw stored range after the last zlib stream as the last declared page only when the declared page count and, when known, the declared logical size require it. A zlib-like header that does not inflate is a note, not a classification. An all-zero range is a page when the count and logical size require it. If the declared pages are already present, the same range is trailing data and MUST NOT be counted as a page (RES-F24, RES-F27).
 5. If one zlib stream spans several declared pages, split it only when the declared count and the `0x10000` size pattern force the split. Mark the pages packed; no packed page was observed (RES-F27).
 6. Report `partial` only when a declared page is genuinely absent from the stored row. A page present as a raw range is not absent.
 
@@ -80,11 +80,11 @@ The stored row is 47,520 bytes: 16 prefix + 38,734 stored zlib + 2 fill + 8,768 
 | 112       | 65,536            | 8,304         | 73,840         | `0xF5A0` |
 | 139       | 131,072           | 14,176        | 145,248        | `0x1E900` |
 
-Three more type 6 rows in other terrain tiles store an 8,768-byte raw last page, with page maps at `0xF7D0`, `0xFA80` and `0xF2A0`. A 16,384-byte raw page was not located; the largest in the tile is 16,288 bytes.
+Three more type 6 rows in other terrain tiles store an 8,768-byte raw last page, with page maps at `0xF7D0`, `0xFA80` and `0xF2A0`. The raw page sizes measured in the representative tile are 8,768, 4,464, 16,288, 8,304 and 14,176 bytes. These rows are listed with stored-row digests in [Sample locators](../../evidence/resources/INDEX.md#sample-locators).
 
 The last chunk is a page, not padding, for these reasons:
 
-- its bytes are non-zero and are not a valid zlib stream;
+- its bytes are not a valid zlib stream; in these rows they are non-zero;
 - its stored length equals the difference between the row's logical size and the reconstructed first page;
 - the declared system page count is one higher than the zlib page count;
 - the page-size pattern places it as the last page of the system segment.
@@ -94,7 +94,7 @@ Alternatives eliminated by these observations:
 | Alternative                     | Discriminating observation                                                                 |
 | ------------------------------- | ------------------------------------------------------------------------------------------ |
 | continuation of a split stream  | the first zlib stream ends at 65,536 bytes, not at the 32 MiB split length; the raw bytes are a new chunk |
-| residual or padding tail        | the raw length is non-zero and equals the logical remainder; it is not zero fill             |
+| residual or padding tail        | in these rows the raw length is non-zero and equals the logical remainder; it is not zero fill |
 | a separate stored range         | the row's chunk count is 2 and its stored size includes the raw bytes; no second entry exists |
 | an artefact of chunk grouping   | the metadata chunk count and the stored-size arithmetic both account for the raw chunk      |
 | a page-size interpretation error | the raw length 8,768 is at most `0x10000`, as the model requires for a last page            |
@@ -105,9 +105,9 @@ The current CLI reports `system_size` 65,536, status `partial` and "1 of 2 syste
 
 ### Rule check
 
-The rule was run over 4,647 resources from 12 instance-placement nested archives. It reconstructs all 4,647 as complete: 9,041 zlib pages and 496 raw pages, with no packed page and no missing page. The packed split was not needed. The CLI reports `partial` for many of the same rows. This is the largest sample checked; it is not a survey of every archive (RES-F35).
+The rule was run over 4,647 resources from 12 instance-placement nested archives. It reconstructs all 4,647 as complete: 9,041 zlib pages and 496 raw pages, with no packed page and no missing page. The packed split was not needed. The CLI reports `partial` for many of the same rows. This is the largest sample checked; it is not a census of every archive (RES-F35).
 
-The 16,384-byte raw page figure was not reproduced; the largest raw page in the representative tile is 16,288 bytes. A packed page was not observed in the sample; the synthetic fixture is its only test (RES-F27).
+The raw page sizes measured in the representative tile are 8,768, 4,464, 16,288, 8,304 and 14,176 bytes. A packed page was not observed in the sample; the synthetic fixture is its only test (RES-F27).
 
 ## System segment
 
@@ -130,11 +130,11 @@ The first 0x60 bytes of the reconstructed system segment of the primary sample, 
 
 Only the page-map pointer and the graphics-segment pointer are interpreted. The repeated `0x0C` counts pair with the 12-entry pointer array, which fits a `{pointer, count}` descriptor. That reading is **Probable**; the field meanings are **Unknown** (RES-F05).
 
-Values in 64-bit slots have a zero upper half in this sample and in the survey. Whether the upper half carries flags for other resources is **Unknown** (RES-F09).
+Values in 64-bit slots have a zero upper half in this sample and in the rechecked rows. Whether the upper half carries flags for other resources is **Unknown** (RES-F09).
 
 The header is not uniform across all resources:
 
-- 38 rows carry the four bytes `0DRP` at `+0x10..+0x13` and the byte `0x7a` at `+0x14`, with zero at `+0x18` (RES-F21).
+- The rechecked 0DRP samples carry the four bytes `0DRP` at `+0x10..+0x13` and the byte `0x7a` at `+0x14`, with zero at `+0x18` (RES-F21).
 - Other rows carry `0` or `1` at `+0x18`, depending on the type ID.
 
 All offsets in this list are from the start of the system segment. A reader MUST NOT require the bytes at `+0x10` through `+0x17` to be zero.
@@ -171,32 +171,17 @@ The byte `0xAA` occurs in short runs: 24 bytes in six 4-byte runs in this segmen
 
 ## Page counts
 
-The declared counts match the page groups derived from the chunk sizes in every complete resource of the reported survey. A raw page counts as one page group; the representative type 6 row is complete under the corrected rule. Across the reported 1,466 authenticated rows:
-
-| System pages | Graphics pages | Resources |
-| ------------ | -------------- | --------- |
-| 1            | 0              | 47        |
-| 1            | 1              | 1,378     |
-| 1            | 2              | 34        |
-| 2            | 0              | 0         |
-| 2            | 1              | 2         |
-| 2            | 2              | 5         |
-
-These counts are from the source survey and were not re-counted in this consolidation. Counts are one byte each, so a segment can declare up to 255 pages. The largest observed counts are 2 and 2 (RES-F12).
-
-### Counterexample: a declared page with no stored chunk
-
-One resource declares one system page and two graphics pages but stores two streams. The current CLI reports status `partial` and `1 of 2 graphics pages found`. The graphics page present is `0x420000` bytes, a multiple of `0x10000`, consistent with a missing last page. Whether the absent page is missing or empty is not established (RES-F13).
+The declared counts match the reconstructed page groups in every rechecked complete resource. A raw page counts as one page group. The rechecked samples cover 1/0 (type 11), 1/1 (primary and type 73), 2/0 (raw-page and type 74) and 2/1 (625,472-byte) page-count pairs. Counts are one byte each, so a segment can declare up to 255 pages.
 
 ## Page sizes
 
 Page sizes are not stored as lengths. They follow from the reconstructed chunk sizes.
 
-- **Unit, not page size.** In a segment with more than one page, every page except the last is a multiple of `0x10000` and the last is at most `0x10000`. The reported survey counted 965 multi-page segments without exception (RES-F14). A single-page segment is not constrained: the primary sample has 1,888 and 49,152 bytes.
+- **Unit, not page size.** In a segment with more than one page, every page except the last is a multiple of `0x10000` and the last is at most `0x10000`. The reconstruction tool reports no page-size violation in 4,647 rechecked resources (RES-F14). A single-page segment is not constrained: the primary sample has 1,888 and 49,152 bytes.
 - **Pages larger than 64 KiB.** In the 625,472-byte sample the system pages are 589,824 (`0x90000`) and 35,648 (`0x8B40`) bytes; the graphics page is 196,608 (`0x30000`) bytes. The sample has 3 streams and 3 pages. A fixed 64 KiB page size is therefore refuted: the arithmetic is consistent with `0x10000` as the allocation multiple for every page but the last, not as the page size (RES-F28).
-- **Split pages.** A page larger than 32 MiB is stored as consecutive chunks. Every chunk but the last of a split page reconstructs to exactly `0x2000000` (32 MiB). Four split pages were rechecked with the current CLI, with tails of `0x200000` (2 MiB), `0x170000` (1.4375 MiB) and `0x600000` (6 MiB, twice) (RES-F15).
+- **Split pages.** A page larger than 32 MiB is stored as consecutive chunks. Every chunk but the last of a split page reconstructs to exactly `0x2000000` (32 MiB). Four split-page rows are identified by payload offset and size in the rechecked samples table below; their tails are `0x200000` (2 MiB), `0x170000` (1.4375 MiB) and `0x600000` (6 MiB, twice). Their archive row locators are not retained (RES-F15).
 
-  `0x200000` (2 MiB) is not a split length. The 2 MiB stream in the survey is the tail of a 35,651,584-byte page whose first stream is `0x2000000`.
+  `0x200000` (2 MiB) is not a split length. The 2 MiB stream in the rechecked split-page sample is the tail of a 35,651,584-byte page whose first stream is `0x2000000`.
 
 - **Grouping.** A reader with the chunk lengths and the page count:
   1. reconstructs every zlib stream and every raw chunk;
@@ -206,11 +191,11 @@ Page sizes are not stored as lengths. They follow from the reconstructed chunk s
   5. otherwise, if the number of zlib streams equals the page count, treats every zlib stream as one page;
   6. otherwise reports an ambiguous layout.
 
-  Step 5 handles a page of exactly 32 MiB, which stream length alone cannot distinguish from a split page. No such page was observed. A packed page is handled only by the arithmetic in step 3; no packed page was observed.
+  Step 5 handles a page of exactly 32 MiB, which stream length alone cannot distinguish from a split page. No such page was observed. A packed page is handled only by the arithmetic in step 5 of the reconstruction rule; no packed page was observed.
 
-## Survey observations
+## Rechecked samples
 
-The rechecked samples below come from nested archives of the `textures.rpf` and `data.rpf` families. They are structural checks, not a re-run of the full survey.
+The rechecked samples below come from the primary nested archive and from nested archives in `levels.rpf` and `data.rpf`. Each located row is identified in [Sample locators](../../evidence/resources/INDEX.md#sample-locators). The split-page and system-only rows are identified by payload offset and size; their archive row locators are not retained.
 
 | Sample                        | Payload   | Map       | System pages | Graphics pages | System bytes | Graphics bytes | Split pages |
 | ----------------------------- | --------- | --------- | ------------ | -------------- | ------------ | -------------- | ----------- |
@@ -223,7 +208,7 @@ The rechecked samples below come from nested archives of the `textures.rpf` and 
 | split graphics page           | `0xC26000` | `0xCF0`   | 1            | 1              | 3,344        | 39,845,888     | 1           |
 | system only                   | `0x8000`  | `0x10A0`  | 1            | 0              | 4,688        | 0              | 0           |
 
-The raw last system page is inner row 46 of a terrain-tile nested archive. The 625,472-byte sample is inner row 1 of a nested archive from the `data.rpf` family; its 3 streams reconstruct to 589,824 + 35,648 + 196,608 bytes. The map in the second system page and system pointers above `0x20000` in that resource show that offsets address the concatenated segment (RES-F17).
+The raw last system page is inner row 46 of the nested archive at `<GAME_ROOT>/levels.rpf` row 2; its stored-row digest is in [Sample locators](../../evidence/resources/INDEX.md#sample-locators). The 625,472-byte sample is inner row 1 of the nested archive at `<GAME_ROOT>/data.rpf` row 14; its 3 streams reconstruct to 589,824 + 35,648 + 196,608 bytes. The map in the second system page and system pointers above `0x20000` in that resource show that offsets address the concatenated segment (RES-F17).
 
 ## Reader requirements
 
@@ -234,7 +219,7 @@ A reader that decodes a resource from its stored entry SHOULD:
 - reconstruct every page the page map declares; a readable page map MUST NOT end reconstruction;
 - require the first system page to start with the resource header of the table above;
 - bound the page map by the reconstructed system data, reject nonzero bytes outside the counts, reject a zero system-page count and reject a map outside the declared system pages;
-- use a raw last chunk as the last page only when the declared page count requires it; otherwise report it as trailing data, not as a page;
+- use a raw last chunk as the last page only when the declared page count and logical size require it; otherwise report it as trailing data, not as a page. An all-zero chunk is valid when the count and logical size require it;
 - require the declared page count to match the reconstructed pages, and report missing pages instead of inventing sizes;
 - require the page-size pattern for multi-page segments, and report an ambiguous split instead of choosing silently;
 - split a packed stream only when the declared count and the size pattern force it, and mark the result as untested;
@@ -251,7 +236,6 @@ The published [parser](../../tools/resources/README.md) implements the zlib page
 - Whether a page of exactly 32 MiB exists, and how it is distinguished from a split page.
 - Whether a packed page, one zlib stream covering two declared pages, exists outside the synthetic fixture. None was observed.
 - Whether a raw stored page is copied directly or passes through another transport. No engine code was traced.
-- Whether the absent page in the incomplete resource is missing data or an empty page.
-- The meanings of the four `u16` values at `+0x48` and the `+0x20` word in the 0DRP root header.
-- Whether the block-table tiling result extends beyond the sampled type 73 rows.
+- The meanings of the four `u16` fields at `+0x48` and the `+0x20` word in the 0DRP root header.
+- Whether the tiling result for the records behind `+0x38` extends beyond the sampled type 73 rows.
 - The page-size rule is an observation. No engine code that allocates or validates pages was traced; page allocation remains **Unknown**.

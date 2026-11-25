@@ -46,6 +46,6 @@ Interpretations that were once used for RAGE resources and later corrected. The 
 
 ## The 0DRP findings compared beyond their samples
 
-**Committed claim.** RES-F29 ended with the verdict "not all reproduced"; RES-F32 ended with the verdict "not located".
+**Committed claim.** RES-F29 and RES-F32 ended with comparisons against values that were not part of their samples.
 
 **Correction.** RES-F29 now lists the four `u16` values and the `+0x20` word observed in its type 11, 73 and 74 samples, and states that the field positions are validated while the individual values are not a rule. RES-F32 now states only its sampled population and limits. Both findings state what their samples contain and make no comparison beyond them.

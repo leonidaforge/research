@@ -8,21 +8,21 @@ Everything here comes from payload data of the Scarlett build. No engine code pa
 
 | Part                                                                | Status                                                                     |
 | ------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| Stored entry: 16 zero bytes, then one chunk per page, except a split page | Confirmed in rechecked rows and the reported survey (RES-F10, RES-F24)     |
+| Stored entry: 16 zero bytes, then one chunk per page, except a split page | Confirmed in the rechecked rows (RES-F10, RES-F24)     |
 | A chunk is a zlib stream or a raw (uncompressed) page               | Confirmed for the type 6 rows; see [pages.md](pages.md#raw-stored-page) (RES-F24) |
-| Segment order: system segment first, then graphics segment          | Confirmed in rechecked rows and the reported survey (RES-F01, RES-F11)     |
-| Resource header: zero `u64`, system pointer to the page map at `+8` | Confirmed in rechecked rows and the reported survey (RES-F11)              |
+| Segment order: system segment first, then graphics segment          | Confirmed in the rechecked rows (RES-F01, RES-F11)     |
+| Resource header: zero `u64`, system pointer to the page map at `+8` | Confirmed in the rechecked rows (RES-F11)              |
 | Pointer values: 4-bit segment selector, 28-bit offset               | Confirmed (RES-F16). A 16-bit split is rejected by offsets above `0xFFFF`  |
-| Pointer count and bounds                                            | Confirmed in rechecked rows and the reported survey (RES-F02, RES-F17, RES-F18) |
+| Pointer count and bounds                                            | Confirmed in the rechecked rows (RES-F02, RES-F17, RES-F18) |
 | Page-map location and count bytes                                   | Confirmed (RES-F12)                                                        |
 | Page-map length and zero slots                                      | Probable. `16 + 8 * pages` fits; slots are always zero as stored (RES-F12)  |
 | Page sizes and the `0x10000` unit                                   | Confirmed for the samples, Probable as a rule (RES-F14, RES-F28)           |
 | Split pages at 32 MiB                                               | Confirmed, four instances (RES-F15)                                        |
 | A stream is one page except a split page; a raw page is not a stream | Tested scope in [pages.md](pages.md#page-and-stream-relation) (RES-F27)   |
-| 0DRP root header at `+0x10..+0x4F`                                 | Confirmed fields for one type 11, 73 and 74 resource (RES-F29, RES-F30)    |
-| Block table: 16-byte entries at the `+0x38` pointer                | Confirmed for the same three resources (RES-F31)                           |
+| 0DRP root header at `+0x10..+0x4F`                                 | Confirmed positions in one type 11, one type 73 and one type 74 resource (RES-F29, RES-F30) |
+| 16-byte records behind the `+0x38` pointer                         | Confirmed for the same three resources (RES-F31)                           |
 | Header field meanings beyond the page-map pointer                   | Unknown                                                                    |
-| Types 2, 4, 5 and 11 follow the same layout                         | Confirmed for the reported 1,466 authenticated rows; Probable for the rest (RES-F20) |
+| Types 2, 4, 5, 11, 73 and 74 follow the same layout                | Confirmed for the rechecked samples; other rows untested (RES-F20)         |
 
 ## Model
 
@@ -48,57 +48,55 @@ Documents:
 
 ## 0DRP root header
 
-Some resources carry the four bytes `0DRP` at system `+0x10` (RES-F21). The candidate layout at `+0x10..+0x4F` was read on one type 11, one type 73 and one type 74 resource (RES-F29). Offsets are from the start of the system segment.
+Some resources carry the four bytes `0DRP` at system `+0x10` (RES-F21). The layout at `+0x10..+0x4F` was read on one type 11, one type 73 and one type 74 resource (RES-F29); the rows are listed in [Sample locators](../../evidence/resources/INDEX.md#sample-locators). Offsets are from the start of the system segment.
 
 | Offset | Width | Observed content                                   | Status                    |
 | ------ | ----- | -------------------------------------------------- | ------------------------- |
 | `+0x10` | 4     | `0DRP`                                             | Confirmed (samples)       |
 | `+0x14` | 1     | `0x7A`                                             | Confirmed (samples)       |
 | `+0x18` | 8     | zero                                               | Confirmed (samples)       |
-| `+0x20` | 8     | `1`, `1`, `2` for the type 73, 73 and 74 samples   | Unknown; varies by row    |
+| `+0x20` | 8     | `1`, `1`, `2` for the type 11, 73 and 74 samples    | Unknown; varies by row    |
 | `+0x28` | 8     | system pointer                                     | Confirmed (samples)       |
 | `+0x30` | 8     | system pointer, or zero                            | Confirmed (samples)       |
-| `+0x38` | 8     | system pointer to the block table                  | Confirmed (samples)       |
+| `+0x38` | 8     | system pointer to 16-byte records                  | Confirmed (samples)       |
 | `+0x40` | 8     | system pointer, or zero                            | Confirmed (samples)       |
-| `+0x48` | 2 × 4 | four `u16` counts                                  | Confirmed bytes; meanings **Unknown** |
+| `+0x48` | 2 × 4 | four `u16` fields                                  | Confirmed bytes; meanings **Unknown** |
 | `+0x50` | 8     | system pointer, or zero                            | Not in the candidate; observed in the type 73 and 74 samples |
 
 - Every nonzero pointer above resolved inside the system segment in the three samples; no out-of-bounds or cross-page pointer was found (RES-F30). The page-map pointer at `+0x08` is also a system pointer.
-- Across the three families, the tag, the version byte, the zero at `+0x18`, the pointer positions and the four `u16` positions hold. The `+0x20` word and the values of the four `u16` differ between the samples. The 16-byte block width also holds.
-- The four `u16` values were `2/2/2/0` for the type 11 sample, `13/2/5/1` for type 73 and `4/3/5/32` for type 74. The third value equals the number of block entries in each sample. The other three are **Unknown**.
+- Across the three families, the tag, the version byte, the zero at `+0x18`, the pointer positions and the four `u16` positions hold. The `+0x20` word and the values of the four `u16` differ between the samples. The 16-byte record width also holds.
+- The four `u16` fields were `2/2/2/0` for the type 11 sample, `13/2/5/1` for type 73 and `4/3/5/32` for type 74. The third field was `2`, `5` and `5`. The walk below reads that third field times 16 bytes; the samples do not establish its meaning. The other three are **Unknown**.
 - The field positions are validated on these three resources; the individual values are not a rule.
 - The tag, version and `+0x18` zero are not required by the page model. A reader MUST NOT require `0DRP` to reconstruct pages.
 
-## Block tables
+## Records behind `+0x38`
 
-The pointer at `+0x38` names a table of 16-byte entries in the system segment (RES-F31):
+The pointer at `+0x38` leads to a sequence of 16-byte records in the system segment (RES-F31); the rows are listed in [Sample locators](../../evidence/resources/INDEX.md#sample-locators):
 
 | Offset | Width | Observed content                                          |
 | ------ | ----- | --------------------------------------------------------- |
-| `+0`   | 4     | identifier or hash                                        |
-| `+4`   | 4     | size in bytes                                             |
+| `+0`   | 4     | a 4-byte value; meaning **Unknown**                       |
+| `+4`   | 4     | a 4-byte value; used as a length in the boundary check; meaning **Unknown** |
 | `+8`   | 8     | pointer; the segment selects the addressed segment        |
 
-- The width is 16 bytes for the type 11, 73 and 74 samples. The table length is the third `u16` count times 16.
-- The table need not end at the page map. In the type 74 sample the table ends at `0x15A00`, a block fills `0x15A00..0x15A50`, and the page map starts at `0x15A50`.
-- Entries address byte ranges, not pages. The pointer selects the system or graphics segment and the size bounds the range. A page can contain several blocks; a block can equal the page when the page contains one block (RES-F33).
-- A block range can cross the `0x10000` unit boundary. In the type 74 sample a system block spans `0xBCB0..0x146D0`, across the boundary between its two system pages. The block table therefore cannot be used to derive page boundaries (RES-F34).
-- In a type 73 sample, five entries cover three system ranges and two graphics ranges. The graphics ranges `0..0x810` and `0x810..0x860` tile the `0x860`-byte graphics page exactly.
-- In 4,426 type 73 resources with a declared graphics page and at least one graphics block, graphics blocks tile the page exactly in 2,864; 606 leave an uncovered remainder; 464 have an internal gap; 492 address outside the reconstructed graphics extent (in the examples the declared page has no stored stream); no overlap was found. The sample is 12 instance-placement nested archives (RES-F32).
+- The width is 16 bytes for the type 11, 73 and 74 samples. The walk reads the third `u16` field at `+0x48` times 16 bytes; the field's meaning is unconfirmed.
+- The records need not end at the page map. In the type 74 sample the records end at `0x15A00`, a range fills `0x15A00..0x15A50`, and the page map starts at `0x15A50`.
+- A record whose `+8` pointer selects a segment, together with the `+4` field under the walk's interpretation, describes a byte range inside that segment. The `+4` meaning is not established. A page can contain several such ranges; a range can equal the page when the page contains one range (RES-F33).
+- A range can cross the `0x10000` unit boundary. In the type 74 sample a system range spans `0xBCB0..0x146D0`, across the boundary between its two system pages. These records cannot be used to derive page boundaries (RES-F34).
+- In a type 73 sample, five records cover three system ranges and two graphics ranges. The graphics ranges `0..0x810` and `0x810..0x860` tile the `0x860`-byte graphics page exactly.
+- In 4,426 type 73 resources with a declared graphics page and at least one record whose `+8` pointer selects graphics, those ranges tile the page exactly in 2,864; 606 leave an uncovered remainder; 464 have an internal gap; 492 address outside the reconstructed graphics extent (in the examples the declared page has no stored stream); no overlap was found. The sample is 12 instance-placement nested archives (RES-F32).
 
 ## Limits
 
-- The reported survey covers 3,026 reconstructed resources from two archive families and four type IDs, of which 1,466 rows were authenticated. The counts come from the source survey and were not re-counted in this consolidation; representative samples were rechecked with the current CLI and parser.
-- Other archives, especially very large resources, were not scanned for this consolidation.
+- The samples rechecked for this document are the primary sample and the rows in [Sample locators](../../evidence/resources/INDEX.md#sample-locators). Other archives were not scanned.
 - The page sizes and the 32 MiB split are observations. No engine code that allocates or validates pages was traced. Page allocation and runtime validation remain **Unknown**.
 - The page slots are zero in every stored resource. Their runtime content and the exact slot width cannot be checked from data.
-- One resource declares one page more than the payload stores. Whether that page is missing or empty is not established.
 - A page of exactly 32 MiB cannot be distinguished from a split page by stream length alone.
 - A stored page can be raw (not a zlib stream). A reader that only finds zlib streams loses that page; the current CLI reports `partial` for such a row although the bytes are present (RES-F24, RES-F25).
 - No packed page, one stream covering two declared pages, was observed. The packing rule is untested (RES-F27).
-- The 0DRP root header and block table were read on three resources. The counts, the pointer targets beyond their bounds and the `+0x20` word are not established as general semantics (RES-F29, RES-F30, RES-F31).
-- The block-tiling population is type 73 only. Type 11 and type 74 samples are too few to state a tiling rule.
-- The primary sample's ASCII names below the page map are resource data, not archive paths. They are payload text and are not reproduced here.
+- The 0DRP root header and the records behind `+0x38` were read on three resources. The `u16` values, the `+0x20` word and the `+0` and `+4` record values are not established as general semantics (RES-F29, RES-F30, RES-F31).
+- The tiling population is type 73 only. Type 11 and type 74 samples are too few to state a tiling rule.
+- The primary sample's ASCII names below the page map are resource data, not archive paths. They are payload text and are not included here.
 - Payload bytes are not authenticated by the RPF9 metadata signature. A structurally valid resource does not prove untampered content.
 
 ## Terms

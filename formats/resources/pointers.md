@@ -21,7 +21,7 @@ The high bits select a segment; the remaining bits are an offset inside that seg
 | 16-bit selector | high 16 bits select the segment, low 16 bits are the offset           | Rejected (RES-F16)                                                    |
 | Virtual address | value is `segment_base + offset`, bases `0x50000000` and `0x60000000` | Arithmetically identical to the 4-bit selector for the observed bases |
 
-The primary sample alone cannot separate these readings: both segments are small. A second sample separates them. One resource places its page map at system offset `0x988E0` and holds an in-bounds system pointer at `0x98B34`; a 16-bit offset cannot express either value. The 4-bit selector with a 28-bit offset fits. The same resource also contains one value that matches the pointer encoding but lies outside the segment; it is reported as a warning rather than used as structure (RES-F18).
+The primary sample alone cannot separate these readings: both segments are small. A second sample separates them. One resource (the 625,472-byte sample in [Sample locators](../../evidence/resources/INDEX.md#sample-locators)) places its page map at system offset `0x988E0` and holds an in-bounds system pointer at `0x98B34`; a 16-bit offset cannot express either value. The 4-bit selector with a 28-bit offset fits. The same resource also contains one value that matches the pointer encoding but lies outside the segment; it is reported as a warning rather than used as structure (RES-F18).
 
 The offset is at most `0x0FFFFFFF`. A larger offset would set bit 28 and change the decoded segment, so the encoding cannot express more. This is a property of the scheme, not an observed upper bound. The largest observed in-bounds offsets are `0x740` (system) and `0xB000` (graphics) in the primary sample, and `0x2600000` (graphics, about 39.8 MB) in a split-page sample.
 
@@ -39,7 +39,7 @@ Primary sample:
 | Highest graphics offset      | `0xB000`                |
 | Values outside their segment | 0                       |
 
-The reported survey of 1,466 authenticated rows counted 34,022 system-shaped values and 6,609 graphics-shaped values in system data, with 1,353 and 591 outside their segment. A further 1,560 resources from the `data.rpf` data area were re-parsed by the source survey: 2,112,806 system-shaped values (44,463 outside) and 94,564 graphics-shaped values (52,873 outside). Those totals are carried forward from the source survey and were not re-counted in this consolidation (RES-F22).
+In the rechecked resources, values matching the pointer encoding occur both inside and outside their segment. Their number, not their position, is what makes them visible (RES-F18).
 
 Scan predicate: every 8-byte aligned `u64` whose upper half is zero and whose low 32 bits have top nibble `0x5` or `0x6`. Mutual consistency supports the model but does not prove it. Values outside a segment are expected in arbitrary data (RES-F18).
 
@@ -64,7 +64,7 @@ All 12 are inside the system segment. Their targets were not interpreted.
 
 The observed pointer fields are 8-byte slots whose upper 32 bits are zero: the header slot at `+0x08`, the array at `0x580`, and the 12 graphics values. Whether a field may be 4 bytes wide elsewhere, or whether the upper half carries flags or a wider address, is **Unknown** (RES-F09). A reader MUST check the upper half rather than discard it silently.
 
-The source survey found 12,441 `u64` values with a pointer-shaped low half and a nonzero upper half. They were not counted as pointers; whether any is one is not established.
+Values with a pointer-shaped low half and a nonzero upper half were not counted as pointers; whether any is one is not established.
 
 ## False positives
 
@@ -74,7 +74,7 @@ Matching the two high nibbles alone is a heuristic. Values that look like pointe
 - text read as a little-endian `u64`, for example `0x0C617274` from the bytes `74 72 61 0C` (`tra`);
 - 32-bit hashes whose bits 28..31 happen to be `0101` or `0110`, followed by four zero bytes.
 
-In a rechecked split-page resource, 8 graphics-shaped values point outside the graphics segment. In the `data.rpf` sample of the source survey more than half of the graphics-shaped values point outside the graphics segment. Their number, not their position, is what makes them visible.
+In a rechecked split-page resource, 8 graphics-shaped values point outside the graphics segment. Pointer-like values outside a segment are common; their number, not their position, is what makes them visible.
 
 ### Consequences
 
