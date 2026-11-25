@@ -356,17 +356,23 @@ class MaterialTests(DrawableCase):
             self.assertEqual(unbound[0]["key_status"], "unbound")
             bound = [entry for entry in parameters["texture_parameters"] if entry["record"] is not None]
             self.assertEqual(bound[0]["key_status"], "unresolved")
-            self.assertEqual(parameters["key_join"], {
-                "direct_store": 0,
-                "edup_indirection": 0,
+            self.assertEqual(parameters["keys"], {
+                "declared": 2,
+                "bound": 1,
+                "unbound": 1,
                 "null_key": 0,
-                "unresolved": 1,
+                "bound_with_key": 1,
+                "join_attempted": False,
+                "resolved": None,
             })
-        self.assertEqual(materials["key_join"], {
-            "direct_store": 0,
-            "edup_indirection": 0,
+        self.assertEqual(materials["keys"], {
+            "declared": 4,
+            "bound": 2,
+            "unbound": 2,
             "null_key": 0,
-            "unresolved": 2,
+            "bound_with_key": 2,
+            "join_attempted": False,
+            "resolved": None,
         })
 
     def test_shader_hash_is_reported(self):
@@ -451,6 +457,28 @@ class StructureTests(DrawableCase):
         report = di.analyze(self.write(bytes(data[:SYSTEM_SIZE]), bytes(data[SYSTEM_SIZE:])), SYSTEM_SIZE)
         self.assertEqual(report["status"], "partial")
         self.assertIn("aabb_union", self.issue_codes(report))
+
+    def test_header_aabb_union_matches(self):
+        report = self.analyze(Fixture())
+        header = report["header_aabb_union"]
+        self.assertIsNotNone(header)
+        self.assertTrue(header["matches"])
+        self.assertEqual(header["model_count"], 1)
+        self.assertEqual(header["null_lod_slots"], 3)
+
+    def test_index_count_b_ignores_high_and_low_bytes(self):
+        fixture = Fixture()
+        system, graphics = fixture.build(geometries=1)
+        good = di.analyze(self.write(system, graphics), SYSTEM_SIZE)
+        descriptor = good["lod_slots"][0]["models"][0]["geometries"][0]["index_descriptor_record"]["offset"]
+        data = bytearray(system + graphics)
+        count_b = struct.unpack_from("<I", data, descriptor + 0x0C)[0] >> 8
+        struct.pack_into("<I", data, descriptor + 0x0C, (0xAB << 24) | (count_b << 8) | 0x5A)
+        report = di.analyze(self.write(bytes(data[:SYSTEM_SIZE]), bytes(data[SYSTEM_SIZE:])), SYSTEM_SIZE)
+        self.assertEqual(report["status"], "complete", self.issue_codes(report))
+        buffer = report["lod_slots"][0]["models"][0]["geometries"][0]["index_descriptor_record"]
+        self.assertEqual(buffer["index_count_b"], count_b)
+        self.assertTrue(buffer["buffer"]["header_matches_descriptor"])
 
 
 class NegativeTests(DrawableCase):

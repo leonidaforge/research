@@ -105,6 +105,7 @@ class Inspector:
         self.lods = []
         self.materials = None
         self.graphics_base = None
+        self.header_aabb = None
 
     def add(self, code: str, detail: str):
         self.issues.append(Issue(code, detail))
@@ -286,6 +287,35 @@ class Inspector:
                 self.lods.append(group)
         self.materials = self.read_materials()
         self.graphics_base = self.derive_graphics_base()
+        self.header_aabb = self.header_aabb_union()
+
+    def header_aabb_union(self):
+        """Union of all walked model aggregates against the header AABB."""
+        if not self.header:
+            return None
+        aggregates = [
+            model["aabb_aggregate"]
+            for lod in self.lods
+            for model in lod["models"]
+            if model.get("aabb_aggregate")
+        ]
+        if not aggregates:
+            return None
+        minimum = [min(record["minimum"][axis] for record in aggregates) for axis in range(3)]
+        maximum = [max(record["maximum"][axis] for record in aggregates) for axis in range(3)]
+        bounds = self.header["bounds"]
+        delta = max(
+            max(abs(minimum[axis] - bounds["minimum"][axis]) for axis in range(3)),
+            max(abs(maximum[axis] - bounds["maximum"][axis]) for axis in range(3)),
+        )
+        return {
+            "minimum": minimum,
+            "maximum": maximum,
+            "delta": delta,
+            "matches": delta <= AABB_UNION_TOLERANCE,
+            "model_count": len(aggregates),
+            "null_lod_slots": sum(1 for slot in self.header["lod_slots"] if not slot["resolved"]),
+        }
 
     def read_lod_group(self, offset: int, slot: int):
         what = f"LOD group {slot} at {offset:#x}"
@@ -601,7 +631,7 @@ class Inspector:
             "cluster_count": clusters,
             "index_count_a": field_0a,
             "index_count_b_raw": f"{field_0c:#010x}",
-            "index_count_b": field_0c >> 8,
+            "index_count_b": (field_0c >> 8) & 0xFFFF,
             "constant": f"{constant:#018x}",
             "buffer": None,
         }
@@ -609,7 +639,7 @@ class Inspector:
             self.add("missing_pointer", f"{what} has no index-buffer record pointer")
         if buffer_record is not None:
             report["buffer"] = self.read_index_buffer(
-                buffer_record.offset, what, clusters, field_0a, field_0c >> 8
+                buffer_record.offset, what, clusters, field_0a, (field_0c >> 8) & 0xFFFF
             )
         return report
 
@@ -735,13 +765,14 @@ class Inspector:
                     shaders.append(shader)
         elif count:
             self.add("missing_pointer", f"{what} has {count} shader(s) but no shader array pointer")
-        key_join = {"direct_store": 0, "edup_indirection": 0, "null_key": 0, "unresolved": 0}
+        keys = {"declared": 0, "bound": 0, "unbound": 0, "null_key": 0, "bound_with_key": 0,
+                "join_attempted": False, "resolved": None}
         for shader in shaders:
             parameters = shader.get("parameters")
             if not parameters:
                 continue
-            for name, value in parameters["key_join"].items():
-                key_join[name] += value
+            for name in ("declared", "bound", "unbound", "null_key", "bound_with_key"):
+                keys[name] += parameters["keys"][name]
         return {
             "group": group,
             "optional": self._pointer_report(optional, optional_value),
@@ -750,7 +781,7 @@ class Inspector:
             "shader_array_entries": array_count,
             "shader_capacity": capacity,
             "shaders": shaders,
-            "key_join": key_join,
+            "keys": keys,
         }
 
     def read_shader(self, offset: int, index: int):
@@ -872,11 +903,14 @@ class Inspector:
             "bound": bound,
             "unbound": texture_count - bound,
             "distinct_keys": len(set(keys)),
-            "key_join": {
-                "direct_store": 0,
-                "edup_indirection": 0,
+            "keys": {
+                "declared": texture_count,
+                "bound": bound,
+                "unbound": texture_count - bound,
                 "null_key": null_keys,
-                "unresolved": unresolved,
+                "bound_with_key": unresolved,
+                "join_attempted": False,
+                "resolved": None,
             },
         }
 
@@ -935,6 +969,7 @@ class Inspector:
             "status": status,
             "page_map": self.page_map,
             "header": self.header,
+            "header_aabb_union": self.header_aabb,
             "lod_slots": self.lods,
             "materials": self.materials,
             "graphics_base": self.graphics_base,
@@ -1034,10 +1069,11 @@ def print_text(report):
                 f"{params.get('unbound', 0)} unbound, "
                 f"{params.get('distinct_keys', 0)} distinct key(s)"
             )
-        join = materials["key_join"]
+        join = materials["keys"]
+        resolved = "not attempted" if join["resolved"] is None else join["resolved"]
         print(
-            f"  key join: {join['direct_store']} direct store, {join['edup_indirection']} EDUP, "
-            f"{join['null_key']} null, {join['unresolved']} unresolved"
+            f"  keys: {join['bound']} bound ({join['bound_with_key']} with key, "
+            f"{join['null_key']} null), {join['unbound']} unbound, resolved {resolved}"
         )
     for issue in report.get("issues", []):
         print(f"issue:       {issue['code']}: {issue['detail']}")
