@@ -432,7 +432,6 @@ def _empty_totals():
         "payload_bytes": 0,
         "padding_bytes": 0,
         "violations": 0,
-        "exceptions": 0,
     }
 
 
@@ -483,23 +482,47 @@ def inspect_framing(data: bytes, label: str = "<memory>") -> dict:
         stats["size"] = size
         stats["blocks"] = size // BLOCK_SIZE
         stats["records"] = len(descriptor["entries"]) if "entries" in descriptor else 1
-        if size % BLOCK_SIZE:
-            stats["violations"].append(
-                {
-                    "kind": "size_not_multiple_of_block",
-                    "size": size,
-                    "remainder": size % BLOCK_SIZE,
-                    "record_offset": chunk_record["offset"],
-                }
-            )
         codec = descriptor["codec"]
-        if codec == 0x02:
+        mixed_entries = False
+        if variant == 0xFF25 and "entries" in descriptor:
+            entries = descriptor["entries"]
+            entry_codecs = {}
+            entry_rates = {}
+            for entry in entries:
+                entry_codec = f"0x{entry['codec']:02x}"
+                entry_codecs[entry_codec] = entry_codecs.get(entry_codec, 0) + 1
+                entry_rates[entry["rate"]] = entry_rates.get(entry["rate"], 0) + 1
+            if len(entry_codecs) > 1 or len(entry_rates) > 1:
+                mixed_entries = True
+                stats["entries"] = entries
+                stats["entry_codecs"] = entry_codecs
+                stats["entry_rates"] = entry_rates
+                if len(entry_codecs) > 1:
+                    stats["violations"].append(
+                        {"kind": "mixed_entry_codecs", "values": sorted(entry_codecs)}
+                    )
+                if len(entry_rates) > 1:
+                    stats["violations"].append(
+                        {"kind": "mixed_entry_rates", "values": sorted(entry_rates)}
+                    )
+        if mixed_entries:
+            pass
+        elif codec == 0x02:
             stats["raw_size_check"] = {
                 "size": size,
                 "declared": descriptor["declared"],
                 "four_bytes_per_sample": size == 4 * descriptor["declared"],
             }
         elif codec == 0x0B:
+            if size % BLOCK_SIZE:
+                stats["violations"].append(
+                    {
+                        "kind": "size_not_multiple_of_block",
+                        "size": size,
+                        "remainder": size % BLOCK_SIZE,
+                        "record_offset": chunk_record["offset"],
+                    }
+                )
             if variant == 0xFF25:
                 _inspect_ff25_stream(chunk, size, descriptor, stats)
             else:
@@ -523,7 +546,7 @@ def inspect_framing(data: bytes, label: str = "<memory>") -> dict:
                 stats["a3"]["count_matches_blocks_plus_one"] = (
                     stats["a3"]["count"] == stats["blocks"] + 1
                 )
-        elif codec == 0x0B:
+        elif codec == 0x0B and not mixed_entries:
             report["exceptions"].append(
                 {"kind": "missing_a3", "record_offset": chunk_record["offset"]}
             )
@@ -542,10 +565,11 @@ def inspect_framing(data: bytes, label: str = "<memory>") -> dict:
         totals["payload_bytes"] += stats["payload_bytes"]
         totals["padding_bytes"] += stats["padding_bytes"]
         totals["violations"] += len(stats["violations"])
+        report["all_totals"]["streams"] += 1
         for key in ("blocks", "data_blocks", "sentinel_blocks", "metadata_blocks",
                     "zero_blocks", "unknown_blocks", "packets", "payload_bytes",
-                    "padding_bytes", "streams"):
-            report["all_totals"][key] += stats[key] if key in stats else totals[key]
+                    "padding_bytes"):
+            report["all_totals"][key] += stats[key]
         report["all_totals"]["violations"] += len(stats["violations"])
         report["streams"].append(stats)
         for violation in stats["violations"]:
@@ -554,12 +578,6 @@ def inspect_framing(data: bytes, label: str = "<memory>") -> dict:
             report["exceptions"].append(entry)
 
     report["all_totals"]["exceptions"] = len(report["exceptions"])
-    for key in ("0x0b", "0x02"):
-        if key in report["codec_totals"]:
-            report["codec_totals"][key]["exceptions"] = sum(
-                1 for stream in report["streams"]
-                if stream["codec"] == key and stream["violations"]
-            )
     return report
 
 
@@ -862,6 +880,8 @@ def _summarize(reports):
 
 def _print_summary(summary, stream):
     print(f"samples: {summary['samples']}", file=stream)
+    if "selection" in summary:
+        print(f"selection: {summary['selection']}", file=stream)
     print(f"variants: {summary['variants']}", file=stream)
     print(f"codec_counts: {summary['codec_counts']}", file=stream)
     print(f"codec_rows: {summary['codec_rows']}", file=stream)
@@ -983,13 +1003,67 @@ def _write_atomic(path: str, text: str) -> None:
 
 
 def _read_input_list(path):
-    paths = []
+    entries = []
     with open(path, encoding="utf-8") as handle:
-        for line in handle:
+        for number, line in enumerate(handle, 1):
             value = line.strip()
-            if value and not value.startswith("#"):
-                paths.append(value)
-    return paths
+            if not value or value.startswith("#"):
+                continue
+            if value.startswith("{"):
+                try:
+                    row = json.loads(value)
+                except json.JSONDecodeError as error:
+                    raise AdatError(f"input list line {number}: {error}") from error
+                sample_path = row.get("file") or row.get("path")
+                if not sample_path:
+                    raise AdatError(f"input list line {number}: no file path")
+                entries.append(
+                    {
+                        "path": sample_path,
+                        "parent_id": row.get("parent_id"),
+                        "row": row.get("row"),
+                        "archive_sha256": row.get("archive_sha256"),
+                    }
+                )
+            else:
+                entries.append(
+                    {"path": value, "parent_id": None, "row": None,
+                     "archive_sha256": None}
+                )
+    return entries
+
+
+def _deduplicate(entries):
+    raw = len(entries)
+    keyed = [
+        entry for entry in entries
+        if entry.get("parent_id") is not None and entry.get("row") is not None
+    ]
+    if raw == 0:
+        return entries, {
+            "raw_inputs": 0, "deduped_inputs": 0, "copies": 0,
+            "parents": 0, "archive_copies": 0, "missing_keys": 0,
+        }
+    if len(keyed) != raw:
+        return entries, {
+            "raw_inputs": raw, "deduped_inputs": raw, "copies": 0,
+            "parents": None, "archive_copies": None,
+            "missing_keys": raw - len(keyed),
+        }
+    unique = {}
+    for entry in entries:
+        unique.setdefault((entry["parent_id"], entry["row"]), entry)
+    return list(unique.values()), {
+        "raw_inputs": raw,
+        "deduped_inputs": len(unique),
+        "copies": raw - len(unique),
+        "parents": len({entry["parent_id"] for entry in entries}),
+        "archive_copies": len({
+            entry["archive_sha256"] for entry in entries
+            if entry.get("archive_sha256") is not None
+        }),
+        "missing_keys": 0,
+    }
 
 
 def main(argv=None) -> int:
@@ -1008,21 +1082,29 @@ def main(argv=None) -> int:
                         help="refuse a sample larger than this many bytes")
     args = parser.parse_args(argv)
 
-    samples = list(args.samples)
+    samples = [
+        {"path": path, "parent_id": None, "row": None, "archive_sha256": None}
+        for path in args.samples
+    ]
     if args.input_list:
         try:
             samples.extend(_read_input_list(args.input_list))
-        except OSError as error:
+        except (OSError, AdatError) as error:
             print(f"error: {error}", file=sys.stderr)
             return 1
     if not samples:
         parser.error("no samples")
-    if args.output and _output_is_inside_input(args.output, samples):
+    selection = None
+    if args.summary:
+        samples, selection = _deduplicate(samples)
+    paths = [sample["path"] for sample in samples]
+    if args.output and _output_is_inside_input(args.output, paths):
         parser.error("refusing to write output inside an input directory")
 
     reports = []
     try:
-        for path in samples:
+        for sample in samples:
+            path = sample["path"]
             label = os.path.basename(path)
             if os.path.getsize(path) > args.max_bytes:
                 raise AdatError(f"{label}: larger than the {args.max_bytes}-byte cap")
@@ -1037,6 +1119,7 @@ def main(argv=None) -> int:
 
     if args.summary:
         summary = _summarize(reports)
+        summary["selection"] = selection
         if args.json:
             text = json.dumps(summary, indent=2) + "\n"
         else:

@@ -120,9 +120,22 @@ class FramingTests(unittest.TestCase):
         self.assertEqual(totals["packets"], 3)
         self.assertEqual(totals["data_blocks"], 2)
         self.assertEqual(report["codec_counts"], {"0x0b": 1})
+        self.assertEqual(report["all_totals"]["streams"], 1)
         stream = report["streams"][0]
         self.assertEqual(stream["lengths"], {3: 2, 4: 1})
         self.assertEqual(stream["toc"], {0xF8: 1, 0xFC: 1, 0xD8: 1})
+
+    def test_all_totals_counts_streams_once(self):
+        block = framed_block([b"\xF8\x01"])
+        data = build_with_records(0xFF21, 2, [
+            (0x55, block, 0),
+            (0x76, descriptor_76(), 2048),
+            (0x55, block, 2080),
+            (0x76, descriptor_76(), 4128),
+        ])
+        report = adat_inspect.inspect_framing(data)
+        self.assertEqual(report["all_totals"]["streams"], 2)
+        self.assertEqual(report["codec_totals"]["0x0b"]["streams"], 2)
 
     def test_length_overrun_is_reported(self):
         block = bytearray(2048)
@@ -165,6 +178,18 @@ class FramingTests(unittest.TestCase):
         report = adat_inspect.inspect_framing(data)
         stream = report["streams"][0]
         self.assertTrue(stream["raw_size_check"]["four_bytes_per_sample"])
+
+    def test_0x02_non_multiple_size_is_not_a_framing_violation(self):
+        data = build_with_records(0xFF21, 1, [
+            (0x76, descriptor_76(declared=4, codec=0x02), 0),
+            (0x55, b"\x00" * 16, 32),
+        ])
+        report = adat_inspect.inspect_framing(data)
+        stream = report["streams"][0]
+        self.assertTrue(stream["raw_size_check"]["four_bytes_per_sample"])
+        self.assertEqual(stream["violations"], [])
+        self.assertEqual(report["codec_totals"]["0x02"]["violations"], 0)
+        self.assertEqual(report["exceptions"], [])
 
     def test_ff25_page_layout(self):
         block0 = bytearray(2048)
@@ -215,6 +240,20 @@ class FramingTests(unittest.TestCase):
         info = report["streams"][0]["a3"]
         self.assertFalse(info["nondecreasing"])
 
+    def test_ff25_mixed_entries_are_flagged(self):
+        block0 = bytearray(2048)
+        struct.pack_into("<I", block0, 0, 0xFFFFFFFF)
+        data = build_with_records(0xFF25, 2, [
+            (0x48, descriptor_48(1, 4 * 2048,
+                                 [(0x02, 1000, 48000), (0x0B, 1000, 48000)]), 0),
+            (0x55, bytes(block0) + framed_block([b"\xF8\x01"]) * 2 + b"\x00" * 2048, 60),
+        ])
+        report = adat_inspect.inspect_framing(data)
+        stream = report["streams"][0]
+        kinds = {item["kind"] for item in stream["violations"]}
+        self.assertIn("mixed_entry_codecs", kinds)
+        self.assertEqual(stream["entry_codecs"], {"0x02": 1, "0x0b": 1})
+
     def test_ff25_page_count_mismatch(self):
         block0 = bytearray(2048)
         struct.pack_into("<I", block0, 0, 0xFFFFFFFF)
@@ -254,6 +293,20 @@ class FramingTests(unittest.TestCase):
         ])
         with self.assertRaises(adat_inspect.AdatError):
             adat_inspect.inspect_framing(data)
+
+    def test_deduplication_key(self):
+        entries = [
+            {"path": "a.bin", "parent_id": "p1", "row": 0, "archive_sha256": "s1"},
+            {"path": "a-copy.bin", "parent_id": "p1", "row": 0, "archive_sha256": "s2"},
+            {"path": "b.bin", "parent_id": "p2", "row": 1, "archive_sha256": "s1"},
+        ]
+        unique, selection = adat_inspect._deduplicate(entries)
+        self.assertEqual(len(unique), 2)
+        self.assertEqual(selection["raw_inputs"], 3)
+        self.assertEqual(selection["deduped_inputs"], 2)
+        self.assertEqual(selection["copies"], 1)
+        self.assertEqual(selection["parents"], 2)
+        self.assertEqual(selection["archive_copies"], 2)
 
     def test_atomic_output(self):
         with tempfile.TemporaryDirectory() as directory:
