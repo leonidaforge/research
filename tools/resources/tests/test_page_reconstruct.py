@@ -91,11 +91,54 @@ class ReconstructionTests(unittest.TestCase):
     def test_raw_tail_is_not_a_page_when_no_page_is_missing(self):
         system = system_data(0x1000, 0x80, 1, 0)
         tail = b"\x01\x02\x03\x04" * 16
-        layout = pr.analyze_bytes(stored([("zlib", system), ("raw", tail)]), "fixture")
+        layout = pr.analyze_bytes(stored([("zlib", system), ("raw", tail)]), "fixture",
+                                  logical_size=0x1000)
         self.assertEqual(layout.status, "complete", codes(layout))
         self.assertEqual([page.size for page in layout.pages], [0x1000])
         self.assertEqual([page.storage for page in layout.pages], ["zlib"])
         self.assertIn("trailing_raw", codes(layout))
+
+    def test_all_zero_raw_tail_is_a_page_when_the_count_needs_it(self):
+        page0 = system_data(0x1_0000, 0xFD60, 2, 0)
+        tail = bytes(8768)
+        layout = pr.analyze_bytes(stored([("zlib", page0), ("raw", tail)]), "fixture",
+                                  logical_size=74304)
+        self.assertEqual(layout.status, "complete", codes(layout))
+        self.assertEqual([page.size for page in layout.pages], [0x1_0000, 8768])
+        self.assertEqual([page.storage for page in layout.pages], ["zlib", "raw"])
+
+    def test_zlib_like_raw_tail_is_a_page_not_a_payload_error(self):
+        page0 = system_data(0x1_0000, 0xFD60, 2, 0)
+        tail = b"\x78\xDA" + bytes(8766)
+        layout = pr.analyze_bytes(stored([("zlib", page0), ("raw", tail)]), "fixture",
+                                  logical_size=74304)
+        self.assertEqual(layout.status, "complete", codes(layout))
+        self.assertEqual([page.size for page in layout.pages], [0x1_0000, 8768])
+        self.assertEqual([page.storage for page in layout.pages], ["zlib", "raw"])
+        self.assertNotIn("payload_error", codes(layout))
+
+    def test_raw_tail_that_breaks_the_logical_size_is_not_a_page(self):
+        page0 = system_data(0x1_0000, 0xFD60, 2, 0)
+        tail = (bytes(range(256)) * 35)[:8768]
+        layout = pr.analyze_bytes(stored([("zlib", page0), ("raw", tail)]), "fixture",
+                                  logical_size=0x1_0000)
+        self.assertEqual(layout.status, "partial")
+        self.assertEqual([page.size for page in layout.pages], [0x1_0000])
+        self.assertIn("trailing_raw", codes(layout))
+        self.assertIn("missing_pages", codes(layout))
+
+    def test_total_cap_is_enforced_across_chunks(self):
+        system = system_data(0x200, 0x80, 2, 0)
+        data = stored([("zlib", system[:0x100]), ("zlib", system[0x100:])])
+        layout = pr.Layout("fixture")
+        with self.assertRaises(pr.ResourceError) as raised:
+            pr.read_chunks(data, layout, max_total=0x100)
+        self.assertIn("cap", str(raised.exception))
+        self.assertIn("observed 512", str(raised.exception))
+        report = pr.analyze_bytes(data, "fixture", max_total=0x100)
+        self.assertEqual(report.status, "unverified")
+        self.assertIn("payload_error", codes(report))
+        self.assertIn("cap", report.issues[0].detail)
 
     def test_page_map_in_second_system_page(self):
         system = system_data(0x1_0100, 0x10040, 2, 0)
@@ -151,7 +194,7 @@ class ReconstructionTests(unittest.TestCase):
         data = stored([("zlib", system)])
         layout = pr.analyze_bytes(data[:-20], "fixture")
         self.assertEqual(layout.status, "unverified")
-        self.assertIn("payload_error", codes(layout))
+        self.assertIn(layout.issues[0].code, ("not_a_resource", "payload_error"))
 
 
 if __name__ == "__main__":

@@ -10,7 +10,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import root_tables as rt  # noqa: E402
 
 
-def root_bytes(length=0x200, map_at=0x1E0, block_ptr=0x100, count=2):
+def root_bytes(length=0x200, map_at=0x1E0, record_ptr=0x100, count=2):
     data = bytearray(length)
     struct.pack_into("<Q", data, 8, rt.SYSTEM_BASE | map_at)
     data[0x10:0x14] = b"0DRP"
@@ -18,13 +18,13 @@ def root_bytes(length=0x200, map_at=0x1E0, block_ptr=0x100, count=2):
     struct.pack_into("<Q", data, 0x20, 3)
     struct.pack_into("<Q", data, 0x28, rt.SYSTEM_BASE | 0x40)
     struct.pack_into("<Q", data, 0x30, 0)
-    struct.pack_into("<Q", data, 0x38, rt.SYSTEM_BASE | block_ptr)
+    struct.pack_into("<Q", data, 0x38, rt.SYSTEM_BASE | record_ptr)
     struct.pack_into("<Q", data, 0x40, rt.SYSTEM_BASE | 0x80)
     struct.pack_into("<4H", data, 0x48, 3, 0, count, 0)
-    if block_ptr + count * 16 <= length:
-        struct.pack_into("<IIQ", data, block_ptr, 0x11111111, 0x20, rt.SYSTEM_BASE | 0x40)
+    if record_ptr + count * 16 <= length:
+        struct.pack_into("<IIQ", data, record_ptr, 0x11111111, 0x20, rt.SYSTEM_BASE | 0x40)
         if count > 1:
-            struct.pack_into("<IIQ", data, block_ptr + 16, 0x22222222, 0x30, rt.GRAPHICS_BASE | 0x10)
+            struct.pack_into("<IIQ", data, record_ptr + 16, 0x22222222, 0x30, rt.GRAPHICS_BASE | 0x10)
     return bytes(data)
 
 
@@ -33,37 +33,37 @@ class RootTests(unittest.TestCase):
         root, issues = rt.parse_root(root_bytes(), graphics_len=0x100)
         self.assertEqual(issues, [])
         self.assertEqual(root.page_map, 0x1E0)
-        self.assertEqual(root.version, 0x7A)
+        self.assertEqual(root.byte_14, 0x7A)
         self.assertEqual(root.qword_18, 0)
-        self.assertEqual(root.variant, 3)
-        self.assertEqual(root.counts, (3, 0, 2, 0))
+        self.assertEqual(root.word_20, 3)
+        self.assertEqual(root.fields_48, (3, 0, 2, 0))
         self.assertEqual(root.pointers[0x28], 0x40)
         self.assertIsNone(root.pointers[0x30])
         self.assertEqual(root.pointers[0x38], 0x100)
         self.assertEqual(root.pointers[0x40], 0x80)
 
-    def test_walks_the_block_table(self):
+    def test_walks_the_record_table(self):
         root, issues = rt.parse_root(root_bytes(), graphics_len=0x100)
         self.assertEqual(issues, [])
-        self.assertEqual(len(root.blocks), 2)
-        self.assertEqual([(b.segment, b.offset, b.size) for b in root.blocks],
+        self.assertEqual(len(root.records), 2)
+        self.assertEqual([(b.segment, b.offset, b.word4) for b in root.records],
                          [("system", 0x40, 0x20), ("graphics", 0x10, 0x30)])
 
-    def test_block_table_outside_is_refused(self):
-        root, issues = rt.parse_root(root_bytes(block_ptr=0x1F8, count=2), graphics_len=0x100)
-        self.assertEqual(root.blocks, [])
-        self.assertIn("block_table_outside", [issue.code for issue in issues])
+    def test_record_table_outside_is_refused(self):
+        root, issues = rt.parse_root(root_bytes(record_ptr=0x1F8, count=2), graphics_len=0x100)
+        self.assertEqual(root.records, [])
+        self.assertIn("record_table_outside", [issue.code for issue in issues])
 
-    def test_block_target_outside_is_reported(self):
+    def test_record_target_outside_is_reported(self):
         data = bytearray(root_bytes())
         struct.pack_into("<IIQ", data, 0x100, 0x11111111, 0x200, rt.GRAPHICS_BASE | 0x10)
         root, issues = rt.parse_root(bytes(data), graphics_len=0x100)
-        self.assertIn("block_outside", [issue.code for issue in issues])
+        self.assertIn("record_outside", [issue.code for issue in issues])
 
     def test_huge_count_does_not_read_past_the_segment(self):
         root, issues = rt.parse_root(root_bytes(count=0xFFFF), graphics_len=0x100)
-        self.assertEqual(root.blocks, [])
-        self.assertIn("block_table_outside", [issue.code for issue in issues])
+        self.assertEqual(root.records, [])
+        self.assertIn("record_table_outside", [issue.code for issue in issues])
 
     def test_root_pointer_outside_is_reported(self):
         data = bytearray(root_bytes())

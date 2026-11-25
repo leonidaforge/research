@@ -5,10 +5,13 @@ A stored row is 16 zero bytes followed by one chunk per page. A chunk is
 either a zlib stream or a raw (uncompressed) page. The page map, at the system
 offset named by the qword at +8, declares how many system and graphics pages
 exist. Reconstruction must cover every declared page; a readable page map does
-not end the reconstruction.
+not end the reconstruction. A raw stored range is classified by the declared
+page count and, when supplied, the declared logical size; a zlib header is only
+a secondary check.
 
-The tool reads only, bounds every stream and the total size, and reports what
-it cannot establish. See formats/resources/pages.md for the layout.
+The tool reads only, bounds every stream and the total reconstructed bytes,
+and reports what it cannot establish. See formats/resources/pages.md for the
+layout.
 """
 
 from __future__ import annotations
@@ -190,27 +193,45 @@ def inflate_at(buf: bytes, at: int, limit: int) -> tuple[bytes, int]:
     return bytes(out), consumed - len(decoder.unused_data)
 
 
-def read_chunks(buf: bytes, layout: Layout) -> list[Chunk]:
+def read_chunks(buf: bytes, layout: Layout, max_total: int = MAX_TOTAL) -> list[Chunk]:
     if len(buf) < STORED_PREFIX_LEN:
         raise ResourceError("the entry is shorter than the 16-byte prefix")
     if any(buf[:STORED_PREFIX_LEN]):
         raise ResourceError("the 16 bytes before the first chunk are not zero")
     chunks: list[Chunk] = []
+    total = 0
     pos = STORED_PREFIX_LEN
     while pos < len(buf):
+        data = None
+        used = 0
         if zlib_header(buf, pos):
-            data, used = inflate_at(buf, pos, len(buf))
+            try:
+                data, used = inflate_at(buf, pos, len(buf))
+            except ResourceError as err:
+                # A raw page can begin with bytes that look like a zlib header.
+                # The declared page count and logical size decide later.
+                layout.note(f"a zlib-like header at {pos:#x} does not inflate: {err}")
+        if data is not None:
             chunks.append(Chunk(pos, used, data, "zlib"))
+            total += len(data)
+            if total > max_total:
+                raise ResourceError(
+                    f"the reconstructed chunks exceed the {max_total}-byte cap "
+                    f"(observed {total})"
+                )
             next_pos = align16(pos + used)
             if any(buf[pos + used : next_pos]):
                 raise ResourceError(f"the padding after the stream at {pos:#x} is not zero")
             pos = next_pos
             continue
         tail = buf[pos:]
-        if not any(tail):
-            layout.note(f"{len(tail)} zero bytes after the last chunk")
-            break
         chunks.append(Chunk(pos, len(tail), tail, "raw"))
+        total += len(tail)
+        if total > max_total:
+            raise ResourceError(
+                f"the reconstructed chunks exceed the {max_total}-byte cap "
+                f"(observed {total})"
+            )
         pos = len(buf)
     return chunks
 
@@ -278,7 +299,7 @@ def split_candidate(group, deficit, storage):
     return pages
 
 
-def assign_pages(chunks, page_map, layout):
+def assign_pages(chunks, page_map, layout, logical_size=None):
     groups = zlib_groups(chunks)
     declared = page_map.total
     candidates = []
@@ -291,27 +312,48 @@ def assign_pages(chunks, page_map, layout):
         else:
             candidates.append({"size": size, "streams": 1, "storage": "zlib", "group": group})
 
-    # A raw chunk is a page only when the declared page count needs it. If the
-    # zlib chunks already fill the count, the raw bytes are trailing data.
-    if len(candidates) < declared and candidates and candidates[-1]["storage"] == "raw":
-        deficit = declared - len(candidates) + 1
-        split = split_candidate(candidates[-1]["group"], deficit - 1, "raw")
-        if split is not None:
-            candidates.pop()
-            for size, streams, storage in split:
-                candidates.append({"size": size, "streams": streams, "storage": storage, "group": None})
-            layout.note(
-                f"the {sum(c.size for c in chunks if c.kind == 'raw'):#x}-byte raw stored range "
-                "completes the declared page count and is reconstructed as a raw page"
-            )
-    elif len(candidates) > declared and candidates and candidates[-1]["storage"] == "raw":
-        extra = candidates.pop()
-        layout.issues.append(
-            Issue(
-                "trailing_raw",
-                f"{extra['size']:#x} raw bytes follow the declared pages and are not a page",
-            )
-        )
+    # A raw stored range is classified by the declared page count and the
+    # declared logical size. A zlib header is only a secondary check.
+    raw = candidates[-1] if candidates and candidates[-1]["storage"] == "raw" else None
+    if raw is not None:
+        raw_bytes = raw["group"][0].data
+        zlib_total = sum(candidate["size"] for candidate in candidates[:-1])
+        needed = declared - (len(candidates) - 1)
+        fits_logical = logical_size is None or zlib_total + raw["size"] == logical_size
+        candidates.pop()
+        if needed >= 1:
+            split = split_candidate(raw["group"], needed - 1, "raw")
+            if split is not None and fits_logical:
+                for size, streams, storage in split:
+                    candidates.append(
+                        {"size": size, "streams": streams, "storage": storage, "group": None}
+                    )
+                layout.note(
+                    f"the {raw['size']:#x}-byte raw stored range completes the declared "
+                    "page count and is reconstructed as a raw page"
+                )
+            else:
+                if any(raw_bytes):
+                    layout.issues.append(
+                        Issue(
+                            "trailing_raw",
+                            f"{raw['size']:#x} raw bytes do not complete the declared pages",
+                        )
+                    )
+                else:
+                    layout.note(f"{raw['size']} zero bytes after the last chunk")
+                if split is not None and not fits_logical:
+                    layout.note("the raw range does not match the declared logical size")
+        else:
+            if any(raw_bytes):
+                layout.issues.append(
+                    Issue(
+                        "trailing_raw",
+                        f"{raw['size']:#x} raw bytes follow the declared pages and are not a page",
+                    )
+                )
+            else:
+                layout.note(f"{raw['size']} zero bytes after the last chunk")
 
     # If zlib grouping still leaves a gap, a stream may pack several pages.
     if len(candidates) < declared:
@@ -334,10 +376,11 @@ def assign_pages(chunks, page_map, layout):
     return candidates
 
 
-def analyze_bytes(buf: bytes, source: str) -> Layout:
+def analyze_bytes(buf: bytes, source: str, max_total: int = MAX_TOTAL,
+                  logical_size: int | None = None) -> Layout:
     layout = Layout(source=source)
     try:
-        layout.chunks = read_chunks(buf, layout)
+        layout.chunks = read_chunks(buf, layout, max_total)
     except ResourceError as err:
         layout.add("payload_error", str(err))
         return layout
@@ -364,7 +407,14 @@ def analyze_bytes(buf: bytes, source: str) -> Layout:
         layout.add("page_count", f"the page map declares {page_map.total} pages")
         return layout
 
-    candidates = assign_pages(layout.chunks, page_map, layout)
+    candidates = assign_pages(layout.chunks, page_map, layout, logical_size)
+    page_total = sum(candidate["size"] for candidate in candidates)
+    if page_total > max_total:
+        layout.add(
+            "payload_error",
+            f"the reconstructed pages exceed the {max_total}-byte cap (observed {page_total})",
+        )
+        return layout
     if len(candidates) < page_map.total:
         layout.add(
             "missing_pages",
@@ -410,7 +460,8 @@ def analyze_bytes(buf: bytes, source: str) -> Layout:
     return layout
 
 
-def analyze_file(path, offset, length):
+def analyze_file(path, offset, length, max_total: int = MAX_TOTAL,
+                 logical_size: int | None = None):
     with open(path, "rb") as handle:
         handle.seek(offset)
         buf = handle.read(length)
@@ -418,7 +469,7 @@ def analyze_file(path, offset, length):
         layout = Layout(source=f"{path} payload at {offset:#x}", stored_offset=offset, stored_length=length)
         layout.add("payload_error", f"the entry needs {length} bytes but only {len(buf)} are present")
         return layout
-    layout = analyze_bytes(buf, f"{path} payload at {offset:#x}")
+    layout = analyze_bytes(buf, f"{path} payload at {offset:#x}", max_total, logical_size)
     layout.stored_offset = offset
     layout.stored_length = length
     return layout
@@ -461,9 +512,13 @@ def main(argv=None):
                         help="payload offset of the entry")
     parser.add_argument("--length", required=True, type=lambda text: int(text, 0),
                         help="stored length of the entry")
+    parser.add_argument("--logical-size", type=lambda text: int(text, 0),
+                        help="logical size from the RPF9 row, when known")
+    parser.add_argument("--max-total", type=lambda text: int(text, 0), default=MAX_TOTAL,
+                        help=f"cap on reconstructed bytes (default {MAX_TOTAL})")
     parser.add_argument("--json", action="store_true", help="print the report as JSON")
     args = parser.parse_args(argv)
-    layout = analyze_file(args.file, args.offset, args.length)
+    layout = analyze_file(args.file, args.offset, args.length, args.max_total, args.logical_size)
     report = layout.report()
     if args.json:
         json.dump(report, sys.stdout, indent=2)
