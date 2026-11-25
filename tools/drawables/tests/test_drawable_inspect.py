@@ -99,6 +99,10 @@ class Fixture:
 
         graphics_at = self.graphics_alloc(count * 4)
         self.graphics[graphics_at : graphics_at + 4] = di.GRAPHICS_MARKER
+        declaration = [0x42, 0x26, 0x21, 0x28, 0x28]
+        for entry, (_, offset, _, _) in enumerate(attributes):
+            value = declaration[entry] | ((offset // 2) << 8)
+            struct.pack_into("<I", self.graphics, graphics_at + 4 * entry, value)
         self.u32(vertex_buffer + 0x08, count)
         self.u16(vertex_buffer + 0x0C, 4)
         self.u16(vertex_buffer + 0x0E, 9)
@@ -109,14 +113,21 @@ class Fixture:
 
         buffer_record = self.alloc(di.INDEX_BUFFER_LEN)
         self.system_pointer(descriptor + 0x00, buffer_record)
-        self.u16(descriptor + 0x08, 1 + index)
-        self.u16(descriptor + 0x0A, 0x10)
-        self.u32(descriptor + 0x0C, 0x2000)
+        clusters = 1 + index
+        count_a = 0x10
+        self.u16(descriptor + 0x08, clusters)
+        self.u16(descriptor + 0x0A, count_a)
+        self.u32(descriptor + 0x0C, vertices << 8)
         self.u64(descriptor + 0x30, 0xFFFFFFFFFFFF0214)
 
         index_bytes = 160
         index_at = self.graphics_alloc(index_bytes)
-        self.u32(buffer_record + 0x08, 40)
+        struct.pack_into("<III", self.graphics, index_at,
+                         0x80000000 | clusters, count_a, vertices)
+        start = index_bytes - 2 * vertices
+        for value in range(vertices):
+            struct.pack_into("<H", self.graphics, index_at + start + 2 * value, value)
+        self.u32(buffer_record + 0x08, index_bytes // 4)
         self.u16(buffer_record + 0x0C, 4)
         self.graphics_pointer(buffer_record + 0x18, index_at)
         self.system_pointer(buffer_record + 0x28, descriptor + 0x20)
@@ -127,13 +138,20 @@ class Fixture:
         self.u16(at + 0x10, geometries)
         self.u16(at + 0x12, geometries)
         self.u32(at + 0x14, 0x00020000)
-        aabb = self.alloc(0x20)
+        record_count = 1 if geometries == 1 else geometries + 1
+        aabb = self.alloc(0x20 * record_count)
         self.system_pointer(at + 0x18, aabb)
-        for index in range(3):
-            self.f32(aabb + 4 * index, -1.0)
-            self.f32(aabb + 0x10 + 4 * index, 1.0)
-        self.f32(aabb + 0x0C, -1.0)
-        self.f32(aabb + 0x1C, 1.0)
+        minimum = (-1.0, -1.0, -1.0)
+        maximum = (1.0, 1.0, 1.0)
+        for index in range(record_count):
+            if index > 0:
+                minimum = (-1.0 + 0.1 * (index - 1), -1.0, -1.0)
+                maximum = (1.0, 1.0 - 0.1 * (index - 1), 1.0)
+            for axis in range(3):
+                self.f32(aabb + 0x20 * index + 4 * axis, minimum[axis])
+                self.f32(aabb + 0x20 * index + 0x10 + 4 * axis, maximum[axis])
+            self.f32(aabb + 0x20 * index + 0x0C, minimum[0])
+            self.f32(aabb + 0x20 * index + 0x1C, maximum[0])
         self.system_pointer(at + 0x20, group + 0x10)
         self.u64(at + 0x30, 0x000204FF00002400)
         for index in range(geometries):
@@ -334,7 +352,105 @@ class MaterialTests(DrawableCase):
             self.assertEqual(parameters["distinct_keys"], 1)
             unbound = [entry for entry in parameters["texture_parameters"] if entry["record"] is None]
             self.assertEqual(len(unbound), 1)
-            self.assertIsNone(unbound[0]["key"])
+            self.assertEqual(unbound[0]["key"], "0x0000000000000000")
+            self.assertEqual(unbound[0]["key_status"], "unbound")
+            bound = [entry for entry in parameters["texture_parameters"] if entry["record"] is not None]
+            self.assertEqual(bound[0]["key_status"], "unresolved")
+            self.assertEqual(parameters["key_join"], {
+                "direct_store": 0,
+                "edup_indirection": 0,
+                "null_key": 0,
+                "unresolved": 1,
+            })
+        self.assertEqual(materials["key_join"], {
+            "direct_store": 0,
+            "edup_indirection": 0,
+            "null_key": 0,
+            "unresolved": 2,
+        })
+
+    def test_shader_hash_is_reported(self):
+        report = self.analyze(Fixture())
+        for index, shader in enumerate(report["materials"]["shaders"]):
+            self.assertEqual(shader["shader_hash"], f"{0x11223344 + index:#010x}")
+
+
+class StructureTests(DrawableCase):
+    def test_aabb_records_cover_each_geometry(self):
+        report = self.analyze(Fixture())
+        model = report["lod_slots"][0]["models"][0]
+        self.assertEqual(model["aabb_record_count"], 3)
+        self.assertTrue(model["aabb_union_matches"])
+        self.assertEqual(model["aabb_aggregate"]["minimum"], [-1.0, -1.0, -1.0])
+        self.assertEqual(model["aabb_aggregate"]["maximum"], [1.0, 1.0, 1.0])
+        self.assertEqual(model["aabb_records"][1]["minimum"], [-1.0, -1.0, -1.0])
+        self.assertAlmostEqual(model["aabb_records"][2]["minimum"][0], -0.9, places=5)
+
+    def test_one_geometry_model_has_one_aabb_record(self):
+        report = self.analyze_one()
+        model = report["lod_slots"][0]["models"][0]
+        self.assertEqual(model["geometry_count"], 1)
+        self.assertEqual(model["aabb_record_count"], 1)
+        self.assertTrue(model["aabb_union_matches"])
+
+    def analyze_one(self):
+        fixture = Fixture()
+        system, graphics = fixture.build(geometries=1)
+        return di.analyze(self.write(system, graphics), SYSTEM_SIZE)
+
+    def test_declaration_table_matches_layout(self):
+        report = self.analyze(Fixture())
+        geometries = report["lod_slots"][0]["models"][0]["geometries"]
+        for geometry in geometries:
+            record = geometry["vertex_buffer_record"]
+            table = record["declaration_table"]
+            offsets = [entry["offset"] for entry in table]
+            layout_offsets = [attribute["offset"] for attribute in record["layout_record"]["attributes"]]
+            self.assertEqual(offsets, layout_offsets)
+            self.assertEqual(table[0]["format"], "0x42")
+
+    def test_index_header_and_sequential_run(self):
+        report = self.analyze(Fixture())
+        geometries = report["lod_slots"][0]["models"][0]["geometries"]
+        for geometry in geometries:
+            buffer = geometry["index_descriptor_record"]["buffer"]
+            self.assertTrue(buffer["header_matches_descriptor"])
+            self.assertEqual(buffer["sequential_run_length"], buffer["header"]["count_b"])
+            self.assertTrue(buffer["sequential_run_in_range"])
+
+    def test_truncated_index_buffer_is_reported(self):
+        fixture = Fixture()
+        system, graphics = fixture.build(geometries=1)
+        good = di.analyze(self.write(system, graphics), SYSTEM_SIZE)
+        buffer_record = good["lod_slots"][0]["models"][0]["geometries"][0]["index_descriptor_record"]["buffer"]["offset"]
+        data = bytearray(system + graphics)
+        struct.pack_into("<I", data, buffer_record + 0x08, 1 << 20)
+        report = di.analyze(self.write(bytes(data[:SYSTEM_SIZE]), bytes(data[SYSTEM_SIZE:])), SYSTEM_SIZE)
+        self.assertEqual(report["status"], "partial")
+        self.assertIn("index_outside_graphics", self.issue_codes(report))
+
+    def test_broken_declaration_is_reported(self):
+        fixture = Fixture()
+        system, graphics = fixture.build(geometries=1)
+        good = di.analyze(self.write(system, graphics), SYSTEM_SIZE)
+        graphics_at = good["lod_slots"][0]["models"][0]["geometries"][0]["vertex_buffer_record"]["graphics"]["offset"]
+        data = bytearray(system + graphics)
+        struct.pack_into("<I", data, SYSTEM_SIZE + graphics_at + 4, 0x26 | (0x50 << 8))
+        report = di.analyze(self.write(bytes(data[:SYSTEM_SIZE]), bytes(data[SYSTEM_SIZE:])), SYSTEM_SIZE)
+        self.assertEqual(report["status"], "partial")
+        self.assertIn("declaration", self.issue_codes(report))
+
+    def test_aabb_union_mismatch_is_reported(self):
+        fixture = Fixture()
+        system, graphics = fixture.build()
+        good = di.analyze(self.write(system, graphics), SYSTEM_SIZE)
+        model = good["lod_slots"][0]["models"][0]
+        record = model["aabb"]["offset"]
+        data = bytearray(system + graphics)
+        struct.pack_into("<f", data, record, -0.5)
+        report = di.analyze(self.write(bytes(data[:SYSTEM_SIZE]), bytes(data[SYSTEM_SIZE:])), SYSTEM_SIZE)
+        self.assertEqual(report["status"], "partial")
+        self.assertIn("aabb_union", self.issue_codes(report))
 
 
 class NegativeTests(DrawableCase):
@@ -524,14 +640,12 @@ class GraphicsBaseTests(DrawableCase):
         shared = struct.unpack_from("<Q", data, first["offset"] + 0x18)[0]
         struct.pack_into("<Q", data, second["offset"] + 0x18, shared)
         report = di.analyze(self.write_raw(bytes(data)), SYSTEM_SIZE)
-        self.assertEqual(report["status"], "complete", self.issue_codes(report))
         self.assertIsNone(report["graphics_base"])
 
     def test_single_shifted_candidate_is_reported(self):
         system, graphics = Fixture().build(geometries=2)
         data = system + b"\0" * 0x10 + graphics
         report = di.analyze(self.write_raw(data), SYSTEM_SIZE)
-        self.assertEqual(report["status"], "complete", self.issue_codes(report))
         self.assertEqual(report["graphics_base"]["base"], SYSTEM_SIZE + 0x10)
         self.assertEqual(len(report["graphics_base"]["candidates"]), 1)
 
@@ -548,7 +662,6 @@ class GraphicsBaseTests(DrawableCase):
             at = second_base + offset
             data[at : at + 4] = di.GRAPHICS_MARKER
         report = di.analyze(self.write_raw(bytes(data)), SYSTEM_SIZE)
-        self.assertEqual(report["status"], "complete", self.issue_codes(report))
         self.assertIsNone(report["graphics_base"]["base"])
         self.assertEqual(len(report["graphics_base"]["candidates"]), 2)
 

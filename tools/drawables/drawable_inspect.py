@@ -33,6 +33,14 @@ VERTEX_BUFFER_LEN = 0x50
 INDEX_DESCRIPTOR_LEN = 0x40
 INDEX_BUFFER_LEN = 0x50
 
+AABB_RECORD_LEN = 0x20
+AABB_UNION_TOLERANCE = 2e-3
+DECLARATION_ENTRY_LEN = 4
+MAX_DECLARATION_ENTRIES = 16
+INDEX_HEADER_LEN = 12
+MAX_SEQUENTIAL_CANDIDATES = 4096
+MAX_SEQUENTIAL_RUN = 1 << 16
+
 LAYOUT_SEMANTICS = 52
 LAYOUT_SIZES = 0xD0
 LAYOUT_FORMATS = 0x104
@@ -340,6 +348,7 @@ class Inspector:
         if count > MAX_GEOMETRIES:
             self.add("model_count", f"{what} declares {count} geometries, above the {MAX_GEOMETRIES} cap")
             return None
+        aabb_report = self.read_model_aabb(aabb, count, what) if aabb is not None else None
         geometries = []
         array_count = 0
         if geometry_array is not None:
@@ -360,6 +369,9 @@ class Inspector:
                     geometries.append(geometry)
         elif count:
             self.add("missing_pointer", f"{what} has {count} geometry(ies) but no geometry array pointer")
+        union = self._aabb_union(aabb_report, count)
+        if union is False:
+            self.add("aabb_union", f"{what} aggregate AABB does not equal the union of its geometry records")
         return {
             "slot": slot,
             "index": index,
@@ -370,10 +382,56 @@ class Inspector:
             "geometry_capacity": capacity,
             "uninterpreted_14": f"{unknown_14:#010x}",
             "aabb": self._pointer_report(aabb, aabb_value),
+            "aabb_record_count": None if aabb_report is None else len(aabb_report),
+            "aabb_aggregate": None if not aabb_report else aabb_report[0],
+            "aabb_records": aabb_report,
+            "aabb_union_matches": union,
             "shader_indices": self._pointer_report(shader_indices, shader_value),
             "flags": f"{flags:#018x}",
             "geometries": geometries,
         }
+
+    def read_model_aabb(self, aabb, count: int, what: str):
+        """Read record0 plus one record per geometry. A one-geometry model has one record."""
+        if count <= 0:
+            return []
+        length = 1 if count == 1 else count + 1
+        records = []
+        for index in range(length):
+            at = aabb.offset + AABB_RECORD_LEN * index
+            try:
+                values = [self.f32(at + 4 * i, self.system_len, what + " AABB") for i in range(8)]
+            except DrawableError as err:
+                self.add("aabb", str(err))
+                break
+            records.append(
+                {
+                    "minimum": values[0:3],
+                    "maximum": values[4:7],
+                    "min_extra": values[3],
+                    "max_extra": values[7],
+                }
+            )
+        return records
+
+    @staticmethod
+    def _aabb_union(records, count: int):
+        if not records or count <= 0:
+            return None
+        if count == 1:
+            return True
+        if len(records) != count + 1:
+            return None
+        aggregate = records[0]
+        minimum = [min(record["minimum"][axis] for record in records[1:]) for axis in range(3)]
+        maximum = [max(record["maximum"][axis] for record in records[1:]) for axis in range(3)]
+        return all(
+            abs(minimum[axis] - aggregate["minimum"][axis]) <= AABB_UNION_TOLERANCE
+            for axis in range(3)
+        ) and all(
+            abs(maximum[axis] - aggregate["maximum"][axis]) <= AABB_UNION_TOLERANCE
+            for axis in range(3)
+        )
 
     def read_geometry(self, offset: int, slot: int, model_index: int, geometry_index: int):
         what = f"geometry {geometry_index} of model {model_index} in LOD {slot} at {offset:#x}"
@@ -427,6 +485,7 @@ class Inspector:
             "layout": self._pointer_report(layout, layout_value),
             "declared_bytes": declared_bytes,
             "graphics_marker": None,
+            "declaration_table": None,
             "layout_record": None,
         }
         if graphics is None and graphics_value == 0:
@@ -436,6 +495,7 @@ class Inspector:
         if graphics is not None:
             marker = self.graphics_marker(graphics)
             report["graphics_marker"] = None if marker is None else marker.hex(" ")
+            report["declaration_table"] = self.read_declaration(graphics.offset, what)
             if graphics.offset + declared_bytes > self.graphics_len:
                 self.add(
                     "buffer_outside_graphics",
@@ -458,7 +518,33 @@ class Inspector:
                         f"{what} declares {declared_bytes} bytes but the attributes "
                         f"end at {layout_record['attribute_end']}",
                     )
+                self.check_declaration(report["declaration_table"], layout_record, what)
         return report
+
+    def read_declaration(self, graphics_offset: int, parent: str):
+        """The graphics prefix starts with u32 entries of format and offset/2."""
+        entries = []
+        at = self.system_len + graphics_offset
+        for index in range(MAX_DECLARATION_ENTRIES):
+            if at + DECLARATION_ENTRY_LEN * (index + 1) > len(self.data):
+                break
+            value = self.u32(at + DECLARATION_ENTRY_LEN * index, len(self.data), parent + " declaration")
+            if value == 0:
+                break
+            entries.append({"format": f"{value & 0xFF:#04x}", "offset": (value >> 8) * 2})
+        return entries
+
+    def check_declaration(self, entries, layout_record, what: str):
+        if not entries:
+            return
+        layout_offsets = {attribute["offset"] for attribute in layout_record["attributes"]}
+        for index, entry in enumerate(entries):
+            if entry["offset"] not in layout_offsets:
+                self.add(
+                    "declaration",
+                    f"{what} declaration entry {index} names offset {entry['offset']:#x}, "
+                    f"which is not a present layout attribute",
+                )
 
     def read_layout(self, offset: int, parent: str):
         what = f"layout at {offset:#x} ({parent})"
@@ -513,18 +599,21 @@ class Inspector:
             "offset": offset,
             "buffer_record": self._pointer_report(buffer_record, buffer_value),
             "cluster_count": clusters,
-            "uninterpreted_0a": f"{field_0a:#06x}",
-            "uninterpreted_0c": f"{field_0c:#010x}",
+            "index_count_a": field_0a,
+            "index_count_b_raw": f"{field_0c:#010x}",
+            "index_count_b": field_0c >> 8,
             "constant": f"{constant:#018x}",
             "buffer": None,
         }
         if buffer_record is None and buffer_value == 0:
             self.add("missing_pointer", f"{what} has no index-buffer record pointer")
         if buffer_record is not None:
-            report["buffer"] = self.read_index_buffer(buffer_record.offset, what)
+            report["buffer"] = self.read_index_buffer(
+                buffer_record.offset, what, clusters, field_0a, field_0c >> 8
+            )
         return report
 
-    def read_index_buffer(self, offset: int, parent: str):
+    def read_index_buffer(self, offset: int, parent: str, clusters: int, count_a: int, count_b: int):
         what = f"index buffer record at {offset:#x} ({parent})"
         try:
             element_count = self.u32(offset + 0x08, self.system_len, what + " element count")
@@ -535,22 +624,80 @@ class Inspector:
             self.add("index_buffer", str(err))
             return None
         declared_bytes = element_count * element_unit
-        if graphics is None and graphics_value == 0:
-            self.add("missing_pointer", f"{what} has no graphics pointer")
-        if graphics is not None and graphics.offset + declared_bytes > self.graphics_len:
-            self.add(
-                "index_outside_graphics",
-                f"{what} declares {declared_bytes} bytes at graphics offset "
-                f"{graphics.offset:#x}, past the {self.graphics_len:#x}-byte segment",
-            )
-        return {
+        report = {
             "offset": offset,
             "element_count": element_count,
             "element_unit": element_unit,
             "declared_bytes": declared_bytes,
             "graphics": self._pointer_report(graphics, graphics_value),
             "uninterpreted_28": self._pointer_report(pointer_28, pointer_28_value),
+            "header": None,
+            "header_matches_descriptor": None,
+            "sequential_run_length": None,
+            "sequential_run_in_range": None,
         }
+        if graphics is None and graphics_value == 0:
+            self.add("missing_pointer", f"{what} has no graphics pointer")
+        if graphics is None:
+            return report
+        if graphics.offset + declared_bytes > self.graphics_len:
+            self.add(
+                "index_outside_graphics",
+                f"{what} declares {declared_bytes} bytes at graphics offset "
+                f"{graphics.offset:#x}, past the {self.graphics_len:#x}-byte segment",
+            )
+            return report
+        at = self.system_len + graphics.offset
+        if declared_bytes >= INDEX_HEADER_LEN:
+            header = [self.u32(at + 4 * index, len(self.data), what + " header") for index in range(3)]
+            report["header"] = {
+                "marker": f"{header[0]:#010x}",
+                "count_a": header[1],
+                "count_b": header[2],
+            }
+            report["header_matches_descriptor"] = (
+                (header[0] & 0x8000_0000) != 0
+                and (header[0] & 0x7FFF_FFFF) == clusters
+                and header[1] == count_a
+                and header[2] == count_b
+            )
+            if not report["header_matches_descriptor"]:
+                self.add(
+                    "index_header",
+                    f"{what} header {header[0]:#x}/{header[1]}/{header[2]} does not match "
+                    f"descriptor clusters {clusters} and counts {count_a}/{count_b}",
+                )
+        report["sequential_run_length"] = self.find_sequential_run(at, declared_bytes, count_b)
+        if report["sequential_run_length"] is not None:
+            report["sequential_run_in_range"] = (
+                report["sequential_run_length"] > 0
+                and report["sequential_run_length"] <= MAX_SEQUENTIAL_RUN
+            )
+        return report
+
+    def find_sequential_run(self, at: int, length: int, vertex_count: int):
+        """Length of the leading 0,1,2,... run found in the u16 view of the buffer."""
+        if vertex_count <= 0 or length < 2:
+            return 0
+        limit = at + min(length, 2 * MAX_SEQUENTIAL_RUN)
+        best = 0
+        candidates = 0
+        position = at
+        while position + 2 <= limit and candidates < MAX_SEQUENTIAL_CANDIDATES:
+            if self.u16(position, len(self.data), "index") == 0:
+                candidates += 1
+                run = 0
+                while (
+                    run < vertex_count
+                    and position + 2 * (run + 1) <= limit
+                    and self.u16(position + 2 * run, len(self.data), "index") == run
+                ):
+                    run += 1
+                best = max(best, run)
+                if best >= vertex_count:
+                    break
+            position += 2
+        return best
 
     def read_materials(self):
         header = self.header.get("shader_group")
@@ -588,6 +735,13 @@ class Inspector:
                     shaders.append(shader)
         elif count:
             self.add("missing_pointer", f"{what} has {count} shader(s) but no shader array pointer")
+        key_join = {"direct_store": 0, "edup_indirection": 0, "null_key": 0, "unresolved": 0}
+        for shader in shaders:
+            parameters = shader.get("parameters")
+            if not parameters:
+                continue
+            for name, value in parameters["key_join"].items():
+                key_join[name] += value
         return {
             "group": group,
             "optional": self._pointer_report(optional, optional_value),
@@ -596,6 +750,7 @@ class Inspector:
             "shader_array_entries": array_count,
             "shader_capacity": capacity,
             "shaders": shaders,
+            "key_join": key_join,
         }
 
     def read_shader(self, offset: int, index: int):
@@ -615,6 +770,7 @@ class Inspector:
             "index": index,
             "offset": offset,
             "uninterpreted_00": f"{tag:#010x}",
+            "shader_hash": f"{tag:#010x}",
             "constant": f"{constant:#010x}",
             "first": self._pointer_report(first, first_value),
             "slot_table": self._pointer_report(slots, slots_value),
@@ -656,6 +812,7 @@ class Inspector:
         textures = []
         keys = []
         bound = 0
+        null_keys = 0
         slot_limit = 0
         if slots is not None:
             slot_limit = self.array_count(slots.offset, texture_count, 8, what + " slot table")
@@ -669,7 +826,15 @@ class Inspector:
                 break
             packed = int(pairs[index]["packed"], 0)
             slot = packed // 4
-            entry = {"index": index, "name": pairs[index]["name"], "packed": pairs[index]["packed"], "slot": slot, "record": None, "key": None}
+            entry = {
+                "index": index,
+                "name": pairs[index]["name"],
+                "packed": pairs[index]["packed"],
+                "slot": slot,
+                "record": None,
+                "key": "0x0000000000000000",
+                "key_status": "unbound",
+            }
             if slots is not None and slot < slot_limit:
                 try:
                     pointer, value = self.system_pointer(
@@ -681,6 +846,7 @@ class Inspector:
                 if pointer is not None:
                     bound += 1
                     entry["record"] = self._pointer_report(pointer, value)
+                    entry["key_status"] = "unresolved"
                     try:
                         name_record, _ = self.system_pointer(
                             pointer.offset + 0x30, what + f" texture record {slot} name"
@@ -688,10 +854,15 @@ class Inspector:
                         if name_record is not None:
                             key = self.u64(name_record.offset + 0x08, self.system_len, what + " key")
                             entry["key"] = f"{key:#018x}"
-                            keys.append(key)
+                            if key == 0:
+                                entry["key_status"] = "null"
+                                null_keys += 1
+                            else:
+                                keys.append(key)
                     except DrawableError as err:
                         self.add("pointer_read", str(err))
             textures.append(entry)
+        unresolved = bound - null_keys
         return {
             "offset": offset,
             "texture_count": texture_count,
@@ -701,6 +872,12 @@ class Inspector:
             "bound": bound,
             "unbound": texture_count - bound,
             "distinct_keys": len(set(keys)),
+            "key_join": {
+                "direct_store": 0,
+                "edup_indirection": 0,
+                "null_key": null_keys,
+                "unresolved": unresolved,
+            },
         }
 
     def derive_graphics_base(self):
@@ -827,9 +1004,19 @@ def print_text(report):
                     f"{len(layout.get('attributes', []))} attribute(s), "
                     f"graphics {record.get('graphics', {}).get('offset', 0):#x}"
                 )
+                descriptor = geometry.get("index_descriptor_record") or {}
+                index_buffer = descriptor.get("buffer") or {}
+                if index_buffer:
+                    print(
+                        f"      index buffer: {index_buffer.get('element_count', 0)} element(s), "
+                        f"{index_buffer.get('declared_bytes', 0)} bytes, "
+                        f"header match {index_buffer.get('header_matches_descriptor')}, "
+                        f"sequential run {index_buffer.get('sequential_run_length')}"
+                    )
                 aabb = model.get("aabb", {})
                 if aabb.get("resolved"):
-                    print(f"      AABB at {aabb['offset']:#x}")
+                    print(f"      AABB at {aabb['offset']:#x}, records {model.get('aabb_record_count')}, "
+                          f"union {model.get('aabb_union_matches')}")
     graphics_base = report.get("graphics_base")
     if graphics_base:
         base = graphics_base["base"]
@@ -841,12 +1028,17 @@ def print_text(report):
         for shader in materials["shaders"]:
             params = shader.get("parameters") or {}
             print(
-                f"  shader {shader['index']} at {shader['offset']:#x}: "
+                f"  shader {shader['index']} at {shader['offset']:#x}: hash {shader['shader_hash']}, "
                 f"{params.get('texture_count', 0)} texture parameter(s), "
                 f"{params.get('total', 0)} total, {params.get('bound', 0)} bound, "
                 f"{params.get('unbound', 0)} unbound, "
                 f"{params.get('distinct_keys', 0)} distinct key(s)"
             )
+        join = materials["key_join"]
+        print(
+            f"  key join: {join['direct_store']} direct store, {join['edup_indirection']} EDUP, "
+            f"{join['null_key']} null, {join['unresolved']} unresolved"
+        )
     for issue in report.get("issues", []):
         print(f"issue:       {issue['code']}: {issue['detail']}")
 
