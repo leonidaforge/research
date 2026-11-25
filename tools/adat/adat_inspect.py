@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Inspect the ADAT header, its chunk records and the stream framing.
+"""Inspect the ADAT header, chunk records, stream descriptors and framing.
 
 The tool reads each input read-only, refuses to write output inside an input
-directory, and reports offsets, counts, type bytes, codec bytes and framing
-statistics. It does not print payload text and assigns no codec identity.
+directory, and reports offsets, counts, type bytes, codec bytes, descriptor
+entries, seek tables and framing statistics. It does not print payload text and
+assigns no codec identity.
 """
 
 from __future__ import annotations
@@ -22,6 +23,7 @@ VERSION = 1
 VARIANTS = {0xFF02, 0xFF21, 0xFF25, 0xFF61}
 RECORD_BYTES = 8
 BLOCK_SIZE = 2048
+A3_ENTRY_BYTES = 4
 DEFAULT_MAX_BYTES = 64 * 1024 * 1024
 
 
@@ -88,17 +90,30 @@ def _read_records(data, variant, streams, data_offset):
     return records
 
 
+def _validate_record_extents(records, data, label, data_offset):
+    for record in records:
+        if record["data_offset"] < data_offset:
+            raise AdatError(
+                f"{label}: record at 0x{record['offset']:x} points before the data offset"
+            )
+        if record["data_offset"] + record["size"] > len(data):
+            raise AdatError(
+                f"{label}: record at 0x{record['offset']:x} overruns the payload"
+            )
+
+
 def _descriptor_76(data, record):
     size = record["size"]
     start = record["data_offset"]
-    if size < 32:
+    if size != 32:
         raise AdatError(
-            f"0x76 record at 0x{record['offset']:x} is {size} bytes, shorter than 32"
+            f"0x76 record at 0x{record['offset']:x} is {size} bytes, not 32"
         )
     return {
         "kind": "0x76",
         "declared": _u32(data, start),
         "rate": _u16(data, start + 8),
+        "rate_flags": _u16(data, start + 10),
         "codec": data[start + 28],
         "tail": data[start + 28:start + 32].hex(),
     }
@@ -128,7 +143,7 @@ def _descriptor_48(data, record):
     entries = []
     for index in range(count):
         base = start + 12 + 16 * index
-        unknown, decoded, rate_flags, codec, flags = struct.unpack_from(
+        unknown, decoded, rate_flags, codec_word, flags = struct.unpack_from(
             "<IIIHH", data, base
         )
         entries.append(
@@ -137,8 +152,8 @@ def _descriptor_48(data, record):
                 "decoded": decoded,
                 "rate": rate_flags >> 16,
                 "rate_flags": rate_flags & 0xFFFF,
-                "codec": codec & 0xFF,
-                "codec_word": codec,
+                "codec": codec_word & 0xFF,
+                "codec_word": codec_word,
                 "flags": flags,
             }
         )
@@ -152,6 +167,29 @@ def _descriptor_48(data, record):
         "rate": entries[0]["rate"] if entries else None,
         "declared": entries[0]["decoded"] if entries else None,
         "entries": entries,
+    }
+
+
+def _parse_a3(data, record):
+    size = record["size"]
+    if size % A3_ENTRY_BYTES:
+        raise AdatError(
+            f"0xA3 record at 0x{record['offset']:x} has size {size},"
+            f" not a multiple of {A3_ENTRY_BYTES}"
+        )
+    count = size // A3_ENTRY_BYTES
+    values = [
+        _u32(data, record["data_offset"] + A3_ENTRY_BYTES * index)
+        for index in range(count)
+    ]
+    return {
+        "entry_bytes": A3_ENTRY_BYTES,
+        "count": count,
+        "first": values[0] if values else None,
+        "last": values[-1] if values else None,
+        "first_is_zero": bool(values) and values[0] == 0,
+        "nondecreasing": all(left <= right for left, right in zip(values, values[1:])),
+        "size": size,
     }
 
 
@@ -178,8 +216,10 @@ def _new_stream_stats(descriptor):
         "declared": descriptor.get("declared"),
         "blocks": 0,
         "data_blocks": 0,
+        "sentinel_blocks": 0,
         "metadata_blocks": 0,
         "zero_blocks": 0,
+        "unknown_blocks": 0,
         "packets": 0,
         "payload_bytes": 0,
         "padding_bytes": 0,
@@ -240,20 +280,31 @@ def _walk_data_block(block, stats, block_index):
     return True
 
 
-def _inspect_ff25_stream(data, chunk, size, descriptor, stats, report):
+def _inspect_ff25_stream(chunk, size, descriptor, stats):
     stride = descriptor["page_stride"] // BLOCK_SIZE
     page_count = descriptor["page_count"]
     entries = descriptor["entries"]
-    stats["codec"] = f"0x{entries[0]['codec']:02x}" if entries else "unknown"
-    stats["rate"] = entries[0]["rate"] if entries else None
-    stats["declared"] = entries[0]["decoded"] if entries else None
-    stats["page_count"] = page_count
-    stats["page_stride"] = stride
-    stats["entry_count"] = len(entries)
+    stats["entries"] = entries
+    stats["entry_codecs"] = {}
+    stats["entry_rates"] = {}
+    for entry in entries:
+        codec = f"0x{entry['codec']:02x}"
+        rate = entry["rate"]
+        stats["entry_codecs"][codec] = stats["entry_codecs"].get(codec, 0) + 1
+        stats["entry_rates"][rate] = stats["entry_rates"].get(rate, 0) + 1
+    if len(stats["entry_codecs"]) > 1:
+        stats["violations"].append(
+            {"kind": "mixed_entry_codecs", "values": sorted(stats["entry_codecs"])}
+        )
+    if len(stats["entry_rates"]) > 1:
+        stats["violations"].append(
+            {"kind": "mixed_entry_rates", "values": sorted(stats["entry_rates"])}
+        )
 
     block_total = size // BLOCK_SIZE
     position = 0
     pages = 0
+    metadata_per_page = {}
     while position < block_total:
         end = min(position + stride, block_total)
         classes = [
@@ -261,10 +312,12 @@ def _inspect_ff25_stream(data, chunk, size, descriptor, stats, report):
             for index in range(position, end)
         ]
         cursor = 0
-        if cursor < len(classes) and classes[cursor] == "sentinel":
+        sentinel = 0
+        while cursor < len(classes) and classes[cursor] == "sentinel":
+            sentinel += 1
             cursor += 1
         metadata = 0
-        while cursor < len(classes) and classes[cursor] in ("other", "sentinel"):
+        while cursor < len(classes) and classes[cursor] == "other":
             metadata += 1
             cursor += 1
         data_start = cursor
@@ -278,32 +331,40 @@ def _inspect_ff25_stream(data, chunk, size, descriptor, stats, report):
         data_end = cursor
         while cursor < len(classes) and classes[cursor] == "zero":
             cursor += 1
-        if cursor != len(classes):
+        zero_end = cursor
+        unknown = len(classes) - zero_end
+        if sentinel == 0:
+            stats["violations"].append(
+                {"kind": "missing_page_sentinel", "page": pages, "block": position}
+            )
+        if unknown:
             stats["violations"].append(
                 {
                     "kind": "unexplained_page_tail",
                     "page": pages,
-                    "block": position,
-                    "classes": classes[cursor:],
+                    "block": position + zero_end,
+                    "classes": classes[zero_end:],
                 }
             )
+        stats["sentinel_blocks"] += sentinel
+        stats["metadata_blocks"] += metadata
         stats["data_blocks"] += data_end - data_start
-        stats["metadata_blocks"] += data_start
-        stats["zero_blocks"] += len(classes) - data_end
-        stats["pages"] = pages + 1
+        stats["zero_blocks"] += zero_end - data_end
+        stats["unknown_blocks"] += unknown
+        metadata_per_page[metadata] = metadata_per_page.get(metadata, 0) + 1
         position = end
         pages += 1
+    stats["pages"] = pages
+    stats["page_count"] = page_count
+    stats["page_stride"] = stride
+    stats["page_metadata_counts"] = metadata_per_page
     if pages != page_count:
         stats["violations"].append(
-            {
-                "kind": "page_count_mismatch",
-                "declared": page_count,
-                "observed": pages,
-            }
+            {"kind": "page_count_mismatch", "declared": page_count, "observed": pages}
         )
 
 
-def _inspect_plain_stream(data, chunk, size, descriptor, stats):
+def _inspect_plain_stream(chunk, size, stats):
     block_total = size // BLOCK_SIZE
     for index in range(block_total):
         block = chunk[index * BLOCK_SIZE:(index + 1) * BLOCK_SIZE]
@@ -312,14 +373,71 @@ def _inspect_plain_stream(data, chunk, size, descriptor, stats):
             _walk_data_block(block, stats, index)
             stats["data_blocks"] += 1
         else:
-            stats["metadata_blocks" if kind != "zero" else "zero_blocks"] += 1
+            stats["unknown_blocks"] += 1
             stats["violations"].append(
                 {"kind": "unexpected_block_class", "block": index, "class": kind}
             )
 
 
+def _pair_records(records, variant):
+    """Return (descriptor, 0x55, 0xA3) triples in stream order."""
+    if variant == 0xFF25:
+        d48 = [record for record in records if record["type"] == 0x48]
+        chunks = [record for record in records if record["type"] == 0x55]
+        a3 = [record for record in records if record["type"] == 0xA3]
+        return [
+            (d48[0] if d48 else None,
+             chunks[0] if chunks else None,
+             a3[0] if a3 else None)
+        ]
+    groups = []
+    start = 0
+    for index, record in enumerate(records):
+        if record["type"] != 0x76:
+            continue
+        chunk = next(
+            (candidate for candidate in reversed(records[start:index])
+             if candidate["type"] == 0x55),
+            None,
+        )
+        a3 = None
+        cursor = index + 1
+        while cursor < len(records) and records[cursor]["type"] != 0x76:
+            if records[cursor]["type"] == 0x55 and chunk is None:
+                chunk = records[cursor]
+            if records[cursor]["type"] == 0xA3 and a3 is None:
+                a3 = records[cursor]
+            cursor += 1
+        if a3 is None:
+            a3 = next(
+                (candidate for candidate in reversed(records[start:index])
+                 if candidate["type"] == 0xA3),
+                None,
+            )
+        groups.append((record, chunk, a3))
+        start = index + 1
+    return groups
+
+
+def _empty_totals():
+    return {
+        "streams": 0,
+        "blocks": 0,
+        "data_blocks": 0,
+        "sentinel_blocks": 0,
+        "metadata_blocks": 0,
+        "zero_blocks": 0,
+        "unknown_blocks": 0,
+        "packets": 0,
+        "payload_bytes": 0,
+        "padding_bytes": 0,
+        "violations": 0,
+        "exceptions": 0,
+    }
+
+
 def inspect_framing(data: bytes, label: str = "<memory>") -> dict:
-    """Walk 0x55 stream records and classify their framing."""
+    """Walk stream records, descriptors, 0xA3 tables and 0x55 framing."""
     if len(data) < 0x10 or data[0:4] != MAGIC:
         raise AdatError(f"{label}: not an ADAT payload")
     flags = _u32(data, 0x04)
@@ -327,70 +445,46 @@ def inspect_framing(data: bytes, label: str = "<memory>") -> dict:
     streams = _u32(data, 0x08)
     data_offset = _u32(data, 0x0C)
     records = _read_records(data, variant, streams, data_offset)
-    for record in records:
-        if record["data_offset"] < data_offset:
-            raise AdatError(
-                f"{label}: record at 0x{record['offset']:x} points before the data offset"
-            )
-        if record["data_offset"] + record["size"] > len(data):
-            raise AdatError(
-                f"{label}: record at 0x{record['offset']:x} overruns the payload"
-            )
-
-    descriptors = []
-    chunk_records = []
-    if variant == 0xFF25:
-        for record in records:
-            if record["type"] == 0x48:
-                descriptors.append(_descriptor_48(data, record))
-            elif record["type"] == 0x55:
-                chunk_records.append(record)
-    else:
-        for record in records:
-            if record["type"] == 0x76:
-                descriptors.append(_descriptor_76(data, record))
-            elif record["type"] == 0x55:
-                chunk_records.append(record)
+    _validate_record_extents(records, data, label, data_offset)
 
     report = {
         "variant": f"0x{variant:04x}",
         "streams": [],
         "codec_counts": {},
+        "codec_totals": {},
+        "all_totals": _empty_totals(),
         "exceptions": [],
-        "totals": {
-            "streams": 0,
-            "blocks": 0,
-            "data_blocks": 0,
-            "metadata_blocks": 0,
-            "zero_blocks": 0,
-            "packets": 0,
-            "payload_bytes": 0,
-            "padding_bytes": 0,
-            "violations": 0,
-        },
     }
 
-    if variant == 0xFF25:
-        pairs = [(descriptors, chunk_records[0])] if descriptors and chunk_records else []
-        if len(chunk_records) != 1:
+    for descriptor_record, chunk_record, a3_record in _pair_records(records, variant):
+        if descriptor_record is None:
             report["exceptions"].append(
-                {"kind": "0x55_record_count", "count": len(chunk_records)}
+                {"kind": "missing_stream_descriptor", "chunk": chunk_record is not None}
             )
-    else:
-        pairs = [([descriptor], chunk) for descriptor, chunk in zip(descriptors, chunk_records)]
-        if len(descriptors) != len(chunk_records):
+            continue
+        if descriptor_record["type"] == 0x48:
+            descriptor = _descriptor_48(data, descriptor_record)
+        else:
+            descriptor = _descriptor_76(data, descriptor_record)
+        if chunk_record is None:
             report["exceptions"].append(
-                {
-                    "kind": "descriptor_chunk_count_mismatch",
-                    "descriptors": len(descriptors),
-                    "chunks": len(chunk_records),
-                }
+                {"kind": "missing_stream_chunk", "descriptor": descriptor_record["type"]}
             )
-
-    for descriptor_list, chunk_record in pairs:
+            continue
         size = chunk_record["size"]
+        chunk = data[chunk_record["data_offset"]:chunk_record["data_offset"] + size]
+        if len(chunk) != size:
+            raise AdatError(
+                f"{label}: 0x55 record at 0x{chunk_record['offset']:x} is truncated"
+            )
+        stats = _new_stream_stats(descriptor)
+        stats["variant"] = report["variant"]
+        stats["label"] = label
+        stats["size"] = size
+        stats["blocks"] = size // BLOCK_SIZE
+        stats["records"] = len(descriptor["entries"]) if "entries" in descriptor else 1
         if size % BLOCK_SIZE:
-            report["exceptions"].append(
+            stats["violations"].append(
                 {
                     "kind": "size_not_multiple_of_block",
                     "size": size,
@@ -398,50 +492,74 @@ def inspect_framing(data: bytes, label: str = "<memory>") -> dict:
                     "record_offset": chunk_record["offset"],
                 }
             )
-        chunk = data[chunk_record["data_offset"]:chunk_record["data_offset"] + size]
-        if len(chunk) != size:
-            raise AdatError(
-                f"{label}: 0x55 record at 0x{chunk_record['offset']:x} is truncated"
-            )
-        if variant == 0xFF25:
-            stats = _new_stream_stats(descriptor_list[0])
-            stats["records"] = len(descriptor_list)
-            _inspect_ff25_stream(data, chunk, size, descriptor_list[0], stats, report)
-        else:
-            descriptor = descriptor_list[0]
-            stats = _new_stream_stats(descriptor)
-            stats["records"] = 1
-            if descriptor["codec"] == 0x02:
-                stats["raw_size_check"] = {
-                    "size": size,
-                    "declared": descriptor["declared"],
-                    "four_bytes_per_sample": size == 4 * descriptor["declared"],
-                }
-                stats["rate"] = descriptor["rate"]
-                stats["declared"] = descriptor["declared"]
+        codec = descriptor["codec"]
+        if codec == 0x02:
+            stats["raw_size_check"] = {
+                "size": size,
+                "declared": descriptor["declared"],
+                "four_bytes_per_sample": size == 4 * descriptor["declared"],
+            }
+        elif codec == 0x0B:
+            if variant == 0xFF25:
+                _inspect_ff25_stream(chunk, size, descriptor, stats)
             else:
-                _inspect_plain_stream(data, chunk, size, descriptor, stats)
-        stats["size"] = size
-        stats["blocks"] = size // BLOCK_SIZE
+                _inspect_plain_stream(chunk, size, stats)
+        else:
+            stats["violations"].append(
+                {"kind": "unclassified_codec", "codec": f"0x{codec:02x}"}
+            )
+        if a3_record is not None:
+            stats["a3"] = _parse_a3(data, a3_record)
+            if codec == 0x02:
+                report["exceptions"].append(
+                    {"kind": "unexpected_a3_for_codec_0x02",
+                     "record_offset": chunk_record["offset"]}
+                )
+            elif variant == 0xFF25:
+                stats["a3"]["count_matches_pages"] = (
+                    stats["a3"]["count"] == stats.get("pages")
+                )
+            else:
+                stats["a3"]["count_matches_blocks_plus_one"] = (
+                    stats["a3"]["count"] == stats["blocks"] + 1
+                )
+        elif codec == 0x0B:
+            report["exceptions"].append(
+                {"kind": "missing_a3", "record_offset": chunk_record["offset"]}
+            )
+
         codec_key = stats["codec"]
         report["codec_counts"][codec_key] = report["codec_counts"].get(codec_key, 0) + 1
-        report["streams"].append(stats)
-        totals = report["totals"]
+        totals = report["codec_totals"].setdefault(codec_key, _empty_totals())
         totals["streams"] += 1
         totals["blocks"] += stats["blocks"]
         totals["data_blocks"] += stats["data_blocks"]
+        totals["sentinel_blocks"] += stats["sentinel_blocks"]
         totals["metadata_blocks"] += stats["metadata_blocks"]
         totals["zero_blocks"] += stats["zero_blocks"]
+        totals["unknown_blocks"] += stats["unknown_blocks"]
         totals["packets"] += stats["packets"]
         totals["payload_bytes"] += stats["payload_bytes"]
         totals["padding_bytes"] += stats["padding_bytes"]
         totals["violations"] += len(stats["violations"])
-        if stats["violations"]:
-            for violation in stats["violations"][:3]:
-                entry = dict(violation)
-                entry["record_offset"] = chunk_record["offset"]
-                report["exceptions"].append(entry)
+        for key in ("blocks", "data_blocks", "sentinel_blocks", "metadata_blocks",
+                    "zero_blocks", "unknown_blocks", "packets", "payload_bytes",
+                    "padding_bytes", "streams"):
+            report["all_totals"][key] += stats[key] if key in stats else totals[key]
+        report["all_totals"]["violations"] += len(stats["violations"])
+        report["streams"].append(stats)
+        for violation in stats["violations"]:
+            entry = dict(violation)
+            entry["record_offset"] = chunk_record["offset"]
+            report["exceptions"].append(entry)
 
+    report["all_totals"]["exceptions"] = len(report["exceptions"])
+    for key in ("0x0b", "0x02"):
+        if key in report["codec_totals"]:
+            report["codec_totals"][key]["exceptions"] = sum(
+                1 for stream in report["streams"]
+                if stream["codec"] == key and stream["violations"]
+            )
     return report
 
 
@@ -579,24 +697,185 @@ def inspect_bytes(data: bytes, label: str = "<memory>", framing: bool = False) -
     return report
 
 
+def _summarize(reports):
+    summary = {
+        "samples": len(reports),
+        "variants": {},
+        "codec_counts": {},
+        "descriptor_counts": {},
+        "codec_totals": {},
+        "a3": {
+            "streams": 0,
+            "first_is_zero": 0,
+            "nondecreasing": 0,
+            "count_matches_blocks_plus_one": 0,
+            "count_matches_pages": 0,
+            "missing": 0,
+            "unexpected": 0,
+        },
+        "ff25": {
+            "streams": 0,
+            "pages": 0,
+            "sentinel_blocks": 0,
+            "metadata_blocks": 0,
+            "zero_blocks": 0,
+            "data_blocks": 0,
+            "page_metadata_counts": {},
+            "entry_codecs": {},
+            "entry_rates": {},
+            "stride_rows": {},
+        },
+        "rates": {"0x76": {}, "atypical": []},
+        "codec02": {"records": 0, "four_bytes_per_sample": 0},
+        "violations": 0,
+        "exceptions": 0,
+        "exception_kinds": {},
+        "block_size_violations": 0,
+    }
+    for report in reports:
+        framing = report.get("framing")
+        if not framing:
+            continue
+        summary["variants"][framing["variant"]] = (
+            summary["variants"].get(framing["variant"], 0) + 1
+        )
+        for key, value in framing["codec_counts"].items():
+            summary["codec_counts"][key] = summary["codec_counts"].get(key, 0) + value
+        for key, totals in framing["codec_totals"].items():
+            target = summary["codec_totals"].setdefault(key, _empty_totals())
+            for field, value in totals.items():
+                target[field] = target.get(field, 0) + value
+        summary["violations"] += framing["all_totals"]["violations"]
+        summary["exceptions"] += len(framing["exceptions"])
+        for exception in framing["exceptions"]:
+            kind = exception.get("kind", "unknown")
+            summary["exception_kinds"][kind] = summary["exception_kinds"].get(kind, 0) + 1
+
+        for index, stream in enumerate(framing["streams"]):
+            if stream["variant"] == "0xff25":
+                for codec, count in stream.get("entry_codecs", {}).items():
+                    summary["descriptor_counts"][codec] = (
+                        summary["descriptor_counts"].get(codec, 0) + count
+                    )
+            else:
+                summary["descriptor_counts"][stream["codec"]] = (
+                    summary["descriptor_counts"].get(stream["codec"], 0) + 1
+                )
+            a3 = stream.get("a3")
+            if a3:
+                summary["a3"]["streams"] += 1
+                summary["a3"]["first_is_zero"] += int(a3["first_is_zero"])
+                summary["a3"]["nondecreasing"] += int(a3["nondecreasing"])
+                summary["a3"]["count_matches_blocks_plus_one"] += int(
+                    a3.get("count_matches_blocks_plus_one", False)
+                )
+                summary["a3"]["count_matches_pages"] += int(
+                    a3.get("count_matches_pages", False)
+                )
+                if stream["codec"] == "0x02":
+                    summary["a3"]["unexpected"] += 1
+            elif stream["codec"] == "0x0b":
+                summary["a3"]["missing"] += 1
+            if stream["codec"] == "0x02":
+                summary["codec02"]["records"] += 1
+                if stream.get("raw_size_check", {}).get("four_bytes_per_sample"):
+                    summary["codec02"]["four_bytes_per_sample"] += 1
+            if stream["codec"] == "0x0b" and stream["variant"] == "0xff25":
+                summary["ff25"]["streams"] += 1
+                summary["ff25"]["pages"] += stream.get("pages", 0)
+                summary["ff25"]["sentinel_blocks"] += stream.get("sentinel_blocks", 0)
+                summary["ff25"]["metadata_blocks"] += stream.get("metadata_blocks", 0)
+                summary["ff25"]["zero_blocks"] += stream.get("zero_blocks", 0)
+                summary["ff25"]["data_blocks"] += stream.get("data_blocks", 0)
+                for count, pages in stream.get("page_metadata_counts", {}).items():
+                    summary["ff25"]["page_metadata_counts"][str(count)] = (
+                        summary["ff25"]["page_metadata_counts"].get(str(count), 0) + pages
+                    )
+                for codec, count in stream.get("entry_codecs", {}).items():
+                    summary["ff25"]["entry_codecs"][codec] = (
+                        summary["ff25"]["entry_codecs"].get(codec, 0) + count
+                    )
+                for rate, count in stream.get("entry_rates", {}).items():
+                    summary["ff25"]["entry_rates"][str(rate)] = (
+                        summary["ff25"]["entry_rates"].get(str(rate), 0) + count
+                    )
+                stride_blocks = stream.get("page_stride")
+                if stride_blocks is not None:
+                    summary["ff25"]["stride_rows"][str(stride_blocks)] = (
+                        summary["ff25"]["stride_rows"].get(str(stride_blocks), 0) + 1
+                    )
+            if stream["codec"] == "0x02":
+                continue
+            rate = stream.get("rate")
+            if rate is None:
+                continue
+            key = str(rate)
+            if stream["variant"] == "0xff25":
+                # Entry rates are already counted above; keep 0x76 only here.
+                continue
+            summary["rates"]["0x76"][key] = summary["rates"]["0x76"].get(key, 0) + 1
+            if rate != 48000:
+                summary["rates"]["atypical"].append(
+                    {
+                        "label": report["label"],
+                        "variant": stream["variant"],
+                        "stream_index": index,
+                        "codec": stream["codec"],
+                        "rate": rate,
+                        "declared": stream.get("declared"),
+                        "size": stream.get("size"),
+                    }
+                )
+        for exception in framing["exceptions"]:
+            if exception.get("kind") == "size_not_multiple_of_block":
+                summary["block_size_violations"] += 1
+    return summary
+
+
+def _print_summary(summary, stream):
+    print(f"samples: {summary['samples']}", file=stream)
+    print(f"variants: {summary['variants']}", file=stream)
+    print(f"codec_counts: {summary['codec_counts']}", file=stream)
+    print(f"descriptor_counts: {summary['descriptor_counts']}", file=stream)
+    for codec, totals in sorted(summary["codec_totals"].items()):
+        print(
+            f"codec {codec}: streams={totals['streams']} blocks={totals['blocks']}"
+            f" data={totals['data_blocks']} sentinel={totals['sentinel_blocks']}"
+            f" metadata={totals['metadata_blocks']} zero={totals['zero_blocks']}"
+            f" unknown={totals['unknown_blocks']} packets={totals['packets']}"
+            f" payload_bytes={totals['payload_bytes']}"
+            f" padding_bytes={totals['padding_bytes']}"
+            f" violations={totals['violations']}",
+            file=stream,
+        )
+    print(f"a3: {summary['a3']}", file=stream)
+    print(f"ff25: {summary['ff25']}", file=stream)
+    print(f"rates 0x76: {summary['rates']['0x76']}", file=stream)
+    print(f"rates 0x48 entries: {summary['ff25']['entry_rates']}", file=stream)
+    print(f"codec02: {summary['codec02']}", file=stream)
+    print(f"violations: {summary['violations']}; exceptions: {summary['exceptions']}", file=stream)
+    print(f"exception kinds: {summary['exception_kinds']}", file=stream)
+    if summary["rates"]["atypical"]:
+        print(f"atypical rate records: {len(summary['rates']['atypical'])}", file=stream)
+        for item in summary["rates"]["atypical"]:
+            print(f"  {item}", file=stream)
+
+
 def _print_framing(report, stream):
     framing = report.get("framing")
     if not framing:
         return
-    totals = framing["totals"]
-    print(
-        f"framing: streams={totals['streams']} blocks={totals['blocks']}"
-        f" data={totals['data_blocks']} metadata={totals['metadata_blocks']}"
-        f" zero={totals['zero_blocks']} packets={totals['packets']}"
-        f" payload_bytes={totals['payload_bytes']}"
-        f" padding_bytes={totals['padding_bytes']}"
-        f" violations={totals['violations']}",
-        file=stream,
-    )
-    codecs = ", ".join(
-        f"{key}={value}" for key, value in sorted(framing["codec_counts"].items())
-    )
-    print(f"framing codecs: {codecs}", file=stream)
+    for codec, totals in sorted(framing["codec_totals"].items()):
+        print(
+            f"framing {codec}: streams={totals['streams']} blocks={totals['blocks']}"
+            f" data={totals['data_blocks']} sentinel={totals['sentinel_blocks']}"
+            f" metadata={totals['metadata_blocks']} zero={totals['zero_blocks']}"
+            f" unknown={totals['unknown_blocks']} packets={totals['packets']}"
+            f" payload_bytes={totals['payload_bytes']}"
+            f" padding_bytes={totals['padding_bytes']}"
+            f" violations={totals['violations']}",
+            file=stream,
+        )
     for exception in framing["exceptions"][:8]:
         print(f"framing exception: {exception}", file=stream)
 
@@ -663,36 +942,68 @@ def _write_atomic(path: str, text: str) -> None:
         raise
 
 
+def _read_input_list(path):
+    paths = []
+    with open(path, encoding="utf-8") as handle:
+        for line in handle:
+            value = line.strip()
+            if value and not value.startswith("#"):
+                paths.append(value)
+    return paths
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(
-        description="Inspect an ADAT header, chunk records and stream framing."
+        description="Inspect ADAT headers, chunk records, descriptors and framing."
     )
-    parser.add_argument("samples", nargs="+", help="stored ADAT payload files")
+    parser.add_argument("samples", nargs="*", help="stored ADAT payload files")
+    parser.add_argument("--input-list", help="read sample paths from this file")
     parser.add_argument("--json", action="store_true", help="print JSON instead of text")
     parser.add_argument("--framing", action="store_true",
                         help="walk the 0x55 stream records in 2048-byte blocks")
+    parser.add_argument("--summary", action="store_true",
+                        help="aggregate the inputs instead of printing each report")
     parser.add_argument("--output", help="write output to this file instead of stdout")
     parser.add_argument("--max-bytes", type=int, default=DEFAULT_MAX_BYTES,
                         help="refuse a sample larger than this many bytes")
     args = parser.parse_args(argv)
 
-    if args.output and _output_is_inside_input(args.output, args.samples):
+    samples = list(args.samples)
+    if args.input_list:
+        try:
+            samples.extend(_read_input_list(args.input_list))
+        except OSError as error:
+            print(f"error: {error}", file=sys.stderr)
+            return 1
+    if not samples:
+        parser.error("no samples")
+    if args.output and _output_is_inside_input(args.output, samples):
         parser.error("refusing to write output inside an input directory")
 
     reports = []
     try:
-        for path in args.samples:
+        for path in samples:
             label = os.path.basename(path)
             if os.path.getsize(path) > args.max_bytes:
                 raise AdatError(f"{label}: larger than the {args.max_bytes}-byte cap")
             with open(path, "rb") as handle:
                 data = handle.read()
-            reports.append(inspect_bytes(data, label=label, framing=args.framing))
+            reports.append(
+                inspect_bytes(data, label=label, framing=args.framing or args.summary)
+            )
     except (OSError, AdatError) as error:
         print(f"error: {error}", file=sys.stderr)
         return 1
 
-    if args.json:
+    if args.summary:
+        summary = _summarize(reports)
+        if args.json:
+            text = json.dumps(summary, indent=2) + "\n"
+        else:
+            buffer = io.StringIO()
+            _print_summary(summary, buffer)
+            text = buffer.getvalue()
+    elif args.json:
         text = json.dumps(reports, indent=2) + "\n"
     else:
         buffer = io.StringIO()

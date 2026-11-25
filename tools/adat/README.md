@@ -10,9 +10,12 @@ and assigns no codec or stream identity.
 ```sh
 python tools/adat/adat_inspect.py <SAMPLE> [<SAMPLE> ...]
 python tools/adat/adat_inspect.py <SAMPLE> [...] --framing --json --output <REPORT>
+python tools/adat/adat_inspect.py --input-list <LIST> --summary --json --output <REPORT>
 ```
 
 All paths are required. `--max-bytes` (default 64 MiB) bounds each read.
+`--input-list` adds one path per line; blank lines and `#` comments are skipped.
+`--summary` aggregates the inputs instead of printing one report per sample.
 `--output` writes atomically outside the input directory.
 
 ## Checks
@@ -49,10 +52,24 @@ name.
 A `0x48` entry is `[u32 unknown][u32 decoded][u32 rate_flags][u16 codec_word][u16 flags]`.
 The record size must equal `12 + 16 * count`. `FF25` uses one `0x55` record for
 all entries; the other variants pair one `0x76` with one `0x55` in record order.
+An `FF25` stream reports the codec and rate of every entry, and a record with
+mixed codecs or rates is a violation.
+
+## 0xA3 tables
+
+A `0xA3` record is a `u32` array. Each entry is 4 bytes. The parser reports the
+entry count, first value, last value, start-at-zero flag, non-decreasing flag,
+and the count relation:
+
+- non-`FF25`: `count == blocks + 1`;
+- `FF25`: `count == page count`.
+
+A `0x0B` stream without an `A3` record is an exception. A `0x02` stream with an
+`A3` record is an exception.
 
 ## Framing
 
-For a `0x55` record whose descriptor codec byte is not `0x02`:
+For a `0x55` record whose descriptor codec byte is `0x0B`:
 
 - the record size must be a multiple of 2,048 bytes;
 - each data block is a sequence of `u16 length` and `length` bytes;
@@ -61,9 +78,12 @@ For a `0x55` record whose descriptor codec byte is not `0x02`:
 - a length that would cross the block end is a violation.
 
 For `FF25`, the stream is divided into pages of the `0x48` stride. A page starts
-with a sentinel block (`u32` `0xFFFFFFFF`), may carry one or more metadata
-blocks, then data blocks, then zero blocks to the page end. The page count must
-equal the `0x48` field. The block classes are counted per page.
+with one or more sentinel blocks (`u32` `0xFFFFFFFF`), may carry other metadata
+blocks, then data blocks, then zero blocks to the page end. The tool counts
+sentinel, other metadata, data, zero and unknown blocks separately. The page
+count must equal the `0x48` field. Because every leading non-data, non-zero
+block is classified as metadata, a corrupted first data block would be counted
+as metadata; the tool cannot distinguish that case.
 
 The observed codec bytes are `0x0B` and `0x02`. For `0x02`, the tool reports
 `size == 4 * declared` and does not walk packet lengths. A different codec byte
@@ -90,9 +110,14 @@ The byte immediately before the data offset is the last record's type byte.
 - The `FF02` chunk sum and formula result, or the `FF61` second offset.
 - Boolean checks for flags packing, record-run end, nonzero sizes, extents and
   the last record type.
-- With `--framing`: per-stream codec byte, rate, declared count, block counts,
-  packet count, length range and histogram, TOC-shaped first-byte histogram,
-  padding bytes, and every block-boundary violation with its block and offset.
+- With `--framing`: per-stream codec byte, rate, declared count, `0x48` entry
+  codecs and rates, `0xA3` count and terminal value, block counts split into
+  data, sentinel, metadata, zero and unknown, packet count, length range and
+  histogram, TOC-shaped first-byte histogram, padding bytes, and every
+  block-boundary violation with its block and offset.
+- With `--summary`: sample count, variant counts, codec stream counts, per-codec
+  block and packet totals, `0xA3` count relations, `FF25` page and entry totals,
+  rate distributions, atypical rate records and exception counts.
 
 No packet bytes or decoded audio are printed.
 
@@ -110,4 +135,5 @@ The tests build synthetic payloads for all four variants, a misaligned record
 run, an overrunning record, a zero-size record, an unknown variant, a version
 other than 1, a two-block `0x76` stream, a block-length overrun, nonzero
 padding, a non-multiple `0x55` size, a `0x02` size relation, an `FF25` page
-layout and a page-count mismatch. They do not read game files.
+layout, a page-count mismatch, a start-at-zero non-decreasing `0xA3` table and a
+non-monotonic `0xA3` table. They do not read game files.

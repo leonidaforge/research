@@ -115,9 +115,10 @@ class FramingTests(unittest.TestCase):
             (0x55, block0 + block1, 32),
         ])
         report = adat_inspect.inspect_framing(data)
-        self.assertEqual(report["totals"]["violations"], 0)
-        self.assertEqual(report["totals"]["packets"], 3)
-        self.assertEqual(report["totals"]["data_blocks"], 2)
+        totals = report["codec_totals"]["0x0b"]
+        self.assertEqual(totals["violations"], 0)
+        self.assertEqual(totals["packets"], 3)
+        self.assertEqual(totals["data_blocks"], 2)
         self.assertEqual(report["codec_counts"], {"0x0b": 1})
         stream = report["streams"][0]
         self.assertEqual(stream["lengths"], {3: 2, 4: 1})
@@ -173,13 +174,46 @@ class FramingTests(unittest.TestCase):
             (0x55, bytes(block0) + framed_block([b"\xF8\x01"]) * 2 + b"\x00" * 2048, 60),
         ])
         report = adat_inspect.inspect_framing(data)
-        self.assertEqual(report["totals"]["violations"], 0)
+        self.assertEqual(report["codec_totals"]["0x0b"]["violations"], 0)
         stream = report["streams"][0]
         self.assertEqual(stream["page_count"], 1)
         self.assertEqual(stream["pages"], 1)
-        self.assertEqual(stream["metadata_blocks"], 1)
+        self.assertEqual(stream["sentinel_blocks"], 1)
+        self.assertEqual(stream["metadata_blocks"], 0)
         self.assertEqual(stream["data_blocks"], 2)
         self.assertEqual(stream["zero_blocks"], 1)
+        self.assertEqual(stream["entry_codecs"], {"0x0b": 1})
+
+    def test_a3_table(self):
+        block0 = framed_block([b"\xF8\x01"])
+        block1 = framed_block([b"\xFC\x02"])
+        a3 = struct.pack("<III", 0, 100, 200)
+        data = build_with_records(0xFF21, 1, [
+            (0x55, block0 + block1, 0),
+            (0x76, descriptor_76(), 4096),
+            (0xA3, a3, 4128),
+        ])
+        report = adat_inspect.inspect_framing(data)
+        info = report["streams"][0]["a3"]
+        self.assertEqual(info["entry_bytes"], 4)
+        self.assertEqual(info["count"], 3)
+        self.assertEqual(info["first"], 0)
+        self.assertEqual(info["last"], 200)
+        self.assertTrue(info["first_is_zero"])
+        self.assertTrue(info["nondecreasing"])
+        self.assertTrue(info["count_matches_blocks_plus_one"])
+
+    def test_a3_non_monotonic_is_reported(self):
+        block0 = framed_block([b"\xF8\x01"])
+        a3 = struct.pack("<II", 0, 200) + struct.pack("<I", 100)
+        data = build_with_records(0xFF21, 1, [
+            (0x55, block0, 0),
+            (0x76, descriptor_76(), 2048),
+            (0xA3, a3, 2080),
+        ])
+        report = adat_inspect.inspect_framing(data)
+        info = report["streams"][0]["a3"]
+        self.assertFalse(info["nondecreasing"])
 
     def test_ff25_page_count_mismatch(self):
         block0 = bytearray(2048)
