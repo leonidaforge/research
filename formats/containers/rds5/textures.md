@@ -65,8 +65,8 @@ not a codec name.
 
 | Format id | Unit | Bytes | Evidence | Confidence |
 |---|---|---|---|---|
-| 28 | L4 | 4 per texel | 1,604 of 1,759 rows fit the L4 level-size model; the 155 multi-level tile-0 rows are excluded | Probable for the tested class |
-| 54 | L2 | 2 per texel | 946 of 946 rows fit the L2 level-size model | Confirmed for the tested class |
+| 28 | L4 | 4 per texel | level-size fit on the single-level rows; multi-level tile-0 rows do not all fit and are excluded | Probable for the tested class |
+| 54 | L2 | 2 per texel | level-size fit on every sampled row | Confirmed for the tested class |
 | 71, 72 | B8 | 8 per 4 x 4 tile | total fits and BC1 mip check below | Confirmed for the tested class |
 | 80 | B8 | 8 per 4 x 4 tile | total fits and BC4 candidate mip check | Probable |
 | 83 | B16 | 16 per 4 x 4 tile | total fits; two 8-byte single-channel candidates pass the mip check | Probable |
@@ -78,39 +78,36 @@ sizes. The discriminator is the block-first-byte structure in RDS5-F41.
 
 ## Mip-check population
 
-Selection rule: for each `(format id, tile mode)` pair, the 40 largest clean
-simple-2D descriptors with a decoded extent at most 1 MiB, decoded through the
-table above. Candidate decoders: BC1 for formats 71 and 72; single-plane BC4 for
-formats 77 and 80; two-plane BC4 for format 83. The rule is deterministic from
-the local sample order and extent.
+Selection rule: for each `(format id, tile mode)` pair, up to 40 clean simple-2D
+descriptors with a decoded extent at most 1 MiB, decoded through the table above.
+Candidate decoders: BC1 for formats 71 and 72; single-plane BC4 for formats 77
+and 80; two-plane BC4 for format 83.
 
-| Format | Tile modes | Checked | Pass |
-|---|---:|---:|---:|
-| 71 | 1, 2, 3 | 120 | 97 |
-| 72 | 1, 2, 3 | 120 | 67 |
-| 77 | 2, 3 | 20 | 15 |
-| 80 | 1, 2, 3 | 120 | 75 |
-| 83 | 2, 3 | 80 | 44 |
-| **Total** | | **460** | **298** |
+Passing checks were observed for format ids 71, 72, 77, 80 and 83 at tile modes
+1, 2 and 3, on both 8-byte and 16-byte block candidates. The exact per-class
+counts were measured with the committed analyser but the selection driver is
+scratch-only and is not committed, so this document does not cite them. The
+per-class rate is not uniform: format 71 mode 1 and mode 3 pass almost every
+sampled texture, while format 71 mode 2 passes fewer than half. A mixed rate
+means the candidate decoder is incomplete for that class, not that the texture
+has no mip relation. Rejected pairs stay rejected.
 
-298 textures pass the mip check across five format ids and both 8-byte and
-16-byte block candidates. The per-class rate is not uniform: format 71 mode 1
-and mode 3 pass 40/40 and 39/40, while format 71 mode 2 passes 18/40. A mixed
-rate means the candidate decoder is incomplete for that class, not that the
-texture has no mip relation. Rejected pairs stay rejected.
+The sampled run produced passing checks for five format ids on both 8-byte and
+16-byte block candidates. The number of passing textures and the selection
+driver are not committed, so the 20-texture acceptance threshold cannot be
+verified from this repository alone; the claim is private-evidence supported.
 
-The check covers only levels that are whole storage blocks. For 512 x 512
-format 71 that is levels 0 to 2 and for 1024 x 1024 it is levels 0 to 3. The
-mip tail below those levels is not part of the pass count.
+The check covers only levels that are whole storage blocks. The mip tail below
+those levels is not part of the pass count.
 
 ## Rejected candidates
 
 | Candidate | Format / sample | Observation | Status |
 |---|---|---|---|
 | 1 byte per texel, row-major | 98, 99, smoke sample | 65.54% of 16-byte block-first bytes are multiples of 16 against 32.53% over all bytes; the lowest-set-bit histogram covers only bits 0..7 with a mode-prefix shape | Rejected |
-| BC4, single channel | 71 | Mip error 48.5 / 46.2 on local/spatial differences, worse than BC1 | Rejected |
-| Nibbles, 4 bits per texel | 71 | Mip error 64.5 / 66.3, at the random level | Rejected |
-| BC1, BC3 and linear 8-bit | 98, tile 3 | Mip error 63 to 77 against a 25.0 threshold | Rejected for the tested class |
+| BC4, single channel | 71 | A scratch comparison of local spatial differences gave a larger error than the BC1 candidate; the exact scratch values are not committed | Rejected (scratch measurement) |
+| Nibbles, 4 bits per texel | 71 | The same scratch comparison gave an error at the random level; the exact scratch values are not committed | Rejected (scratch measurement) |
+| BC1, BC3 and linear 8-bit | 98, tile 3 | A scratch mip comparison stayed far above the 25.0 threshold; the exact scratch values are not committed | Rejected (scratch measurement) |
 | 16 bytes per 4 x 4 tile identifies a codec | all | A block size is not a mode format; BC1, BC4, BC5-class and BC7-class candidates share byte ratios | Rejected as a claim |
 
 ## Control sample
