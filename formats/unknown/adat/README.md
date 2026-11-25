@@ -5,8 +5,9 @@ archives. The current depth-1 scan finds 768 rows in 65 parent archives under
 four top-level archives: 729 rows in 59 of the 60 scanned depth-1 archives
 reached from `audio.rpf`, and 39 rows in six depth-1 archives reached from
 `shared_minigame000.rpf`, `story000.rpf` and `story000_restofworld.rpf`. The 768
-rows are the 923 extracted ADAT rows collapsed by `(parent archive identity,
-row index)`; repeated copies of the same parent archive are counted once.
+rows are the result of collapsing 923 extracted ADAT rows by `(parent archive
+identity, row index)`; each parent/row pair is counted once. The raw inputs and
+the collapsed rows both span 65 distinct parent archives.
 
 The archive names are provenance, not evidence of purpose. The magic occurs only
 at payload offset 0; the substring inside `METADATA` is not a match.

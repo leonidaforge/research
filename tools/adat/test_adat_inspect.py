@@ -304,9 +304,9 @@ class FramingTests(unittest.TestCase):
         self.assertEqual(len(unique), 2)
         self.assertEqual(selection["raw_inputs"], 3)
         self.assertEqual(selection["deduped_inputs"], 2)
-        self.assertEqual(selection["copies"], 1)
-        self.assertEqual(selection["parents"], 2)
-        self.assertEqual(selection["archive_copies"], 2)
+        self.assertEqual(selection["collapsed_inputs"], 1)
+        self.assertEqual(selection["distinct_parents"], 2)
+        self.assertEqual(selection["distinct_archive_digests"], 2)
 
     def test_atomic_output(self):
         with tempfile.TemporaryDirectory() as directory:

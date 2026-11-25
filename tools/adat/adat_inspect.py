@@ -1041,13 +1041,14 @@ def _deduplicate(entries):
     ]
     if raw == 0:
         return entries, {
-            "raw_inputs": 0, "deduped_inputs": 0, "copies": 0,
-            "parents": 0, "archive_copies": 0, "missing_keys": 0,
+            "raw_inputs": 0, "deduped_inputs": 0, "collapsed_inputs": 0,
+            "distinct_parents": 0, "distinct_archive_digests": 0,
+            "missing_keys": 0,
         }
     if len(keyed) != raw:
         return entries, {
-            "raw_inputs": raw, "deduped_inputs": raw, "copies": 0,
-            "parents": None, "archive_copies": None,
+            "raw_inputs": raw, "deduped_inputs": raw, "collapsed_inputs": 0,
+            "distinct_parents": None, "distinct_archive_digests": None,
             "missing_keys": raw - len(keyed),
         }
     unique = {}
@@ -1056,9 +1057,9 @@ def _deduplicate(entries):
     return list(unique.values()), {
         "raw_inputs": raw,
         "deduped_inputs": len(unique),
-        "copies": raw - len(unique),
-        "parents": len({entry["parent_id"] for entry in entries}),
-        "archive_copies": len({
+        "collapsed_inputs": raw - len(unique),
+        "distinct_parents": len({entry["parent_id"] for entry in entries}),
+        "distinct_archive_digests": len({
             entry["archive_sha256"] for entry in entries
             if entry.get("archive_sha256") is not None
         }),

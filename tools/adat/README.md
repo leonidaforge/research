@@ -18,9 +18,9 @@ All paths are required. `--max-bytes` (default 64 MiB) bounds each read.
 skipped. A plain line is a path. A JSON line with `file`, `parent_id` and `row`
 (plus optional `archive_sha256`) is deduplicated by `(parent_id, row)` for
 `--summary`. `--summary` aggregates the inputs instead of printing one report
-per sample and reports the raw count, collapsed count, copy count, parent count
-and archive-copy count. `--output` writes atomically outside the input
-directory.
+per sample and reports the raw input count, collapsed row count, collapsed-input
+count, distinct parent count and distinct archive-digest count. `--output`
+writes atomically outside the input directory.
 
 ## Checks
 
