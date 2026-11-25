@@ -204,6 +204,8 @@ A marker record is 32 bytes and starts with eight `0xAA` bytes.
 
 The marker run is exact. Every `0xAA` run in the body is a marker record, all 10,537 records start at a 16-byte boundary, and every consecutive pair is 32 bytes apart. The run starts at `+0x10` in 483 of 483 payloads. The tail has no marker. Tails are 0 to 59,776 bytes and all are multiples of 16; only widths 1, 2, 4, 8 and 16 divide every tail length, so a 16-byte table is possible but not decoded. The tail grammar and the record fields are **Unknown**.
 
+A cross-section reference is not established. The first four body bytes equal the last pre-section descriptor word in 191 of 483 payloads; the relation is not universal and is not used by the parser.
+
 ### `LENM` body
 
 The body is empty in 254 top-level payloads. The 229 nonempty bodies share a header:
