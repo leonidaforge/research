@@ -23,11 +23,11 @@ local CLI type ID 5 inside those nested archives. The counts and digests are in
 [Sample locators](../../evidence/resources/INDEX.md#texture-dictionary-sample).
 
 The negative sample is 469 rows of other local type IDs in the same nested
-archives and one additional `levels.rpf` nested archive: 80 type 66, 224 type 3,
-164 type 73 and 1 type 74. The type-66 rows are in the five `data.rpf` nested
-archives of the sample table, the type-3 rows are in the `levels.rpf` row-5
-archive and the type-73/74 rows are in the `levels.rpf` row-153 archive. They
-were selected with the same listing command and the type IDs stated here.
+archives and two `levels.rpf` nested archives: 80 type 66, 224 type 3, 164 type
+73 and 1 type 74. The type-66 rows are in the five `data.rpf` nested archives of
+the sample table, the type-3 rows are in the `levels.rpf` row-5 archive and the
+type-73/74 rows are in the `levels.rpf` row-153 archive. They were selected with
+the same listing command and the type IDs stated here.
 
 | Property                    | Value                                                       |
 | --------------------------- | ----------------------------------------------------------- |
@@ -35,7 +35,7 @@ were selected with the same listing command and the type IDs stated here.
 | Non-empty dictionaries      | 1,431                                                       |
 | Empty dictionaries          | 9                                                           |
 | Records                     | 5,484                                                       |
-| Records per dictionary      | 1 to 1,198                                                  |
+| Records per non-empty dictionary | 1 to 1,198                                         |
 | Dimensions                  | 94 distinct pairs, 4×4 to 4,096×1,024                       |
 | Format ids                  | 22 distinct values, `10` to `99`                            |
 | Mip counts                  | 1 to 12                                                     |
@@ -57,15 +57,26 @@ A reader applies these structural tests to a decoded resource:
 7. Every value is a system pointer to a 0x70-byte record.
 
 All 1,431 non-empty dictionaries pass steps 1–7. The 9 empty dictionaries have
-zero pointers and counts and pass steps 1–5 trivially. Of the 469 negative rows,
-80 (type 66) fail during stored-row reconstruction, 389 (224 type 3, 164 type
-73, 1 type 74) are rejected by the structural test, and 0 are accepted.
+zero pointers and counts and pass steps 1–5 trivially. The negative attribution
+is:
+
+| Type | Selected | Decode fail | Structural reject | Accepted |
+| ---- | -------: | ----------: | ----------------: | -------: |
+| 66   |       80 |          80 |                 0 |        0 |
+| 3    |      224 |           0 |               224 |        0 |
+| 73   |      164 |           0 |               164 |        0 |
+| 74   |        1 |           0 |                 1 |        0 |
+| all  |      469 |          80 |               389 |        0 |
+
+The type-66 rows fail in `page_reconstruct`; the other 389 reach
+`parse_dictionary` and are rejected by the structural test.
 
 This is a structural test, not a proof of format identity. Steps 1–2 are generic
-resource-header fields, and the positive sample was selected by type ID 5. The
-test is useful because 469 nearby resources of other types were rejected by the
-same code; it does not show that every type-5 resource is a dictionary or that
-no other type can pass.
+resource-header fields, and the positive sample was selected by type ID 5. Of
+the 469 nearby resources of other types, 80 were rejected during stored-row
+reconstruction and 389 by the structural test; none was accepted. The test does
+not show that every type-5 resource is a dictionary or that another type cannot
+pass.
 
 The name hash is the 32-bit one-at-a-time hash (`joaat`) of the ASCII text
 reached from the record's name pointer, with the text starting at the pointer
@@ -89,7 +100,7 @@ grammar are listed.
 | `+0x28` | 2×2  | `u16` hash count, `u16` hash capacity              | Confirmed (sample)      |
 | `+0x30` | 8    | system pointer to the value array                  | Confirmed (sample)      |
 | `+0x38` | 2×2  | `u16` value count, `u16` value capacity            | Confirmed (sample)      |
-| `+0x48`, `+0x50`, `+0x58` | 8 each | present, values vary; not interpreted | Bytes confirmed; meanings **Unknown** |
+| `+0x48`, `+0x50`, `+0x58` | 8 each | present, values vary (68, 32 and 42 distinct values); not interpreted | Bytes confirmed; meanings **Unknown** |
 
 The rest of the root header is not part of this grammar. A reader MUST NOT
 require any other root field.
@@ -98,18 +109,22 @@ require any other root field.
 
 The hash array is `count` little-endian `u32` values in ascending order. The
 value array is `count` 8-byte values in the same order: `hash[i]` and
-`value[i]` describe the same texture. The value array is a permutation of the
-record table; a reader MUST follow `value[i]`, not compute a record address from
-`i`.
+`value[i]` describe the same texture. The value array is a set of distinct
+record pointers; its order is not always the index order. The parser reports
+`value_order_matches_index`. In 1,315 of the 1,422 multi-record dictionaries the
+value order equals the index order, and in 107 it differs. A reader MUST follow
+`value[i]`, not compute a record address from `i`.
 
 Across the 2,852 distinct hashes, 2,842 occur in one record, 8 occur in two
 records and 2 occur in 1,313 records. A hash is therefore not unique to one
 dictionary; the same texture name can appear in many dictionaries.
 
-The record table is normally a dense run of 0x70-byte records. One dictionary
-of 1,198 records has a 0x20-byte gap at system offset `0x1ff70..0x20000` in that
-resource, on a `0x10000` boundary. A reader MUST therefore accept a
-non-contiguous record table. The gap does not change the record width.
+The record table is normally a dense run of 0x70-byte records: 1,430 of the
+1,431 non-empty dictionaries are dense. One dictionary of 1,198 records has one
+gap. The census records the two record starts as `0x1ff70` and `0x20000`, a
+delta of `0x90`, which leaves `0x20` bytes between the end of the first record
+and the start of the second, on a `0x10000` boundary. A reader MUST therefore
+accept a non-contiguous record table. The gap does not change the record width.
 
 ## Record
 
@@ -149,27 +164,26 @@ meanings is claimed.
 
 ## Allocation bounds
 
-The allocation size reported by the parser is the extent to the next distinct
-allocation start, with the last allocation ending at the graphics end:
+The extent for a start is the next distinct start minus this start; the last
+extent ends at the graphics end. The sum is therefore
+`graphics_size - min(start)` when the starts are distinct.
 
-```text
-extent[i] = start[i + 1] - start[i]   (the last uses graphics length)
-```
+The parser requires every record to have an allocation pointer, no two starts
+to be equal, the first start to be zero, and the summed extents to equal the
+graphics size. It reports these as `allocations_in_bounds`, `partition_ok` and
+`starts_at_zero`. In the sample, 1,440 of 1,440 resources pass all three. The
+weaker `allocation_sum_ok` is the `<=` check and is kept for callers that only
+need a bound.
 
-This is an upper bound. The record's `+0x08` value is a unit count, not a byte
-count; its byte scale is not established. The parser reports the unit count and
-the extent separately and does not multiply them.
+A start equal to the graphics size is not accepted as in bounds; a missing
+allocation pointer is not in bounds. If two records share a start, the parser
+reports `allocation_duplicate` and the summed extents can exceed the graphics
+size. If the first start is above zero, the parser reports
+`allocation_front_gap`.
 
-The extents partition the graphics segment when the allocation starts are
-distinct, so their sum equals the graphics size by construction. The parser
-reports that equality as a partition check, not as independent evidence. If two
-records share a start, the parser reports `allocation_duplicate` and the summed
-extents can exceed the graphics size.
-
-Across the sample, every allocation start is inside the graphics segment, no
-two records share a start and the partition check passes in all 1,440
-resources. Those are reader checks on the sampled layout, not a proof of engine
-allocation policy.
+The extents are reader arithmetic on the sampled layout, not evidence of engine
+allocation policy. The record's `+0x08` value is a unit count, not a byte count;
+its byte scale is not established, and the parser does not multiply it.
 
 An earlier draft fitted a unit table that made `units × unit` equal the extent
 for each format id and reported a mip-chain comparison. That table was fitted
@@ -192,7 +206,8 @@ extent remain as separate observations.
 
 - An empty dictionary has a 96-byte system segment, a page map with one system
   page and zero graphics pages, and zero hash and value pointers. It has no
-  records. Nine such resources occur.
+  records. Nine such resources occur; the census reports 9 of 9 at 96 bytes and
+  page-map counts `1/0`.
 - A dictionary whose hash count differs from its value count was not observed.
   A reader MUST report the mismatch instead of truncating silently.
 - A dictionary whose value pointer leaves the system segment was not observed.
@@ -221,7 +236,8 @@ The sample is the 92 type-2 drawables of the nested archive at
 - 770 slots hold a system texture record (4 to 29 per drawable; every drawable
   has at least 4), 199 are null and 0 are invalid;
 - 678 name records have the `6` variant at `+0x10` and carry a 32-bit value at
-  `+0x18`; 92 have a system pointer there and do not carry that value;
+  `+0x18`; 92 have a system pointer there and do not carry that value; 0 have no
+  valid name record;
 - the 678 values are 254 distinct values. 264 references to 4 distinct values
   match a name hash in the sampled dictionaries; 414 references to the other
   250 values do not. A matching hash is a namespace match, not a resolution to a
@@ -234,7 +250,7 @@ The sample is the 92 type-2 drawables of the nested archive at
   values recorded by DRAW-F18 (`0xC8E8C282`, `0x739E3D0D`, `0x2C8D7182`,
   `0x0CD27763`, `0xC6F46E79`, `0x1E77BF4C`);
 - no 32-bit half of the 64-bit key is a dictionary hash (0 of 770 lower halves
-  and 0 of 770 upper halves).
+  and 0 of 770 upper halves; the key was read for all 770 bound slots).
 
 The 92 pointer-variant name records and the 414 unmatched references are
 unresolved. The sample does not show which dictionaries contain the unmatched
@@ -272,8 +288,9 @@ selection rule is the type ID in those listings.
 
 [tools/resources/texture_dictionary.py](../../tools/resources/texture_dictionary.py)
 implements the dictionary grammar. It reads a decoded resource or a stored row
-through `page_reconstruct`, bounds the counts, reports every record field and
-the allocation extents, and does not decode pixels.
+through `page_reconstruct`, bounds the counts, exposes every record field in the
+table (including the uninterpreted ones) in its JSON report, and reports the
+allocation extents and checks. It does not decode pixels.
 [tools/resources/pool_reference.py](../../tools/resources/pool_reference.py)
 reads the drawable slot and name-record references and reports them separately
 from 0x5/0x6 pointers.

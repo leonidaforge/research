@@ -76,7 +76,7 @@ python -m unittest discover -s tools/resources -p "test_*.py"
 
 The 26 `rage_resource` tests build every input with `zlib` and `struct`. They cover a valid one-page-per-segment resource, a map in a later system page, a split 32 MiB page, a page of exactly 32 MiB, missing and extra pages, a page-size violation, an outside pointer, and the negative cases: truncated stream, zero system-page count, map outside the system data, nonzero slot, nonzero prefix, nonzero padding, stream and total caps, and data without a resource header.
 
-The suite also holds 18 `page_reconstruct` tests, 8 `root_tables` tests, 22 `texture_dictionary` tests, 16 `pool_reference` tests and 1 `dictionary_census` test. All 91 tests pass with the standard library only.
+The suite also holds 18 `page_reconstruct` tests, 8 `root_tables` tests, 25 `texture_dictionary` tests, 16 `pool_reference` tests and 2 `dictionary_census` tests. All 95 tests pass with the standard library only.
 
 ## Limits
 
@@ -146,13 +146,21 @@ python texture_dictionary.py --file <DECODED> --system-length <BYTES> [--check-n
   that leaves the buffer. The default `max_records` is 65,536, above the `u16`
   maximum, so the default never triggers on a real count; a caller can pass a
   lower cap. Per-record problems are issues.
-- The report gives the hash count, value count, record count and each
-  capacity, every record's name hash, width, height, format id, mip count,
-  allocation offset, raw unit count, allocation size and allocation extent, plus
-  the in-bounds and partition tests.
+- The JSON report gives the hash count, value count, record count and each
+  capacity; the root fields; every record's name hash, width, height, format id,
+  mip count, allocation offset, raw unit count, allocation size, allocation
+  extent, record offset, raw value pointer and the uninterpreted `+0x00`,
+  `+0x0C`, `+0x10`, `+0x20`, `+0x28`, `+0x44`, `+0x46`, `+0x48`, `+0x50`,
+  `+0x58`, `+0x60` and `+0x68` values; the in-bounds, `starts_at_zero`,
+  `partition_ok`, `allocation_sum_ok`, `record_table_dense` and
+  `value_order_matches_index` results; and any record gap.
 - `allocation_size` is the extent to the next distinct allocation start, an
   upper bound. The `+0x08` value is a unit count whose byte scale is
   **Unknown**; the tool does not multiply it.
+- The parser requires every record to have an allocation pointer, no two starts
+  to be equal, the first start to be zero and the extents to sum to the graphics
+  size. `partition_ok` reports that conjunction; `allocation_sum_ok` is the
+  weaker `<=` check.
 - `--check-names` reports only how many records' hashes equal the one-at-a-time
   hash of their ASCII name; the text is never printed. The hash folds `A`–`Z`
   and `\`, reads at most 64 bytes and skips a text without a terminator in that
@@ -161,10 +169,11 @@ python texture_dictionary.py --file <DECODED> --system-length <BYTES> [--check-n
 
 The tests cover a valid two-record dictionary, the empty form, count mismatch,
 capacities below the counts, unsorted and duplicate hashes, record pointers and
-records outside the segment, allocation outside and duplicate starts, a raw
-unknown format id, zero dimensions and mip bounds, the refusal cases, the folded
-hash and the 64-byte window, a stored row through `page_reconstruct`, and the
-JSON CLI.
+records outside the segment, allocation outside and duplicate starts, a
+non-zero first start, a record gap, a value-order permutation, all record-field
+output keys, zero dimensions and mip bounds, the refusal cases, the folded hash
+and the 64-byte window, a stored row through `page_reconstruct`, and the JSON
+CLI.
 
 ## pool_reference
 
@@ -217,10 +226,13 @@ python dictionary_census.py --dictionary ARCHIVE LISTING [--dictionary ...] \
   parses dictionaries with `texture_dictionary` and walks drawables with
   `pool_reference`. It invokes no application code and reads the inputs only.
 - The report holds the dictionary counts, format and mip distributions, the
-  distinct-hash count and the hash multiplicity; the drawable slot counts, the
-  distinct name values, the namespace matches, the per-drawable match counts,
-  the matched-hash multiplicity, the DRAW-F18 overlap and the 64-bit key
-  comparison; the negative accepted/rejected counts; and the seeded 10,000-value
-  controls.
+  distinct-hash and hash-multiplicity counts, the record-field and root-field
+  frequencies, the field constant checks, the empty-dictionary lengths and page
+  maps, the record gaps and value-order counts; the drawable slot counts, the
+  name variants, the keys read, the distinct name values, the namespace matches,
+  the per-drawable match counts, the matched-hash multiplicity, the DRAW-F18
+  overlap and the 64-bit key comparison; the negative `decode_fail`,
+  `rejected_structural` and `accepted` counts by type and source; and the seeded
+  10,000-value controls.
 - The test builds a synthetic dictionary and a synthetic non-dictionary, runs the
   CLI and checks the dictionary, negative and control sections.
