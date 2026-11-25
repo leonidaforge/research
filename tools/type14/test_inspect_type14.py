@@ -2,7 +2,7 @@ import json
 import struct
 import unittest
 
-from inspect_type14 import describe, joaat, verify_ids
+from inspect_type14 import Type14Error, describe, joaat, verify_ids
 
 
 def synthetic_payload(strings=None, identifiers=None, size=0x120, stride=0x28):
@@ -46,10 +46,16 @@ class DescribeTest(unittest.TestCase):
         self.assertNotIn("alpha", encoded)
         self.assertNotIn("beta", encoded)
         self.assertNotIn('"id"', encoded)
+        self.assertNotIn("name_key", encoded)
+        self.assertNotIn("name_hash", encoded)
 
     def test_rejects_short_payload(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(Type14Error):
             describe(b"\x00" * 8)
+
+    def test_rejects_malformed_payload(self):
+        with self.assertRaises(Type14Error):
+            describe(b"\x00" * 0x2C)
 
 
 class VerifyIdsTest(unittest.TestCase):

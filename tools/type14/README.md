@@ -11,10 +11,14 @@ python tools/type14/inspect_type14.py <payload>
 python tools/type14/inspect_type14.py <payload> --verify-ids
 ```
 
-The input is opened read-only. Output is JSON.
+The input is opened read-only. Output is JSON. `--max-bytes` (default 64 MiB)
+bounds the read. A malformed payload, a read error or a payload above the cap is
+reported as an `error:` line with a nonzero exit, not a traceback.
 
 ## Output
 
+- `size` and `content_sha256`: the payload length and a content digest. The
+  digest is provenance, not a name or record identifier.
 - `header_u16` and `header_u32`: the first `0x2C` bytes, read at each aligned
   offset.
 - `string_table`: the offset at `+0x00`, the length at `+0x0C`, the count at
@@ -36,7 +40,8 @@ reported variants are:
 - little-endian or byte-swapped output.
 
 It also reports how many identifiers match the folded or case-sensitive hash of
-the record name field. No name, hash or identifier is printed.
+the record name field. No name, content digest, hash or identifier is printed in
+this mode.
 
 ## Dependencies
 
@@ -49,4 +54,4 @@ python -m unittest discover -s tools/type14
 ```
 
 The tests build synthetic payloads with invented strings and correctly computed
-identifiers. They do not read game files.
+identifiers, and cover short and malformed inputs. They do not read game files.

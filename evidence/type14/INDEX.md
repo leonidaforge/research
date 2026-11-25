@@ -17,8 +17,8 @@ supported**. Corrected interpretations are recorded in the
 | Chunks | 1, entry encoding 3 |
 | Stored size | 240 bytes |
 | Logical size | 1,280 bytes |
-| Name | key32 unresolved, hash `0x2E730C8AC8406F39`, key `0x525EAA43` |
-| Payload SHA-256 | `d324c7908f1f8d66877b4ff8d9847662ba83ebbc9aa62e8662a68d270d600a85` |
+| Name | unresolved; not published |
+| Payload content SHA-256 | `d324c7908f1f8d66877b4ff8d9847662ba83ebbc9aa62e8662a68d270d600a85` |
 | Top-level archives | 22 authenticated manifests, 6,534 rows |
 | Nested manifests | 250 unique archives, 38,395 rows |
 
@@ -39,7 +39,7 @@ observations are limited to offsets, counts and lengths.
 | T14-F08 | A repeated fixed-size structure does not start at offset 0. The first `0x2C` bytes are header fields, followed by zero and `0xCD` fill; the first record starts at `+0x3C0`. The string and record tables have the same count and seven matching name lengths; the fifth entry differs in length. | Payload data, consistency check | Confirmed (one payload) | One payload |
 | T14-F09 | The payload is more consistent with a serialized structure than with a typical standalone file. It has no magic, its header stores internal offsets, lengths and a count, and it carries two tables with the same count and overlapping name lengths, separated by fill regions. A standalone, unlabelled file is not excluded: `+0x04` stores the total size and all offsets are internal. | Payload data, consistency check | Probable (serialized structure); Unknown (identity) | One payload; no loader or writer traced |
 | T14-F10 | The `u32` values at `+0x20`, `+0x24` and `+0x28` match none of the tested hashes of the 8 string-table entries or the 8 record names. Their meaning remains Unknown. | `BINARY` | Unknown | One payload; no code path |
-| T14-F11 | Each of the 8 record `u32` identifiers equals the one-at-a-time ("joaat") hash of the string-table entry at the same index, over the exact entry bytes excluding the terminating `0x00`: 8/8. With the terminator the count is 0/8; with byte-swapped output it is 0/8. The folded lower-case and case-sensitive variants both give 8/8 because the 8 entries are lower-case ASCII. The record name field is not the preimage: six of eight names differ from the same-index string only by case and two have different text; hashing the record names gives 6/8 folded and 0/8 case-sensitive. | `BINARY`, `CROSS_SAMPLE`, `SYNTHETIC` | Confirmed (single payload) | One decoded payload; no second payload or other record type. The relation is not generalised. Names, hashes and identifiers are not published. The synthetic test validates the tool, not the native format |
+| T14-F11 | Each of the 8 record `u32` identifiers equals the one-at-a-time ("joaat") hash of the string-table entry at the same index, over the exact entry bytes excluding the terminating `0x00`: 8/8. With the terminator the count is 0/8; with byte-swapped output it is 0/8. The folded lower-case and case-sensitive variants both give 8/8 because the 8 entries are lower-case ASCII. The record name field is not the preimage: six of eight names differ from the same-index string only by case and two have different text; hashing the record names gives 6/8 folded and 0/8 case-sensitive. | `BINARY`, `CROSS_SAMPLE`, `SYNTHETIC` | Confirmed (single payload) | One decoded payload; no second payload or other record type. The relation is not generalised. Record names and record identifiers are not published, and no name preimage or name key is published. The payload content SHA-256 is a content digest, not a name or record identifier. The synthetic test validates the tool, not the native format |
 
 ## Reproduction
 
@@ -56,9 +56,10 @@ python tools/type14/inspect_type14.py <WORK>/row262.bin --verify-ids
 
 The inspector reports header fields, the string table offset and length, the
 string lengths, and every record stride that forms a table of the header count.
-It does not print payload text or record identifiers. `--verify-ids` prints only
-match counts. The nested type 14 row is read from a manifest only; its transform
-is unsupported.
+It does not print payload text or record identifiers. Default output includes a
+payload content digest only, not a name or record identifier. `--verify-ids`
+prints only match counts. The nested type 14 row is read from a manifest only;
+its transform is unsupported.
 
 ## Limits
 

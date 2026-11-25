@@ -12,13 +12,20 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import struct
+import sys
 from pathlib import Path
 
 HEADER_END = 0x2C
 RECORD_HEADER_BYTES = 6
 MIN_STRIDE = 8
 MAX_STRIDE = 0x80
+MAX_BYTES = 64 * 1024 * 1024
+
+
+class Type14Error(ValueError):
+    pass
 
 
 def u16(data: bytes, offset: int) -> int:
@@ -86,18 +93,18 @@ def record_candidates(data: bytes, count: int) -> list[dict]:
 
 def _parse(data: bytes) -> dict:
     if len(data) < HEADER_END:
-        raise ValueError(f"payload is shorter than the observed header: {len(data)} bytes")
+        raise Type14Error(f"payload is shorter than the observed header: {len(data)} bytes")
 
     string_offset = u16(data, 0x00)
     string_length = u16(data, 0x0C)
     count = u16(data, 0x18)
     string_end = string_offset + string_length
     if string_end > len(data):
-        raise ValueError("string table extends past the payload end")
+        raise Type14Error("string table extends past the payload end")
     strings = nul_strings(data[string_offset:string_end])
     candidates = record_candidates(data, count)
     if len(candidates) != 1:
-        raise ValueError(f"expected one record table candidate, found {len(candidates)}")
+        raise Type14Error(f"expected one record table candidate, found {len(candidates)}")
     return {
         "string_offset": string_offset,
         "string_length": string_length,
@@ -145,7 +152,7 @@ def describe(data: bytes) -> dict:
         )
     return {
         "size": len(data),
-        "sha256": hashlib.sha256(data).hexdigest(),
+        "content_sha256": hashlib.sha256(data).hexdigest(),
         "header_u16": header_u16,
         "header_u32": header_u32,
         "string_table": string_table,
@@ -185,7 +192,7 @@ def verify_ids(data: bytes) -> dict:
     records = parsed["candidate"]["records"]
     strings = parsed["strings"]
     if len(records) != len(strings):
-        raise ValueError("record and string-table counts differ")
+        raise Type14Error("record and string-table counts differ")
     variants = {}
     for lower in (False, True):
         for terminator in (False, True):
@@ -222,12 +229,23 @@ def main() -> int:
         action="store_true",
         help="print identifier match counts only, never names, hashes or ids",
     )
+    parser.add_argument(
+        "--max-bytes",
+        type=int,
+        default=MAX_BYTES,
+        help="refuse a payload larger than this many bytes",
+    )
     args = parser.parse_args()
-    data = args.payload.read_bytes()
-    if args.verify_ids:
-        print(json.dumps(verify_ids(data), indent=2, sort_keys=True))
-    else:
-        print(json.dumps(describe(data), indent=2, sort_keys=True))
+    label = os.path.basename(str(args.payload))
+    try:
+        if args.payload.stat().st_size > args.max_bytes:
+            raise Type14Error(f"{label}: larger than the {args.max_bytes}-byte cap")
+        data = args.payload.read_bytes()
+        result = verify_ids(data) if args.verify_ids else describe(data)
+    except (OSError, Type14Error, struct.error) as error:
+        print(f"error: {error}", file=sys.stderr)
+        return 1
+    print(json.dumps(result, indent=2, sort_keys=True))
     return 0
 
 
