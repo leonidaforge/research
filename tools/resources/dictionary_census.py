@@ -232,6 +232,7 @@ def drawable_census(sources, hash_records):
         "distinct_name_hashes": len(name_hashes),
         "distinct_matched_hashes": len(matched),
         "matched_hash_multiplicity": dict(matched_multiplicity),
+        "matched_hash_record_counts": sorted(len(hash_records[value]) for value in matched),
         "per_drawable_match_counts": dict(per_drawable),
         "bound_per_drawable": {
             "distribution": dict(bound_per_drawable),
