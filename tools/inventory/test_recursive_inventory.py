@@ -113,6 +113,52 @@ def make_case(root, top_bytes, top_rows, extract_map, manifests):
     return [item], FakeRunner(extract_map, manifests)
 
 
+class DiscoveryTests(unittest.TestCase):
+    def test_unreadable_top_level_manifest_is_recorded(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            archive = root / "top.rpf"
+            archive.write_bytes(b"TOP")
+            valid = root / "valid.jsonl"
+            valid.write_text(
+                "\n".join(
+                    json.dumps(document) for document in (header(archive), row(0, 10))
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            unreadable = root / "unreadable.jsonl"
+            unreadable.write_bytes(b"\xff\xfe\x00")
+            manifests, rejected = inventory.discover_manifests(root)
+            self.assertEqual(
+                [Path(item["header"]["archive"]) for item in manifests], [archive]
+            )
+            self.assertEqual(len(rejected), 1)
+            self.assertEqual(rejected[0]["manifest"], str(unreadable))
+            self.assertTrue(rejected[0]["reason"].startswith("unreadable:"))
+
+
+class MalformedRowTests(unittest.TestCase):
+    def test_selection_ignores_row_without_numeric_index(self):
+        malformed = row(0, 10)
+        del malformed["row"]
+        selected, count = inventory.select_quantiles(
+            [malformed, row(1, 20)], inventory.MAX_ARCHIVE_BYTES, 4
+        )
+        self.assertEqual(count, 1)
+        self.assertEqual([item["row"] for item in selected], [1])
+
+    def test_payload_selection_ignores_row_without_numeric_index(self):
+        malformed = row(0, 10, type_id=11)
+        del malformed["row"]
+        record = {"sha256": "a", "rows": [malformed, row(1, 20, type_id=11)]}
+        selected, stats = inventory.payload_candidates(
+            [record], 4, inventory.MAX_PAYLOAD_BYTES
+        )
+        self.assertEqual([item["row"] for item, _ in selected[11]], [1])
+        self.assertEqual(stats[11]["selected"], 1)
+
+
 class SelectionTests(unittest.TestCase):
     def test_type0_selection_filters_and_orders(self):
         rows = [
@@ -413,6 +459,9 @@ class TraversalTests(unittest.TestCase):
         first = inventory.execute(args, items, [], FakeSampler(scratch, runner))
         first_calls = (runner.extract_calls, runner.manifest_calls)
         first_bytes = first["totals"]["extracted_bytes"]
+        self.assertEqual(first["totals"]["archive_extraction_cached"], 0)
+        self.assertEqual(first["totals"]["archive_extraction_fresh"], 1)
+        self.assertEqual(first["unique_archives"][0]["extraction"]["exit"], 0)
 
         second_runner = FakeRunner(runner.extract_map, runner.manifests)
         second = inventory.execute(args, items, [], FakeSampler(scratch, second_runner))
@@ -420,9 +469,13 @@ class TraversalTests(unittest.TestCase):
         self.assertEqual(second_runner.manifest_calls, 0)
         self.assertEqual(second["totals"]["archive_extraction_attempts"], 1)
         self.assertEqual(second["totals"]["archive_extraction_successes"], 1)
+        self.assertEqual(second["totals"]["archive_extraction_cached"], 1)
+        self.assertEqual(second["totals"]["archive_extraction_fresh"], 0)
         self.assertEqual(second["totals"]["extracted_bytes"], first_bytes)
         self.assertTrue(second["unique_archives"][0]["extraction"]["cached"])
+        self.assertNotIn("exit", second["unique_archives"][0]["extraction"])
         self.assertEqual(second["unique_archives"][0]["manifest"]["provenance"], "cached")
+        self.assertNotIn("exit", second["unique_archives"][0]["manifest"])
         self.assertEqual(first_calls, (1, 1))
 
     def test_transform_only_rows_stop(self):

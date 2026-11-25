@@ -53,10 +53,14 @@ through `lforge 0.1.0`. RPF9 finding IDs refer to the
   (`core_restofworld.rpf`), 8 (`shared_minigame000_bvh4.rpf`), 4
   (`story000_script.rpf`), 2 (`script.rpf`), 1 (`core_licenses_data.rpf`) and 1
   (`core_restofworld001.rpf`).
-- Caps: no cap was reached. Used: 782 archives, 7,988,951,648 archive bytes and
-  1,415,428 payload bytes (8,240,768,324 bytes in total). The run stopped
-  `complete`. Accounting: 22 top-level archives discovered, 804 parents visited
-  (22 top-level and 782 nested) and 782 nested manifests enumerated.
+- Caps: no cap was reached. The 782 sampled archives total 7,988,951,648 bytes
+  and the payload sample totals 1,415,428 bytes, or 7,990,367,076 bytes across
+  this sample. `summary.json` reports the cache as a whole: 8,239,352,896
+  archive bytes, 1,415,428 payload bytes and 8,240,768,324 extracted bytes. The
+  remaining 250,401,248 archive bytes are cached artifacts outside this sample.
+  The run stopped `complete`. Accounting: 22 top-level archives discovered, 804
+  parents visited (22 top-level and 782 nested) and 782 nested manifests
+  enumerated.
 - Depth 2: none of the 782 depth-1 manifests contains a type-0 row at any size,
   so the depth-2 selection has 0 candidates and the maximum depth reached is 1.
 - Payload sample: 144 attempts, 137 distinct SHA-256 fingerprints, 7 duplicates.
@@ -113,29 +117,29 @@ type-0 rows were skipped because they contain no archive container row.
 
 | ID | Claim | Evidence | Confidence | Limits |
 | --- | --- | --- | --- | --- |
-| INV-F18 | The comprehensive rule selected 782 readable type-0 rows from 17 of 22 top-level archives. All 782 native extractions exited 0 with output size equal to the logical size. Their SHA-256 fingerprints are distinct, so no duplicate nested archive content was found. The archives total 7,988,951,648 bytes; the smallest is 720 bytes and the largest 66,870,368 bytes. 256 are larger than 8 MiB, 161 larger than 16 MiB and 87 larger than 32 MiB. | Sample audit, native extraction, hash fingerprint | Confirmed (sample) | Readable type-0 rows at or below 64 MiB only. 381 larger type-0 rows were not extracted. 3,188 eligible rows were not selected. Five top-level archives have no type-0 row. The total number of nested archives is unknown. |
-| INV-F19 | The 782 nested manifests hold 169,523 rows, 168,700 readable and 823 unreadable, with 40 distinct type IDs. Five type IDs dominate: 100 (27,482 rows), 111 (21,922), 15 (21,742), 67 (15,879) and 11 (13,487). Compared with the 250-archive sample, four type IDs are new: 64, 86, 105 and 109; no prior type ID is absent. Every row reports read source `main`. | Authenticated manifest | Confirmed (sample) | One build and sample. Type IDs are row labels; this index assigns no payload format to them. Names remain unresolved hashes. |
+| INV-F18 | The comprehensive rule selected 782 readable type-0 rows from 17 of 22 top-level archives. All 782 archive artifacts have output size equal to the logical size. Fresh extractions exited 0; cached hits ran no extraction command and carry no exit code. Their SHA-256 fingerprints are distinct, so no duplicate nested archive content was found. The 782 sampled archives total 7,988,951,648 bytes; the smallest is 720 bytes and the largest 66,870,368 bytes. 256 are larger than 8 MiB, 161 larger than 16 MiB and 87 larger than 32 MiB. | Sample audit, native extraction, hash fingerprint | Confirmed (sample) | Readable type-0 rows at or below 64 MiB only. 381 larger type-0 rows were not extracted. 3,188 eligible rows were not selected. Five top-level archives have no type-0 row. The total number of nested archives is unknown. |
+| INV-F19 | The 782 nested manifests hold 169,523 rows, 168,700 readable and 823 unreadable, with 40 distinct type IDs. Five type IDs dominate: 100 (27,482 rows), 111 (21,922), 15 (21,742), 67 (15,879) and 11 (13,487). Compared with the 250-archive expanded sample (36 type IDs; histogram below), four type IDs are new: 64, 86, 105 and 109; no type ID from that sample is absent. Every row reports read source `main`. | Authenticated manifest | Confirmed (sample) | One build and sample. Type IDs are row labels; this index assigns no payload format to them. Names remain unresolved hashes. |
 | INV-F20 | Layout and chunk encoding correlate in the comprehensive sample. All 157,593 layout-R rows use chunk encoding 2. Layout F covers 11,930 rows: 11,006 use encoding 3 and 924 have no chunk table. Compression mode 0 covers 169,367 rows and mode 1 covers 156. No row uses encoding 4. All 924 unchunked rows are readable, including all 156 mode-1 rows. | Authenticated manifest | Confirmed (sample correlation) | A sample correlation, not a format rule. No encoding-4 row was available to test. |
 | INV-F21 | The 823 unreadable rows are all `unsupported_transform`: 746 type-89 encoding-2 rows, 76 type-11 encoding-3 rows and one type-14 encoding-3 row. They were excluded from payload sampling, so no extraction was attempted for them. | Authenticated manifest | Confirmed (sample) | Row states only. The payload transform remains unsupported (RPF9-F113, RPF9-F116, RPF9-F117). |
 | INV-F22 | No type-0 row occurs at any size in the 782 sampled depth-1 manifests. The depth-2 selection therefore has 0 candidates and the recursive sample stops at depth 1. This extends the 250-archive and 44-archive observations to a larger sample. | Authenticated manifest, sample audit | Confirmed (sample); Unknown (general) | 782 of 3,970 eligible type-0 rows were sampled. 3,188 eligible rows and 381 rows above 64 MiB were not extracted. Larger or unselected top-level type-0 rows may contain archives. |
-| INV-F23 | All 144 payload attempts exited 0 with exact logical size; none failed. They produced 137 distinct SHA-256 fingerprints; 7 attempts repeated content already seen (`type 5`: 3, `type 79`: 1, `type 255`: 3). The attempts contain 116 encoding-2 rows, 27 encoding-3 rows and 1 row without a chunk table. 36 of 40 type IDs were sampled. Types 14 and 89 are unreadable, and the single type-96 and type-109 rows exceed the 1 MiB payload cap. | Native extraction, hash fingerprint, authenticated manifest | Confirmed (sample) | At most four payloads per type, all at or below 1 MiB. Most readable rows were not extracted. |
+| INV-F23 | All 144 payload attempts succeeded with exact logical size; none failed. Fresh extractions exited 0; cached hits ran no extraction command and carry no exit code. They produced 137 distinct SHA-256 fingerprints; 7 attempts repeated content already seen (`type 5`: 3, `type 79`: 1, `type 255`: 3). The attempts contain 116 encoding-2 rows, 27 encoding-3 rows and 1 row without a chunk table. 36 of 40 type IDs were sampled. Types 14 and 89 are unreadable, and the single type-96 and type-109 rows exceed the 1 MiB payload cap. | Native extraction, hash fingerprint, authenticated manifest | Confirmed (sample) | At most four payloads per type, all at or below 1 MiB. Most readable rows were not extracted. |
 | INV-F24 | The 137 unique payloads fall into four prefix classes: 112 zero-prefix, 8 `PSIN`, 4 `RBF0` and 13 unrecognized. `RBF0` occurs only in type 11, across chunk encoding 3 and no chunk table, in two archives. `PSIN` occurs only in types 93 and 94, chunk encoding 3, across eight payloads from one archive. The 13 unrecognized samples are types 64, 66, 105 and 255 with chunk encoding 3, from six archives. The zero-prefix class spans 29 type IDs from 49 archives. No sample begins with `9FPR`, a zlib container header or another documented magic. | Payload prefix | Confirmed (classes and counts); Unknown (format identity) | First 8 bytes only. Exact prefixes stay in scratch. Each non-zero class comes from one or a few archives and a small number of rows. |
 | INV-F25 | Type ID does not determine the sampled prefix class. The zero-prefix class spans 29 type IDs; `RBF0` covers type 11; `PSIN` covers types 93 and 94; unrecognized covers types 64, 66, 105 and 255. | Payload prefix | Confirmed (sample independence); Unknown (format identity) | 36 of 40 type IDs were sampled. An 8-byte prefix is weak evidence of format. |
 | INV-F26 | Content-hash deduplication found no duplicate archive among the 782 extractions and seven duplicate payloads among 144 attempts. Sampling by name or row index alone would have counted those seven payload extractions twice. | Hash fingerprint | Confirmed (sample) | The archive duplicate count covers the 782 sampled archives, not the whole game. |
 
 ### Prior expanded sample (250 archives)
 
-| ID | Claim |
-| --- | --- |
-| INV-F09 | 250 readable type-0 rows from 17 of 22 top-level archives; all 250 extractions exact; 843,608,368 archive bytes; 1,090,553 payload bytes. 42 archives larger than 8 MiB. |
-| INV-F10 | 250 nested manifests hold 38,395 rows, 38,378 readable and 17 unreadable, with 36 type IDs. |
-| INV-F11 | Layout R uses encoding 2; layout F uses encoding 3 or no chunk table; no encoding 4. |
-| INV-F12 | The 17 unreadable rows are all `unsupported_transform`: 15 type-11 encoding-3, one type-14 encoding-3 and one type-89 encoding-2. |
-| INV-F13 | No type-0 row occurs in the 250 depth-1 manifests; the sample stops at depth 1. |
-| INV-F14 | 130 payload attempts, all exact; 122 distinct fingerprints and 8 duplicates. |
-| INV-F15 | 122 unique payloads: 106 zero-prefix, 8 `PSIN`, 3 `RBF0` and 5 unrecognized. |
-| INV-F16 | Type ID does not determine the sampled prefix class. |
-| INV-F17 | No duplicate archive among 250; eight duplicate payloads among 130 attempts. |
+| ID | Claim | Evidence | Confidence | Limits |
+| --- | --- | --- | --- | --- |
+| INV-F09 | The expanded rule selected 250 readable type-0 rows from 17 of 22 top-level archives. All 250 native extractions exited 0 with output size equal to the logical size. Their SHA-256 fingerprints are distinct, so no duplicate nested archive content was found. The archives total 843,608,368 bytes; the smallest is 720 bytes and the largest 16,714,192 bytes. 42 are larger than 8 MiB. | Sample audit, native extraction, hash fingerprint | Confirmed (sample) | Readable type-0 rows at or below 16 MiB only. 1,274 larger type-0 rows were not extracted. Five top-level archives have no type-0 row. The total number of nested archives is unknown. |
+| INV-F10 | The 250 nested manifests hold 38,395 rows, 38,378 readable and 17 unreadable, with 36 distinct type IDs. Three type IDs dominate: 11 (11,040 rows), 111 (10,181) and 100 (4,896). Compared with the prior 25-type sample, 12 type IDs are new: 6, 17, 93, 94, 95, 99, 100, 101, 102, 108, 110 and 114. Type 109 was present in the prior sample but absent here. Every row reports read source `main`. | Authenticated manifest | Confirmed (sample) | One build and sample. Type IDs are row labels; this index assigns no payload format to them. Names remain unresolved hashes. |
+| INV-F11 | Layout and chunk encoding correlate in the expanded sample. All 35,548 layout-R rows use chunk encoding 2. Layout F covers 2,847 rows: 2,536 use encoding 3 and 311 have no chunk table. Compression mode 0 covers 38,239 rows and mode 1 covers 156. No row uses encoding 4. All 311 unchunked rows are readable, including all 156 mode-1 rows. | Authenticated manifest | Confirmed (sample correlation) | A sample correlation, not a format rule. No encoding-4 row was available to test. |
+| INV-F12 | The 17 unreadable rows are all `unsupported_transform`: 15 type-11 encoding-3 rows, one type-14 encoding-3 row and one type-89 encoding-2 row. They were excluded from payload sampling, so no extraction was attempted for them. | Authenticated manifest | Confirmed (sample) | Row states only. The payload transform remains unsupported (RPF9-F113, RPF9-F116, RPF9-F117). |
+| INV-F13 | No type-0 row occurs at any size in the 250 sampled depth-1 manifests. The depth-2 selection therefore has 0 candidates and the recursive sample stops at depth 1. This extends the prior 44-archive observation to a larger sample. | Authenticated manifest, sample audit | Confirmed (sample); Unknown (general) | 250 of 3,077 eligible type-0 rows were sampled. 2,827 eligible rows and 1,274 rows above 16 MiB were not extracted. Larger or unselected top-level type-0 rows may contain archives. |
+| INV-F14 | All 130 payload attempts exited 0 with exact logical size; none failed. They produced 122 distinct SHA-256 fingerprints; 8 attempts repeated content already seen (`type 5`: 3, `type 255`: 3, `type 11`: 1, `type 79`: 1). The sample contains 110 encoding-2 rows, 16 encoding-3 rows and 4 unchunked mode-1 rows. 33 of 36 type IDs were sampled. Types 14 and 89 are unreadable, and the single type-96 row exceeds the 1 MiB payload cap. | Native extraction, hash fingerprint, authenticated manifest | Confirmed (sample) | At most four payloads per type, all at or below 1 MiB. Most readable rows were not extracted. |
+| INV-F15 | The 122 unique payloads fall into four prefix classes: 106 zero-prefix, 8 `PSIN`, 3 `RBF0` and 5 unrecognized. `RBF0` occurs only in type 11, mode 1 without a chunk table, across three payloads from one archive. `PSIN` occurs only in types 93 and 94, chunk encoding 3, across eight payloads from one archive. The five unrecognized samples are type 66 and type 255 with chunk encoding 3. No sample begins with `9FPR`, a zlib container header or another documented magic. | Payload prefix | Confirmed (classes and counts); Unknown (format identity) | First 8 bytes only. Exact prefixes stay in scratch. Each non-zero class comes from one archive and a small number of rows. |
+| INV-F16 | Type ID does not determine the sampled prefix class. The zero-prefix class spans 28 type IDs; `RBF0` covers type 11; `PSIN` covers types 93 and 94; unrecognized covers types 66 and 255. Type 255 carried several distinct signatures in the prior sample and one unrecognized class here. | Payload prefix | Confirmed (sample independence); Unknown (format identity) | 33 of 36 type IDs were sampled. An 8-byte prefix is weak evidence of format. |
+| INV-F17 | Content-hash deduplication found no duplicate archive among the 250 extractions and eight duplicate payloads among 130 attempts. Sampling by name or row index alone would have counted those eight payload extractions twice. | Hash fingerprint | Confirmed (sample) | The archive duplicate count covers the 250 sampled archives, not the whole game. |
 
 ### Original bounded sample (44 archives, INV-F01 to INV-F08)
 
@@ -198,8 +202,51 @@ chunk-table encoding; `none` means no chunk table.
 | 115 | 138 | 138 | 0 | 2 |
 | 255 | 808 | 808 | 0 | 3: 40; none: 768 |
 
-Type 0 does not appear in the nested manifests; it labels the top-level rows
-used as archive containers in this sample.
+### Prior expanded sample
+
+Counts are rows in the 250 unique nested manifests of the prior expanded run.
+
+| Type ID | Rows | Readable | Unreadable | Encoding |
+| ---: | ---: | ---: | ---: | --- |
+| 2 | 996 | 996 | 0 | 2 |
+| 3 | 446 | 446 | 0 | 2 |
+| 4 | 687 | 687 | 0 | 2 |
+| 5 | 191 | 191 | 0 | 2 |
+| 6 | 275 | 275 | 0 | 2 |
+| 11 | 11,040 | 11,025 | 15 | 2: 8,673, 3: 2,211, none: 156 |
+| 14 | 1 | 0 | 1 | 3 |
+| 15 | 2,719 | 2,719 | 0 | 2 |
+| 16 | 120 | 120 | 0 | 2 |
+| 17 | 293 | 293 | 0 | 2 |
+| 66 | 12 | 12 | 0 | 3 |
+| 67 | 803 | 803 | 0 | 2 |
+| 70 | 1,249 | 1,249 | 0 | 2 |
+| 72 | 149 | 149 | 0 | 2 |
+| 73 | 1,044 | 1,044 | 0 | 2 |
+| 74 | 106 | 106 | 0 | 2 |
+| 78 | 1,037 | 1,037 | 0 | 2 |
+| 79 | 162 | 162 | 0 | 2 |
+| 87 | 580 | 580 | 0 | 2 |
+| 88 | 140 | 140 | 0 | 2 |
+| 89 | 1 | 0 | 1 | 2 |
+| 93 | 211 | 211 | 0 | 3 |
+| 94 | 80 | 80 | 0 | 3 |
+| 95 | 97 | 97 | 0 | 2 |
+| 96 | 1 | 1 | 0 | 3 |
+| 99 | 98 | 98 | 0 | 2 |
+| 100 | 4,896 | 4,896 | 0 | 2 |
+| 101 | 5 | 5 | 0 | 2 |
+| 102 | 93 | 93 | 0 | 2 |
+| 103 | 266 | 266 | 0 | 2 |
+| 108 | 3 | 3 | 0 | 2 |
+| 110 | 3 | 3 | 0 | 2 |
+| 111 | 10,181 | 10,181 | 0 | 2 |
+| 114 | 97 | 97 | 0 | 2 |
+| 115 | 138 | 138 | 0 | 2 |
+| 255 | 175 | 175 | 0 | 3: 20, none: 155 |
+
+Type 0 does not appear in either nested sample; it labels the top-level rows
+used as archive containers.
 
 ## Extraction outcomes
 
@@ -209,15 +256,24 @@ used as archive containers in this sample.
 | Nested archive successes | 782 |
 | Nested archive failures | 0 |
 | Duplicate nested archives | 0 |
-| Nested archive bytes | 7,988,951,648 |
+| Sampled archive bytes | 7,988,951,648 |
 | Payload attempts | 144 |
 | Payload successes | 144 |
 | Payload failures | 0 |
 | Unique payload fingerprints | 137 |
 | Duplicate payloads | 7 |
 | Payload bytes | 1,415,428 |
-| Total extracted bytes | 8,240,768,324 |
+| Sampled bytes total | 7,990,367,076 |
+| Cache archive bytes | 8,239,352,896 |
+| Cache payload bytes | 1,415,428 |
+| Cache extracted bytes | 8,240,768,324 |
+| Cache bytes outside this sample | 250,401,248 |
 | Extraction failures | 0 |
+
+The attempts include cache hits. `summary.json` counts cached and fresh archive
+and payload extractions separately; a cache hit runs no extraction command and
+carries no `exit` value. The cache totals cover every artifact in the scratch
+cache, including 250,401,248 archive bytes from earlier samples.
 
 ## Payload signature classes
 

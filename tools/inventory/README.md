@@ -119,9 +119,17 @@ Duplicate payloads are recorded the same way.
 | `run.log` | progress log |
 | `plan.json` | depth-1 selection with `--plan-only` |
 
-The `*_attempts` totals count every extraction attempt. `*_successes` and
-`*_failures` partition those attempts, so a failed extraction is never hidden
-from the attempt count.
+`archive_extraction_attempts` and `payload_attempts` count every requested
+extraction, including cache hits. `archive_extraction_cached` and
+`archive_extraction_fresh` split the archive attempts, and
+`payload_extraction_cached` and `payload_extraction_fresh` split the payload
+attempts. `*_successes` and `*_failures` partition the attempts. A cache hit
+runs no extraction command and carries no `exit` value.
+
+`archive_bytes`, `payload_bytes` and `extracted_bytes` describe the cache as a
+whole. A resumed run can hold artifacts from earlier samples, so these totals
+can exceed the bytes of the current sample. The current sample is the records
+in `archives.jsonl` and `payloads.jsonl`.
 
 Only the first eight extracted bytes are read for classification. Exact
 prefixes, archive paths and archived rows stay in the scratch directory.

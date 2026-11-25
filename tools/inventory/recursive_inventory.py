@@ -153,6 +153,7 @@ def type0_rows(rows: list[dict], max_size: int) -> list[dict]:
         for row in rows
         if row.get("kind") == "row"
         and row.get("type_id") == 0
+        and isinstance(row.get("row"), int)
         and isinstance(row.get("logical_size"), int)
         and row["logical_size"] <= max_size
         and is_readable(row)
@@ -235,7 +236,7 @@ def discover_manifests(inventory_dir: Path) -> tuple[list[dict], list[dict]]:
     for path in sorted(inventory_dir.glob("*.jsonl")):
         try:
             documents = read_jsonl(path)
-        except (OSError, json.JSONDecodeError) as error:
+        except (OSError, UnicodeError, json.JSONDecodeError) as error:
             duplicates.append({"manifest": str(path), "reason": f"unreadable: {error}"})
             continue
         if not documents or documents[0].get("kind") != "header":
@@ -384,6 +385,8 @@ class Sampler:
         self.attempts = {"archive": 0, "payload": 0}
         self.successes = {"archive": 0, "payload": 0}
         self.extraction_failures = {"archive": 0, "payload": 0}
+        self.cached = {"archive": 0, "payload": 0}
+        self.fresh = {"archive": 0, "payload": 0}
         self.enumerated_rows = 0
         self.row_limit_hit = False
         self.stop_flags: set[str] = set()
@@ -430,12 +433,12 @@ class Sampler:
         cached = self.cache.lookup(kind, sample_key, expected)
         if cached:
             entry, path = cached
+            self.cached[kind] += 1
             self.successes[kind] += 1
             return (
                 {
                     "ok": True,
                     "cached": True,
-                    "exit": 0,
                     "actual_size": expected,
                     "expected_size": expected,
                 },
@@ -472,6 +475,7 @@ class Sampler:
             "--executable",
             str(self.executable),
         ]
+        self.fresh[kind] += 1
         result = self.run(command)
         actual = temporary.stat().st_size if temporary.exists() else None
         if result.returncode == 0 and actual == expected:
@@ -563,7 +567,7 @@ class Sampler:
                 }, []
         try:
             documents = read_jsonl(path)
-        except (OSError, json.JSONDecodeError) as error:
+        except (OSError, UnicodeError, json.JSONDecodeError) as error:
             path.unlink(missing_ok=True)
             failure = dict(label)
             failure.update(
@@ -612,13 +616,14 @@ class Sampler:
         self.enumerated_rows += len(rows)
         result = {
             "ok": True,
-            "exit": 0,
             "authentication": header.get("authentication", {}),
             "rows": total_rows,
             "enumerated_rows": len(rows),
             "provenance": "cached" if cached else "rechecked",
             "types": type_histogram(rows),
         }
+        if not cached:
+            result["exit"] = 0
         if truncated:
             result["row_limit_truncated"] = truncated
         return result, rows
@@ -737,6 +742,8 @@ def payload_candidates(
             entry["readable"] += 1
             if not isinstance(row.get("logical_size"), int) or row["logical_size"] > max_size:
                 entry["over_payload_size_cap"] += 1
+                continue
+            if not isinstance(row.get("row"), int):
                 continue
             entry["readable_within_limit"] += 1
             buckets.setdefault(type_id, []).append((row, record))
@@ -861,10 +868,14 @@ def write_report(path: Path, summary: dict) -> None:
         "archive_extraction_attempts",
         "archive_extraction_successes",
         "archive_extraction_failures",
+        "archive_extraction_cached",
+        "archive_extraction_fresh",
         "archive_bytes",
         "payload_attempts",
         "payload_successes",
         "payload_failures",
+        "payload_extraction_cached",
+        "payload_extraction_fresh",
         "unique_payloads",
         "duplicate_payloads",
         "payload_bytes",
@@ -1480,10 +1491,14 @@ def execute(
             "archive_extraction_attempts": sampler.attempts["archive"],
             "archive_extraction_successes": sampler.successes["archive"],
             "archive_extraction_failures": sampler.extraction_failures["archive"],
+            "archive_extraction_cached": sampler.cached["archive"],
+            "archive_extraction_fresh": sampler.fresh["archive"],
             "archive_bytes": sampler.cache.archive_bytes,
             "payload_attempts": sampler.attempts["payload"],
             "payload_successes": sampler.successes["payload"],
             "payload_failures": sampler.extraction_failures["payload"],
+            "payload_extraction_cached": sampler.cached["payload"],
+            "payload_extraction_fresh": sampler.fresh["payload"],
             "unique_payloads": len(
                 {record["sha256"] for record in sampler.payload_records if record["sha256"]}
             ),
