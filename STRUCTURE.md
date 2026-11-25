@@ -30,8 +30,9 @@ A format document says _what_ the structure is. The build catalog says _where_ i
 | `audio/`      | Audio sample and stream encodings                                                    |
 | `scripts/`    | Script bytecode and script containers                                                |
 | `metadata/`   | Structured data formats such as PSO or XML schemas                                   |
+| `unknown/`    | Payloads identified by bytes but not yet assigned to a category                      |
 
-Only `containers/` exists so far.
+Only `containers/` and `unknown/` exist so far.
 
 ### Flat container directories
 
