@@ -36,10 +36,10 @@ and `\` to `/`; nothing else changes. See
 
 The two files are separate namespaces:
 
-| File | Namespace | Width | Field |
-|---|---|---|---|
-| `rpf9-hash64.lut` | `hash64` | 16 digits | 64-bit name hash |
-| `rpf9-key32.lut` | `key32` | 8 digits | 32-bit name key |
+| File              | Namespace | Width     | Field            |
+| ----------------- | --------- | --------- | ---------------- |
+| `rpf9-hash64.lut` | `hash64`  | 16 digits | 64-bit name hash |
+| `rpf9-key32.lut`  | `key32`   | 8 digits  | 32-bit name key  |
 
 A 32-bit value is never reinterpreted as a 64-bit hash or the reverse.
 
@@ -60,10 +60,12 @@ The current files contain hash-validated candidates from two local sources:
 A candidate was accepted only when the extension and row type were consistent
 with the public type/extension knowledge. For `hash64` the only established
 extension mapping is `rpf` to type 0, so these records are relative `.rpf`
-paths. For `key32` only type 255, the engine's no-type class, is accepted.
-Payloads behind the unsupported payload transform were skipped and are not
-sources. Raw payload text, executable bytes, archive bytes and local paths are
-not published.
+paths. For `key32` the established types are 255, the engine's no-type class,
+and types 11 and 14 from the executable's per-type class tables. Types 11 and
+14 have no confirmed extension, so their candidates are path stems without an
+invented extension. Payloads behind the unsupported payload transform were
+skipped and are not sources. Raw payload text, executable bytes, archive bytes
+and local paths are not published.
 
 The records are candidate mappings, not independently established original
 developer filenames. A hash match can be coincidental, particularly in the
@@ -72,11 +74,11 @@ several names for one hash.
 
 ## Current coverage
 
-The published files hold 2250 `hash64` records and 106 `key32` records. Applied
-to the 22 authenticated local archives, they resolve 2392 of 6534 rows with no
-ambiguous row under the strict type/extension matching described above. The
-remaining 4142 rows have no published candidate. These counts are observations
-from one build and one local sample, not limits of the format.
+The published files hold 2250 `hash64` records and 233 `key32` records. Of the
+`key32` keys, 106 address type 255 rows and 127 address type 11 rows; 211 keys
+over 228 payload-matched rows came from payload text and 22 keys over 31 rows
+from the executable, with no key from both sources. Applied to the 22
+authenticated local archives, the pair\nresolves 2525 of 6534 rows with no ambiguous row under the strict type matching\ndescribed above: 2266 type-0 rows, 125 type-255 rows and 134 type-11 rows. The\nremaining 4009 rows have no published candidate. A re-hash audit found no\nunverified record, no key with more than one normalized name, no duplicate\nspelling and no path-unsafe name. These counts are observations from one build\nand one local sample, not limits of the format; the harvest run was truncated\nby its explicit byte, string and match limits.
 
 ## Contributing
 
