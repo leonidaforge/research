@@ -68,8 +68,8 @@ independently confirmed for any format id.
 
 The last column states whether any consequence independent of the extent fit was
 tested. A mip check is independent of the fit only in the sense that it compares
-neighbouring levels; it uses the same unit to size them. Format 54 has no such
-consequence in this iteration.
+neighbouring levels; it uses the same unit to size them. Formats 28, 54 and 99
+have no such consequence in this iteration.
 
 | Format id | Unit | Bytes | Extent fit | Independent consequence |
 |---|---|---|---|---|
