@@ -4,6 +4,7 @@
   inventory sampler.
 - [SGD5 structural sampler](sgd5/README.md): reports the observed SGD5 header,
   table blocks and data-region prefix.
+- [rbf0](rbf0/README.md): structural inspector for RBF0 payloads.
 
 A tool added here MUST:
 
