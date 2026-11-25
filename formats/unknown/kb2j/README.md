@@ -27,11 +27,11 @@ variants. All 515 rows share the same header prefix, little-endian frame index
 table and frame-data region. The fourth signature byte selects a variant; what
 it selects is **Unknown**.
 
-A similarity to the Bink 2 container family is **Speculative**. An external
-demuxer recognizes `KB2j` as a Bink-family format, parses the header and demuxes
-packets, then stops at an unimplemented Bink 2 video decoder. A local decoder
-DLL contains one signature comparison sequence for `KB2f` through `KB2n`,
-including both signatures. Both observations are external-tool behavior and
+A similarity to a known video-container family is **Speculative**. An external
+demuxer recognizes `KB2j` as that family, parses the header and demuxes packets,
+then stops at an unimplemented video decoder. A local decoder DLL contains one
+signature comparison sequence for `KB2f` through `KB2n`, including both
+signatures. Both observations are external-tool behavior and
 local strings, not decoded frames or an engine call path. They do not establish
 container identity, engine compatibility or a decoder implementation.
 
@@ -40,7 +40,7 @@ container identity, engine compatibility or a decoder implementation.
 | Magic and occurrence             | Confirmed (515 rows, one archive)    |
 | Common header and frame table    | Confirmed (515 rows)                 |
 | One family, two variants         | Probable                             |
-| Bink 2 similarity                | Speculative (external tooling names) |
+| Known video-family similarity    | Speculative (external tooling behavior) |
 | Meaning of the fourth magic byte | Unknown                              |
 | Frame encoding and decode        | Unknown                              |
 
@@ -223,8 +223,8 @@ observations; the codec and the meaning of `decoded_bytes` are not established.
 - The earlier 787 `KB2n` count covers a different `movies.rpf` population whose
   manifest is not preserved. The current 505 count covers the 515-row manifest;
   the figures are not interchangeable (KB2-F12).
-- The Bink 2 similarity rests on external demuxer format naming and local DLL
-  strings. No decoded frame or engine call path confirms it.
+- The video-family similarity rests on external demuxer format naming and local
+  DLL strings. No decoded frame or engine call path confirms it.
 - No frame was decoded and no payload was played back. The external demuxer
   demuxes `KB2j` without a decoder for the video bitstream.
 - The meanings of the `+0x24` flag bits, `+0x2C`, the audio flag bits and the
