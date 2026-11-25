@@ -58,8 +58,10 @@ bytes form a common header; field support is counted over all 768 rows.
 
 The offset at `+0x0C` is even in all 768 rows and lies after the variant table
 and before the stored size. The byte immediately before the offset is `A3` in
-608 rows, `BD` in 117 and `76` in 43. Bytes at the offset begin the encoded
-stream; the byte distribution changes there in the inspected samples.
+608 rows, `BD` in 117 and `76` in 43. The byte at the offset takes 158 values;
+`00` accounts for 367 rows and `A0` for 115. Over the same 768 rows, the
+one-byte distributions immediately before and at the offset have a total
+variation distance of 0.997. Bytes at the offset begin the encoded stream.
 
 Variant counts:
 
@@ -84,11 +86,14 @@ predicts the table length; the offset at `+0x0C` follows the table.
 | `FF61` | `u32` second offset at `+0x10`; non-decreasing `u16[count]` at `+0x14` | 86/86 | none |
 | `FF02` | `u16[count]` table is absent; a record region of `count` fixed-width records follows `+0x10` | 123/124 use a fixed width | one row at 138,736 bytes |
 
-For `FF21`, `FF25` and `FF61`, the table length test uses the small increment
-between adjacent entries. The entries increase by at most 5; the value after the
-table jumps by at least 2,045 in `FF21`, 381 in `FF25` and 5,700 in `FF61`.
-`FF25` permits equal adjacent entries in 36 rows; `FF21` and `FF61` are strictly
-increasing in the sample.
+For `FF21`, `FF25` and `FF61`, the table length test uses the increment between
+adjacent entries across all 644 rows. In the sample, no adjacent increase
+exceeds 5 (5 in `FF21`, 3 in `FF25`, 5 in `FF61`). The `u16` after the table is
+at least 2,045 (`FF21`), 381 (`FF25`) and 5,700 (`FF61`) above the last entry.
+`FF25` has equal adjacent entries in 36 rows and 87 equal pairs; `FF21` and
+`FF61` have no equal adjacent pairs. `FF21` has 26 single-entry rows, where the
+adjacent-entry test is vacuous. `ADAT-F16` records the population and the
+absence of counterexamples.
 
 For `FF61`, the `u32` at `+0x10` is a second payload-relative offset. It is
 greater than the `+0x0C` offset and smaller than the stored size in all 86 rows.
@@ -142,6 +147,9 @@ be recorded with the signature, because it selects the table layout.
   complete census of the build.
 - The 18 zlib type-255 rows in one `audio.rpf` archive were not decoded, so
   whether they also begin `ADAT` is Unknown.
+- The table-end bounds in `ADAT-F16` are empirical over 644 rows. A genuine
+  adjacent increase above 5 would fail the table-length test; no such row
+  occurs in the sample.
 - The region between the variant table and the data offset is not interpreted
   beyond its boundaries and the `FF61` second offset.
 - No executable path was traced. Field roles beyond count and offset are
