@@ -12,6 +12,7 @@ Subjects:
 - [RPF9](rpf9/INDEX.md)
 - [RBF0](rbf0/INDEX.md)
 - [PSIN](psin/INDEX.md)
+- [EDUP](edup/INDEX.md)
 - [PTFX](ptfx/INDEX.md)
 - [SGD5](sgd5/INDEX.md)
 - [Type 14](type14/INDEX.md)

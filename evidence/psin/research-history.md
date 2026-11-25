@@ -37,3 +37,9 @@ Interpretations that were once used for PSIN and later corrected. The current mo
 **Old reading.** The `u32` at body `+0x08` was recorded as 512 in 441 payloads, 768 in 35 payloads, and 1024 in 7 payloads.
 
 **Correction.** The pairing was wrong. The correct counts over the same 483 unique top-level `LSCH` payloads are 768 in 441, 512 in 35, and 1024 in 7. The value set and total are unchanged; only the counts assigned to 512 and 768 were swapped. The correction came from `tools/psin/body_probe.py` and `tools/psin/body-record.json`.
+
+## `PMAP` block bodies described as wholly opaque
+
+**Old reading.** PSIN-F15 recorded that block contents are opaque, with no exception.
+
+**Correction.** The id-1 block is a name block (PSIN-F21): its body ends with a NUL and splits into printable ASCII parts. The opacity limit now covers every other block id. The probe keeps only wholly printable parts, so earlier prose that called the whole block body printable ASCII overstated what `tools/psin/body_probe.py` records.

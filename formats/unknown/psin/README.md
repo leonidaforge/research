@@ -169,7 +169,7 @@ Block ids are not uniform.
 | Small (below `0x100`) | 1, 2, 6, 7, 8, 12 | 62 | Do not occur in the `PSCH` id table |
 | Other | all other observed ids | 459 | Every other id occurs in the `PSCH` id table (62 of 62 payloads) |
 
-Id 1 marks a name block in 41 payloads. Its bytes are NUL-terminated printable ASCII in 41 of 41: 8,342 name strings, 1,385 distinct, with repeats across payloads. `tools/psin/body-record.json` records these counts. The names are data, not format semantics. The other block bodies are opaque.
+Id 1 marks a name block in 41 payloads. The block body ends with a NUL in 41 of 41 and splits into NUL-separated parts; 8,342 of those parts are entirely printable ASCII, 1,385 distinct, with repeats across payloads. The probe drops empty and non-printable parts, so the count covers printable parts and does not establish that every part of every block is printable. `tools/psin/body-record.json` records these counts. The names are data, not format semantics. The other block bodies are opaque.
 
 ### `PSCH` section
 
