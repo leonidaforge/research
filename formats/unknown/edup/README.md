@@ -41,11 +41,35 @@ Counterexamples to simpler readings: in the 236-byte payload the `u32` at `+0x04
 
 ## Entries and trailing blob
 
-The entries are not sorted by their 128-bit value in either byte order. Every entry is distinct within its payload. In the 4-entry, 33-entry and 17,431-entry payloads, the first 8 bytes are all distinct; the last 8 bytes take 4, 21 and 6,845 distinct values respectively. In the 17,431-entry payload every byte position takes all 256 values, so the repeats are whole 8-byte values, not a constant byte. No entry contains the shared name hash or key in either byte order. This pattern does not support treating an entry as a uniform 128-bit value; it may hold two 8-byte components, whose meanings are Unknown.
+The entries are not sorted by their 128-bit value in either byte order. Every entry is distinct within its payload. In the 4-entry, 33-entry and 17,431-entry payloads, the first 8 bytes are all distinct; the last 8 bytes take 4, 21 and 6,845 distinct values respectively. In the 17,431-entry payload every byte position takes all 256 values, so the repeats are whole 8-byte values, not a constant byte. No entry contains the shared name hash or key in either byte order. The entry is therefore two 8-byte fields, not one 128-bit value.
 
-The trailing blob is length-delimited and opaque at this level. The 687,056-byte blob has entropy about 8.0 bits/byte and the 1,008-byte blob about 7.8; none of the zlib, gzip, bzip2 or LZMA decoders accepts either, and no entry appears inside the blob. Every blob length is a multiple of 16 bytes, so every payload size is `12 mod 16`. Whether the blob is content, a digest, compressed data or encrypted data is Unknown.
+## Key relationship
 
-The count-0 payload has a 16-byte trailing blob, constant across the two byte-identical rows. It does not match the first or last 16 bytes of MD5, SHA-1, SHA-256, SHA-512 or BLAKE2 digests of the five payloads, and the byte at `+0x06` does not take a standard UUID version nibble. Its identity remains Unknown; calling it a digest would be a guess.
+The two 8-byte fields read as little-endian keys. The first field is unique in every nonempty table. The second field repeats. The two key sets are disjoint in every nonempty table: no second-field value occurs as a first-field value, and no first-field value occurs as a second-field value.
+
+The second field was tested against the 64-bit key tables of the local RDS5/ETPF texture stores. The store population is the 46 `.ttpf` files present under the local texture data directory: 352,461 keys, 352,417 distinct across the set.
+
+| Table                 | Entries | Distinct first | Distinct second | First in store keys | Second in store keys |
+| --------------------- | ------: | -------------: | --------------: | ------------------: | -------------------: |
+| `textures.rpf` row 20 |  17,431 |         17,431 |           6,845 |                   0 |               17,431 |
+| `core_restofworld` 15 |      33 |             33 |              21 |                   0 |                    0 |
+| `shared_minigame000` 53 |     4 |              4 |               4 |                   0 |                    0 |
+
+In the 17,431-entry table every first-field key is absent from every store key table and every second-field key is present. The second field is therefore the stored texture key in that table. The mapping direction is alias to stored key, not stored key to alias. The first field is a separate key space that no sampled store indexes.
+
+The 1,176 repeated second-field values cover 6,845 distinct stored keys; the largest repeat count is 723. The table therefore maps many distinct first-field keys to one stored key.
+
+The direction is **Confirmed** for `textures.rpf` row 20 and **Unknown** for the other two nonempty tables. Their second-field keys do not occur in the 46-store set. The local set is smaller than the 57-store sample used by the RDS5 document, so a missing store is the first explanation to test. The direction is not refuted: no table maps a stored key to an absent key.
+
+## Trailing blob
+
+The blob is length-delimited and opaque. Every blob length is a multiple of 16 bytes, so every payload size is `12 mod 16`. The four blob lengths are 16, 160, 1,008 and 687,056 bytes.
+
+Tested record widths 1 to 64: only widths 1, 2 and 4 divide every blob length. No width produces a record table whose count equals the entry count or the distinct second-field count, and no fixed-offset 4-byte field is strictly increasing. The 16-byte records are all distinct in every blob. No 8-byte word matches a store key.
+
+Tested decoders on the complete blob: zlib, raw deflate, gzip, bzip2, xz and LZMA-alone. All fail; raw deflate and LZMA also produce no complete stream with zero unused input. No zstd or LZ4 frame signature occurs at the blob start. Entropy is 3.9, 6.8, 7.8 and 8.0 bits/byte for the four blobs.
+
+The count-0 payload has a 16-byte blob, constant across the two byte-identical rows. It does not match the first or last 16 bytes of MD5, SHA-1, SHA-256, SHA-512 or BLAKE2 digests of the five payloads, and the byte at `+0x06` does not take a standard UUID version nibble. Its identity remains Unknown. The blob is kept opaque: content, a digest table, compressed data and encrypted data are all consistent with the negative tests.
 
 ## Classification
 
@@ -56,16 +80,28 @@ The count-0 payload has a 16-byte trailing blob, constant across the two byte-id
 | Decoded-content occurrence            | Confirmed (5 rows; bounded scan for small rows) |
 | Count, length and 16-byte entry width | Confirmed (four distinct payloads)             |
 | Little-endian field reading           | Probable                                       |
-| Field meanings after the count        | Unknown                                        |
+| Two 8-byte entry fields               | Confirmed (one table; disjoint key sets)       |
+| Alias-to-stored-key direction         | Confirmed (`textures.rpf` row 20); Unknown (two tables) |
+| Trailing blob                         | Unknown (decoder and width tests negative)     |
 | Independent format                    | Probable                                       |
 
-The magic and the count/length framing are self-contained and fit all five payloads; no documented format is claimed as a match. The format is probably independent, but its role as metadata, container or embedded structure is not established. The count-0 and larger payloads share one framing, so they are not treated as separate variants.
+The magic and the count/length framing are self-contained and fit all five payloads; no documented format is claimed as a match. The key test identifies the second field as a stored texture key in one table. The format is probably independent, but its role as metadata, container or embedded structure is not established. The count-0 and larger payloads share one framing, so they are not treated as separate variants.
+
+## Tools
+
+`tools/edup/edup_inspect.py` reports the layout, the two entry fields as counts only, and an optional membership test against local RDS5/ETPF stores. It never prints key values or payload bytes.
+
+```text
+python tools/edup/edup_inspect.py <sample> [<sample> ...] [--store <ttpf> ...] [--store-dir <dir>] [--json]
+python -m unittest discover -s tools/edup
+```
 
 ## Limits
 
 - Five rows and four distinct payloads. The two hidden rows were found through the shared name key; the full 1,735-row type-255 set, about 14 GB logical, was not decoded.
-- The entry and blob contents are not interpreted. No executable path was traced and no earlier RAGE format is claimed as a match.
-- The 16-byte blob is not named. A digest, a fixed marker and an opaque value are all consistent with the bytes.
+- The key test covers 46 local `.ttpf` stores, not the 57-store sample in the RDS5 document. One table resolves completely; two do not resolve.
+- The entry and blob contents are not otherwise interpreted. No executable path was traced and no earlier RAGE format is claimed as a match.
+- The trailing blob is not named or decoded. The width and decoder tests are negative, not a proof of encryption.
 - The stored-byte census remains three; it is a lower bound for decoded signatures that a zlib chunk can hide.
 
-Evidence: [evidence/unknown-payloads/INDEX.md](../../../evidence/unknown-payloads/INDEX.md).
+Evidence: [evidence/edup/INDEX.md](../../../evidence/edup/INDEX.md). The original occurrence and framing findings are UPL-F02 to UPL-F11 in [evidence/unknown-payloads/INDEX.md](../../../evidence/unknown-payloads/INDEX.md).
