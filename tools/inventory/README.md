@@ -159,8 +159,8 @@ They do not read game files.
 
 `full_census.py` attempts every readable type-0 row in a directory of
 top-level manifests, extracts it, records the archive header, and reads its
-nested manifest. It is the driver behind the population counts in
-[evidence/inventory/INDEX.md](../../evidence/inventory/INDEX.md).
+nested manifest. A run that reaches every declared row supports a population
+count; the committed index does not yet carry one.
 
 ```sh
 python tools/inventory/full_census.py \
