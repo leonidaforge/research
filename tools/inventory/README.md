@@ -191,3 +191,45 @@ compressed stream`, `incomplete reconstruction`, `operational limit` or
 `unclassified`. A stage is assigned from the CLI message or the observed size,
 not guessed from a row type.
 
+## Payload families
+
+`payload_families.py` selects a bounded sample per type from cached manifests,
+extracts each payload, and classifies the first 4 KiB:
+
+```sh
+python tools/inventory/payload_families.py \
+  --manifest-dir <manifest-directory> \
+  --archive-dir <archive-directory> \
+  --output-dir <scratch-directory> \
+  --lforge <leonida-forge-cli> \
+  --executable <game-executable> \
+  --per-type 8
+```
+
+Selection is quantile-spaced by `(logical_size, archive hash, row)` per type,
+at or below `--max-payload-bytes`. The classes are `resource-wrapper` (eight
+zero bytes, a system pointer at `+0x08`, `0DRP` at `+0x10`), `zero-prefix`,
+the documented family magics, `zlib-container-header`, `unrecognized` and
+`short`. The classifier reports the `+0x10` tag and follows the `+0x08` pointer
+to the page-map counts when the map lies inside the read window. A class is a
+byte observation; only `resource-wrapper` has a structural reading, and that
+reading is **Probable**.
+
+## Transform population
+
+`transform_census.py` reads the manifests produced by the full census and
+groups every unreadable row by stage:
+
+```sh
+python tools/inventory/transform_census.py \
+  --manifest-dir <census-manifest-directory> \
+  --rows <census-rows.jsonl> \
+  --output-dir <scratch-directory>
+```
+
+Each unreadable row gets a stage and a 16-hex-digit structural fingerprint over
+its type, layout, chunk encoding and count, mode, size relation, read source and
+cipher descriptor. The output separates `transform_flagged` from the readable
+structure population and splits every type, including 89, 11 and 14.
+
+
