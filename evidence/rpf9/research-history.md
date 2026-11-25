@@ -206,6 +206,12 @@ Some earlier notes used "A" and "B" for `hdr[0x04]` and `hdr[0x08]`. Those lette
 
 **Still open.** What the prefix contains or means, and whether another encoding-2 layout exists.
 
+## Raw DEFLATE rows were unobserved
+
+**Old assumption.** Native extraction covered stored rows and chunked rows. Raw DEFLATE rows with mode 1 and no chunk table had been seen only in code, never in real data (RPF9-F104).
+
+**Correction.** A nested archive contains 156 type 11 rows, all mode 1 without a chunk table. Eight sampled rows extracted as raw DEFLATE to exact logical sizes (RPF9-F118). The archive is nested, outside the 22 top-level archives of RPF9-F103, so that sample's counts do not change. One row failed with a DEFLATE error; the failure is not explained.
+
 ## Open
 
 - Meaning of descriptor `+0x08`, and any use of `+0x12`.

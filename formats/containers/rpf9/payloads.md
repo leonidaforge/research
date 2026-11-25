@@ -5,7 +5,7 @@ Payload data follows the metadata area. This document has two kinds of knowledge
 - The engine read path, traced in code: where an entry's bytes are, how they are read, and how they are decoded.
 - The storage layout observed in archive data. It is enough to recover payloads without the table of contents.
 
-The two agree where they overlap (see [below](#relation-between-code-and-data)). Stored rows and chunked rows can now be read by following the native field values, once the metadata authenticates ([native reads](#native-reads-from-authenticated-metadata)). The payload transform reuses the metadata cipher's engine, but its key state is unresolved; raw DEFLATE without a chunk table remains untried on real data.
+The two agree where they overlap (see [below](#relation-between-code-and-data)). Stored rows and chunked rows can now be read by following the native field values, once the metadata authenticates ([native reads](#native-reads-from-authenticated-metadata)). The payload transform uses a separate object of the same class and selects algorithm `0x11`, a counter-mode keystream rather than the metadata CBC; its descriptor binding is established for the sample, the block program is not, and raw DEFLATE without a chunk table was extracted from a nested archive (RPF9-F114 to RPF9-F118).
 
 ## Payload address
 
@@ -248,7 +248,7 @@ These agree. The data observations were made by scanning, not by following nativ
 
 Once the metadata signature verifies, payloads can be read through native location records rather than by scanning. In the 22 tested archives, 5150 rows were stored and 929 decoded through chunk tables; 455 rows carried the payload transform and were refused (RPF9-F103). Stored and chunked extractions produced exactly the logical size (RPF9-F104).
 
-No raw DEFLATE row without a chunk table was observed, so that path remains confirmed by code but unconfirmed by real extraction. Transformed rows read their cipher descriptor from their own metadata field and select algorithm `0x11` (RPF9-F114, RPF9-F116), whose block program is not reproduced, so they are still refused (RPF9-F117). The metadata signature covers none of these payload bytes; successful extraction is not authentication.
+None of the 22 top-level archives of RPF9-F103 was observed to contain a raw DEFLATE row without a chunk table. A nested archive does hold them: its authenticated table of contents lists 156 rows, all type 11, mode 1 without a chunk table, and eight sampled rows extracted to their logical sizes (RPF9-F118). One row of that archive failed with a DEFLATE error. Transformed rows read their cipher descriptor from their own metadata field and select algorithm `0x11` (RPF9-F114, RPF9-F116), whose block program is not reproduced, so they are still refused (RPF9-F117). The metadata signature covers none of these payload bytes; successful extraction is not authentication.
 
 ## Observed storage layout
 
