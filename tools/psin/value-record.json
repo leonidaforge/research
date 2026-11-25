@@ -129,6 +129,16 @@
       2,
       180
     ],
+    "value_common_divisors_1_to_64": [
+      1,
+      2,
+      4
+    ],
+    "block_common_divisors_1_to_64": [
+      1
+    ],
+    "value_length_min": 12,
+    "value_length_max": 5812,
     "value_decoder_any": {
       "zlib": 0,
       "deflate_raw": 0,

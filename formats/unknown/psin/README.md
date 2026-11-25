@@ -188,7 +188,7 @@ The `PSCH` id set contains every other `PMAP` block id in 62 of 62 payloads. The
 
 ### Negative tests for the values
 
-Fixed record widths 1 to 64 do not consume all 1,170 `PSCH` values: only widths 1, 2 and 4 divide every value length, and those are byte granularities, not records. No zlib, gzip, bzip2, xz, LZMA, zstd or LZ4 signature occurs at a `PSCH` value or a block start. No value or block yields a complete stream under raw deflate, zlib, gzip, bzip2, LZMA or LZMA-alone. Permissive calls can return partial output; those are not accepted as streams. Unlike the earlier whole-area test, this test isolates each value and block and checks end-of-stream. The value and block internals remain **Unknown**.
+Fixed record widths 1 to 64 do not consume all 1,170 `PSCH` values: the value common divisors are 1, 2 and 4, which are byte granularities, not records. The classifier records this as `value_common_divisors_1_to_64` in `value-record.json`. No zlib, gzip, bzip2, xz, LZMA, zstd or LZ4 signature occurs at a `PSCH` value or a block start. No value or block yields a complete stream under raw deflate, zlib, gzip, bzip2, LZMA or LZMA-alone. Permissive calls can return partial output; those are not accepted as streams. Unlike the earlier whole-area test, this test isolates each value and block and checks end-of-stream. The value and block internals remain **Unknown**.
 
 ## `LSCH` and `LENM` section bodies
 
@@ -216,7 +216,7 @@ A marker record is 32 bytes and starts with eight `0xAA` bytes.
 | `+0x0E` | `u16` little-endian | Uninterpreted |
 | `+0x10` | 16 bytes | Uninterpreted |
 
-The marker run is exact. Every `0xAA` run in the body is a marker record, all 10,537 records start at a 16-byte boundary, and every consecutive pair is 32 bytes apart. The run starts at `+0x10` in 483 of 483 payloads. The tail has no marker. Tails are 0 to 59,776 bytes and all are multiples of 16; the tail grammar and the record fields are **Unknown**.
+The marker run is exact. Every `0xAA` run in the body is a marker record, all 10,537 records start at a 16-byte boundary, and every consecutive pair is 32 bytes apart. The run starts at `+0x10` in 483 of 483 payloads. The tail has no marker. Tails are variable and all are multiples of 16 bytes; the tail grammar and the record fields are **Unknown**.
 
 A cross-section reference is not established. The first four body bytes equal the last pre-section descriptor word in 191 of 483 payloads; the relation is not universal and is not used by the parser.
 
@@ -233,7 +233,7 @@ The body is empty in 254 top-level payloads. The 229 nonempty bodies share a `0x
 
 The header is `0x20` bytes, and `length - 0x20` is a multiple of 8 in 229 of 229 nonempty payloads.
 
-`N` does not delimit the body. For `N >= 1`, the chain is `16 * N - 8` bytes (`N` hashes and `N - 1` index words), so `length == 0x20 + (16N - 8) + extra == 0x18 + 16N + extra`. The `extra` term is 0 in 54 of 229 bodies and a positive multiple of 8 in the other 175. Extra regions are 40 to 134,872 bytes. The chain and the extra region are **Unknown**; an 8-byte table is possible but not decoded.
+`N` does not delimit the body. For `N >= 1`, the chain is `16 * N - 8` bytes (`N` hashes and `N - 1` index words), so `length == 0x20 + (16N - 8) + extra == 0x18 + 16N + extra`. The `extra` term is 0 in 54 of 229 bodies and a positive multiple of 8 in the other 175. The chain and the extra region are **Unknown**; an 8-byte table is possible but not decoded.
 
 The arithmetic is consistent with the header test: `(0x18 + 16N + extra) - 0x20 = 16N - 8 + extra`, which is a multiple of 8 for every `N` and every multiple-of-8 `extra`. The rejected reading `length - 0x14` is not a multiple of 8 for the 54 bodies with `extra = 0`; for example, a 72-byte body with `N = 3` gives 52.
 

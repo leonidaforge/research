@@ -158,12 +158,14 @@ def probe(data: bytes, label: str) -> dict:
     return {
         "label": label,
         "values": {
+            "lengths": [len(value) for value in values],
             "width": width_summary(values),
             "signatures": signatures(values),
             "decoders": decode_results(values),
             "strict": strict_results(values),
         },
         "blocks": {
+            "lengths": [len(block) for block in blocks],
             "width": width_summary(blocks),
             "signatures": signatures(blocks),
             "decoders": decode_results(blocks),
@@ -173,10 +175,22 @@ def probe(data: bytes, label: str) -> dict:
 
 
 def aggregate(reports: list) -> dict:
+    value_lengths = [length for report in reports for length in report["values"]["lengths"]]
+    block_lengths = [length for report in reports for length in report["blocks"]["lengths"]]
     return {
         "samples": len(reports),
         "value_counts": [report["values"]["width"]["count"] for report in reports],
         "block_counts": [report["blocks"]["width"]["count"] for report in reports],
+        "value_common_divisors_1_to_64": [
+            width for width in range(1, WIDTH_LIMIT + 1)
+            if value_lengths and all(length % width == 0 for length in value_lengths)
+        ],
+        "block_common_divisors_1_to_64": [
+            width for width in range(1, WIDTH_LIMIT + 1)
+            if block_lengths and all(length % width == 0 for length in block_lengths)
+        ],
+        "value_length_min": min(value_lengths) if value_lengths else None,
+        "value_length_max": max(value_lengths) if value_lengths else None,
         "value_decoder_any": {
             name: sum(report["values"]["decoders"][name] for report in reports)
             for name in ("zlib", "deflate_raw", "gzip", "bz2", "xz", "lzma_alone")
