@@ -47,6 +47,7 @@ DRAW_F18_CONSTANTS = {
     0x1E77BF4C,
 }
 CONTROL_TRIALS = 10000
+MAX_ROWS = 1_000_000
 
 
 class CensusError(Exception):
@@ -63,7 +64,12 @@ class Source:
 def rows(source: Source, types=None):
     with open(source.listing, encoding="utf-8") as handle:
         listing = json.load(handle)
-    for entry in listing.get("rows", []):
+    entries = listing.get("rows", [])
+    if len(entries) > MAX_ROWS:
+        raise CensusError(
+            f"{source.listing} holds {len(entries)} rows, above the {MAX_ROWS} cap"
+        )
+    for entry in entries:
         if types is None or entry.get("type_id") in types:
             yield entry
 
@@ -311,7 +317,13 @@ def main(argv=None):
 
     if not dictionary_sources:
         parser.error("at least one --dictionary source is required")
-    dictionary, hash_records = dictionary_census(dictionary_sources)
+    try:
+        dictionary, hash_records = dictionary_census(dictionary_sources)
+        drawables = drawable_census(drawable_sources, hash_records) if drawable_sources else None
+        negatives = negative_census(negative_sources) if negative_sources else None
+    except CensusError as err:
+        print(f"error: {err}", file=sys.stderr)
+        return 2
     out = {
         "selection": {
             "dictionary_sources": [[s.archive, s.listing] for s in dictionary_sources],
@@ -322,8 +334,8 @@ def main(argv=None):
             "drawable_select": "type_id == 2",
         },
         "dictionaries": dictionary,
-        "drawables": drawable_census(drawable_sources, hash_records) if drawable_sources else None,
-        "negatives": negative_census(negative_sources) if negative_sources else None,
+        "drawables": drawables,
+        "negatives": negatives,
         "control": control_census(hash_records),
     }
     if args.json:
