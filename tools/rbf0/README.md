@@ -1,49 +1,46 @@
-# RBF0 inspector
+# RBF0 token parser
 
-`rbf0_inspect.py` reports the structure of one RBF0 payload. It implements the grammar documented in [formats/metadata/rbf0](../../formats/metadata/rbf0/README.md).
-
-The tool prints offsets, tags, widths, counts and name hashes. It does not print field names or text values.
+`rbf0_inspect.py` parses one RBF0 payload with the grammar documented in [formats/metadata/rbf0](../../formats/metadata/rbf0/README.md). It reports the header variant, token counts, value widths and name-definition hashes. It does not print names or text values.
 
 ## Usage
 
 ```text
-python tools/rbf0/rbf0_inspect.py <payload> [--json]
+python tools/rbf0/rbf0_inspect.py <payload> [--json] [--max-depth 256]
 ```
 
-The input path is required. The tool opens it read-only and writes nothing.
+The input path is required. The tool opens it read-only and writes nothing. `--max-depth` bounds element nesting.
 
 ## Output
 
 Text output reports:
 
-- payload size and header fields,
-- object, field, attribute, string and fixed 8-byte counts,
-- each unsupported header marker, value tag or field identifier with its file offset.
+- payload size, header variant, version, number width and token start;
+- element, attribute, text-node, name-definition and maximum-depth counts;
+- value counts per type code;
+- every name definition with its offset, name index, name length and SHA-256.
 
-`--json` emits the same report as a JSON object. The `definitions` list records each field identifier when its name is first defined: the offset of the name-length word, the identifier, the high-nibble group, the low 12-bit slot, the name length and the name SHA-256.
+`--json` emits the same report as a JSON object. A failed parse reports the first failing offset and the token class, such as `truncated_token`, `name`, `text`, `value_6`, `unterminated`, `unsupported_type_7`, `trailing` or `magic`.
 
 ## Exit codes
 
-| Code | Meaning                                                         |
-| ---- | --------------------------------------------------------------- |
-| 0    | Parsed with no unsupported tag and no structural error          |
-| 1    | Input could not be read                                         |
-| 2    | Unsupported tag or structural error; details are in the report  |
+| Code | Meaning |
+| ---- | ------- |
+| 0 | Parsed to the end with no unsupported token |
+| 1 | Input could not be read |
+| 2 | Structural or token error; details are in the report |
 
-## Supported forms
+## Grammar support
 
-- Header marker `0xFFFB` and header value `1`.
-- Object body with `u32` reserved word, `u16` attribute count and `u16 0xFFFF` terminator.
-- Object fields `0x0001` and `0x0002`.
-- String fields `0x0004` to `0x000A` with value tag `0xFFFD`, NUL-terminated bytes and `u16 0xFFFF` value terminator.
-- Attribute fields `0x6003` and `0x6004` in the counted attribute position.
-- Fixed 8-byte field `0x1006`.
+- Versioned header `RBF0` + `0xFFFB` + `u16` version, token stream at `+0x08`, 8-byte numbers.
+- Versionless header `RBF0`, token stream at `+0x04`, 4-byte numbers.
+- Global per-document name table with definition on first use.
+- Type 0 elements with `u32` reserved word and `u16` attribute count.
+- Attribute tokens with type codes 1 to 6.
+- Value widths: type 1 and 4 use the document number width; types 2 and 3 are zero bytes; type 5 is 12 bytes; type 6 is `u16` length plus bytes.
+- Text token `0xFFFD` with `u32` length.
+- Close token `0xFFFF`.
 
-Any other identifier, value tag or header marker is reported as unsupported, including field identifiers `0x000B` to `0x5FFF` that have the string value shape. An attribute identifier in the field stream is also reported as unsupported because attribute position is unresolved. A nonzero reserved word or value header is reported without stopping the parse.
-
-## Dependencies
-
-Python 3.11 or later, standard library only.
+Token types 7 to 14 are reported as unsupported errors. The parser does not skip them.
 
 ## Tests
 
@@ -51,8 +48,14 @@ Python 3.11 or later, standard library only.
 python -m unittest discover -s tools/rbf0 -p "test_*.py"
 ```
 
-The tests build synthetic RBF0 payloads. They do not use game files.
+`tools/rbf0/synthetic.py` writes the synthetic fixtures used by the tests:
+
+```text
+python tools/rbf0/synthetic.py <output-directory>
+```
+
+The fixtures cover versioned and versionless documents, every value type, a text node, nested elements and each malformed case. They contain no game files.
 
 ## Limits
 
-The tool encodes only the forms observed in 18 rows from one nested archive. It does not establish field semantics, the meaning of the header words or the meaning of the high-nibble groups beyond the observed encodings.
+The width table is observed data, not a semantic model. Type 5 has one observation, types 2 and 3 have 21, and field-position type 6 is unobserved. The tool does not establish field meanings, the purpose of the document or whether the name set identifies a schema.

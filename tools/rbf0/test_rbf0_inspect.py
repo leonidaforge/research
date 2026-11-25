@@ -1,144 +1,123 @@
 #!/usr/bin/env python3
-"""Synthetic tests for the RBF0 structural inspector."""
+"""Synthetic tests for the RBF0 token parser."""
 
 from __future__ import annotations
 
 import contextlib
 import io
 import os
-import struct
 import tempfile
 import unittest
 
 import rbf0_inspect as inspect
+import synthetic
 
 
-def u16(value: int) -> bytes:
-    return struct.pack("<H", value)
+class ParserTests(unittest.TestCase):
+    def test_versioned_document_with_every_value_type(self) -> None:
+        report = inspect.inspect_bytes(synthetic.all_value_types())
+        self.assertEqual(report.header["variant"], "versioned")
+        self.assertEqual(report.header["version"], 1)
+        self.assertEqual(report.header["number_width"], 8)
+        self.assertEqual(report.header["token_start"], 8)
+        self.assertEqual(report.counts["elements"], 2)
+        self.assertEqual(report.counts["attributes"], 6)
+        self.assertEqual(report.counts["text_nodes"], 2)
+        self.assertEqual(report.counts["values_by_type"], {1: 3, 2: 2, 3: 2, 4: 2, 5: 2, 6: 2})
+        self.assertGreaterEqual(report.counts["name_definitions"], 14)
+        self.assertEqual(report.counts["max_depth"], 2)
 
+    def test_versionless_document_uses_four_byte_numbers(self) -> None:
+        report = inspect.inspect_bytes(synthetic.versionless_document())
+        self.assertEqual(report.header["variant"], "versionless")
+        self.assertIsNone(report.header["version"])
+        self.assertEqual(report.header["number_width"], 4)
+        self.assertEqual(report.header["token_start"], 4)
+        self.assertEqual(report.counts["values_by_type"], {1: 1, 4: 1})
+        self.assertEqual(report.counts["text_nodes"], 1)
 
-def u32(value: int) -> bytes:
-    return struct.pack("<I", value)
+    def test_name_reuse_does_not_define_a_second_name(self) -> None:
+        report = inspect.inspect_bytes(synthetic.name_reuse_document())
+        self.assertEqual(report.counts["name_definitions"], 2)
+        self.assertEqual(report.counts["values_by_type"], {1: 2})
+        self.assertEqual(
+            [entry["name_index"] for entry in report.definitions], [0, 1]
+        )
 
+    def test_nested_document_reports_depth(self) -> None:
+        report = inspect.inspect_bytes(synthetic.nested_document(4))
+        self.assertEqual(report.counts["max_depth"], 5)
+        self.assertEqual(report.counts["elements"], 5)
 
-def name(value: bytes) -> bytes:
-    return u16(len(value)) + value
+    def test_depth_limit_is_an_error(self) -> None:
+        with self.assertRaises(inspect.ParseError) as raised:
+            inspect.inspect_bytes(synthetic.nested_document(4), max_depth=3)
+        self.assertEqual(raised.exception.token, "depth")
 
+    def test_truncated_token(self) -> None:
+        with self.assertRaises(inspect.ParseError) as raised:
+            inspect.inspect_bytes(synthetic.malformed("truncated_token"))
+        self.assertEqual(raised.exception.token, "truncated_token")
 
-def string_value(value: bytes) -> bytes:
-    return u32(0) + u16(0) + u16(0xFFFD) + u32(len(value)) + value + u16(0xFFFF)
+    def test_truncated_version_header(self) -> None:
+        with self.assertRaises(inspect.ParseError) as raised:
+            inspect.inspect_bytes(synthetic.malformed("truncated_version"))
+        self.assertEqual(raised.exception.token, "header")
 
+    def test_name_length_past_end(self) -> None:
+        with self.assertRaises(inspect.ParseError) as raised:
+            inspect.inspect_bytes(synthetic.malformed("name_length_past_end"))
+        self.assertEqual(raised.exception.token, "name")
 
-def attribute(field_id: int, field_name: bytes, value: bytes) -> bytes:
-    return u16(field_id) + name(field_name) + u16(len(value)) + value
+    def test_text_length_past_end(self) -> None:
+        with self.assertRaises(inspect.ParseError) as raised:
+            inspect.inspect_bytes(synthetic.malformed("text_length_past_end"))
+        self.assertEqual(raised.exception.token, "text")
 
+    def test_type6_length_past_end(self) -> None:
+        with self.assertRaises(inspect.ParseError) as raised:
+            inspect.inspect_bytes(synthetic.malformed("type6_length_past_end"))
+        self.assertEqual(raised.exception.token, "value_6")
 
-def object_body(attribute_count: int, attributes: bytes, fields: bytes) -> bytes:
-    return u32(0) + u16(attribute_count) + attributes + fields + u16(0xFFFF)
+    def test_name_index_beyond_table(self) -> None:
+        with self.assertRaises(inspect.ParseError) as raised:
+            inspect.inspect_bytes(synthetic.malformed("name_index_past_table"))
+        self.assertEqual(raised.exception.token, "name")
+        self.assertIn("beyond the table", raised.exception.message)
 
+    def test_unterminated_element(self) -> None:
+        with self.assertRaises(inspect.ParseError) as raised:
+            inspect.inspect_bytes(synthetic.malformed("unterminated_element"))
+        self.assertEqual(raised.exception.token, "unterminated")
 
-def build_document() -> bytes:
-    root_name = b"doc"
-    header = b"RBF0" + u16(0xFFFB) + u32(1) + name(root_name)
-    inner_item = object_body(
-        0,
-        b"",
-        u16(4)
-        + name(b"text")
-        + string_value(b"x\x00")
-        + u16(0x1006)
-        + name(b"number")
-        + b"\xff" * 8,
-    )
-    second_item = object_body(0, b"", b"")
-    first_item = object_body(
-        1,
-        attribute(0x6003, b"kind", b"item"),
-        u16(2) + inner_item + u16(2) + second_item,
-    )
-    container = object_body(0, b"", u16(2) + name(b"item") + first_item)
-    root = object_body(0, b"", u16(1) + name(b"list") + container)
-    return header + root
+    def test_unsupported_token_class_is_reported(self) -> None:
+        with self.assertRaises(inspect.ParseError) as raised:
+            inspect.inspect_bytes(synthetic.malformed("unsupported_token"))
+        self.assertEqual(raised.exception.token, "unsupported_type_7")
 
+    def test_trailing_bytes(self) -> None:
+        with self.assertRaises(inspect.ParseError) as raised:
+            inspect.inspect_bytes(synthetic.malformed("trailing_bytes"))
+        self.assertEqual(raised.exception.token, "trailing")
 
-class InspectorTests(unittest.TestCase):
-    def test_counts_and_header(self) -> None:
-        report = inspect.Inspector(build_document()).run()
-        self.assertEqual(report.header["marker"], 0xFFFB)
-        self.assertEqual(report.header["value"], 1)
-        self.assertEqual(report.header["root_name_length"], 3)
-        self.assertEqual(report.counts["attributes"], 1)
-        self.assertEqual(report.counts["string_values"], 1)
-        self.assertEqual(report.counts["fixed8_fields"], 1)
-        self.assertEqual(len(report.definitions), 5)
-
-    def test_field_definitions_are_local_and_ordered(self) -> None:
-        report = inspect.Inspector(build_document()).run()
-        ids = [entry["field_id"] for entry in report.definitions]
-        self.assertEqual(ids, [1, 2, 0x6003, 4, 0x1006])
-        self.assertEqual([entry["index"] for entry in report.definitions], [1, 2, 3, 4, 6])
-
-    def test_unsupported_value_tag_is_reported(self) -> None:
-        data = bytearray(build_document())
-        marker = data.find(u16(0xFFFD))
-        data[marker:marker + 2] = u16(0xFFFE)
-        inspector = inspect.Inspector(bytes(data))
-        with self.assertRaises(inspect.ParseError):
-            inspector.run()
-        self.assertTrue(inspector.report.unsupported)
-        self.assertEqual(inspector.report.unsupported[0]["tag"], 0xFFFE)
-
-    def test_highest_evidenced_string_identifier_is_accepted(self) -> None:
-        header = b"RBF0" + u16(0xFFFB) + u32(1) + name(b"doc")
-        fields = u16(0x000A) + name(b"text") + string_value(b"x\x00")
-        report = inspect.Inspector(header + object_body(0, b"", fields)).run()
-        self.assertEqual(report.counts["string_fields"], 1)
-
-    def test_string_identifiers_outside_evidence_are_unsupported(self) -> None:
-        header = b"RBF0" + u16(0xFFFB) + u32(1) + name(b"doc")
-        for field_id in (0x000B, 0x1007, 0x5FFF):
-            with self.subTest(field_id=field_id):
-                fields = u16(field_id) + name(b"text") + string_value(b"x\x00")
-                inspector = inspect.Inspector(header + object_body(0, b"", fields))
-                with self.assertRaises(inspect.ParseError):
-                    inspector.run()
-                self.assertEqual(inspector.report.counts["string_fields"], 0)
-                self.assertEqual(inspector.report.unsupported[0]["tag"], field_id)
-
-    def test_attribute_identifier_in_field_stream_is_unsupported(self) -> None:
-        header = b"RBF0" + u16(0xFFFB) + u32(1) + name(b"doc")
-        fields = u16(0x6003) + name(b"kind") + u16(3) + b"abc"
-        inspector = inspect.Inspector(header + object_body(0, b"", fields))
-        with self.assertRaises(inspect.ParseError):
-            inspector.run()
-        self.assertEqual(inspector.report.unsupported[0]["tag"], 0x6003)
-        self.assertIn("attribute identifier", inspector.report.unsupported[0]["reason"])
-
-    def test_attribute_identifiers_outside_evidence_are_unsupported(self) -> None:
-        header = b"RBF0" + u16(0xFFFB) + u32(1) + name(b"doc")
-        attributes = u16(0x6005) + name(b"kind") + u16(3) + b"abc"
-        inspector = inspect.Inspector(header + object_body(1, attributes, b""))
-        with self.assertRaises(inspect.ParseError):
-            inspector.run()
-        self.assertEqual(inspector.report.unsupported[0]["tag"], 0x6005)
-
-    def test_truncated_payload_is_an_error(self) -> None:
-        data = build_document()[:-4]
-        with self.assertRaises(inspect.ParseError):
-            inspect.Inspector(data).run()
+    def test_bad_magic(self) -> None:
+        with self.assertRaises(inspect.ParseError) as raised:
+            inspect.inspect_bytes(synthetic.malformed("bad_magic"))
+        self.assertEqual(raised.exception.token, "magic")
 
     def test_cli_exit_codes(self) -> None:
-        document = build_document()
         with tempfile.TemporaryDirectory() as directory:
             good = os.path.join(directory, "good.rbf0")
             bad = os.path.join(directory, "bad.rbf0")
             with open(good, "wb") as handle:
-                handle.write(document)
+                handle.write(synthetic.all_value_types())
             with open(bad, "wb") as handle:
-                handle.write(document[:-4])
+                handle.write(synthetic.malformed("unterminated_element"))
             with contextlib.redirect_stdout(io.StringIO()):
                 self.assertEqual(inspect.main([good]), 0)
                 self.assertEqual(inspect.main([bad]), 2)
+                self.assertEqual(inspect.main([good, "--json"]), 0)
+                self.assertEqual(inspect.main([bad, "--json"]), 2)
 
 
 if __name__ == "__main__":
