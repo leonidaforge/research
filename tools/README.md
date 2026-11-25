@@ -11,12 +11,9 @@
   payload.
 - [kb2j](kb2j/README.md): bounded `KB2j`/`KB2n` header and frame-table
   inspector.
-<<<<<<< HEAD
 - [resources](resources/README.md): RAGE resource page and pointer inspector.
-=======
 - [GFX* structural sampler](gfx/README.md): reports the observed `GFX*` decoded
   header, variant bytes, interstitial and trailer.
->>>>>>> 3ab3449 (feat(gfx): decode the full payload population and add an inspector)
 
 A tool added here MUST:
 
