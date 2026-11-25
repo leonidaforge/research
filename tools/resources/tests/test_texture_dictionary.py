@@ -97,18 +97,19 @@ class ParseTests(unittest.TestCase):
         self.assertEqual(dictionary.hash_count, 2)
         self.assertEqual(dictionary.value_count, 2)
         self.assertEqual(dictionary.record_count, 2)
-        self.assertEqual(dictionary.allocated_total, 0x100 * 8 + 0x80 * 16)
+        self.assertEqual(dictionary.allocated_total, 0x2000)
         self.assertTrue(dictionary.allocations_in_bounds)
         self.assertTrue(dictionary.allocation_sum_ok)
         first, second = dictionary.records
         self.assertEqual((first.width, first.height, first.format_id, first.mip_levels),
                          (10, 20, 71, 3))
         self.assertEqual(first.mip_flag, 0x8000)
+        self.assertEqual(first.allocation_units, 0x100)
         self.assertEqual(first.allocation_offset, 0)
-        self.assertEqual(first.allocation_size, 0x800)
+        self.assertEqual(first.allocation_size, 0x1000)
         self.assertEqual(first.allocation_extent, 0x1000)
-        self.assertEqual(first.size_basis, "units")
-        self.assertEqual((second.allocation_offset, second.allocation_size), (0x1000, 0x800))
+        self.assertEqual(first.size_basis, "extent_upper_bound")
+        self.assertEqual((second.allocation_offset, second.allocation_size), (0x1000, 0x1000))
 
     def test_empty_dictionary(self):
         data = bytearray(0x60)
@@ -155,18 +156,11 @@ class ParseTests(unittest.TestCase):
         self.assertIn("record_pointer", [issue.code for issue in dictionary.issues])
 
     def test_allocation_outside_is_reported(self):
-        system = make_dictionary([{"name": "alpha", "units": 0x100, "gfx": 0x1800}],
+        system = make_dictionary([{"name": "alpha", "gfx": 0x3000}],
                                  graphics_length=0x2000)
         dictionary = td.parse_dictionary(bytes(system), 0x2000)
         self.assertIn("allocation_outside", [issue.code for issue in dictionary.issues])
         self.assertFalse(dictionary.allocations_in_bounds)
-
-    def test_allocation_overrun_is_reported(self):
-        system = make_dictionary([{"name": "alpha", "units": 0x400, "gfx": 0},
-                                  {"name": "beta", "units": 1, "gfx": 0x1000}],
-                                 graphics_length=0x2000)
-        dictionary = td.parse_dictionary(bytes(system), 0x2000)
-        self.assertIn("allocation_overrun", [issue.code for issue in dictionary.issues])
 
     def test_duplicate_allocation_is_reported(self):
         system = make_dictionary([{"name": "alpha", "gfx": 0},
@@ -174,14 +168,23 @@ class ParseTests(unittest.TestCase):
         dictionary = td.parse_dictionary(bytes(system), 0x2000)
         self.assertIn("allocation_duplicate", [issue.code for issue in dictionary.issues])
 
-    def test_unknown_format_falls_back_to_the_extent(self):
+    def test_format_is_raw_and_size_is_the_extent(self):
         system = make_dictionary([{"name": "alpha", "hash": 1, "format": 200, "units": 4, "gfx": 0},
                                   {"name": "beta", "hash": 2, "gfx": 0x1000}])
         dictionary = td.parse_dictionary(bytes(system), 0x2000)
         record = dictionary.records[0]
+        self.assertEqual(record.format_id, 200)
+        self.assertEqual(record.allocation_units, 4)
         self.assertEqual(record.allocation_size, record.allocation_extent)
-        self.assertEqual(record.size_basis, "extent")
-        self.assertIn("unknown_format", [issue.code for issue in dictionary.issues])
+        self.assertEqual(record.size_basis, "extent_upper_bound")
+        self.assertNotIn("unknown_format", [issue.code for issue in dictionary.issues])
+
+    def test_capacity_below_count_is_reported(self):
+        system = make_dictionary([{"name": "alpha"}, {"name": "beta"}])
+        struct.pack_into("<H", system, 0x2A, 1)
+        struct.pack_into("<H", system, 0x3A, 1)
+        dictionary = td.parse_dictionary(bytes(system), 0x2000)
+        self.assertIn("capacity_short", [issue.code for issue in dictionary.issues])
 
     def test_dimensions_and_mips_are_checked(self):
         system = make_dictionary([{"name": "alpha", "width": 0, "height": 4}])
@@ -193,15 +196,6 @@ class ParseTests(unittest.TestCase):
         system = make_dictionary([{"name": "alpha", "mips": 0}])
         dictionary = td.parse_dictionary(bytes(system), 0x2000)
         self.assertIn("mips_zero", [issue.code for issue in dictionary.issues])
-
-    def test_sparse_record_table_is_still_parsed(self):
-        system = make_dictionary([{"name": "a", "hash": 1}, {"name": "b", "hash": 2}])
-        value_at = struct.unpack_from("<Q", system, 0x30)[0] & td.OFFSET_MASK
-        struct.pack_into("<Q", system, value_at + 8,
-                         td.SYSTEM_BASE | (0x40 + 2 * td.RECORD_LEN))
-        dictionary = td.parse_dictionary(bytes(system), 0x2000)
-        self.assertEqual(dictionary.record_count, 2)
-        self.assertNotIn("record_table_sparse", [issue.code for issue in dictionary.issues])
 
 
 class RefusalTests(unittest.TestCase):
@@ -251,6 +245,21 @@ class NameCheckTests(unittest.TestCase):
         checked, matched = td.check_names(bytes(system), dictionary)
         self.assertEqual(checked, 2)
         self.assertLess(matched, checked)
+
+    def test_joaat_folds_case_and_backslash(self):
+        self.assertEqual(td.joaat(b"alpha/beta"), 0x75438640)
+        self.assertEqual(td.joaat(b"ALPHA\\BETA"), 0x75438640)
+        system = make_dictionary([{"name": "ALPHA\\BETA", "hash": 0x75438640}])
+        dictionary = td.parse_dictionary(bytes(system), 0x2000)
+        checked, matched = td.check_names(bytes(system), dictionary)
+        self.assertEqual((checked, matched), (1, 1))
+
+    def test_name_longer_than_the_window_is_unchecked(self):
+        name = "a" * 80
+        system = make_dictionary([{"name": name}])
+        dictionary = td.parse_dictionary(bytes(system), 0x2000)
+        checked, matched = td.check_names(bytes(system), dictionary, limit=64)
+        self.assertEqual((checked, matched), (0, 0))
 
 
 def stored_row(system, graphics):

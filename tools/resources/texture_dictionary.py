@@ -3,8 +3,10 @@
 
 A texture dictionary is a system segment whose header holds two parallel
 arrays: a sorted array of 32-bit name hashes and an array of pointers to
-0x70-byte texture records. Each record holds the texture dimensions, a format
-id, a mip count, an allocation size in format units, and a graphics pointer.
+0x70-byte texture records. Each record holds candidate dimensions, a raw format
+id, a mip count, an allocation unit count, and a graphics pointer. The
+allocation size reported here is the extent to the next distinct allocation, an
+upper bound; the byte scale of the unit count is not established.
 
 Positions and arithmetic are observed from payload data. Field meanings are
 **Probable** unless a finding states otherwise. This module reads only and does
@@ -29,35 +31,6 @@ RECORD_LEN = 0x70
 MAX_RECORDS = 1 << 16
 RECORD_NAME_TEXT = 0x08
 MIP_COUNT_MASK = 0x7FFF
-
-# Allocation bytes per format unit. A unit is one 4x4 block for the block
-# formats and one pixel for the uncompressed formats. The values are the ones
-# that reproduce ``allocation_units * unit_bytes == allocation extent`` in the
-# sampled dictionaries. They are not used to decode pixels.
-FORMAT_UNIT_BYTES = {
-    10: 8,
-    24: 4,
-    28: 4,
-    29: 4,
-    34: 4,
-    41: 4,
-    49: 2,
-    54: 2,
-    56: 2,
-    61: 1,
-    65: 1,
-    71: 8,
-    72: 8,
-    74: 16,
-    77: 16,
-    78: 16,
-    80: 8,
-    83: 16,
-    87: 4,
-    95: 16,
-    98: 16,
-    99: 16,
-}
 
 
 class TextureDictionaryError(Exception):
@@ -92,7 +65,7 @@ class Record:
     mip_levels: int
     mip_flag: int
     field_3c: int
-    depth: int
+    field_3e: int
     field_40: int
     allocation_units: int
     allocation_offset: int | None
@@ -111,7 +84,7 @@ class Record:
             "mip_levels": self.mip_levels,
             "mip_flag": self.mip_flag,
             "field_3c": self.field_3c,
-            "depth": self.depth,
+            "field_3e": self.field_3e,
             "field_40": self.field_40,
             "allocation_units": self.allocation_units,
             "allocation_offset": self.allocation_offset,
@@ -242,6 +215,16 @@ def parse_dictionary(system: bytes, graphics_length: int, max_records: int = MAX
         hash_count, hash_capacity, value_count, value_capacity,
         min(hash_count, value_count), graphics_length,
     )
+    if hash_capacity < hash_count:
+        dictionary.add(
+            "capacity_short",
+            f"the hash array count {hash_count} exceeds its capacity {hash_capacity}",
+        )
+    if value_capacity < value_count:
+        dictionary.add(
+            "capacity_short",
+            f"the value array count {value_count} exceeds its capacity {value_capacity}",
+        )
     if hash_count != value_count:
         dictionary.add(
             "count_mismatch",
@@ -279,11 +262,10 @@ def parse_dictionary(system: bytes, graphics_length: int, max_records: int = MAX
         width = packed_38 & 0xFFFF
         height = (packed_38 >> 16) & 0xFFFF
         field_3c = (packed_38 >> 32) & 0xFFFF
-        depth = (packed_38 >> 48) & 0xFF
+        field_3e = (packed_38 >> 48) & 0xFF
         format_id = (packed_38 >> 56) & 0xFF
         packed_40 = _u64(system, offset + 0x40)
         mip_word = (packed_40 >> 16) & 0xFFFF
-        unit_bytes = FORMAT_UNIT_BYTES.get(format_id)
         allocation_units = _u32(system, offset + 0x08)
         allocation_target = decode_pointer(_u64(system, offset + 0x18))
         allocation_offset = (
@@ -293,9 +275,6 @@ def parse_dictionary(system: bytes, graphics_length: int, max_records: int = MAX
         )
         name_target = decode_pointer(_u64(system, offset + 0x30))
         name_pointer = name_target[1] if name_target and name_target[0] == "system" else None
-        allocation_size = (
-            allocation_units * unit_bytes if unit_bytes is not None else None
-        )
         records.append(
             Record(
                 index=index,
@@ -306,21 +285,21 @@ def parse_dictionary(system: bytes, graphics_length: int, max_records: int = MAX
                 mip_levels=mip_word & MIP_COUNT_MASK,
                 mip_flag=mip_word & ~MIP_COUNT_MASK,
                 field_3c=field_3c,
-                depth=depth,
+                field_3e=field_3e,
                 field_40=packed_40 & 0xFFFF,
                 allocation_units=allocation_units,
                 allocation_offset=allocation_offset,
-                allocation_size=allocation_size,
+                allocation_size=None,
                 allocation_extent=None,
-                size_basis="units" if unit_bytes is not None else "unresolved",
+                size_basis="extent_upper_bound",
                 name_pointer=name_pointer,
             )
         )
     dictionary.records = records
 
     # Allocation extents are the gaps between distinct starts, with the last
-    # extending to the graphics end. They bound each allocation; the stored
-    # unit count gives the allocation size when the format unit is known.
+    # extending to the graphics end. They are an upper bound; the stored unit
+    # count's byte scale is not established.
     offsets = sorted({r.allocation_offset for r in records if r.allocation_offset is not None})
     extent = {}
     for position, offset in enumerate(offsets):
@@ -337,32 +316,12 @@ def parse_dictionary(system: bytes, graphics_length: int, max_records: int = MAX
             )
             continue
         record.allocation_extent = extent[record.allocation_offset]
-        if record.allocation_size is None:
-            record.allocation_size = record.allocation_extent
-            record.size_basis = "extent"
+        record.allocation_size = record.allocation_extent
         if record.allocation_offset >= graphics_length:
             dictionary.add(
                 "allocation_outside",
                 f"record {record.index} allocation {record.allocation_offset:#x} is outside "
                 f"the {graphics_length:#x}-byte graphics segment",
-            )
-        elif record.allocation_offset + record.allocation_size > graphics_length:
-            dictionary.add(
-                "allocation_outside",
-                f"record {record.index} allocation {record.allocation_offset:#x} + "
-                f"{record.allocation_size:#x} leaves the {graphics_length:#x}-byte segment",
-            )
-        if record.allocation_size > record.allocation_extent:
-            dictionary.add(
-                "allocation_overrun",
-                f"record {record.index} allocation {record.allocation_size:#x} exceeds its "
-                f"{record.allocation_extent:#x}-byte extent",
-            )
-        if record.size_basis == "extent":
-            dictionary.add(
-                "unknown_format",
-                f"record {record.index} format id {record.format_id} has no observed unit; "
-                "the extent stands in for the allocation size",
             )
         if record.width == 0 or record.height == 0:
             dictionary.add(
@@ -390,9 +349,18 @@ def parse_dictionary(system: bytes, graphics_length: int, max_records: int = MAX
 
 
 def joaat(data: bytes) -> int:
-    """Jenkins one-at-a-time over the given bytes."""
+    """Jenkins one-at-a-time with the engine's ASCII fold (HSH-F04).
+
+    ``A``-``Z`` fold to lower case and ``\\`` folds to ``/``. Bytes above
+    ``0x7F`` are unchanged. The fold makes the function accept either spelling
+    of an already-normalised resource name.
+    """
     result = 0
     for byte in data:
+        if 0x41 <= byte <= 0x5A:
+            byte += 0x20
+        elif byte == 0x5C:
+            byte = 0x2F
         result = (result + byte) & 0xFFFFFFFF
         result = (result + (result << 10)) & 0xFFFFFFFF
         result ^= result >> 6
@@ -416,7 +384,13 @@ def check_names(system: bytes, dictionary: Dictionary, limit: int = 64):
         at = record.name_pointer + RECORD_NAME_TEXT
         if at < 0 or at >= len(system):
             continue
-        text = system[at:at + limit].split(b"\x00")[0]
+        raw = system[at:at + limit]
+        end = raw.find(b"\x00")
+        if end < 0:
+            # No terminator inside the window: the text is longer than the
+            # limit, so the hash cannot be checked without guessing.
+            continue
+        text = raw[:end]
         if not text or any(byte < 0x20 or byte >= 0x7F for byte in text):
             continue
         checked += 1
