@@ -19,14 +19,21 @@ The container is a flat layout, not a hierarchical archive:
 ```
 
 Record 0 locates the ETPF chunk. Records 1 to C-2 each locate one data block, and
-record C-1 equals the file size. Each block record carries a storage-class id in
-bits 26..29 of its first word; the bits 24..29 reading is four times that value.
+record C-1 equals the file size. Each block record carries a storage-class id.
+Unless a sentence says otherwise, an id in this document is the six-bit value of
+bits 24..29; the four-bit value of bits 26..29 is that id divided by four.
 
 Eight class ids are observed: `0x00`, `0x04`, `0x0C`, `0x10`, `0x14`, `0x18`,
 `0x1C` and `0x20`. Class `0x20` is a complete zlib stream and accounts for
 918,223 of the 1,026,833 blocks. Class `0x00` is stored bytes and accounts for 5
 blocks. The other 108,605 blocks carry the six remaining class ids; their payload
-format is **Unknown** and this container does not name it.
+format is **Unknown** and this container does not name it. The
+[specification](specification.md) maps each six-bit id to its four-bit reading.
+
+Bits 24 and 25 are zero in every sampled record. A record with either bit set is
+accepted: the class is taken from bits 26..29 and the six-bit reading is reported
+as ambiguous. The first such record is the first candidate that could
+discriminate the two field descriptions.
 
 The ETPF chunk holds 357,115 descriptors across the 57 sampled stores. A
 descriptor is 1,024 x 512 or another power-of-two size, with a format id, a
@@ -49,8 +56,8 @@ Independent verification: [evidence/rds5-verification/INDEX.md](../../../evidenc
 |---|---|
 | Magic, fixed header, record array position | Confirmed |
 | `record_count`, payload-size field | Confirmed for offsets and observed values. Bit 0 of `+0x0C` is payload-size bit 32 in 57 of 57; the upper bits are **Unknown** |
-| Storage-class field | Confirmed as a four-bit or six-bit field; the population cannot distinguish the two descriptions. Bits 24..25 are zero in every record |
-| Storage classes | `0x20` validated as zlib (918,223 blocks; 6,357 full inflations, 0 failures). `0x00` validated as stored (5 blocks). Six classes **Unknown** |
+| Storage-class field | Confirmed as a four-bit or six-bit field; the population cannot distinguish the two descriptions. Bits 24..25 are zero in every record. A record with either bit set is accepted and reported as ambiguous |
+| Storage classes | `0x20` validated as zlib (918,223 blocks; 6,357 full inflations, 0 failures). `0x00` validated as stored (5 blocks; payload returned verbatim and the virtual-length identity checked). Six classes **Unknown** |
 | Virtual position and padding | Validated for zlib and stored blocks: 6,357 of 6,357 zlib blocks and 5 of 5 stored blocks. Untested for the six undecoded classes |
 | Record 0 as ETPF locator | Confirmed |
 | ETPF chunk position and header | Confirmed |

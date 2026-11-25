@@ -59,6 +59,7 @@ measurements, which the verification on `main` re-read.
 | `virtual = 0x1000 + counter*0x4000 + page_term*0x1000` | The `+0x1000` constant is not present. In the platform sample the first block has counter 0 and page term 1 and starts at `0x1000`, not `0x2000` |
 | The word at `+0x0C` is a version | Bit 0 equals bit 32 of the virtual payload size in 57 of 57 stores. The upper bits are constant at `0x16000000`, but their meaning is unknown |
 | Block records' `hi[16:32]` is one unknown 16-bit hash | Bits 16..19 are counter bits and bits 20..31 are the padding count, which explains the observed value set |
+| A record with bit 24 or bit 25 set is out of the documented model | Under the four-bit description those bits belong to the offset. The record is accepted, its class is taken from bits 26..29, and the six-bit reading is reported as ambiguous. The first such record is the discrimination candidate RDS5-F37 |
 
 ## 2026-11-25: selector 2 added
 
@@ -116,6 +117,14 @@ zero in all 1,026,947 records, so a six-bit class field in bits 24..29 with a
 24-bit offset and a four-bit class field in bits 26..29 with a 26-bit offset
 describe the same bytes. The population cannot discriminate them because no
 store reaches 4 GiB. A store at or above 4 GiB would.
+
+The ids quoted in this repository are the six-bit values. Under the four-bit
+reading the same class is that id divided by four. The earlier text treated bits
+24 and 25 as reserved and rejected them. That is wrong because under the
+four-bit description those bits may belong to the offset. A record with either
+bit set is now accepted: its class is taken from bits 26..29 and the six-bit
+reading is reported as ambiguous. No such record is in the sample. The first one
+is the discrimination candidate RDS5-F37.
 
 The 82 former exceptions are 77 class-`0x10` and 5 class-`0x00` blocks. The five
 class-`0x00` blocks satisfy `span - padding = virtual length`. The anomaly class

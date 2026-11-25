@@ -50,34 +50,53 @@ layout. The first word is `lo` and the second word is `hi`.
 |---|---|---|
 | `0..23` | `offset24` | Absolute position, `value * 0x100` |
 | `0..25` | `offset26` | Equivalent 26-bit reading of the same field |
-| `24..29` | `storage_class` | Class id; all observed values are multiples of 4 |
-| `26..29` | `storage_class` | The same class id read as four bits |
+| `24..29` | `class_six` | Six-bit class reading |
+| `26..29` | `class_four` | Four-bit class reading |
+| `24..25` | ambiguous | Zero in every sampled record; under the four-bit description these bits belong to the offset |
 | `30..31` | `page_term` | Low two bits of the virtual page position |
-| `24..25` | reserved | Zero in every one of the 1,026,947 records |
 | `hi[0:19]` | `counter` | 20-bit virtual counter in 0x4000-byte units |
 | `hi[20:31]` | `padding` | 12-bit trailing padding count of the stored span |
 
 The two offset rows are alternative readings of the same low bits. They give the
 same value while bits 24 and 25 are zero, which holds for every sampled record.
 
+### Class id convention
+
+Unless a sentence says otherwise, a class id in this repository is the six-bit
+value of bits 24..29. Under the four-bit reading at bits 26..29 the same class is
+that id divided by four. The eight observed classes map as follows:
+
+| Six-bit id (bits 24..29) | Four-bit id (bits 26..29) | Blocks |
+|---|---|---:|
+| `0x00` | `0x0` | 5 |
+| `0x04` | `0x1` | 102,725 |
+| `0x0C` | `0x3` | 35 |
+| `0x10` | `0x4` | 77 |
+| `0x14` | `0x5` | 333 |
+| `0x18` | `0x6` | 268 |
+| `0x1C` | `0x7` | 5,167 |
+| `0x20` | `0x8` | 918,223 |
+
 ### Two equivalent class and offset descriptions
 
-Only class ids `0x00`, `0x04`, `0x0C`, `0x10`, `0x14`, `0x18`, `0x1C` and
-`0x20` are observed. Every value is a multiple of 4, and bits 24 and 25 are zero
-in every record (RDS5-F23). Two descriptions fit the same bytes:
+Every observed six-bit id is a multiple of 4, and bits 24 and 25 are zero in
+every record (RDS5-F23). Two descriptions fit the same bytes:
 
 1. a six-bit class field in bits 24..29 with a 24-bit offset in bits 0..23;
 2. a four-bit class field in bits 26..29 with a 26-bit offset in bits 0..25.
 
-The value of the six-bit field is exactly four times the value of the four-bit
-field. The population cannot discriminate the descriptions: every sampled store
-is below 4 GiB, so no record needs bit 24 or bit 25 of the offset. The
-observation that would discriminate them is a store at or above 4 GiB whose
-record offsets set bit 24 or bit 25. Such a store would reject the 24-bit offset
-reading. No such store is in the sample.
+The population cannot discriminate the descriptions: every sampled store is
+below 4 GiB, so no record needs bit 24 or bit 25 of the offset. The observation
+that would discriminate them is a store at or above 4 GiB whose record offsets
+set bit 24 or bit 25. Such a store would reject the 24-bit offset reading. No
+such store is in the sample.
 
-A reader MUST reject a record with bit 24 or bit 25 set as out of the documented
-model. It MUST NOT silently mask those bits or fold them into the class.
+A record with bit 24 or bit 25 set is accepted. The reader MUST take its class
+from bits 26..29 and MUST report the six-bit reading as ambiguous for that
+record. It MUST NOT reject the record and MUST NOT silently fold the bits into
+the class. The first such record is the first candidate that could discriminate
+the two readings (RDS5-F37). It does not by itself decide the question: the
+record also has to be consistent with one of the two offset readings.
 
 Record roles:
 
@@ -143,10 +162,10 @@ classes.
 
 ## Storage classes
 
-The class id is read from bits 26..29 of `lo` (or the equivalent six-bit value
-four times larger). It is not a two-bit selector: the old mask `(high_byte >> 2)
-& 3` covered only bits 26 and 27 and could not separate ids that differ in bits
-28 and 29 (RDS5-F24, RDS5-F26).
+The class id is the six-bit value of bits 24..29; equivalently, it is the
+four-bit value of bits 26..29 multiplied by four. It is not a two-bit selector:
+the old mask `(high_byte >> 2) & 3` covered only bits 26 and 27 and could not
+separate ids that differ in bits 28 and 29 (RDS5-F24, RDS5-F26).
 
 | Class id | Blocks | State | Evidence |
 |---|---:|---|---|
@@ -166,7 +185,9 @@ consumed length equals `span - padding`. The inflated sizes are multiples of
 
 Class `0x00` is validated only as stored bytes. The five blocks are 4,096 or
 16,384 bytes of content followed by zero padding; `span - padding` equals the
-virtual length of each block.
+virtual length of each block. A decoder MUST return the first `span - padding`
+bytes verbatim and MUST report a stored block whose length differs from the
+declared virtual length (RDS5-F25).
 
 The six remaining classes are storage classes distinguished by id. This
 document does not name their payload format, does not assert a pixel format for
@@ -362,10 +383,12 @@ A reader MUST:
 
 - reject a file shorter than 0x10 bytes, a wrong magic, a `size_high` word whose
   bits 1..31 differ from `0x16000000`, and a `record_count` below 3;
-- reject a record whose bits 24 or 25 are set, instead of folding them into the
-  class or the offset;
-- bound `record_count`, `descriptor_count`, `field_m`, the block span and the
-  file size before allocating or reading a block;
+- accept a record whose bits 24 or 25 are set, classify it by bits 26..29, and
+  report the six-bit reading as ambiguous; it MUST NOT fold those bits into the
+  class or silently drop them;
+- bound `record_count`, `descriptor_count`, `field_m`, a block index, a
+  descriptor index, the block span and the file size before allocating or
+  reading a block;
 - reject a record array that exceeds the file, an out-of-order record, a record
   offset outside the file, record 0 not pointing at the ETPF chunk, and a last
   record not equal to the file size;

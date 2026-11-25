@@ -59,7 +59,7 @@ content is never reproduced. Decoded images stay in scratch and are not committe
 | RDS5-F01 | The magic is ASCII `RDS5` at offset 0 in all 57 stores | Header scan (`BINARY`, `CROSS_SAMPLE`) | Confirmed | RDS5V-F02 | One installation |
 | RDS5-F02 | The fixed header is 0x10 bytes: `record_count` at `0x04`, `size_low` at `0x08`, `size_high` at `0x0C`. There is no separate header area between the records and 0x100; the 0x100 impression comes from small record arrays | Header scan (`BINARY`, `CROSS_SAMPLE`) | Confirmed | RDS5V-F02 | The 0x100-byte "header" only appears when the record array plus padding ends at 0x100 |
 | RDS5-F03 | The record array starts at `0x10` and holds `record_count` 8-byte records. `align_up(0x10 + 8*C, 0x100)` equals the ETPF offset and record 0's offset in 57 of 57. Two stores place ETPF exactly at `0x10 + 8*C`, which rules out a `0x18` start | Record scan, arithmetic (`BINARY`, `CROSS_SAMPLE`) | Confirmed | RDS5V-F02 for the aligned relation | The exact `0x10 + 8*C` case rests on the two transferred samples; the independent check did not name them |
-| RDS5-F04 | Record decode: `offset = (lo & 0xFFFFFF) * 0x100`, `storage_class = (lo >> 24) & 0x3C`, `page_term = (lo >> 30) & 3`, `virtual = (hi & 0xFFFFF) * 0x4000 + page_term * 0x1000`, `padding = hi >> 20` | Record scan, arithmetic (`BINARY`, `CROSS_SAMPLE`) | Confirmed | RDS5V-F02, RDS5V-F13 | The 24-bit offset and the equivalent 26-bit reading are not discriminated (RDS5-F23) |
+| RDS5-F04 | Record decode: `offset = (lo & 0xFFFFFF) * 0x100`, `offset_26 = (lo & 0x3FFFFFF) * 0x100`, `storage_class = ((lo >> 26) & 0xF) << 2`, `page_term = (lo >> 30) & 3`, `virtual = (hi & 0xFFFFF) * 0x4000 + page_term * 0x1000`, `padding = hi >> 20`. Bits 24..25 are reported as ambiguous, not folded into the class | Record scan, arithmetic (`BINARY`, `CROSS_SAMPLE`) | Confirmed | RDS5V-F02, RDS5V-F13 | The 24-bit offset and the equivalent 26-bit reading are not discriminated (RDS5-F23) |
 | RDS5-F05 | Record 0 locates the ETPF chunk. Records `1..C-2` are data blocks with strictly increasing, 0x100-aligned offsets. Record `C-1` equals the file size in 57 of 57. Blocks are contiguous up to the recorded padding | Record scan (`BINARY`, `CROSS_SAMPLE`) | Confirmed | RDS5V-F02, RDS5V-F03 | Record 0's `hi` carries `0x10000000` in one store and `0x20000000` in another; meaning **Unknown** |
 | RDS5-F06 | The word at `+0x0C` has bit 0 equal to bit 32 of the virtual payload size and bits 1..31 equal to `0x16000000` in 57 of 57 stores. The earlier "version" reading is superseded | Header scan, arithmetic (`BINARY`, `CROSS_SAMPLE`) | Confirmed (bit-32 relation and constant upper bits), Unknown (meaning of the upper bits) | RDS5V-F04 | The sample does not show whether the upper bits are a version, a marker or another field |
 | RDS5-F07 | The ETPF chunk sits at `align_up(0x10 + 8*C, 0x100)` with ASCII `ETPF`, a constant `0x27A` at `+0x04`, a descriptor count at `+0x08` and `field_m` at `+0x0C` | Header scan (`BINARY`, `CROSS_SAMPLE`) | Confirmed (positions, constant in 57 of 57) | RDS5V-F02, RDS5V-F03 | `0x27A` is not shown to be a version |
@@ -78,9 +78,9 @@ content is never reproduced. Decoded images stay in scratch and are not committe
 | RDS5-F20 | In the 238,897,664-byte vfx sample the application and the parser both place the first block at `0x24000`: ETPF at `0x8E00`, `descriptor_count` 1,722, `field_m` 54,816, content end `0x23B70`, 0x1000-aligned end `0x23E00`, flag term `0x200` | App inspection, header scan, arithmetic (`BINARY`) | Confirmed (one sample) | RDS5-F17, RDS5V-F13 | One sample. The application reports 4,526 blocks: class `0x20` 4,333, `0x04` 85, `0x0C` 3, `0x14` 44, `0x18` 4 and `0x1C` 57 |
 | RDS5-F21 | In the 38,656-byte five-entry sample the application and the parser agree: five descriptors hold pages `1, 0x11, 0x21, 0x31, 0x41`, five zlib blocks decode to 327,680 bytes, `field_m` is 144, content end `0x240`, first block `0x1100`, and the payload size is 331,776 | App inspection, bounded inflate, header scan (`BINARY`) | Confirmed (one sample) | RDS5-F14, RDS5V-F12 | One sample. Page counter unit is 0x1000 on this sample; general mapping to blocks is not established |
 | RDS5-F22 | No counterexample to RDS5-F17 or RDS5-F21 was found. On the vfx sample the application reports 751,046,656 decoded zlib bytes against the declared 766,107,648, but 193 blocks use unidentified classes and are not decoded, so the declared total cannot be checked on that file | App inspection, bounded inflate (`BINARY`) | Confirmed (observation) | — | The difference is a boundary of the zlib-only check, not a contradiction of the layout relation |
-| RDS5-F23 | The storage class is read as bits 24..29 of a block record's first word (or bits 26..29 as four bits). The eight observed ids are `0x00` 5, `0x04` 102,725, `0x0C` 35, `0x10` 77, `0x14` 333, `0x18` 268, `0x1C` 5,167 and `0x20` 918,223. Bits 24 and 25 are zero in all 1,026,947 records; all ids are multiples of four | Record scan (`BINARY`, `CROSS_SAMPLE`) | Confirmed (distribution and zero bits), Unknown (which field description is intended) | RDS5V-F08, RDS5V-F09 | A store at or above 4 GiB would discriminate the six-bit/24-bit-offset and four-bit/26-bit-offset descriptions; none is in the sample |
+| RDS5-F23 | The storage class is read as bits 26..29, reported as the six-bit id `four_bit << 2`; the same class under the four-bit reading is that id divided by four. The eight observed ids are `0x00` 5, `0x04` 102,725, `0x0C` 35, `0x10` 77, `0x14` 333, `0x18` 268, `0x1C` 5,167 and `0x20` 918,223. Bits 24 and 25 are zero in all 1,026,947 records; all ids are multiples of four. A record with either bit set is accepted and reported as ambiguous | Record scan (`BINARY`, `CROSS_SAMPLE`) | Confirmed (distribution and zero bits), Unknown (which field description is intended) | RDS5V-F08, RDS5V-F09 | A store at or above 4 GiB would discriminate the six-bit/24-bit-offset and four-bit/26-bit-offset descriptions; none is in the sample. See RDS5-F37 |
 | RDS5-F24 | Class `0x20` is a complete zlib stream. All 918,223 class-`0x20` blocks start `0x78 0xDA`; 6,357 sampled blocks inflate to end-of-stream with the checksum verified, 0 fail, and `consumed = span - padding` in 6,357 of 6,357 | Block header census, full inflate, padding scan (`BINARY`, `CROSS_SAMPLE`) | Confirmed | RDS5V-F07, RDS5V-F09 | First two bytes cover all class-`0x20` blocks; full inflate is a sample |
-| RDS5-F25 | Class `0x00` is stored bytes. The five blocks have `span - padding` equal to the virtual length and zero padding; sizes are 4,096 or 16,384 bytes | Full inflate, padding scan, arithmetic (`BINARY`, `CROSS_SAMPLE`) | Confirmed | RDS5V-F09 | Five blocks in two stores |
+| RDS5-F25 | Class `0x00` is stored bytes. A decoder returns the first `span - padding` bytes verbatim. The five blocks have `span - padding` equal to the virtual length and zero padding; sizes are 4,096 or 16,384 bytes. A stored block whose length differs from the declared virtual length is reported | Full inflate, padding scan, arithmetic (`BINARY`, `CROSS_SAMPLE`) | Confirmed | RDS5V-F09 | Five blocks in two stores |
 | RDS5-F26 | Six storage classes are not decoded: `0x04` 102,725, `0x0C` 35, `0x10` 77, `0x14` 333, `0x18` 268, `0x1C` 5,167. None starts with a zlib header | Block header census (`BINARY`, `CROSS_SAMPLE`) | Confirmed (counts and absent zlib header), Unknown (payload format) | RDS5V-F08, RDS5V-F10 | The payload format and any pixel format are not established |
 | RDS5-F27 | The former 82-block anomaly is explained by the too-narrow mask. The 82 blocks are 77 class-`0x10` and 5 class-`0x00`; the five class-`0x00` blocks satisfy the stored length identity. There is no anomaly class | Block header census, arithmetic (`BINARY`, `CROSS_SAMPLE`) | Confirmed | RDS5V-F09 | The old mask `(high_byte >> 2) & 3` drops bits 28 and 29 |
 | RDS5-F28 | The validated virtual position is `virtual = (hi & 0xFFFFF) * 0x4000 + ((lo >> 30) & 3) * 0x1000`. The candidate form with an extra `+0x1000` constant is rejected. For zlib, `virtual[next] - virtual[this]` equals the inflated byte count in 6,357 of 6,357 | Full inflate, arithmetic (`BINARY`, `CROSS_SAMPLE`) | Confirmed for zlib and stored classes | RDS5V-F13 | Counterexamples: none in the sample. Untested for undecoded classes |
@@ -92,11 +92,13 @@ content is never reproduced. Decoded images stay in scratch and are not committe
 | RDS5-F34 | Among descriptors whose first block is not class `0x20`, the class correlates with the format id: `0x04` with formats 71 and 72, `0x1C` with 98 and 99, `0x10` with 80, `0x14` with 83, `0x18` with 95 and 96, `0x0C` with 77, and `0x00` with 98 and 99. All 1,774 format-28 descriptors start with class `0x20` | Descriptor scan, block header census (`BINARY`, `CROSS_SAMPLE`) | Confirmed (correlation), not a decode | — | The correlation does not establish what the six undecoded classes contain or any pixel format |
 | RDS5-F35 | One byte-level texture chain is established in the platform sample: descriptor format id 98, 1,024 x 512, mip 0, kind 2, tile mode 0, locator page 1; one class-`0x20` block from virtual `0x1000` to `0x81000`; 524,288 inflated bytes; `inflated = width * height * 1`; the payload size equals the end record; one level is present | Header scan, descriptor scan, full inflate, arithmetic (`BINARY`) | Confirmed (byte level) | — | The block encoding, the tile-mode meaning and the element order are **Unknown** |
 | RDS5-F36 | A pixel attempt under a documented 16-byte 4 x 4 endpoint layout (8-byte colour endpoints and indices, 8-byte alpha endpoints and indices) gives legal endpoints by construction and an adjacent-pixel difference of 44.6, against 77.8 for a raw 16-byte-per-tile reading. 12,719 of 32,768 tiles use the three-colour branch and 13,989 use the six-alpha branch; alpha correlates with luminance at -0.12 | Full inflate, arithmetic (`BINARY`), synthetic fixtures (`SYNTHETIC`) | Speculative (consistency only) | — | No lower mip exists, so the box-downsample test is not applicable. This is not a codec identification and not a confirmed pixel decode |
+| RDS5-F37 | Open discrimination candidate: a record with bit 24 or bit 25 set. No such record is in the 57-store sample. The parser accepts it, takes the class from bits 26..29, and reports the six-bit reading as ambiguous. The first such record that is consistent with the four-bit offset reading or the six-bit class reading would be the first evidence to discriminate the two field descriptions | Record scan (`BINARY`, `SYNTHETIC`) | Unknown (no sample record) | — | A record with a set bit alone does not decide the question; the offset consistency must also be checked |
 
 Finding IDs `RDS5-F01` to `RDS5-F22` keep the numbering of the transferred
-evidence. `RDS5-F23` to `RDS5-F36` are the iteration 10 measurements. Superseded
-rows stay in the table so the earlier reading is traceable; the corrections are
-recorded in the [research history](research-history.md).
+evidence. `RDS5-F23` to `RDS5-F37` are the iteration 10 measurements and the
+open discrimination candidate. Superseded rows stay in the table so the earlier
+reading is traceable; the corrections are recorded in the
+[research history](research-history.md).
 
 ## Reproduction
 
@@ -106,7 +108,7 @@ The parser tests need no game files:
 python -m unittest discover -s tools/rds5 -p "test_*.py"
 ```
 
-The current suite reports 47 tests and 0 failures.
+The current suite reports 57 tests and 0 failures.
 
 Structural inspection of a sample container:
 
@@ -116,10 +118,13 @@ python tools/rds5/rds5.py scan <ROOT> --headers
 python tools/rds5/rds5.py descriptors <CONTAINER> --json
 python tools/rds5/rds5.py decode <CONTAINER> --block <N>
 python tools/rds5/rds5.py reconstruct <CONTAINER> --descriptor <N> --bytes-per-texel 1 --levels 1
+python tools/rds5/rds5.py reconstruct <CONTAINER> --descriptor <N> --max-total-bytes <B>
 ```
 
 `<CONTAINER>` is a local read-only copy. `decode` and `reconstruct` print sizes,
-offsets and per-class state; `--out` writes decoded bytes to an explicit path.
+offsets and per-class state. `--out` writes decoded bytes to an explicit path
+through a temporary file and refuses a path that resolves to the input.
+`reconstruct` applies `--max-total-bytes` per block and to the running total.
 
 Expected values for the 57-store scan:
 
@@ -153,4 +158,6 @@ size_matches: True
   blocks were classified by their first two bytes only.
 - The virtual and padding relations are validated for zlib and stored classes
   only.
+- No sampled record sets bit 24 or bit 25, so the class-field and offset-width
+  descriptions remain undiscriminated (RDS5-F37).
 - No pixel format, codec identity or asset name is claimed.
