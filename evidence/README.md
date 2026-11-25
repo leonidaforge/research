@@ -15,6 +15,7 @@ Subjects:
 - [SGD5](sgd5/INDEX.md)
 - [Type 14](type14/INDEX.md)
 - [Unknown payloads](unknown-payloads/INDEX.md)
+- [RAGE resources](resources/INDEX.md)
 - [KB2j and KB2n](kb2j/INDEX.md)
 - [GFX* and ADAT](gfx-adat/INDEX.md)
 - [Inventory](inventory/INDEX.md)

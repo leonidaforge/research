@@ -11,6 +11,7 @@
   payload.
 - [kb2j](kb2j/README.md): bounded `KB2j`/`KB2n` header and frame-table
   inspector.
+- [resources](resources/README.md): RAGE resource page and pointer inspector.
 
 A tool added here MUST:
 
