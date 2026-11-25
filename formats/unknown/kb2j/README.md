@@ -15,10 +15,10 @@ inspected structurally. The four-archive total of 787 and the historical 787
 over a 797-row population are different measurements;
 they MUST NOT be treated as one figure (KB2-F13).
 
-| Signature | Rows | Logical size range            | Audio tracks |
-| --------- | ---- | ----------------------------- | ------------ |
-| `KB2n`    | 505  | 82,320 to 373,705,456 bytes   | 0, 1, 2 or 4 |
-| `KB2j`    | 10   | 50,552 to 4,004,896 bytes     | 0            |
+| Signature | Rows | Logical size range          | Audio tracks |
+| --------- | ---- | --------------------------- | ------------ |
+| `KB2n`    | 505  | 82,320 to 373,705,456 bytes | 0, 1, 2 or 4 |
+| `KB2j`    | 10   | 50,552 to 4,004,896 bytes   | 0            |
 
 ## Status
 
@@ -35,35 +35,35 @@ both signatures. Both observations are external-tool names and local strings,
 not decoded frames or an engine call path. They do not establish container
 identity, engine compatibility or a decoder implementation.
 
-| Part                              | Status                                  |
-| --------------------------------- | --------------------------------------- |
-| Magic and occurrence              | Confirmed (515 rows, one archive)       |
-| Common header and frame table     | Confirmed (515 rows)                    |
-| One family, two variants          | Probable                                |
-| Bink 2 similarity                 | Speculative (external tooling names)    |
-| Meaning of the fourth magic byte  | Unknown                                 |
-| Frame encoding and decode         | Unknown                                 |
+| Part                             | Status                               |
+| -------------------------------- | ------------------------------------ |
+| Magic and occurrence             | Confirmed (515 rows, one archive)    |
+| Common header and frame table    | Confirmed (515 rows)                 |
+| One family, two variants         | Probable                             |
+| Bink 2 similarity                | Speculative (external tooling names) |
+| Meaning of the fourth magic byte | Unknown                              |
+| Frame encoding and decode        | Unknown                              |
 
 ## Common header
 
 All 515 rows share a 48-byte header. Multi-byte fields are little-endian.
 Fields at `+0x24`, `+0x26` and `+0x2C` are observed but not explained.
 
-| Offset | Size | Observation                                                                 |
-| ------ | ---- | --------------------------------------------------------------------------- |
-| `+0x00` | 4   | `KB2j` or `KB2n`                                                            |
-| `+0x04` | 4   | Logical size minus 8. Not the RPF stored size when alignment padding exists |
-| `+0x08` | 4   | Frame count                                                                 |
-| `+0x0C` | 4   | Largest frame size. No frame-index interval exceeds it                      |
-| `+0x10` | 4   | Equal to `+0x08` in all 515 rows                                            |
-| `+0x14` | 4   | Width                                                                       |
-| `+0x18` | 4   | Height                                                                      |
-| `+0x1C` | 4   | Frame-rate numerator. 30 in all 515 rows                                    |
-| `+0x20` | 4   | Frame-rate denominator. 1 in all 515 rows                                   |
-| `+0x24` | 2   | 18 or 19. Meaning **Unknown**                                               |
-| `+0x26` | 2   | 0, 4, 16 or 20. Meaning **Unknown**                                         |
-| `+0x28` | 4   | Audio track count: 0, 1, 2 or 4                                             |
-| `+0x2C` | 4   | Variant identifier. Meaning **Unknown**                                     |
+| Offset  | Size | Observation                                                                 |
+| ------- | ---- | --------------------------------------------------------------------------- |
+| `+0x00` | 4    | `KB2j` or `KB2n`                                                            |
+| `+0x04` | 4    | Logical size minus 8. Not the RPF stored size when alignment padding exists |
+| `+0x08` | 4    | Frame count                                                                 |
+| `+0x0C` | 4    | Largest frame size. No frame-index interval exceeds it                      |
+| `+0x10` | 4    | Equal to `+0x08` in all 515 rows                                            |
+| `+0x14` | 4    | Width                                                                       |
+| `+0x18` | 4    | Height                                                                      |
+| `+0x1C` | 4    | Frame-rate numerator. 30 in all 515 rows                                    |
+| `+0x20` | 4    | Frame-rate denominator. 1 in all 515 rows                                   |
+| `+0x24` | 2    | 18 or 19. Meaning **Unknown**                                               |
+| `+0x26` | 2    | 0, 4, 16 or 20. Meaning **Unknown**                                         |
+| `+0x28` | 4    | Audio track count: 0, 1, 2 or 4                                             |
+| `+0x2C` | 4    | Variant identifier. Meaning **Unknown**                                     |
 
 `+0x04` equals the extracted payload size minus 8 in all 515 rows. The RPF row
 is padded to a 16-byte boundary, so the stored size can be 4, 8 or 12 bytes
@@ -74,10 +74,10 @@ Observed `+0x2C` values:
 
 | Signature | `+0x2C`      | Rows |
 | --------- | ------------ | ---: |
-| `KB2j`    | `0x02070D00` | 10   |
-| `KB2n`    | `0x87E90500` | 491  |
-| `KB2n`    | `0x87E80400` | 13   |
-| `KB2n`    | `0x87E70200` | 1    |
+| `KB2j`    | `0x02070D00` |   10 |
+| `KB2n`    | `0x87E90500` |  491 |
+| `KB2n`    | `0x87E80400` |   13 |
+| `KB2n`    | `0x87E70200` |    1 |
 
 The value is constant per payload and does not track dimensions, frame count
 or audio track count.
@@ -88,11 +88,11 @@ When `+0x28` is `n > 0`, `3n` little-endian `u32` values follow the header,
 grouped by field, not interleaved per track. The frame index table starts after
 these `12n` bytes.
 
-| Array     | Observed content                                                        |
-| --------- | ----------------------------------------------------------------------- |
-| `+0x30`   | 145,920 (`0x23A00`) in all 229 tracks. Meaning **Unknown**              |
-| `+0x30+4n`| Low 16 bits are the sample rate, 48,000 in all tracks. High 16 bits are flags: `0x7000` in 227 tracks and `0x3000` in 2 |
-| `+0x30+8n`| Small integer, usually in `0..n-1` but not always ordered. Meaning **Unknown** |
+| Array      | Observed content                                                                                                        |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `+0x30`    | 145,920 (`0x23A00`) in all 229 tracks. Meaning **Unknown**                                                              |
+| `+0x30+4n` | Low 16 bits are the sample rate, 48,000 in all tracks. High 16 bits are flags: `0x7000` in 227 tracks and `0x3000` in 2 |
+| `+0x30+8n` | Small integer, usually in `0..n-1` but not always ordered. Meaning **Unknown**                                          |
 
 FFmpeg reports one audio stream for the one-track sample after its signature
 is substituted (KB2-F04). The high 16 bits are observed flags; the meaning of
