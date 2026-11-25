@@ -19,7 +19,7 @@ python tools/rds5/rds5.py inspect PATH [--json] [--records] [--descriptors] [--h
 python tools/rds5/rds5.py scan ROOT [--json] [--headers]
 python tools/rds5/rds5.py descriptors PATH [--json]
 python tools/rds5/rds5.py decode PATH --block N [--out FILE]
-python tools/rds5/rds5.py reconstruct PATH --descriptor N [--bytes-per-texel B --levels L] [--json]
+python tools/rds5/rds5.py reconstruct PATH --descriptor N [--bytes-per-texel B --levels L] [--max-total-bytes B] [--json]
 ```
 
 `inspect` parses one file. `--records` adds every decoded record. `--descriptors`
@@ -35,13 +35,21 @@ block.
 is strictly increasing. It never prints key values.
 
 `decode` dispatches by storage-class id. Class `0x20` must be one complete zlib
-stream; class `0x00` returns stored bytes. Every other observed class fails with
-an explicit message. `--out` writes the decoded bytes to the given path.
+stream; class `0x00` returns stored bytes and checks the declared virtual length.
+Every other observed class fails with an explicit message. `--out` writes the
+decoded bytes through a temporary file in the target directory and renames it
+after a successful decode. It refuses a path that resolves to the input file.
 
 `reconstruct` decodes every block whose virtual position falls in a descriptor's
 range. With `--bytes-per-texel` and `--levels` it compares the decoded total with
 the expected mip sizes and reports whether each level boundary falls on a block
 boundary. It does not infer a block codec or a pixel format from a format id.
+`--max-total-bytes` caps the cumulative decoded size; the cap is applied to each
+block and to the running total.
+
+Block and descriptor indices are checked against the parsed array before any
+record or offset arithmetic. An out-of-range index raises a typed error that
+names the index and the array length.
 
 Limits, all overridable on the command line:
 
@@ -51,7 +59,8 @@ Limits, all overridable on the command line:
 | `--max-records` | 2,000,000 | Refuse a larger `record_count` |
 | `--max-etpf-entries` | 2,000,000 | Refuse a larger descriptor count |
 | `--max-block-bytes` | 256 MiB | Refuse a block whose stored span is larger |
-| `--max-uncompressed` | 64 MiB | Decompression output cap |
+| `--max-uncompressed` | 64 MiB | Per-block decompression output cap |
+| `--max-total-bytes` | 512 MiB | Cumulative decoded cap for `reconstruct` |
 
 The padding between the ETPF content and the first block is scanned in 1 MiB
 pieces, and zlib decoding reads straight from the file without loading the stored
@@ -81,11 +90,17 @@ any file fails).
 | `first_block` | Offset of the first data block |
 | `extent_matches_payload_size` | Whether the end record's virtual position equals `payload_size` |
 | `keys_strictly_increasing` | `true`, `false`, or `null` when the table has fewer than two keys |
+| `ambiguous_class_records` | Number of records with bit 24 or 25 set |
 | `class_counts` | Block count per storage-class id |
 | `headers` | With `--headers`: `zlib` and `other` first-byte counts |
-| `records` | With `--records`: index, offset, class, page term, virtual position, padding, second word |
+| `records` | With `--records`: index, 24-bit offset, 26-bit offset, class, class-ambiguity flag, raw six-bit value, page term, virtual position, padding, second word |
 | `descriptors` | With `--descriptors`: index, dimensions, mip, flags, format id, array size, kind, tile mode, first page |
 | `block` | With `--block`: class, span, padding, stream length, and with `--decode` the decoded size, consumed length and virtual length |
+
+`reconstruct` reports the descriptor fields, range, block list, block boundaries
+and decoded total. With `--bytes-per-texel` and `--levels` it adds the expected
+level sizes, whether they match the total, and whether each level boundary falls
+on a block boundary. It also reports `max_total_bytes`.
 
 `scan` prints one tab-separated line per file and a summary. The summary reports
 `files`, `failures`, `blocks`, `descriptors`, `layout_mismatches` and the class
@@ -100,8 +115,11 @@ python -m unittest discover -s tools/rds5 -p "test_*.py"
 
 The tests build synthetic containers in a temporary directory. They cover a valid
 round trip, all eight class ids, explicit failure for the six undecoded classes, a
-bit-24/25 record that must be rejected as out of model, both class-field readings,
-virtual offsets including a sub-page term, a nonzero padding count, a size word
-with bit 32 set, descriptor fields, sorted and unsorted key tables, a small mip
-chain, every rejection path, the decompression cap, an 8 MiB gap scanned without
+bit-24/25 record that must decode and be reported as ambiguous, both class-field
+readings, a stored block whose payload is returned verbatim, a stored block whose
+length mismatches the declared virtual length, virtual offsets including a
+sub-page term, a nonzero padding count, a size word with bit 32 set, descriptor
+fields, sorted and unsorted key tables, a small mip chain, block and descriptor
+index bounds, refusal to overwrite the input, the cumulative reconstruction cap,
+every rejection path, the decompression cap, an 8 MiB gap scanned without
 allocating it, and the CLI commands. No game files are needed.

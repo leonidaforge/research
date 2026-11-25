@@ -1,5 +1,6 @@
 """Synthetic fixtures and contract tests for the RDS5 parser. No game files needed."""
 
+import argparse
 import contextlib
 import io
 import json
@@ -22,6 +23,7 @@ from rds5 import (  # noqa: E402
     HEADER_RESERVED,
     Limits,
     Rds5Error,
+    cmd_decode,
     decode_block,
     decode_class,
     decode_record,
@@ -201,26 +203,83 @@ class ClassDispatchTests(TempFiles):
     def test_class_id_reads_both_descriptions(self):
         for cls in CLASS_OBSERVED:
             lo = cls << 24
-            six_bit = (lo >> 24) & 0x3F
+            six_bit, ambiguous = decode_class(lo)
             four_bit = (lo >> 26) & 0xF
+            self.assertFalse(ambiguous)
+            self.assertEqual(six_bit, cls)
             self.assertEqual(six_bit, four_bit << 2)
-            self.assertEqual(decode_class(lo), cls)
-            self.assertEqual(lo & 0x03000000, 0)
 
-    def test_bit_24_set_is_out_of_model(self):
-        with self.assertRaises(Rds5Error) as ctx:
-            decode_class(0x01000000)
-        self.assertIn("bits 24..25", str(ctx.exception))
-        with self.assertRaises(Rds5Error):
-            decode_class(0x02000000)
+    def test_bit_24_is_accepted_and_reported_ambiguous(self):
+        cls, ambiguous = decode_class((CLASS_ZLIB << 24) | 0x01000000)
+        self.assertEqual(cls, CLASS_ZLIB)
+        self.assertTrue(ambiguous)
+        cls, ambiguous = decode_class((CLASS_STORED << 24) | 0x02000000)
+        self.assertEqual(cls, CLASS_STORED)
+        self.assertTrue(ambiguous)
 
-    def test_store_with_bit_24_set_is_rejected(self):
+    def test_store_with_bit_24_set_decodes(self):
         data = bytearray(build_store([level_block(0x1000, CLASS_ZLIB)]))
         lo = struct.unpack_from("<I", data, 0x18)[0]
         struct.pack_into("<I", data, 0x18, lo | 0x01000000)
+        path = self.write(bytes(data))
+        info = parse(path)
+        record = info.records[1]
+        self.assertTrue(record.class_ambiguous)
+        self.assertEqual(record.storage_class, CLASS_ZLIB)
+        self.assertEqual(record.class_six_bit_raw, 0x21)
+        self.assertEqual(record.offset_26, record.offset + 0x100000000)
+        self.assertEqual(info.ambiguous_class_records, 1)
+        decoded = decode_block(path, info, 0)
+        self.assertEqual(len(decoded.data), 0x1000)
+
+
+class StoredClassTests(TempFiles):
+    def test_stored_payload_is_returned_verbatim(self):
+        payload = bytes(((i * 37) + 11) & 0xFF for i in range(0x1000))
+        block = {"payload": payload, "class_id": CLASS_STORED}
+        path = self.write(build_store([block]))
+        info = parse(path)
+        decoded = decode_block(path, info, 0)
+        self.assertEqual(decoded.data, payload)
+        self.assertEqual(decoded.consumed, len(payload))
+
+    def test_stored_length_mismatch_is_reported(self):
+        block = {"payload": bytes(0x1000), "class_id": CLASS_STORED, "virtual": 0x1000}
+        path = self.write(build_store([block], end_virtual=0x3000))
+        info = parse(path)
         with self.assertRaises(Rds5Error) as ctx:
-            parse(self.write(bytes(data)))
-        self.assertIn("bits 24..25", str(ctx.exception))
+            decode_block(path, info, 0)
+        self.assertIn("stored length", str(ctx.exception))
+        self.assertIn("virtual length", str(ctx.exception))
+
+
+class IndexBoundTests(TempFiles):
+    def test_block_index_just_past_end(self):
+        path = self.write(build_store([level_block(0x1000)]))
+        info = parse(path)
+        with self.assertRaises(Rds5Error) as ctx:
+            decode_block(path, info, info.block_count)
+        self.assertIn(str(info.block_count), str(ctx.exception))
+        self.assertIn(str(info.record_count), str(ctx.exception))
+
+    def test_block_index_overflow_is_bounded(self):
+        path = self.write(build_store([level_block(0x1000)]))
+        info = parse(path)
+        with self.assertRaises(Rds5Error) as ctx:
+            decode_block(path, info, 1 << 63)
+        self.assertIn(str(1 << 63), str(ctx.exception))
+
+    def test_descriptor_index_out_of_range(self):
+        descriptors = [{"width": 8, "height": 8, "page": 1}]
+        blocks = [level_block(0x1000)]
+        path = self.write(build_store(blocks, descriptors))
+        info = parse(path)
+        with self.assertRaises(Rds5Error) as ctx:
+            reconstruct(path, info, info.entry_count)
+        self.assertIn("descriptor table", str(ctx.exception))
+        with self.assertRaises(Rds5Error) as ctx:
+            reconstruct(path, info, 1 << 63)
+        self.assertIn("descriptor table", str(ctx.exception))
 
 
 class ArithmeticTests(unittest.TestCase):
@@ -378,6 +437,37 @@ class ReconstructionTests(TempFiles):
         with self.assertRaises(Rds5Error) as ctx:
             reconstruct(path, info, 0, bytes_per_texel=1, levels=2)
         self.assertIn("does not decode", str(ctx.exception))
+
+    def test_total_cap_refuses_oversized_block(self):
+        blocks = [level_block(0x1000000, virtual=0x1000)]
+        descriptors = [{"width": 4096, "height": 4096, "mip": 0, "page": 1}]
+        path = self.write(build_store(blocks, descriptors, end_virtual=0x1001000))
+        info = parse(path)
+        tracemalloc.start()
+        with self.assertRaises(Rds5Error) as ctx:
+            reconstruct(path, info, 0, max_total_bytes=0x1000)
+        _, peak = tracemalloc.get_traced_memory()
+        tracemalloc.stop()
+        self.assertIn("total decoded cap", str(ctx.exception))
+        self.assertLess(peak, 0x400000)
+
+    def test_total_cap_is_cumulative(self):
+        blocks = [
+            level_block(0x800000, virtual=0x1000),
+            level_block(0x800000, virtual=0x801000),
+            level_block(0x800000, virtual=0x1001000),
+        ]
+        descriptors = [{"width": 4096, "height": 4096, "mip": 2, "page": 1}]
+        path = self.write(build_store(blocks, descriptors, end_virtual=0x1801000))
+        info = parse(path)
+        tracemalloc.start()
+        with self.assertRaises(Rds5Error) as ctx:
+            reconstruct(path, info, 0, max_total_bytes=0xC00000)
+        _, peak = tracemalloc.get_traced_memory()
+        tracemalloc.stop()
+        self.assertIn("total decoded cap", str(ctx.exception))
+        self.assertIn("block 1", str(ctx.exception))
+        self.assertLess(peak, 0x1800000)
 
 
 class RejectionTests(TempFiles):
@@ -569,6 +659,51 @@ class CliTests(TempFiles):
         self.assertEqual(code, 0)
         self.assertEqual(os.path.getsize(out_path), 0x1000)
         self.assertIn("class=0x20", out.getvalue())
+
+    def test_decode_refuses_to_overwrite_input(self):
+        path = self.sample()
+        with open(path, "rb") as handle:
+            original = handle.read()
+        out = io.StringIO()
+        err = io.StringIO()
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+            code = main(["decode", path, "--block", "0", "--out", path])
+        self.assertEqual(code, 1)
+        self.assertIn("input file", err.getvalue())
+        with open(path, "rb") as handle:
+            self.assertEqual(handle.read(), original)
+        self.assertTrue(original.startswith(b"RDS5"))
+
+    def test_decode_refuses_to_overwrite_input_direct(self):
+        path = self.sample()
+        with open(path, "rb") as handle:
+            original = handle.read()
+        args = argparse.Namespace(
+            path=path,
+            out=path,
+            block=0,
+            max_uncompressed=64 << 20,
+            max_block_bytes=256 << 20,
+            max_file_size=8 << 30,
+            max_records=2_000_000,
+            max_etpf_entries=2_000_000,
+        )
+        with self.assertRaises(Rds5Error) as ctx:
+            cmd_decode(args)
+        self.assertIn("input file", str(ctx.exception))
+        with open(path, "rb") as handle:
+            self.assertEqual(handle.read(), original)
+
+    def test_decode_total_cap_command(self):
+        blocks = [level_block(0x100000, virtual=0x1000)]
+        descriptors = [{"width": 512, "height": 512, "mip": 0, "page": 1}]
+        path = self.write(build_store(blocks, descriptors, end_virtual=0x101000))
+        out = io.StringIO()
+        err = io.StringIO()
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+            code = main(["reconstruct", path, "--descriptor", "0", "--max-total-bytes", "4096"])
+        self.assertEqual(code, 1)
+        self.assertIn("total decoded cap", err.getvalue())
 
     def test_decode_undecoded_class_fails(self):
         path = self.write(build_store([level_block(0x1000, 0x04)]))

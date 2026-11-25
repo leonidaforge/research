@@ -17,6 +17,7 @@ import json
 import os
 import struct
 import sys
+import tempfile
 import zlib
 from dataclasses import dataclass, field
 from typing import Dict, Iterable, List, Optional, Sequence, Tuple
@@ -42,8 +43,8 @@ CLASS_ZLIB = 0x20
 CLASS_STORED = 0x00
 CLASS_OBSERVED = (0x00, 0x04, 0x0C, 0x10, 0x14, 0x18, 0x1C, 0x20)
 CLASS_UNDECODED = (0x04, 0x0C, 0x10, 0x14, 0x18, 0x1C)
-CLASS_MASK = 0x3C
-CLASS_RESERVED_BITS = 0x03
+CLASS_FOUR_BIT_MASK = 0x0F
+CLASS_AMBIGUOUS_BITS = 0x03
 PAGE_MASK = 0x03
 
 DEFAULT_MAX_FILE_SIZE = 8 << 30
@@ -51,6 +52,7 @@ DEFAULT_MAX_RECORDS = 2_000_000
 DEFAULT_MAX_ETPF_ENTRIES = 2_000_000
 DEFAULT_MAX_UNCOMPRESSED = 64 << 20
 DEFAULT_MAX_BLOCK_BYTES = 256 << 20
+DEFAULT_MAX_TOTAL_BYTES = 512 << 20
 
 
 class Rds5Error(Exception):
@@ -70,17 +72,23 @@ class Limits:
 class Record:
     """One 8-byte record.
 
-    ``offset`` uses the 24-bit field. Bits 24 and 25 are zero in every observed
-    record, so the same value is obtained from the 26-bit field of the
-    four-bit-class description. ``virtual_offset`` is the block position in
-    virtual space and ``padding`` is the trailing zero count of the stored span.
+    ``storage_class`` is the canonical six-bit id, equal to four times the
+    four-bit value of bits 26..29. ``class_six_bit_raw`` is the raw six-bit field
+    at bits 24..29. ``class_ambiguous`` is true when bits 24 or 25 are set: the
+    raw six-bit reading then differs from the canonical id. ``offset`` is the
+    24-bit reading used for file I/O; ``offset_26`` is the equivalent 26-bit
+    reading. ``virtual_offset`` is the block position in virtual space and
+    ``padding`` is the trailing zero count of the stored span.
     """
 
     index: int
     lo: int
     hi: int
     offset: int
+    offset_26: int
     storage_class: int
+    class_ambiguous: bool
+    class_six_bit_raw: int
     page_term: int
     virtual_offset: int
     padding: int
@@ -156,6 +164,10 @@ class Rds5File:
             counts[record.storage_class] = counts.get(record.storage_class, 0) + 1
         return counts
 
+    @property
+    def ambiguous_class_records(self) -> int:
+        return sum(1 for record in self.records if record.class_ambiguous)
+
 
 def _expect(condition: bool, message: str) -> None:
     if not condition:
@@ -198,20 +210,17 @@ def _check_zero(f, offset: int, length: int, size: int, what: str) -> None:
         remaining -= len(chunk)
 
 
-def decode_class(lo: int) -> int:
-    """Return the storage-class id of a record's first word.
+def decode_class(lo: int) -> Tuple[int, bool]:
+    """Return ``(six_bit_id, ambiguous)`` for a record's first word.
 
-    Bits 24..29 hold the class when read as six bits; bits 26..29 hold the
-    four-bit value that is one quarter of that. Bits 24 and 25 are zero in the
-    observed population, so a set bit there is out of the documented model.
+    The class is taken from the four-bit field at bits 26..29 and reported as
+    the six-bit id used by this document (four times the four-bit value). When
+    bit 24 or bit 25 is set, the six-bit reading at bits 24..29 is ambiguous:
+    under the four-bit description those two bits belong to the offset.
     """
-    high = (lo >> 24) & 0xFF
-    _expect(
-        (high & CLASS_RESERVED_BITS) == 0,
-        f"record word 0x{lo:08x} sets bits 24..25; the observed storage-class "
-        "model requires both bits to be zero",
-    )
-    return high & CLASS_MASK
+    four_bit = (lo >> 26) & CLASS_FOUR_BIT_MASK
+    ambiguous = ((lo >> 24) & CLASS_AMBIGUOUS_BITS) != 0
+    return four_bit << 2, ambiguous
 
 
 def virtual_offset(hi: int, page_term: int) -> int:
@@ -234,14 +243,17 @@ def payload_size(size_word: int, high_bit: int) -> int:
 
 
 def decode_record(index: int, lo: int, hi: int) -> Record:
-    storage_class = decode_class(lo)
+    storage_class, class_ambiguous = decode_class(lo)
     page_term = (lo >> 30) & PAGE_MASK
     return Record(
         index=index,
         lo=lo,
         hi=hi,
         offset=(lo & OFFSET_MASK) * OFFSET_ALIGN,
+        offset_26=(lo & OFFSET_MASK_26) * OFFSET_ALIGN,
         storage_class=storage_class,
+        class_ambiguous=class_ambiguous,
+        class_six_bit_raw=(lo >> 24) & 0x3F,
         page_term=page_term,
         virtual_offset=virtual_offset(hi, page_term),
         padding=padding_count(hi),
@@ -387,9 +399,25 @@ def parse(path: str, limits: Limits = Limits()) -> Rds5File:
     )
 
 
+def _check_block_index(info: Rds5File, index: int) -> None:
+    _expect(
+        0 <= index < info.block_count,
+        f"block index {index} is outside the record array of "
+        f"{info.record_count} records ({info.block_count} blocks)",
+    )
+
+
+def _check_descriptor_index(info: Rds5File, index: int) -> None:
+    _expect(
+        0 <= index < len(info.descriptors),
+        f"descriptor index {index} is outside the descriptor table of "
+        f"{len(info.descriptors)} entries",
+    )
+
+
 def block_span(info: Rds5File, index: int) -> Tuple[int, int]:
     """Return ``(start, end)`` of block ``index`` (0-based among block records)."""
-    _expect(0 <= index < info.block_count, f"block index {index} outside 0..{info.block_count - 1}")
+    _check_block_index(info, index)
     start = info.records[1 + index].offset
     end = info.records[2 + index].offset
     return start, end
@@ -436,6 +464,7 @@ def decode_block(
     ``span - padding``. Class 0x00 returns ``span - padding`` stored bytes. Any
     other observed class raises a class-specific error; it is never guessed.
     """
+    _check_block_index(info, index)
     record = info.records[1 + index]
     start, end = block_span(info, index)
     span = end - start
@@ -477,6 +506,11 @@ def decode_block(
         return BlockDecode(index, record.storage_class, span, pad, length, consumed, bytes(out), virtual_length)
 
     if record.storage_class == CLASS_STORED:
+        _expect(
+            length == virtual_length,
+            f"block {index} stored length 0x{length:x} does not match the "
+            f"declared virtual length 0x{virtual_length:x}",
+        )
         data = read_block_bytes(path, info, index, max_block_bytes)
         _check_tail(path, info, start + length, pad, index)
         return BlockDecode(index, record.storage_class, span, pad, length, length, data[:length], virtual_length)
@@ -498,7 +532,7 @@ def _check_tail(path: str, info: Rds5File, offset: int, length: int, index: int)
 
 def descriptor_page_range(info: Rds5File, index: int) -> Tuple[int, int]:
     """Virtual byte range referenced by descriptor ``index``."""
-    _expect(0 <= index < len(info.descriptors), f"descriptor index {index} out of range")
+    _check_descriptor_index(info, index)
     start = info.descriptors[index].first_page * 0x1000
     if index + 1 < len(info.descriptors):
         end = info.descriptors[index + 1].first_page * 0x1000
@@ -535,30 +569,53 @@ def reconstruct(
     levels: Optional[int] = None,
     max_uncompressed: int = DEFAULT_MAX_UNCOMPRESSED,
     max_block_bytes: int = DEFAULT_MAX_BLOCK_BYTES,
+    max_total_bytes: int = DEFAULT_MAX_TOTAL_BYTES,
 ) -> dict:
     """Decode every block referenced by a descriptor into one virtual stream.
 
     The function reports the block boundaries, the decoded total and, when a
     bytes-per-texel value and level count are supplied, the expected mip level
     sizes. It does not infer a block codec or a pixel format from a format id.
+    The cumulative decoded size is capped by ``max_total_bytes``.
     """
-    descriptor = info.descriptors[descriptor_index]
     start, end = descriptor_page_range(info, descriptor_index)
+    descriptor = info.descriptors[descriptor_index]
     indices = blocks_in_range(info, start, end)
     _expect(indices, f"descriptor {descriptor_index} references no block")
 
     buffer = bytearray()
     boundaries = []
     for index in indices:
-        decoded = decode_block(
-            path,
-            info,
-            index,
-            max_uncompressed=max_uncompressed,
-            max_block_bytes=max_block_bytes,
+        remaining = max_total_bytes - len(buffer)
+        _expect(
+            remaining > 0,
+            f"reconstruction exceeds the {max_total_bytes}-byte total decoded cap "
+            f"at block {index}",
         )
+        block_cap = min(max_uncompressed, remaining)
+        try:
+            decoded = decode_block(
+                path,
+                info,
+                index,
+                max_uncompressed=block_cap,
+                max_block_bytes=max_block_bytes,
+            )
+        except Rds5Error as exc:
+            if block_cap == remaining and "decompression cap" in str(exc):
+                raise Rds5Error(
+                    f"reconstruction exceeds the {max_total_bytes}-byte total "
+                    f"decoded cap at block {index}"
+                ) from exc
+            raise
+        if len(buffer) + len(decoded.data) > max_total_bytes:
+            raise Rds5Error(
+                f"reconstruction exceeds the {max_total_bytes}-byte total decoded cap "
+                f"at block {index}"
+            )
         boundaries.append((index, len(buffer), len(buffer) + len(decoded.data)))
         buffer += decoded.data
+        del decoded
 
     report = {
         "descriptor": descriptor_index,
@@ -574,6 +631,7 @@ def reconstruct(
         "block_count": len(indices),
         "blocks": indices,
         "decoded_bytes": len(buffer),
+        "max_total_bytes": max_total_bytes,
         "block_boundaries": boundaries,
     }
 
@@ -628,6 +686,7 @@ def summarize(info: Rds5File, path: str, with_headers: bool = False) -> dict:
         "first_block": info.first_block,
         "extent_matches_payload_size": info.extent_matches_payload_size,
         "keys_strictly_increasing": info.keys_strictly_increasing,
+        "ambiguous_class_records": info.ambiguous_class_records,
         "class_counts": {f"0x{k:02x}": v for k, v in sorted(info.class_counts().items())},
     }
     if headers is not None:
@@ -660,7 +719,10 @@ def cmd_inspect(args: argparse.Namespace) -> int:
             {
                 "index": rec.index,
                 "offset": rec.offset,
+                "offset_26": rec.offset_26,
                 "storage_class": f"0x{rec.storage_class:02x}",
+                "class_ambiguous": rec.class_ambiguous,
+                "class_six_bit_raw": f"0x{rec.class_six_bit_raw:02x}",
                 "page_term": rec.page_term,
                 "virtual_offset": rec.virtual_offset,
                 "padding": rec.padding,
@@ -804,7 +866,40 @@ def cmd_descriptors(args: argparse.Namespace) -> int:
     return 0
 
 
+def _same_path(a: str, b: str) -> bool:
+    try:
+        if os.path.exists(a) and os.path.exists(b) and os.path.samefile(a, b):
+            return True
+    except OSError:
+        pass
+    return os.path.normcase(os.path.realpath(os.path.abspath(a))) == os.path.normcase(
+        os.path.realpath(os.path.abspath(b))
+    )
+
+
+def _write_atomic(path: str, data: bytes) -> None:
+    directory = os.path.dirname(os.path.abspath(path)) or "."
+    fd, temporary = tempfile.mkstemp(prefix=".rds5-", dir=directory)
+    try:
+        with os.fdopen(fd, "wb") as handle:
+            handle.write(data)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, path)
+    except BaseException:
+        try:
+            os.unlink(temporary)
+        except OSError:
+            pass
+        raise
+
+
 def cmd_decode(args: argparse.Namespace) -> int:
+    if args.out:
+        _expect(
+            not _same_path(args.path, args.out),
+            f"refusing to write decoded bytes over the input file {args.path}",
+        )
     info = parse(args.path, _limits_from(args))
     decoded = decode_block(
         args.path,
@@ -814,8 +909,7 @@ def cmd_decode(args: argparse.Namespace) -> int:
         max_block_bytes=args.max_block_bytes,
     )
     if args.out:
-        with open(args.out, "wb") as f:
-            f.write(decoded.data)
+        _write_atomic(args.out, decoded.data)
     print(
         f"block={decoded.index} class=0x{decoded.storage_class:02x} "
         f"span={decoded.stored_span} padding={decoded.padding} "
@@ -835,6 +929,7 @@ def cmd_reconstruct(args: argparse.Namespace) -> int:
         levels=args.levels,
         max_uncompressed=args.max_uncompressed,
         max_block_bytes=args.max_block_bytes,
+        max_total_bytes=args.max_total_bytes,
     )
     if args.json:
         print(json.dumps(report, indent=2, sort_keys=True))
@@ -894,6 +989,7 @@ def build_parser() -> argparse.ArgumentParser:
     rec.add_argument("--levels", type=int)
     rec.add_argument("--json", action="store_true")
     rec.add_argument("--max-uncompressed", type=int, default=DEFAULT_MAX_UNCOMPRESSED)
+    rec.add_argument("--max-total-bytes", type=int, default=DEFAULT_MAX_TOTAL_BYTES)
     common(rec)
     rec.set_defaults(func=cmd_reconstruct)
     return p
