@@ -228,7 +228,7 @@ With those, a candidate matches a row when its stem hash or 32-bit key and its t
 
 ## Offline resolution limits
 
-The 22 authenticated local archives yielded 6534 rows, 6422 distinct 64-bit name hashes and 2145 distinct 32-bit keys (RPF9-F105). No name was recovered without an external name source, and hashing the local archive file names as candidate paths matched no row. The archives store no name text, so a tool can test candidates but cannot enumerate names from hashes.
+The 22 authenticated local archives yielded 6534 rows, 6422 distinct 64-bit name hashes and 2145 distinct 32-bit keys (RPF9-F105). Without an external name source, no name was recovered and hashing the local archive file names as candidate paths matched no row. The archives store no name text, so a tool can test candidates but cannot enumerate names from hashes. With the published LUT candidates, 2392 rows resolve (RPF9-F106).
 
 A local candidate table MAY hold:
 
@@ -236,6 +236,26 @@ A local candidate table MAY hold:
 - declared `(class, key)` to name mappings, which MUST be marked unconfirmed unless the normalized name or its stem reproduces the key.
 
 A resolved name is display data. It MUST NOT replace the stored hash, change a row identity, select a payload offset or become an extraction path.
+
+## Public name LUTs
+
+The [public LUT files](../../../names/README.md) use a versioned `HASH<TAB>NAME` format with separate `hash64` and `key32` files. Each record is validated by hashing the name or its stem. The current files hold 2250 `hash64` and 106 `key32` candidates (RPF9-F106). A record is a hash-validated candidate, not proof that the game used the text as the original filename.
+
+A LUT has no type field. Different extensions with the same stem share a hash, so several names can map to one key. The resolver keeps those as separate candidates and reports ambiguity; it does not choose one.
+
+## Candidate harvest
+
+The local pipeline indexes authenticated native rows, extracts candidate strings from readable payloads and initialized executable sections, and tests bounded variants against the index (RPF9-F106):
+
+1. Candidate strings come from printable ASCII, valid non-control UTF-8 and ASCII-only UTF-16LE runs that look like relative paths or file names.
+2. Variants are the exact text, the stem before the last `.`, the text after a scheme prefix and the text without leading separators. No directory product is generated.
+3. Each variant is hashed with both namespaces and looked up in an in-memory index.
+4. A `hash64` match needs an established extension/type pair; `rpf` to type 0 is the only one published here. A `key32` match is accepted only for type 255. Other types stay unresolved rather than being guessed.
+5. Payloads behind the payload transform and unsupported compression are skipped, not treated as text.
+
+The sample run read 1125 readable payloads (534,402,445 bytes), skipped 261 payload-transform rows, and extracted 409,342 strings or 926,210 candidate hashes. It produced 2368 payload match records (2250 `hash64`, 118 `key32`), 2349 distinct keys and 2375 rows. The executable scan read 9,050,112 bytes from three initialized sections, extracted 2921 strings and added 7 accepted `key32` matches over 16 rows. The combined LUT pair resolves 2392 of 6534 rows with no ambiguous row, leaving 4142 unresolved.
+
+These counts are observations from one build and one local sample, with explicit byte, string and match limits; the run was truncated by those limits. They are not resolution guarantees.
 
 ## Synthetic example
 

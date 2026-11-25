@@ -12,6 +12,7 @@ Each mechanism is documented once, in the section that owns it. Other sections l
 | `builds/` | RVAs, vtables, object layouts and function roles for one identified executable | Format rules that do not depend on the build |
 | `evidence/` | Source list, finding index and research history per subject | Raw reports, decompiler output, game data |
 | `tools/` | Original, publishable research tools and their synthetic fixtures, including generic recognition interfaces | Private scripts, key-material dumps, extraction reports |
+| `names/` | Published, hash-validated name mappings and their format/provenance notes | Payload text, executable extracts, unvalidated candidates |
 
 A format document says *what* the structure is. The build catalog says *where* in one executable the evidence was found. The evidence index connects the two. Format documents cite findings by ID, such as `RPF9-F07`, and do not repeat addresses.
 

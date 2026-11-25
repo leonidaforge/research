@@ -16,7 +16,7 @@ This repository holds the knowledge base behind [Leonida Forge](https://github.c
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
 | RPF9 header and metadata layout | Layout and region boundaries established through static analysis                                                                                                                                                                                                                     | [formats/containers/rpf9](formats/containers/rpf9/README.md)                                   |
 | RPF9 columnar schema            | Cell addressing confirmed. Most column identities unknown                                                                                                                                                                                                                            | [schema.md](formats/containers/rpf9/schema.md)                                                 |
-| RPF9 entries and names          | Entry IDs, location records and name lookup confirmed. Native rows list and extract after metadata authentication; names remain hashes and most type meanings are unknown                                                                                                            | [entries.md](formats/containers/rpf9/entries.md), [names.md](formats/containers/rpf9/names.md) |
+| RPF9 entries and names          | Entry IDs, location records and name lookup confirmed. Native rows list and extract after metadata authentication; published LUT candidates resolve 2392 of 6534 sampled rows, while most type meanings remain unknown                                                                                                            | [entries.md](formats/containers/rpf9/entries.md), [names.md](formats/containers/rpf9/names.md), [names/](names/README.md) |
 | RPF9 payloads                   | Engine read path partly traced. Storage layout known only from observed data                                                                                                                                                                                                         | [payloads.md](formats/containers/rpf9/payloads.md)                                             |
 | RPF9 cryptography               | Encoded AES-256 decryption and RSA signature scheme confirmed. Registry, descriptor and fixed-table recognition verified for e95020b2; step 1 decrypts all 22 tested archives and their metadata signatures verify. Payload contents stay unauthenticated; cross-build behavior open | [cryptography/rpf9](cryptography/rpf9/README.md)                                               |
 
@@ -29,6 +29,7 @@ Native RPF9 table-of-contents listing works after metadata authentication. Store
 - [engine/](engine/README.md): runtime mechanisms shared by several formats.
 - [builds/](builds/README.md): function addresses and object layouts tied to one executable.
 - [evidence/](evidence/README.md): sources, finding index and research history.
+- [names/](names/README.md): published, hash-validated name mappings.
 - [tools/](tools/README.md): requirements for research tools.
 
 ## Confirmed and open findings
@@ -37,7 +38,7 @@ Specifications use five confidence levels, defined in [RESEARCH-POLICY.md](RESEA
 
 ## Why there is no game data here
 
-The repository holds original descriptions, formulas and tools only. It contains no game executables, archives, extracted assets, cryptographic key material or decompiled code. Most findings can be checked from the documents and synthetic tests. Findings that depend on restricted private evidence say so and are not independently reproducible from this repository alone. The license below covers the project's own contributions. It grants no rights to Rockstar Games or Take-Two Interactive material. See [RESEARCH-POLICY.md](RESEARCH-POLICY.md).
+The repository holds original descriptions, formulas and tools only. It contains no game executables, archives, extracted assets, cryptographic key material or decompiled code. The [public name LUTs](names/README.md) contain hash-validated name mappings, not payload text or asset data. Most findings can be checked from the documents and synthetic tests. Findings that depend on restricted private evidence say so and are not independently reproducible from this repository alone. The license below covers the project's own contributions. It grants no rights to Rockstar Games or Take-Two Interactive material. See [RESEARCH-POLICY.md](RESEARCH-POLICY.md).
 
 ## Contributing
 
