@@ -66,6 +66,30 @@ through `lforge 0.1.0`. RPF9 finding IDs refer to the
 - Payload sample: 144 attempts, 137 distinct SHA-256 fingerprints, 7 duplicates.
 - Run date: 2026-11-25. All inputs were opened read-only.
 
+### Iteration 8 batch probes
+
+Bounded probes extended the comprehensive frame without changing the top-level
+selection. Traversal state and cache stayed outside the repository. All inputs
+were opened read-only.
+
+- Over-cap: 12 of the 381 readable type-0 rows above 64 MiB. The sample is the
+  8 smallest rows and the 4 largest rows at or below a 512 MiB per-row probe
+  cap. The sample totals 2,525,589,904 bytes. 35 candidates exceed the probe
+  cap; 334 at or below it were not selected.
+- Second disjoint batch: 32 of the 3,188 eligible rows skipped by the per-parent
+  limit, 8 per parent from the complement in `anim.rpf`, `core_bvh4.rpf`,
+  `levels.rpf` and `story000.rpf`. The sample totals 414,806,336 bytes.
+- Combined result: 44 new archives, 2,940,396,240 bytes, 44 distinct SHA-256
+  fingerprints and no duplicates. All 44 fresh extractions exited 0 with output
+  size equal to the logical size. All begin with `9FPR`, all manifests
+  authenticate, and none contains a type-0 row. The 44 manifests hold 24,243
+  rows: 24,241 readable and 2 `unsupported_transform`.
+- Unreadable sample: 8 of the 823 unreadable rows, one per distinct archive
+  (2 type-89 encoding-2, 5 type-11 encoding-3, 1 type-14 encoding-3).
+  All 8 extraction attempts exited 1 with the payload-transform message.
+- Signature census: 6,079 of the 6,534 top-level rows inspected; 455 rows with
+  `payload_transform` skipped. See INV-F31.
+
 ### Prior samples
 
 The earlier expanded run sampled 250 unique depth-1 archives and 38,395 rows
@@ -153,6 +177,15 @@ type-0 rows were skipped because they contain no archive container row.
 | INV-F25 | Type ID does not determine the sampled prefix class. The zero-prefix class spans 29 type IDs; `RBF0` covers type 11; `PSIN` covers types 93 and 94; unrecognized covers types 64, 66, 105 and 255. | Payload prefix | Confirmed (sample independence); Unknown (format identity) | 36 of 40 type IDs were sampled. An 8-byte prefix is weak evidence of format. |
 | INV-F26 | Content-hash deduplication found no duplicate archive among the 782 extractions and seven duplicate payloads among 144 attempts. Sampling by name or row index alone would have counted those seven payload extractions twice. | Hash fingerprint | Confirmed (sample) | The archive duplicate count covers the 782 sampled archives, not the whole game. |
 | INV-F27 | The comprehensive counts are disjoint populations: 4,351 readable type-0 rows over all sizes; 3,970 of them with `logical_size <= 67,108,864`; 381 with `logical_size > 67,108,864`; and 782 selected from the 3,970 by the per-parent quantile rule with `samples_depth1 = 128` and extracted. The other 3,188 eligible rows were not selected. `4,351 = 782 + 3,188 + 381`; the joint 20 GiB and 2,000-archive caps did not bind. | Sample audit (`selection_gaps`, `select_quantiles`), native extraction | Confirmed (sample) | One build and one 22-archive top-level set. The predicates cover readable type-0 rows only. The 782 are a bounded sample, not archive coverage. |
+
+### Iteration 8 batch probes
+
+| ID | Claim | Evidence | Confidence | Limits |
+| --- | --- | --- | --- | --- |
+| INV-F28 | The raised-cap batch extracted 12 of the 381 readable type-0 rows above 64 MiB: the 8 smallest (67,238,752 to 68,446,368 bytes) and the 4 largest at or below the 512 MiB probe cap (478,848,640 to 514,812,688 bytes). All 12 fresh extractions exited 0 with exact logical size, begin with `9FPR`, authenticate and contain no type-0 row. The 35 rows above the probe cap (largest 14,159,487,680 bytes) and 334 other candidates at or below it were not extracted. | Native extraction, authenticated manifest | Confirmed (sample) | 12 of 381 over-cap rows. The 512 MiB probe cap is a sampling limit, not an archive limit. |
+| INV-F29 | The second disjoint batch selected 32 of the 3,188 eligible type-0 rows skipped by the per-parent 128-row limit: 8 quantile-spaced rows per parent from the complement in `anim.rpf` (87), `core_bvh4.rpf` (1,129), `levels.rpf` (1,683) and `story000.rpf` (289). All 32 fresh extractions exited 0 with exact logical size, begin with `9FPR`, authenticate and contain no type-0 row. 3,156 eligible rows remain unselected; the other 13 contributing parents had no complement because all their eligible rows were in the first batch. | Native extraction, authenticated manifest | Confirmed (sample) | 32 of 3,188 eligible rows. One second batch, not coverage of the remaining population. |
+| INV-F30 | The 823 unreadable rows in the 782 depth-1 manifests are 746 type-89 encoding-2, 76 type-11 encoding-3 and 1 type-14 encoding-3 row, all `unsupported_transform`. An 8-row sample covering all 8 distinct archives attempted extraction; all 8 exited 1 with `entry 0 is stored behind the payload transform, so its stored bytes are not its contents`. No sampled failure was a rejected signature or a decode error. 815 rows were not sampled. | Authenticated manifest, native extraction | Confirmed (sample) | Row states plus 8 extraction attempts. The transform implementation remains unsupported. |
+| INV-F31 | The stored-byte census inspected 6,079 of the 6,534 top-level rows and skipped 455 with `payload_transform`. It counts `9FPR` 4,351, zlib 924, `KB2n` 787, `KB2j` 10, `EDUP` 3, `SGD5` 2, `PTFX` 1 and a full-zero prefix 1. Classes absent from the `formats/unknown` table are `9FPR` (documented RPF9 container), `PTFX` (1, `common.rpf` row 151), zlib (924) and zero-prefix (1, `data.rpf` row 476). `KB2n` occurs in four archives: `movies.rpf` 505, `story000.rpf` 264, `core_restofworld.rpf` 11 and `story000_restofworld.rpf` 7. This contradicts UPL-F06 and KB2-F12, which confine `KB2n` to `movies.rpf` and attribute 787 to an unpreserved 797-row movies population. | Archive data, authenticated manifest | Confirmed (census); Unknown (format identity) | First eight stored bytes only. No format is assigned to `PTFX`, zlib or the zero prefix. The KB2 subject is not rewritten here. |
 
 ### Prior expanded sample (250 archives)
 
@@ -313,6 +346,28 @@ cache, including 250,401,248 archive bytes from earlier samples.
 | rpf9-magic | 0 | none | none | 0 |
 | zlib-container-header | 0 | none | none | 0 |
 
+## Top-level signature census
+
+Counts are first eight stored bytes of the 6,079 untransformed top-level rows
+with at least eight stored bytes. The other 455 rows are behind the payload
+transform. A class is a byte observation, not a format identity.
+
+| Class | Rows | Occurrence |
+| --- | ---: | --- |
+| `9FPR` | 4,351 | Type-0 container rows |
+| zlib-container-header | 924 | No format assigned |
+| `KB2n` | 787 | `movies.rpf` 505; `story000.rpf` 264; `core_restofworld.rpf` 11; `story000_restofworld.rpf` 7 |
+| `KB2j` | 10 | `movies.rpf` only |
+| `EDUP` | 3 | Stored bytes; decoded occurrence is 5 |
+| `SGD5` | 2 | `shaders.rpf` only |
+| `PTFX` | 1 | `common.rpf` row 151 |
+| zero-prefix | 1 | `data.rpf` row 476 |
+
+`9FPR` is the documented RPF9 container. `PTFX`, zlib and the zero prefix have
+no assigned format. The `formats/unknown` table lists neither `9FPR`, `PTFX`,
+zlib nor the zero prefix, and its `KB2n` count is 505. The census counts 787
+`KB2n` rows across four archives; see INV-F31.
+
 ## Gaps
 
 | Gap | Count |
@@ -331,6 +386,17 @@ The unselected top-level type-0 rows, especially the 381 above 64 MiB, are the
 main unknown. They are the only sampled population that could contain further
 nested archives; the 782 sampled depth-1 manifests contain none.
 
+### Iteration 8 frontier
+
+The batch probes above are samples. They do not cover the remaining population.
+
+| Population | Unvisited |
+| --- | ---: |
+| Readable type-0 rows above 64 MiB | 369 (35 above the 512 MiB probe cap, 334 at or below it) |
+| Eligible type-0 rows skipped by the per-parent limit | 3,156 |
+| Unreadable nested rows | 815 |
+| Top-level rows behind the payload transform | 455 |
+
 ## Not concluded
 
 - No payload format is identified. A type ID, a magic or an 8-byte prefix alone
@@ -343,4 +409,7 @@ nested archives; the 782 sampled depth-1 manifests contain none.
   archives never contain archives.
 - The nested archive and payload counts are not game-wide totals. They are
   bounded by the per-parent limits, the 64 MiB archive cap and the 20 GiB joint
-  byte budget.
+  byte budget. The 44 archive probes add 12 over-cap and 32 second-batch rows;
+  they leave 369 over-cap and 3,156 second-batch rows unvisited.
+- The `KB2n` census contradiction in INV-F31 is recorded here but not
+  reconciled in the KB2 subject.
