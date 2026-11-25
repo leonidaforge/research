@@ -234,7 +234,7 @@ Some earlier notes used "A" and "B" for `hdr[0x04]` and `hdr[0x08]`. Those lette
 
 **Old assumption.** The 8 bytes at `0x18` held the same value in every observed archive, consistent with constant `A` and `B` fields inside them.
 
-**Correction.** The `u16` at `0x18` is `0x7A00` in the 1,440-archive sample, but the same 8 bytes contain `A` at `0x1A` and `B` at `0x1C`. `A` takes 4 to 6 and `B` takes several sizes, so the combined value changes between archives (RPF9-F131). The constant-looking earlier sample did not vary those fields. The meaning of `0x18` itself remains Unknown.
+**Correction.** The `u16` at `0x18` is `0x7A00` in the 1,440-archive sample, but the same 8 bytes contain `A` at `0x1A` and `B` at `0x1C`. `A` takes 4 to 6 and `B` takes several sizes, so the combined value changes between archives (RPF9-F131). A set in which `A` and `B` do not vary makes the 8 bytes look constant. The meaning of `0x18` itself remains Unknown.
 
 ## Open
 
