@@ -20,7 +20,8 @@ def _pointer(segment, offset):
     return base | offset
 
 
-def make_dictionary(records, graphics_length=0x2000, system_length=0x400):
+def make_dictionary(records, graphics_length=0x2000, system_length=0x400,
+                    record_offsets=None, value_permutation=False):
     """Build a synthetic system segment from a list of record dicts."""
     data = bytearray(system_length)
     map_at = system_length - 0x20
@@ -29,8 +30,9 @@ def make_dictionary(records, graphics_length=0x2000, system_length=0x400):
     data[map_at + 9] = 1
     struct.pack_into("<Q", data, 0x18, 1)
     count = len(records)
-    record_base = 0x40
-    hash_at = record_base + count * td.RECORD_LEN
+    if record_offsets is None:
+        record_offsets = [0x40 + index * td.RECORD_LEN for index in range(count)]
+    hash_at = ((max(record_offsets) + td.RECORD_LEN) + 7) & ~7
     value_at = (hash_at + 4 * count + 7) & ~7
     name_at = value_at + 8 * count
     prepared = []
@@ -40,7 +42,7 @@ def make_dictionary(records, graphics_length=0x2000, system_length=0x400):
         prepared.append((name_hash, name, record))
     prepared.sort(key=lambda item: item[0])
     for index, (name_hash, name, record) in enumerate(prepared):
-        at = record_base + index * td.RECORD_LEN
+        at = record_offsets[index]
         struct.pack_into("<I", data, hash_at + 4 * index, name_hash)
         struct.pack_into(
             "<Q", data, value_at + 8 * index, _pointer("system", at)
@@ -48,6 +50,7 @@ def make_dictionary(records, graphics_length=0x2000, system_length=0x400):
         if record.get("skip_record"):
             continue
         struct.pack_into("<I", data, at + 0x08, record.get("allocation_units", 0x100))
+        struct.pack_into("<Q", data, at + 0x10, record.get("field_10", 2432))
         struct.pack_into(
             "<Q", data, at + 0x18,
             _pointer("graphics", record.get("gfx", index * 0x1000)),
@@ -55,6 +58,10 @@ def make_dictionary(records, graphics_length=0x2000, system_length=0x400):
         name_ptr = name_at + index * 0x20
         struct.pack_into("<Q", data, at + 0x28, _pointer("system", at + 0x50))
         struct.pack_into("<Q", data, at + 0x30, _pointer("system", name_ptr))
+        struct.pack_into("<H", data, at + 0x44, record.get("field_44", 0))
+        struct.pack_into("<H", data, at + 0x46, record.get("field_46", 1))
+        struct.pack_into("<Q", data, at + 0x60,
+                         record.get("field_60", 0xFFFFFFFFFFFF0241))
         text = record.get("text", name).encode() + b"\x00"
         if name_ptr + 8 + len(text) <= system_length:
             data[name_ptr + 8:name_ptr + 8 + len(text)] = text
@@ -68,11 +75,16 @@ def make_dictionary(records, graphics_length=0x2000, system_length=0x400):
         packed_40 = (
             record.get("field_40", 5)
             | ((record.get("mips", 1) | record.get("mip_flag", 0)) << 16)
-            | (1 << 32)
+            | (1 << 48)
         )
         struct.pack_into("<Q", data, at + 0x38, packed_38)
         struct.pack_into("<Q", data, at + 0x40, packed_40)
         struct.pack_into("<Q", data, at + 0x48, 2 << 32)
+    if value_permutation and count > 1:
+        first = struct.unpack_from("<Q", data, value_at)[0]
+        second = struct.unpack_from("<Q", data, value_at + 8)[0]
+        struct.pack_into("<Q", data, value_at, second)
+        struct.pack_into("<Q", data, value_at + 8, first)
     struct.pack_into("<Q", data, 0x20, _pointer("system", hash_at))
     struct.pack_into("<H", data, 0x28, count)
     struct.pack_into("<H", data, 0x2A, count)
@@ -100,6 +112,10 @@ class ParseTests(unittest.TestCase):
         self.assertEqual(dictionary.allocated_total, 0x2000)
         self.assertTrue(dictionary.allocations_in_bounds)
         self.assertTrue(dictionary.allocation_sum_ok)
+        self.assertTrue(dictionary.starts_at_zero)
+        self.assertTrue(dictionary.partition_ok)
+        self.assertTrue(dictionary.record_table_dense)
+        self.assertTrue(dictionary.value_order_matches_index)
         first, second = dictionary.records
         self.assertEqual((first.width, first.height, first.format_id, first.mip_levels),
                          (10, 20, 71, 3))
@@ -110,6 +126,67 @@ class ParseTests(unittest.TestCase):
         self.assertEqual(first.allocation_extent, 0x1000)
         self.assertEqual(first.size_basis, "extent_upper_bound")
         self.assertEqual((second.allocation_offset, second.allocation_size), (0x1000, 0x1000))
+
+    def test_reports_all_record_fields(self):
+        system = make_dictionary(
+            [{"name": "alpha", "hash": 1, "field_10": 0x980,
+              "field_44": 0, "field_46": 1, "field_60": 0xFFFFFFFFFFFF0241}]
+        )
+        dictionary = td.parse_dictionary(bytes(system), 0x2000)
+        record = dictionary.records[0]
+        self.assertEqual(record.record_offset, 0x40)
+        self.assertTrue(record.value_pointer)
+        self.assertEqual(record.field_00, 0)
+        self.assertEqual(record.field_0c, 0)
+        self.assertEqual(record.field_10, 0x980)
+        self.assertEqual(record.field_20, 0)
+        self.assertEqual(record.field_28, td.SYSTEM_BASE | 0x90)
+        self.assertEqual(record.field_44, 0)
+        self.assertEqual(record.field_46, 1)
+        self.assertEqual(record.field_48, 2 << 32)
+        self.assertEqual(record.field_50, 0)
+        self.assertEqual(record.field_58, 0)
+        self.assertEqual(record.field_60, 0xFFFFFFFFFFFF0241)
+        self.assertEqual(record.field_68, 0)
+        keys = set(record.as_dict())
+        self.assertTrue({"record_offset", "value_pointer", "field_00", "field_0c",
+                         "field_10", "field_20", "field_28", "field_44", "field_46",
+                         "field_48", "field_50", "field_58", "field_60",
+                         "field_68"}.issubset(keys))
+
+    def test_partition_requires_a_zero_start(self):
+        system = make_dictionary([{"name": "alpha", "hash": 1, "gfx": 0x1000},
+                                  {"name": "beta", "hash": 2, "gfx": 0x1800}],
+                                 graphics_length=0x2000)
+        dictionary = td.parse_dictionary(bytes(system), 0x2000)
+        self.assertFalse(dictionary.starts_at_zero)
+        self.assertFalse(dictionary.partition_ok)
+        self.assertLess(dictionary.allocated_total, dictionary.graphics_size)
+        self.assertIn("allocation_front_gap", [issue.code for issue in dictionary.issues])
+
+    def test_record_gap_and_value_order(self):
+        gapped = make_dictionary(
+            [{"name": "alpha", "hash": 1}, {"name": "beta", "hash": 2}],
+            record_offsets=[0x40, 0x100],
+        )
+        dictionary = td.parse_dictionary(bytes(gapped), 0x2000)
+        self.assertFalse(dictionary.record_table_dense)
+        self.assertEqual(len(dictionary.record_gaps), 1)
+        self.assertEqual(dictionary.record_gaps[0]["delta"], 0xC0)
+        self.assertFalse(dictionary.value_order_matches_index)
+
+        permuted = make_dictionary(
+            [{"name": "alpha", "hash": 1}, {"name": "beta", "hash": 2}],
+            value_permutation=True,
+        )
+        dictionary = td.parse_dictionary(bytes(permuted), 0x2000)
+        self.assertTrue(dictionary.record_table_dense)
+        self.assertFalse(dictionary.value_order_matches_index)
+
+        dense = make_dictionary([{"name": "alpha", "hash": 1}, {"name": "beta", "hash": 2}])
+        dictionary = td.parse_dictionary(bytes(dense), 0x2000)
+        self.assertTrue(dictionary.record_table_dense)
+        self.assertTrue(dictionary.value_order_matches_index)
 
     def test_empty_dictionary(self):
         data = bytearray(0x60)

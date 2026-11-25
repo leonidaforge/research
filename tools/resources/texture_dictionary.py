@@ -73,6 +73,20 @@ class Record:
     allocation_extent: int | None
     size_basis: str
     name_pointer: int | None
+    record_offset: int | None = None
+    value_pointer: int | None = None
+    field_00: int = 0
+    field_0c: int = 0
+    field_10: int = 0
+    field_20: int = 0
+    field_28: int = 0
+    field_44: int = 0
+    field_46: int = 0
+    field_48: int = 0
+    field_50: int = 0
+    field_58: int = 0
+    field_60: int = 0
+    field_68: int = 0
 
     def as_dict(self):
         return {
@@ -91,6 +105,22 @@ class Record:
             "allocation_size": self.allocation_size,
             "allocation_extent": self.allocation_extent,
             "size_basis": self.size_basis,
+            "record_offset": self.record_offset,
+            "value_pointer": None
+            if self.value_pointer is None
+            else f"0x{self.value_pointer:016X}",
+            "field_00": self.field_00,
+            "field_0c": self.field_0c,
+            "field_10": self.field_10,
+            "field_20": self.field_20,
+            "field_28": self.field_28,
+            "field_44": self.field_44,
+            "field_46": self.field_46,
+            "field_48": self.field_48,
+            "field_50": self.field_50,
+            "field_58": self.field_58,
+            "field_60": self.field_60,
+            "field_68": self.field_68,
         }
 
 
@@ -104,6 +134,17 @@ class Dictionary:
     graphics_size: int
     records: list = field(default_factory=list)
     issues: list = field(default_factory=list)
+    system_length: int = 0
+    page_map_offset: int = 0
+    system_pages: int = 0
+    graphics_pages: int = 0
+    field_18: int = 0
+    field_48: int = 0
+    field_50: int = 0
+    field_58: int = 0
+    record_table_dense: bool = True
+    record_gaps: list = field(default_factory=list)
+    value_order_matches_index: bool = True
 
     def add(self, code, detail):
         self.issues.append(Issue(code, detail))
@@ -113,20 +154,40 @@ class Dictionary:
         return sum(r.allocation_size for r in self.records if r.allocation_size is not None)
 
     @property
+    def starts_at_zero(self):
+        if self.record_count == 0:
+            return self.graphics_size == 0
+        offsets = [record.allocation_offset for record in self.records]
+        if any(offset is None for offset in offsets):
+            return False
+        return min(offsets) == 0
+
+    @property
     def allocations_in_bounds(self):
+        if not self.records:
+            return self.graphics_size == 0
         return all(
-            r.allocation_offset is None
-            or (
-                r.allocation_size is not None
-                and 0 <= r.allocation_offset
-                and r.allocation_offset + r.allocation_size <= self.graphics_size
-            )
-            for r in self.records
+            record.allocation_offset is not None
+            and record.allocation_size is not None
+            and 0 <= record.allocation_offset < self.graphics_size
+            and record.allocation_offset + record.allocation_size <= self.graphics_size
+            for record in self.records
         )
 
     @property
     def allocation_sum_ok(self):
         return self.allocated_total <= self.graphics_size
+
+    @property
+    def partition_ok(self):
+        if self.record_count == 0:
+            return self.graphics_size == 0
+        offsets = [record.allocation_offset for record in self.records]
+        if any(offset is None for offset in offsets):
+            return False
+        if len(set(offsets)) != len(offsets):
+            return False
+        return min(offsets) == 0 and self.allocated_total == self.graphics_size
 
     @property
     def status(self):
@@ -140,10 +201,25 @@ class Dictionary:
             "value_count": self.value_count,
             "value_capacity": self.value_capacity,
             "record_count": self.record_count,
+            "system_length": self.system_length,
+            "page_map_offset": self.page_map_offset,
+            "system_pages": self.system_pages,
+            "graphics_pages": self.graphics_pages,
+            "root_fields": {
+                "field_18": self.field_18,
+                "field_48": self.field_48,
+                "field_50": self.field_50,
+                "field_58": self.field_58,
+            },
             "graphics_size": self.graphics_size,
             "allocated_total": self.allocated_total,
             "allocations_in_bounds": self.allocations_in_bounds,
+            "starts_at_zero": self.starts_at_zero,
             "allocation_sum_ok": self.allocation_sum_ok,
+            "partition_ok": self.partition_ok,
+            "record_table_dense": self.record_table_dense,
+            "record_gaps": self.record_gaps,
+            "value_order_matches_index": self.value_order_matches_index,
             "records": [record.as_dict() for record in self.records],
             "issues": [{"code": issue.code, "detail": issue.detail} for issue in self.issues],
         }
@@ -171,6 +247,22 @@ def _require_array(kind, offset, count, item_len, limit):
         )
 
 
+def _fill_root(dictionary, system, page_map):
+    offset = page_map[1]
+    if offset + 10 > len(system):
+        raise TextureDictionaryError(
+            f"the page map at {offset:#x} leaves the {len(system)}-byte system segment"
+        )
+    dictionary.system_length = len(system)
+    dictionary.page_map_offset = offset
+    dictionary.system_pages = system[offset + 8]
+    dictionary.graphics_pages = system[offset + 9]
+    dictionary.field_18 = _u64(system, 0x18)
+    dictionary.field_48 = _u64(system, 0x48)
+    dictionary.field_50 = _u64(system, 0x50)
+    dictionary.field_58 = _u64(system, 0x58)
+
+
 def parse_dictionary(system: bytes, graphics_length: int, max_records: int = MAX_RECORDS):
     """Parse a system segment that holds a texture dictionary.
 
@@ -196,7 +288,9 @@ def parse_dictionary(system: bytes, graphics_length: int, max_records: int = MAX
 
     if hash_pointer is None and value_pointer is None:
         if hash_count == 0 and value_count == 0:
-            return Dictionary(0, 0, 0, 0, 0, graphics_length)
+            empty = Dictionary(0, 0, 0, 0, 0, graphics_length)
+            _fill_root(empty, system, page_map)
+            return empty
         raise TextureDictionaryError("the hash and value arrays are absent but the counts are not zero")
     if hash_pointer is None or hash_pointer[0] != "system":
         raise TextureDictionaryError("the hash-array pointer is not a system pointer")
@@ -215,6 +309,7 @@ def parse_dictionary(system: bytes, graphics_length: int, max_records: int = MAX
         hash_count, hash_capacity, value_count, value_capacity,
         min(hash_count, value_count), graphics_length,
     )
+    _fill_root(dictionary, system, page_map)
     if hash_capacity < hash_count:
         dictionary.add(
             "capacity_short",
@@ -293,9 +388,46 @@ def parse_dictionary(system: bytes, graphics_length: int, max_records: int = MAX
                 allocation_extent=None,
                 size_basis="extent_upper_bound",
                 name_pointer=name_pointer,
+                record_offset=offset,
+                value_pointer=_u64(system, value_pointer[1] + 8 * index),
+                field_00=_u64(system, offset + 0x00),
+                field_0c=_u32(system, offset + 0x0C),
+                field_10=_u64(system, offset + 0x10),
+                field_20=_u64(system, offset + 0x20),
+                field_28=_u64(system, offset + 0x28),
+                field_44=_u16(system, offset + 0x44),
+                field_46=_u16(system, offset + 0x46),
+                field_48=_u64(system, offset + 0x48),
+                field_50=_u64(system, offset + 0x50),
+                field_58=_u64(system, offset + 0x58),
+                field_60=_u64(system, offset + 0x60),
+                field_68=_u64(system, offset + 0x68),
             )
         )
     dictionary.records = records
+
+    # Record table shape and value order. The value array is expected to be a
+    # permutation of the record table, so its order can differ from the index
+    # order even when the table itself is contiguous.
+    record_offsets = sorted(
+        record.record_offset for record in records if record.record_offset is not None
+    )
+    if records and len(record_offsets) == len(records):
+        gaps = [
+            {"previous": previous, "next": following, "delta": following - previous}
+            for previous, following in zip(record_offsets, record_offsets[1:])
+            if following - previous != RECORD_LEN
+        ]
+        dictionary.record_gaps = gaps
+        dictionary.record_table_dense = not gaps
+        base = record_offsets[0]
+        dictionary.value_order_matches_index = all(
+            record.record_offset == base + index * RECORD_LEN
+            for index, record in enumerate(records)
+        )
+    elif records:
+        dictionary.record_table_dense = False
+        dictionary.value_order_matches_index = False
 
     # Allocation extents are the gaps between distinct starts, with the last
     # extending to the graphics end. They are an upper bound; the stored unit
@@ -339,6 +471,12 @@ def parse_dictionary(system: bytes, graphics_length: int, max_records: int = MAX
                     f"{record.width}x{record.height}",
                 )
 
+    if records and not dictionary.starts_at_zero:
+        dictionary.add(
+            "allocation_front_gap",
+            "the lowest allocation start is not zero, so the extents do not cover the "
+            "start of the graphics segment",
+        )
     if not dictionary.allocation_sum_ok:
         dictionary.add(
             "allocation_sum",
@@ -429,7 +567,13 @@ def print_text(report):
     )
     print(
         f"allocations:     {report['allocated_total']} of {report['graphics_size']} bytes, "
-        f"in bounds {report['allocations_in_bounds']}, sum ok {report['allocation_sum_ok']}"
+        f"in bounds {report['allocations_in_bounds']}, sum ok {report['allocation_sum_ok']}, "
+        f"starts at zero {report['starts_at_zero']}, partition {report['partition_ok']}"
+    )
+    print(
+        f"records:         dense {report['record_table_dense']}, "
+        f"gaps {len(report['record_gaps'])}, "
+        f"value order matches index {report['value_order_matches_index']}"
     )
     for record in report["records"]:
         offset = "-" if record["allocation_offset"] is None else f"{record['allocation_offset']:#x}"
