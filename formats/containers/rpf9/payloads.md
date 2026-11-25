@@ -203,7 +203,7 @@ A survey of every row in the 22 top-level archives measured the stored forms des
 
 | Stored form | Rows | Observation |
 | --- | --- | --- |
-| Mode 0, no chunk table, no transform | 5,150 | 4,549 stored exactly the logical size. 601 stored 4, 8, 12 or 13 extra bytes, all zero, after the logical end. No row stored less than its logical size |
+| Mode 0, no chunk table, no transform | 5,150 | 4,549 stored exactly the logical size. 601 stored 4, 5, 8, 12 or 13 extra bytes, all zero, after the logical end. No row stored less than its logical size |
 | Chunked, encoding 3, no transform | 928 | 650 have one chunk. Of those, 646 begin `78 DA` and inflate to exactly the logical size. The other four store plaintext whose stored length minus padding equals the logical size |
 | Chunked, encoding 3, transformed | 455 | Stored bytes are behind the payload transform and were not decoded |
 | Chunked, encoding 2, no transform | 1 | 16 zero bytes, one zlib stream, then zero padding to a 16-byte boundary |
