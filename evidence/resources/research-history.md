@@ -34,6 +34,6 @@ Interpretations that were once used for RAGE resources and later corrected. The 
 
 ## The rechecked structural samples replaced an earlier set
 
-**Old state.** The originating branch recorded a second-system-page sample with a `0x24EC0` map and a 192,240-byte system segment, and a system-only sample with a `0x1B33B90` map and 96 bytes of system data.
+**Old state.** The originating branch recorded a second-system-page sample with its map at `0x24EC0` in a 192,240-byte system segment, and a system-only sample whose entry sits at `0x1B33B90` with a `0x40` map and 96 bytes of system data.
 
 **Correction.** The structural sample was re-derived from seven resources, recorded as RES-F23 and listed in the pages document. The earlier rows record no archive or row index for their subjects, so the change cannot be attributed to a recheck rather than to a different subject selection; the record does not distinguish the two. The earlier values are not retained because they cannot be matched to a named resource.
