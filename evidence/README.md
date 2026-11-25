@@ -13,3 +13,4 @@ Subjects:
 - [RBF0](rbf0/INDEX.md)
 - [PSIN](psin/INDEX.md)
 - [Unknown payloads](unknown-payloads/INDEX.md)
+- [RDS5 verification](rds5-verification/INDEX.md)
