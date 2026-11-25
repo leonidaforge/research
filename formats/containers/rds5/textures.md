@@ -123,10 +123,10 @@ those levels is not part of the pass count.
 | BC1, BC3 and linear 8-bit | 98, tile 3 | A scratch mip comparison stayed far above the 25.0 threshold; the exact scratch values are not committed | Rejected (scratch measurement) |
 | 16 bytes per 4 x 4 tile identifies a codec | all | A block size is not a mode format; BC1, BC4, BC5-class and BC7-class candidates share byte ratios | Rejected as a claim |
 
-Linear 1 byte per texel is **untested**, not rejected. The earlier rejection was
-withdrawn: comparing a stride-16 sample with all bytes has no within-block
-control, and a lowest-set-bit histogram of byte values is tautological under
-either layout (RDS5-F41).
+Linear 1 byte per texel is **rejected for format 98 at tile mode 3** by the
+mip comparison in RDS5-F42, and is **untested in every other class**. The
+separate block-first-byte argument is withdrawn (RDS5-F41): it did not
+discriminate the two layouts.
 
 ## Control sample
 
@@ -159,7 +159,7 @@ cannot show a mode field. No layout is selected for this sample.
 | Stored block selection | Established | RDS5-F33, RDS5-F38 |
 | Decompression | Established | RDS5-F24, RDS5-F38 |
 | Virtual reconstruction | Established | RDS5-F28, RDS5-F38 |
-| Pixel-format interpretation | Fit only; codec and layout untested | RDS5-F39 |
+| Pixel-format interpretation | Fit only; codec unidentified; layout tested only where linear is rejected for 98 at tile 3 | RDS5-F39, RDS5-F42 |
 | Element ordering | Unknown; a BC1 row-major candidate exists for 71 only | RDS5-F40 |
 | Mip selection | Not established for the control sample; level-count recovery unresolved | RDS5-F44 |
 | Output dimensions and arrangement | Dimensions probable; arrangement unknown | RDS5-F38 |
@@ -174,7 +174,9 @@ encoding remain speculative.
 - The candidate decoders are standard specifications used as hypotheses. A
   passing mip check supports the element ordering and level layout, not a codec
   identity or a pixel format.
-- Linear and blocked layouts are untested. The earlier rejection is withdrawn.
+- Linear is rejected for format 98 at tile mode 3 by the F42 mip comparison and
+  is untested elsewhere. The block-first-byte argument is withdrawn because it
+  did not discriminate the two layouts.
 - Format 83 is only tested as two independent 8-byte single-channel planes.
   Other partitionings were not tested.
 - Tile mode 0 is not covered by the mip check: its block starts do not coincide
