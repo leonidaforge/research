@@ -94,6 +94,11 @@ class InspectTests(unittest.TestCase):
         with self.assertRaises(adat_inspect.AdatError):
             adat_inspect.inspect_bytes(data)
 
+    def test_rejects_empty_record_run(self):
+        data = build_payload(variant=0xFF21, streams=2, records=[])
+        with self.assertRaises(adat_inspect.AdatError):
+            adat_inspect.inspect_bytes(data)
+
     def test_rejects_unknown_variant(self):
         data = bytearray(build_payload())
         struct.pack_into("<I", data, 4, (0x1234 << 16) | 1)

@@ -105,6 +105,9 @@ def inspect_bytes(data: bytes, label: str = "<memory>") -> dict:
             f" {remainder}-byte remainder"
         )
 
+    if start == data_offset:
+        raise AdatError(f"{label}: record run is empty")
+
     records = []
     position = start
     while position < data_offset:
@@ -255,11 +258,12 @@ def main(argv=None) -> int:
     reports = []
     try:
         for path in args.samples:
+            label = os.path.basename(path)
             if os.path.getsize(path) > args.max_bytes:
-                raise AdatError(f"{path}: larger than the {args.max_bytes}-byte cap")
+                raise AdatError(f"{label}: larger than the {args.max_bytes}-byte cap")
             with open(path, "rb") as handle:
                 data = handle.read()
-            reports.append(inspect_bytes(data, label=path))
+            reports.append(inspect_bytes(data, label=label))
     except (OSError, AdatError) as error:
         print(f"error: {error}", file=sys.stderr)
         return 1

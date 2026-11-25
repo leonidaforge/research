@@ -30,8 +30,8 @@ All paths are required. `--max-bytes` (default 64 MiB) bounds each read.
 - For `FF02`, the chunk counts in the high three bits of each `u32` at `+0x10`
   must satisfy `data_offset = 0x10 + 4 * streams + 8 * sum(chunks)`.
 
-A record run that leaves a remainder, a zero-size record, an out-of-range
-extent, an unknown variant or a failed `FF02` formula is an error.
+A record run that is empty or leaves a remainder, a zero-size record, an
+out-of-range extent, an unknown variant or a failed `FF02` formula is an error.
 
 ## Record layout
 
@@ -47,7 +47,7 @@ The byte immediately before the data offset is the last record's type byte.
 
 ## Output
 
-- Input size and SHA-256.
+- Input size and content SHA-256. Input paths are shown by basename only.
 - Flags, version, variant, stream count and data offset.
 - Record start, record count, remainder, type-byte counts, first and last type,
   and the size range.
