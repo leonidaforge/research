@@ -49,7 +49,7 @@ compactIndexOffset = rowIndex * storeStride + localColumnIndex
 
 The offset counts elements of `F` bytes. The engine loads one `F`-byte element at that position, so the byte offset is `compactIndexOffset * F`. That matches the store sizes `(C - D) * E * F` and `D * E * F`.
 
-`D` is not fixed at 1. In the 1,440-archive sample it takes values 1 to 8, and 374 archives have `D > 1` (RPF9-F131). The secondary area then holds 2 to 8 columns. The `D * E * F` index store fits every such archive, while a direct layout with one fixed value width in every secondary column fits only 140 of the 374 (RPF9-F132).
+`D` is not fixed at 1. In the 1,440-archive sample it takes values 1 to 8, and 374 archives have `D > 1` (RPF9-F131). The secondary area then holds 2 to 8 columns. With the store starting at `align_F(hdr[0x08])`, the `D * E * F` index-store layout is a necessary size fit in all 374, and a direct layout with one fixed width in every secondary column is a necessary size fit in 140. Size alone decides no archive, so the models are not separated here (RPF9-F132).
 
 | `F` | Load | Null sentinel |
 |---|---|---|

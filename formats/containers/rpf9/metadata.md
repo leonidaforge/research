@@ -98,14 +98,18 @@ The secondary index store starts at `hdr[0x08]` rounded up to `F` bytes. The sec
 
 `D` is not fixed at 1. Across 1,440 archives it takes every value from 1 to 8: 1 in 1,066 archives, 2 in 167, 3 in 7, 4 in 68, 5 in 51, 6 in 75, 7 in 4 and 8 in 2 (RPF9-F131). A secondary area therefore holds more than one column in 374 archives.
 
-Two size models fit the observed areas differently (RPF9-F132):
+The documented store start is `align_F(hdr[0x08])`. The index-store layout then needs `align8(store_start + D * E * F) <= hdr[0x04]` and a non-negative pool. A direct layout with one fixed value width in every secondary column needs the area from the store start to divide by `D * E`.
 
-| Model | Prediction | Result |
-| --- | --- | --- |
-| Index store plus pool | area is at least `align8(D * E * F)`, and the remainder is a non-negative pool | Fits all 374 archives with `D > 1` |
-| Direct values, one fixed width in every secondary column | area divides by `D * E` | Fits 140 of 374 and fails 234 |
+These are necessary size conditions, and they do not choose between the models (RPF9-F132):
 
-The index-store model is the one the accessors implement (RPF9-F06, RPF9-F10, RPF9-F11), so it stays the documented layout. Size arithmetic cannot read the stores, and the direct model remains possible only if every column has its own width. What the flag at `u8@0x2D` selects in the secondary area is an open hypothesis.
+| Check | Result on the 374 archives with `D > 1` |
+| --- | --- |
+| Index store and non-negative pool | Fits all 374 |
+| Direct values, one fixed width in every column | Fits 140 and fails 234 |
+| Archives where the two models make different size predictions | 234 |
+| Archives where the observation selects a model | 0 |
+
+The direct model remains possible for every archive if each column has its own width. The index-store model is the one the accessors implement (RPF9-F06, RPF9-F10, RPF9-F11) and stays the documented layout, but header sizes alone do not demonstrate it. Discriminating the models needs decoded secondary bytes so the index-cell values or the record stride can be observed. What the flag at `u8@0x2D` selects in the secondary area is an open hypothesis.
 
 ## Diagram
 

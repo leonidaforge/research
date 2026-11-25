@@ -11,7 +11,7 @@ The engine reads a 16-byte header first. The following 48 bytes, up to offset `0
 | `0x08` | `u32` | Size of the primary area, start of the secondary area | Confirmed (RPF9-F02) |
 | `0x0C` | `u32` | Byte length of the trailing region after the stored payload data | Confirmed from data (RPF9-F129); not read on traced paths (RPF9-F03) |
 
-`hdr[0x0C]` is not read on any traced path, so its role comes from archive data. In every reachable archive `file_size - hdr[0x0C]` is a 16-byte-aligned boundary above the metadata end. Stored payload data ends at that boundary. The length is not an offset inside the metadata.
+`hdr[0x0C]` is not read on any traced path, so its role comes from archive data. In all 1,440 measured archives `file_size - hdr[0x0C]` is a 16-byte-aligned boundary above the metadata end. Stored payload data ends at that boundary. The length is not an offset inside the metadata. The sample covers 22 top-level and 1,418 nested archives; the 2,933 type-0 rows outside the descended parents and archives outside the supplied set were not measured.
 
 ## Schema prefix
 
@@ -60,9 +60,9 @@ A survey of 1,440 archives (22 top-level and 1,418 nested) found no violation of
 - it lies below the file size;
 - every row's `payload_offset + stored_size` is at or below it.
 
-The observed trailing lengths range from 48 to 178,576 bytes and take 281 distinct values. The content is **undecoded**. The survey compared only lengths, offsets and equality classes; it did not interpret bytes or examine them for text.
+The observed trailing lengths range from 48 to 178,576 bytes and take 281 distinct values. The content is **undecoded**. The survey compared only lengths, offsets and equality classes; it did not interpret bytes or examine them for text. The 2,933 type-0 rows outside the descended parents and archives outside the supplied set were not measured, so the bounds are established for the sample, not archive-wide.
 
-Equality between trailers is not determined by the header shape alone (RPF9-F130). Thirty archives of 720 bytes share one header shape and a byte-identical 64-byte trailing region. Among 40 header-shape groups that contain more than one archive, only four groups have a single full-trailer class, each 544 bytes; the other groups differ in at least the first 16 bytes.
+Equality between trailers is not determined by the header shape alone (RPF9-F130). Two measurements cover different sets. Thirty archives of size 720 bytes share one header shape and a byte-identical 64-byte trailing region; the full shape group that contains them also holds archives of other sizes whose trailers differ, so that group is not single-class. Separately, four other shape groups have a single full-trailer class of 544 bytes. Among 40 header-shape groups that contain more than one archive, the remaining groups differ in at least the first 16 bytes.
 
 ## Validation
 

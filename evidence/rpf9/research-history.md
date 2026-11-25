@@ -228,13 +228,25 @@ Some earlier notes used "A" and "B" for `hdr[0x04]` and `hdr[0x08]`. Those lette
 
 **Old assumption.** The header field `D` was 1 in every observed archive, so the secondary area held one column and its size observations were written for that case.
 
-**Correction.** `D` takes values 1 to 8 in the 1,440-archive sample; 1,066 archives use 1 and 374 use more than one (RPF9-F131). The secondary index store of `D * E * F` bytes rounded up to 8, followed by a non-negative pool, fits all 374 archives with `D > 1`. A direct layout with one fixed value width in every secondary column fits 140 and fails 234 (RPF9-F132). The index-store model stays documented because the accessors implement it; the flag at `u8@0x2D` is still an open hypothesis.
+**Correction.** `D` takes values 1 to 8 in the 1,440-archive sample; 1,066 archives use 1 and 374 use more than one (RPF9-F131). With the documented store start `align_F(hdr[0x08])`, the index-store layout is a necessary size fit in all 374 archives with `D > 1`; a direct layout with one fixed width in every secondary column is a necessary size fit in 140 and fails 234. The models therefore make different size predictions in 234 archives, but no observation selects one: the direct model can fit every archive with per-column widths, and no decoded secondary store was available (RPF9-F132). The index-store model stays documented because the accessors implement it, not because the sizes select it. The flag at `u8@0x2D` is still an open hypothesis.
 
 ## Bytes at `0x18` were constant
 
 **Old assumption.** The 8 bytes at `0x18` held the same value in every observed archive, consistent with constant `A` and `B` fields inside them.
 
 **Correction.** The `u16` at `0x18` is `0x7A00` in the 1,440-archive sample, but the same 8 bytes contain `A` at `0x1A` and `B` at `0x1C`. `A` takes 4 to 6 and `B` takes several sizes, so the combined value changes between archives (RPF9-F131). A set in which `A` and `B` do not vary makes the 8 bytes look constant. The meaning of `0x18` itself remains Unknown.
+
+## Copy chunk test used the stored length
+
+**Old assumption.** An encoding-2 last chunk was a copy chunk when its stored length equalled the remaining logical length. Padded copy chunks were classified as unknown.
+
+**Correction.** The copy condition uses the compressed length, stored length minus padding, not the stored length. The classifier now accepts padding from 0 to 15 and records it. All 178 copy chunks in the sample had zero padding, so the observed counts do not change; a synthetic fixture covers a padded copy chunk (RPF9-F125).
+
+## Trailer equality figures covered different sets
+
+**Old assumption.** One trailer comparison reported thirty 720-byte archives with an identical 64-byte trailer alongside four shape groups with an identical 544-byte trailer, without saying that the figures covered different sets.
+
+**Correction.** The thirty 720-byte archives are a size subset of one header-shape group; that full group also contains other sizes with different trailers, so it is not single-class. The four single-class groups are other header shapes and all have a 544-byte trailer. The figures are not two readings of the same group (RPF9-F130).
 
 ## Open
 

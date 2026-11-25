@@ -210,7 +210,7 @@ Encoding 2 is the dominant nested form. A bounded survey read 48,087 encoding-2 
 
 #### Chunk methods
 
-The untransformed rows hold 70,443 zlib chunks and 178 copy chunks (RPF9-F125). Every copy chunk is the last chunk. Their distribution is 157 rows with two chunks and 21 rows with three. A copy chunk's stored length equals the logical length left after the earlier chunks, which is the copy condition in [the chunk rules](#chunk-layout-and-decoding). The chunk method bits were not read, so the copy reading is **Probable**. No other untransformed chunk started a raw DEFLATE stream and no chunk stayed unclassified.
+The untransformed rows hold 70,443 zlib chunks and 178 copy chunks (RPF9-F125). Every copy chunk is the last chunk. Their distribution is 157 rows with two chunks and 21 rows with three. The copy condition is the one in [the chunk rules](#chunk-layout-and-decoding): the stored length minus the chunk padding equals the logical length left after the earlier chunks. All 178 observed copy chunks had zero padding. No padded copy chunk occurred in the sample, but the classifier accepts padding from 0 to 15 and a synthetic fixture covers the padded case. The chunk method and padding bits were not read, so the copy reading is **Probable**. No other untransformed chunk started a raw DEFLATE stream and no chunk stayed unclassified.
 
 A further 1,010 chunks belong to 747 type-89 rows that carry the payload transform (RPF9-F128). They were not decoded. All transformed rows in the encoding-2 set are type 89: 484 have one chunk and 263 have two. Their prefix is still 16 zero bytes, and their bodies remain unavailable until algorithm `0x11` is reproduced (RPF9-F117).
 
