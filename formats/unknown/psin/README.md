@@ -174,7 +174,7 @@ The `PSCH` id set contains every hashed `PMAP` block id in 62 of 62 payloads. Th
 
 ### Negative tests for the values
 
-Fixed record widths 1 to 64 do not consume all 1,170 `PSCH` values: only widths 1, 2 and 4 divide every value length, and those are byte granularities, not records. No zlib, gzip, bzip2, xz, LZMA, zstd or LZ4 signature occurs at a block start. A strict inflate of every block with raw deflate, zlib, gzip, bzip2 and LZMA yields no complete stream with zero unused input. The value and block internals remain **Unknown**.
+Fixed record widths 1 to 64 do not consume all 1,170 `PSCH` values: only widths 1, 2 and 4 divide every value length, and those are byte granularities, not records. No zlib, gzip, bzip2, xz, LZMA, zstd or LZ4 signature occurs at a `PSCH` value or a block start. A strict inflate of every value and every block with raw deflate, zlib, gzip, bzip2 and LZMA yields no complete stream with zero unused input. The value and block internals remain **Unknown**.
 
 ## `LSCH` and `LENM` section bodies
 

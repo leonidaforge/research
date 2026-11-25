@@ -55,9 +55,11 @@ The second field was tested against the 64-bit key tables of the local RDS5/ETPF
 | `core_restofworld` 15 |      33 |             33 |              21 |                   0 |                    0 |
 | `shared_minigame000` 53 |     4 |              4 |               4 |                   0 |                    0 |
 
-In the 17,431-entry table every first-field key is absent from every store key table and every second-field key is present. The second field is therefore the stored texture key in that table. The mapping direction is alias to stored key, not stored key to alias. The first field is a separate key space that no sampled store indexes.
+In the 17,431-entry table every first-field key is absent from every store key table and every second-field key is present. The second field is therefore the stored texture key in that table. The mapping direction is first-field key to stored key, not stored key to first-field key. The first field is a separate key space that no sampled store indexes; the table does not show where that key is referenced.
 
-The table maps 17,431 first-field keys to 6,845 distinct stored keys; 1,176 of those stored keys have more than one alias, and the largest alias group is 723.
+The match uses the little-endian reading. The big-endian reading of the same 16 bytes matches 0 of 17,431 second-field keys, which confirms the entry-field endianness for this table.
+
+The table maps 17,431 first-field keys to 6,845 distinct stored keys; 1,176 of those stored keys have more than one first-field key, and the largest group is 723.
 
 The direction is **Confirmed** for `textures.rpf` row 20 and **Unknown** for the other two nonempty tables. Their second-field keys do not occur in the 46-store set. The local set is smaller than the 57-store sample used by the RDS5 document, so a missing store is the first explanation to test. The direction is not refuted: no table maps a stored key to an absent key.
 
@@ -81,7 +83,7 @@ The count-0 payload has a 16-byte blob, constant across the two byte-identical r
 | Count, length and 16-byte entry width | Confirmed (four distinct payloads)             |
 | Little-endian field reading           | Probable                                       |
 | Two 8-byte entry fields               | Confirmed (one table; disjoint key sets)       |
-| Alias-to-stored-key direction         | Confirmed (`textures.rpf` row 20); Unknown (two tables) |
+| First-field-to-stored-key direction | Confirmed (`textures.rpf` row 20); Unknown (two tables) |
 | Trailing blob                         | Unknown (decoder and width tests negative)     |
 | Independent format                    | Probable                                       |
 
