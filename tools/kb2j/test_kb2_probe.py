@@ -1,3 +1,4 @@
+import json
 import os
 import struct
 import tempfile
@@ -160,6 +161,45 @@ class ValidationTests(unittest.TestCase):
             )
         kinds = {item["kind"] for item in result["audio_validation"]["violations"]}
         self.assertIn("record_past_frame", kinds)
+
+    def test_manifest_summary(self):
+        first_total = 0x50
+        first = header(b"KB2j", first_total - 8, 1, 8, 16, 16, 0, 0)
+        first += struct.pack("<II", 0x41, first_total)
+        first += bytes(first_total - len(first))
+
+        second_total = 0x70
+        second = header(b"KB2n", second_total - 8, 2, 32, 32, 32, 1, 0x87E90500)
+        second += struct.pack("<III", 145920, 0x7000BB80, 0)
+        second += struct.pack("<III", 0x49, 0x60, second_total)
+        second += struct.pack("<II", 20, 145920) + bytes(16)
+        second += struct.pack("<II", 12, 7680) + bytes(8)
+
+        with tempfile.TemporaryDirectory() as directory:
+            archive = os.path.join(directory, "archive.bin")
+            with open(archive, "wb") as handle:
+                handle.write(first)
+                handle.write(second)
+            manifest = os.path.join(directory, "rows.jsonl")
+            with open(manifest, "w", encoding="utf-8", newline="\n") as handle:
+                handle.write(json.dumps({
+                    "kind": "row", "row": 0, "payload_offset": "0x0",
+                    "logical_size": len(first),
+                }) + "\n")
+                handle.write(json.dumps({
+                    "kind": "row", "row": 1, "payload_offset": hex(len(first)),
+                    "logical_size": len(second),
+                }) + "\n")
+            results = probe.probe_manifest(
+                archive, manifest, validate_frames=True
+            )
+        summary = probe.summarize(results)
+        self.assertEqual(summary["samples"], 2)
+        self.assertEqual(summary["signatures"], {"KB2j": 1, "KB2n": 1})
+        self.assertEqual(summary["audio_rows"], 1)
+        self.assertEqual(summary["frames"], 2)
+        self.assertEqual(summary["packets"], 2)
+        self.assertEqual(summary["array1_is_max_decoded"], 1)
 
     def test_atomic_output(self):
         with tempfile.TemporaryDirectory() as directory:

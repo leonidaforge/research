@@ -94,100 +94,113 @@ def _read_frame_records(handle, payload_offset, file_size, starts, ends,
     return result
 
 
-def probe_file(path: str, max_table_bytes: int = DEFAULT_MAX_TABLE_BYTES,
-               validate_frames: bool = False, max_frames: int = DEFAULT_MAX_FRAMES) -> dict:
-    file_size = os.path.getsize(path)
-    if file_size < HEADER_SIZE:
-        raise Kb2Error("payload is shorter than the 48-byte header")
+def _probe_handle(handle, payload_offset: int, payload_size: int, label: str,
+                  max_table_bytes: int = DEFAULT_MAX_TABLE_BYTES,
+                  validate_frames: bool = False,
+                  max_frames: int = DEFAULT_MAX_FRAMES) -> dict:
+    if payload_size < HEADER_SIZE:
+        raise Kb2Error(
+            f"payload at 0x{payload_offset:x}..0x{payload_offset + payload_size:x}"
+            f" is shorter than the 48-byte header"
+        )
 
-    with open(path, "rb") as handle:
-        header = handle.read(HEADER_SIZE)
-        signature = header[:4]
-        if signature not in SUPPORTED_SIGNATURES:
-            raise Kb2Error(f"unsupported signature {signature!r}")
+    handle.seek(payload_offset)
+    header = handle.read(HEADER_SIZE)
+    signature = header[:4]
+    if signature not in SUPPORTED_SIGNATURES:
+        raise Kb2Error(f"signature at 0x{payload_offset:x} is {signature!r}")
 
-        size_field = _u32(header, 0x04)
-        frame_count = _u32(header, 0x08)
-        if frame_count == 0:
-            raise Kb2Error("payload declares zero frames")
-        largest_frame = _u32(header, 0x0C)
-        duplicate_count = _u32(header, 0x10)
-        width = _u32(header, 0x14)
-        height = _u32(header, 0x18)
-        rate_num = _u32(header, 0x1C)
-        rate_den = _u32(header, 0x20)
-        flags32 = _u32(header, 0x24)
-        audio_count = _u32(header, 0x28)
-        variant = _u32(header, 0x2C)
+    size_field = _u32(header, 0x04)
+    frame_count = _u32(header, 0x08)
+    if frame_count == 0:
+        raise Kb2Error(f"header field at 0x{payload_offset + 0x08:x} declares zero frames")
+    largest_frame = _u32(header, 0x0C)
+    duplicate_count = _u32(header, 0x10)
+    width = _u32(header, 0x14)
+    height = _u32(header, 0x18)
+    rate_num = _u32(header, 0x1C)
+    rate_den = _u32(header, 0x20)
+    flags32 = _u32(header, 0x24)
+    audio_count = _u32(header, 0x28)
+    variant = _u32(header, 0x2C)
 
-        if audio_count > MAX_AUDIO_TRACKS:
-            raise Kb2Error(f"audio track count {audio_count} exceeds the probe limit")
-        descriptor_size = 12 * audio_count
-        table_start = HEADER_SIZE + descriptor_size
-        table_size = 4 * (frame_count + 1)
-        if table_size > max_table_bytes:
-            raise Kb2Error(f"frame table of {table_size} bytes exceeds the probe limit")
-        if table_start + table_size > file_size:
-            raise Kb2Error("frame table extends past the end of the payload")
+    if audio_count > MAX_AUDIO_TRACKS:
+        raise Kb2Error(
+            f"header field at 0x{payload_offset + 0x28:x} gives audio track count"
+            f" {audio_count}, above the {MAX_AUDIO_TRACKS} limit"
+        )
+    descriptor_size = 12 * audio_count
+    table_start = HEADER_SIZE + descriptor_size
+    table_size = 4 * (frame_count + 1)
+    if table_size > max_table_bytes:
+        raise Kb2Error(
+            f"frame table at 0x{payload_offset + table_start:x} would be"
+            f" {table_size} bytes, above the {max_table_bytes}-byte limit"
+        )
+    if table_start + table_size > payload_size:
+        raise Kb2Error(
+            f"frame table at 0x{payload_offset + table_start:x}"
+            f"..0x{payload_offset + table_start + table_size:x}"
+            f" extends past the payload end 0x{payload_offset + payload_size:x}"
+        )
 
-        handle.seek(HEADER_SIZE)
-        descriptors = handle.read(descriptor_size)
-        handle.seek(table_start)
-        table = handle.read(table_size)
+    handle.seek(payload_offset + HEADER_SIZE)
+    descriptors = handle.read(descriptor_size)
+    handle.seek(payload_offset + table_start)
+    table = handle.read(table_size)
 
-        audio_tracks = []
-        for index in range(audio_count):
-            size_value = _u32(descriptors, 4 * index)
-            rate_flags = _u32(descriptors, 4 * audio_count + 4 * index)
-            track_value = _u32(descriptors, 8 * audio_count + 4 * index)
-            audio_tracks.append(
-                {
-                    "size_value": size_value,
-                    "sample_rate": rate_flags & 0xFFFF,
-                    "flags": rate_flags >> 16,
-                    "track_value": track_value,
-                }
-            )
+    audio_tracks = []
+    for index in range(audio_count):
+        size_value = _u32(descriptors, 4 * index)
+        rate_flags = _u32(descriptors, 4 * audio_count + 4 * index)
+        track_value = _u32(descriptors, 8 * audio_count + 4 * index)
+        audio_tracks.append(
+            {
+                "size_value": size_value,
+                "sample_rate": rate_flags & 0xFFFF,
+                "flags": rate_flags >> 16,
+                "track_value": track_value,
+            }
+        )
 
-        offsets = list(struct.unpack_from(f"<{frame_count + 1}I", table, 0))
-        table_end = table_start + table_size
-        masked = [value & ~1 for value in offsets]
-        monotonic = all(left <= right for left, right in zip(offsets, offsets[1:]))
-        masked_monotonic = all(left <= right for left, right in zip(masked, masked[1:]))
-        first_is_end_plus_one = offsets[0] == table_end + 1
-        last_is_file_size = offsets[-1] == file_size
-        last_is_even = offsets[-1] & 1 == 0
-        first_masked_is_table_end = masked[0] == table_end
-        masked_in_range = all(table_end <= value <= file_size for value in masked)
+    offsets = list(struct.unpack_from(f"<{frame_count + 1}I", table, 0))
+    table_end = table_start + table_size
+    masked = [value & ~1 for value in offsets]
+    monotonic = all(left <= right for left, right in zip(offsets, offsets[1:]))
+    masked_monotonic = all(left <= right for left, right in zip(masked, masked[1:]))
+    first_is_end_plus_one = offsets[0] == table_end + 1
+    last_is_file_size = offsets[-1] == payload_size
+    last_is_even = offsets[-1] & 1 == 0
+    first_masked_is_table_end = masked[0] == table_end
+    masked_in_range = all(table_end <= value <= payload_size for value in masked)
 
-        intervals = []
-        if masked[1] >= table_end:
-            intervals.append(masked[1] - table_end)
-        for index in range(1, frame_count):
-            if masked[index + 1] >= masked[index]:
-                intervals.append(masked[index + 1] - masked[index])
-        max_interval = max(intervals) if intervals else None
-        interval_within_limit = max_interval is None or max_interval <= largest_frame
+    intervals = []
+    if masked[1] >= table_end:
+        intervals.append(masked[1] - table_end)
+    for index in range(1, frame_count):
+        if masked[index + 1] >= masked[index]:
+            intervals.append(masked[index + 1] - masked[index])
+    max_interval = max(intervals) if intervals else None
+    interval_within_limit = max_interval is None or max_interval <= largest_frame
 
-        audio_validation = None
-        if validate_frames and audio_count:
-            starts = [table_end] + masked[1:-1]
-            ends = masked[1:]
-            audio_validation = _read_frame_records(
-                handle, 0, file_size, starts, ends, audio_count, max_frames
-            )
-            array1 = max(track["size_value"] for track in audio_tracks)
-            audio_validation["array1"] = array1
-            audio_validation["array1_is_max_decoded"] = (
-                audio_validation["max_decoded"] == array1
-            )
-            audio_validation["array1_ge_max_packet"] = (
-                audio_validation["max_packet"] <= array1
-            )
+    audio_validation = None
+    if validate_frames and audio_count:
+        starts = [table_end] + masked[1:-1]
+        ends = masked[1:]
+        audio_validation = _read_frame_records(
+            handle, payload_offset, payload_size, starts, ends, audio_count, max_frames
+        )
+        array1 = max(track["size_value"] for track in audio_tracks)
+        audio_validation["array1"] = array1
+        audio_validation["array1_is_max_decoded"] = (
+            audio_validation["max_decoded"] == array1
+        )
+        audio_validation["array1_ge_max_packet"] = (
+            audio_validation["max_packet"] <= array1
+        )
 
     track_ids = [track["track_value"] for track in audio_tracks]
     validation = {
-        "flags_is_u32": True,
         "alpha_bit": bool(flags32 & 0x100000),
         "keyframe_entries": sum(1 for value in offsets if value & 1),
         "entry0_is_end_plus_one": first_is_end_plus_one,
@@ -199,12 +212,12 @@ def probe_file(path: str, max_table_bytes: int = DEFAULT_MAX_TABLE_BYTES,
     }
 
     result = {
-        "path": path,
+        "path": label,
         "signature": signature.decode("ascii"),
-        "file_size": file_size,
+        "file_size": payload_size,
         "size_field": size_field,
         "declared_size": size_field + 8,
-        "size_field_matches_file": size_field + 8 == file_size,
+        "size_field_matches_file": size_field + 8 == payload_size,
         "frame_count": frame_count,
         "duplicate_frame_count": duplicate_count,
         "frame_count_matches_duplicate": frame_count == duplicate_count,
@@ -240,6 +253,155 @@ def probe_file(path: str, max_table_bytes: int = DEFAULT_MAX_TABLE_BYTES,
         "audio_validation": audio_validation,
     }
     return result
+
+
+def probe_file(path: str, max_table_bytes: int = DEFAULT_MAX_TABLE_BYTES,
+               validate_frames: bool = False, max_frames: int = DEFAULT_MAX_FRAMES) -> dict:
+    payload_size = os.path.getsize(path)
+    with open(path, "rb") as handle:
+        return _probe_handle(handle, 0, payload_size, path, max_table_bytes,
+                             validate_frames, max_frames)
+
+
+def _read_manifest(path):
+    rows = []
+    with open(path, encoding="utf-8") as handle:
+        for line in handle:
+            value = line.strip()
+            if not value or value.startswith("#"):
+                continue
+            row = json.loads(value)
+            if row.get("kind") == "row":
+                rows.append(row)
+    return rows
+
+
+def probe_manifest(archive_path, manifest_path, max_table_bytes=DEFAULT_MAX_TABLE_BYTES,
+                   validate_frames=False, max_frames=DEFAULT_MAX_FRAMES):
+    rows = _read_manifest(manifest_path)
+    results = []
+    label_root = os.path.basename(archive_path)
+    with open(archive_path, "rb") as handle:
+        for row in rows:
+            offset = int(row["payload_offset"], 16)
+            size = row["logical_size"]
+            label = f"{label_root}:row{row['row']}"
+            try:
+                result = _probe_handle(handle, offset, size, label, max_table_bytes,
+                                       validate_frames, max_frames)
+            except (Kb2Error, OSError) as error:
+                result = {"path": label, "error": str(error), "row": row.get("row")}
+            results.append(result)
+    return results
+
+
+def summarize(results):
+    summary = {
+        "samples": len(results),
+        "errors": 0,
+        "signatures": {},
+        "audio_counts": {},
+        "flags": {},
+        "alpha_rows": 0,
+        "size_field_matches": 0,
+        "frame_count_matches_duplicate": 0,
+        "entry0_is_end_plus_one": 0,
+        "masked_offsets_nondecreasing": 0,
+        "last_entry_even": 0,
+        "masked_offsets_in_range": 0,
+        "intervals_within_largest": 0,
+        "audio_rows": 0,
+        "audio_tracks": 0,
+        "frames": 0,
+        "packets": 0,
+        "zero_packets": 0,
+        "max_packet": 0,
+        "max_decoded": 0,
+        "array1_is_max_decoded": 0,
+        "array1_ge_max_packet": 0,
+        "track_id_exceptions": [],
+        "keyframe_entries": 0,
+    }
+    for result in results:
+        if "error" in result:
+            summary["errors"] += 1
+            continue
+        summary["signatures"][result["signature"]] = (
+            summary["signatures"].get(result["signature"], 0) + 1
+        )
+        summary["audio_counts"][str(result["audio_track_count"])] = (
+            summary["audio_counts"].get(str(result["audio_track_count"]), 0) + 1
+        )
+        summary["flags"][result["flags"]] = summary["flags"].get(result["flags"], 0) + 1
+        summary["alpha_rows"] += int(result["alpha_bit"])
+        summary["size_field_matches"] += int(result["size_field_matches_file"])
+        summary["frame_count_matches_duplicate"] += int(
+            result["frame_count_matches_duplicate"]
+        )
+        table = result["frame_table"]
+        summary["entry0_is_end_plus_one"] += int(table["first_is_end_plus_one"])
+        summary["masked_offsets_nondecreasing"] += int(table["masked_monotonic"])
+        summary["last_entry_even"] += int(table["last_is_even"])
+        summary["masked_offsets_in_range"] += int(table["masked_in_range"])
+        summary["intervals_within_largest"] += int(table["max_interval_within_largest"])
+        summary["keyframe_entries"] += result["validation"]["keyframe_entries"]
+        tracks = result["audio_tracks"]
+        summary["audio_tracks"] += len(tracks)
+        if result["audio_track_count"]:
+            summary["audio_rows"] += 1
+            ids = [track["track_value"] for track in tracks]
+            if (len(set(ids)) != result["audio_track_count"]
+                    or not all(0 <= value < result["audio_track_count"] for value in ids)):
+                summary["track_id_exceptions"].append(
+                    {"path": result["path"], "audio_count": result["audio_track_count"],
+                     "track_ids": ids}
+                )
+            audio = result.get("audio_validation")
+            if audio:
+                summary["frames"] += audio["frames"]
+                summary["packets"] += audio["packets"]
+                summary["zero_packets"] += audio["zero_packets"]
+                summary["max_packet"] = max(summary["max_packet"], audio["max_packet"])
+                summary["max_decoded"] = max(summary["max_decoded"], audio["max_decoded"])
+                summary["array1_is_max_decoded"] += int(audio["array1_is_max_decoded"])
+                summary["array1_ge_max_packet"] += int(audio["array1_ge_max_packet"])
+    return summary
+
+
+def _print_summary(summary, stream):
+    print(f"samples: {summary['samples']}; errors: {summary['errors']}", file=stream)
+    print(f"signatures: {summary['signatures']}", file=stream)
+    print(f"audio counts: {summary['audio_counts']}", file=stream)
+    print(f"flags: {summary['flags']}", file=stream)
+    print(
+        f"size field matches: {summary['size_field_matches']};"
+        f" frame count matches: {summary['frame_count_matches_duplicate']};"
+        f" alpha rows: {summary['alpha_rows']}",
+        file=stream,
+    )
+    print(
+        f"entry0: {summary['entry0_is_end_plus_one']};"
+        f" masked monotonic: {summary['masked_offsets_nondecreasing']};"
+        f" last even: {summary['last_entry_even']};"
+        f" masked in range: {summary['masked_offsets_in_range']};"
+        f" intervals within largest: {summary['intervals_within_largest']}",
+        file=stream,
+    )
+    print(
+        f"audio rows: {summary['audio_rows']}; tracks: {summary['audio_tracks']};"
+        f" frames: {summary['frames']}; packets: {summary['packets']};"
+        f" zero packets: {summary['zero_packets']}",
+        file=stream,
+    )
+    print(
+        f"max packet: {summary['max_packet']}; max decoded: {summary['max_decoded']};"
+        f" array1 is max decoded: {summary['array1_is_max_decoded']};"
+        f" array1 >= max packet: {summary['array1_ge_max_packet']}",
+        file=stream,
+    )
+    print(f"keyframe entries: {summary['keyframe_entries']}", file=stream)
+    for item in summary["track_id_exceptions"]:
+        print(f"track id exception: {item}", file=stream)
 
 
 def _valid(result: dict) -> bool:
@@ -365,7 +527,9 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Inspect KB2j/KB2n container headers and frame tables."
     )
-    parser.add_argument("payload", nargs="+", help="extracted KB2j or KB2n payload")
+    parser.add_argument("payload", nargs="*", help="extracted KB2j or KB2n payload")
+    parser.add_argument("--archive", help="archive that contains the manifest rows")
+    parser.add_argument("--manifest", help="JSONL row manifest with payload offsets")
     parser.add_argument("--json", action="store_true", help="write JSON")
     parser.add_argument(
         "--strict",
@@ -376,6 +540,11 @@ def main(argv: list[str] | None = None) -> int:
         "--validate",
         action="store_true",
         help="walk the leading audio records of each frame",
+    )
+    parser.add_argument(
+        "--summary",
+        action="store_true",
+        help="aggregate the inputs instead of printing each report",
     )
     parser.add_argument(
         "--max-table-bytes",
@@ -392,23 +561,54 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--output", help="write output to this file instead of stdout")
     args = parser.parse_args(argv)
 
-    if args.output and _output_is_inside_input(args.output, args.payload):
+    inputs = list(args.payload)
+    if args.archive:
+        inputs.append(args.archive)
+    if args.manifest:
+        inputs.append(args.manifest)
+    if args.output and _output_is_inside_input(args.output, inputs):
         parser.error("refusing to write output inside an input directory")
 
     results = []
     failed = False
-    for path in args.payload:
+    if args.manifest:
+        if not args.archive:
+            parser.error("--manifest requires --archive")
         try:
-            result = probe_file(path, args.max_table_bytes, args.validate, args.max_frames)
+            results = probe_manifest(args.archive, args.manifest,
+                                     args.max_table_bytes, args.validate,
+                                     args.max_frames)
         except (Kb2Error, OSError) as error:
-            print(f"{path}: {error}", file=sys.stderr)
-            failed = True
-            continue
-        results.append(result)
-        if args.strict and not _valid(result):
-            failed = True
+            print(f"error: {error}", file=sys.stderr)
+            return 1
+        for result in results:
+            if "error" in result:
+                failed = True
+            elif args.strict and not _valid(result):
+                failed = True
+    else:
+        if not args.payload:
+            parser.error("no payload")
+        for path in args.payload:
+            try:
+                result = probe_file(path, args.max_table_bytes, args.validate,
+                                    args.max_frames)
+            except (Kb2Error, OSError) as error:
+                print(f"{path}: {error}", file=sys.stderr)
+                failed = True
+                continue
+            results.append(result)
+            if args.strict and not _valid(result):
+                failed = True
 
-    if args.json:
+    if args.summary:
+        summary = summarize(results)
+        text = (json.dumps(summary, indent=2) + "\n") if args.json else None
+        if text is None:
+            buffer = io.StringIO()
+            _print_summary(summary, buffer)
+            text = buffer.getvalue()
+    elif args.json:
         output = results[0] if len(results) == 1 else results
         text = json.dumps(output, indent=2) + "\n"
     else:
@@ -416,7 +616,10 @@ def main(argv: list[str] | None = None) -> int:
         for index, result in enumerate(results):
             if index:
                 buffer.write("\n")
-            _print_text(result, buffer)
+            if "error" in result:
+                buffer.write(f"{result['path']}: {result['error']}\n")
+            else:
+                _print_text(result, buffer)
         text = buffer.getvalue()
 
     if args.output:

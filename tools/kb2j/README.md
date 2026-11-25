@@ -10,6 +10,7 @@ decode audio or read archive files.
 ```sh
 python tools/kb2j/kb2_probe.py <PAYLOAD> [<PAYLOAD> ...] [--json] [--strict] [--validate]
 python tools/kb2j/kb2_probe.py <PAYLOAD> --validate --output <REPORT>
+python tools/kb2j/kb2_probe.py --archive <ARCHIVE> --manifest <ROWS> --validate --summary --json
 ```
 
 | Option | Meaning |
@@ -17,6 +18,9 @@ python tools/kb2j/kb2_probe.py <PAYLOAD> --validate --output <REPORT>
 | `--json` | Write one JSON object, or an array for several payloads |
 | `--strict` | Exit non-zero when a structural validation fails |
 | `--validate` | Walk the leading audio record of each frame without reading packet data |
+| `--archive PATH` | Archive that contains the manifest rows |
+| `--manifest PATH` | JSONL rows with `payload_offset` and `logical_size` |
+| `--summary` | Aggregate the inputs instead of printing each report |
 | `--max-table-bytes N` | Refuse frame tables larger than `N` bytes (default 8 MiB) |
 | `--max-frames N` | Stop frame validation after `N` frames (default 1,000,000) |
 | `--output PATH` | Write atomically to `PATH` instead of standard output |
@@ -25,6 +29,8 @@ Inputs are opened read-only. `--output` refuses a path inside an input
 directory. The tool refuses payloads shorter than the header, payloads that
 declare zero frames, payloads whose frame table runs past the file, unsupported
 signatures, audio track counts above 64 and frame tables above the limit.
+`--manifest` reads each row at its `payload_offset` with `logical_size` as the
+payload end; it does not extract or write payloads.
 
 ## Output
 
@@ -56,6 +62,11 @@ The audio report states the frame count, nonzero and zero packet counts, the
 largest record and decoded byte counts, whether array 1 equals the largest
 decoded count, and every record that crosses a frame boundary. Packet bytes are
 never read or printed.
+
+With `--summary`, the report aggregates samples, errors, signatures, audio
+counts, flags, header and table check counts, alpha rows, audio rows, tracks,
+frames, packets, zero packets, largest record and decoded counts, array-1
+relations, keyframe entries and every track-id exception.
 
 A false flag is reported but does not fail the command unless `--strict` is set.
 Unrecognized or malformed payloads always fail.
