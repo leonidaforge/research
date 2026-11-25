@@ -268,6 +268,36 @@ class ValidationTests(unittest.TestCase):
             with self.assertRaises(probe.Kb2Error):
                 probe.probe_manifest(archive, manifest)
 
+    def test_missing_payload_is_typed(self):
+        with tempfile.TemporaryDirectory() as directory:
+            with self.assertRaises(probe.Kb2Error):
+                probe.probe_file(os.path.join(directory, "missing.bin"))
+
+    def test_manifest_invalid_utf8_is_typed(self):
+        with tempfile.TemporaryDirectory() as directory:
+            archive = os.path.join(directory, "archive.bin")
+            with open(archive, "wb") as handle:
+                handle.write(bytes(0x50))
+            manifest = os.path.join(directory, "rows.jsonl")
+            with open(manifest, "wb") as handle:
+                handle.write(b"\xff\xfe\n")
+            with self.assertRaises(probe.Kb2Error):
+                probe.probe_manifest(archive, manifest)
+
+    def test_manifest_non_finite_number_is_typed(self):
+        with tempfile.TemporaryDirectory() as directory:
+            archive = os.path.join(directory, "archive.bin")
+            with open(archive, "wb") as handle:
+                handle.write(bytes(0x50))
+            manifest = os.path.join(directory, "rows.jsonl")
+            with open(manifest, "w", encoding="utf-8", newline="\n") as handle:
+                handle.write(json.dumps({
+                    "kind": "row", "row": 0, "payload_offset": "0x0",
+                    "logical_size": float("inf"),
+                }) + "\n")
+            with self.assertRaises(probe.Kb2Error):
+                probe.probe_manifest(archive, manifest)
+
     def test_atomic_output(self):
         with tempfile.TemporaryDirectory() as directory:
             target = os.path.join(directory, "report.json")

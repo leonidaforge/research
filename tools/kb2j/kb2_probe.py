@@ -304,16 +304,29 @@ def _probe_handle(handle, payload_offset: int, payload_size: int, label: str,
 
 def probe_file(path: str, max_table_bytes: int = DEFAULT_MAX_TABLE_BYTES,
                validate_frames: bool = False, max_frames: int = DEFAULT_MAX_FRAMES) -> dict:
-    payload_size = os.path.getsize(path)
-    with open(path, "rb") as handle:
-        return _probe_handle(handle, 0, payload_size, path, max_table_bytes,
-                             validate_frames, max_frames)
+    try:
+        payload_size = os.path.getsize(path)
+        with open(path, "rb") as handle:
+            return _probe_handle(handle, 0, payload_size, path, max_table_bytes,
+                                 validate_frames, max_frames)
+    except OSError as error:
+        raise Kb2Error(f"{path}: {error}") from error
 
 
 def _read_manifest(path):
     rows = []
-    with open(path, encoding="utf-8") as handle:
-        for number, line in enumerate(handle, 1):
+    try:
+        handle = open(path, "rb")
+    except OSError as error:
+        raise Kb2Error(f"manifest {path}: {error}") from error
+    with handle:
+        for number, raw_line in enumerate(handle, 1):
+            try:
+                line = raw_line.decode("utf-8")
+            except UnicodeDecodeError as error:
+                raise Kb2Error(
+                    f"manifest line {number}: invalid UTF-8: {error}"
+                ) from error
             value = line.strip()
             if not value or value.startswith("#"):
                 continue
@@ -333,17 +346,18 @@ def _read_manifest(path):
             raw_offset = row["payload_offset"]
             try:
                 offset = int(raw_offset, 16) if isinstance(raw_offset, str) else int(raw_offset)
-            except (TypeError, ValueError) as error:
+            except (TypeError, ValueError, OverflowError) as error:
                 raise Kb2Error(
                     f"manifest line {number}: payload_offset {raw_offset!r}"
-                    f" is not an integer or hex string"
+                    f" is not a finite integer or hex string"
                 ) from error
+            raw_size = row["logical_size"]
             try:
-                size = int(row["logical_size"])
-            except (TypeError, ValueError) as error:
+                size = int(raw_size)
+            except (TypeError, ValueError, OverflowError) as error:
                 raise Kb2Error(
-                    f"manifest line {number}: logical_size {row['logical_size']!r}"
-                    f" is not an integer"
+                    f"manifest line {number}: logical_size {raw_size!r}"
+                    f" is not a finite integer"
                 ) from error
             if offset < 0 or size < 0:
                 raise Kb2Error(
