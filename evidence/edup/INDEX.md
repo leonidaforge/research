@@ -37,7 +37,7 @@ The two 28-byte rows are byte-identical. The local store set is 46 files, not th
 
 | Reading | Counterexample |
 | ------- | -------------- |
-| Entry as one 128-bit value | The second 8 bytes repeat and the first do not; the two sets are disjoint |
+| Entry as one 128-bit value | In the 33-entry and 17,431-entry tables the second 8 bytes repeat while the first do not; the 4-entry table has no second-field repeat. The two sets are disjoint in all three tables |
 | First field as the stored texture key | 0 of 17,431 first-field keys occur in the 46 store key tables |
 | Second field as an offset into the blob | Every second-field value is larger than every blob length by many orders of magnitude |
 | Blob as a compressed stream | No complete stream with zero unused input across the tested decoders |
