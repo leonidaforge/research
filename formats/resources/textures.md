@@ -24,8 +24,10 @@ local CLI type ID 5 inside those nested archives. The counts and digests are in
 
 The negative sample is 469 rows of other local type IDs in the same nested
 archives and one additional `levels.rpf` nested archive: 80 type 66, 224 type 3,
-164 type 73 and 1 type 74. They were selected with the same listing command and
-the type IDs stated here.
+164 type 73 and 1 type 74. The type-66 rows are in the five `data.rpf` nested
+archives of the sample table, the type-3 rows are in the `levels.rpf` row-5
+archive and the type-73/74 rows are in the `levels.rpf` row-153 archive. They
+were selected with the same listing command and the type IDs stated here.
 
 | Property                    | Value                                                       |
 | --------------------------- | ----------------------------------------------------------- |
