@@ -1,133 +1,154 @@
-# GFX*
+# GFx container
 
-`GFX*` (`47 46 58 2A`) at offset 0 marks the decoded payload of 49 rows. All 49
-rows are type 66, chunk encoding 3, mode 0, and no payload transform. Their
-stored bytes at `payload_offset` begin with a zlib stream (`78 DA`), so the
-signature is visible only after chunk decoding.
+`GFX` (`47 46 58`) with version byte `0x2A` at offset 0 identifies the decoded
+payload of 49 rows as a GFx container. The header is the documented GFx shape:
+a three-byte magic, a version byte, a little-endian `u32` file length, then an
+SWF header and SWF tags.
 
-The archive parent, nested row, sizes and variant bytes are provenance and
-observations only. No payload purpose, format name or field meaning is
-established.
+The archive parent, type ID, stored sizes and decoded sizes are provenance.
+The container, its header and its tag framing are established below. Tag
+contents, ActionScript, playback and rendering are not.
 
-## Population and predicate
+## Population
 
-The recount used the 849 unique depth-1 manifests present in the cached
-inventory, which hold 183,144 row records. Of these, 182,321 are readable and
-823 are unreadable. The run summary records 782 unique archives and 169,523 rows
-for its current sample; the cache directory holds 67 further unique archives
-with 13,621 rows. All six type-66 archives are in the current sample, and the 67
-further archives add no type-66 row.
+All 49 rows are type 66 in six depth-1 archives reached from `data.rpf` rows 1,
+3, 6, 19, 20 and 39. Every row uses chunk encoding 3, mode 0 and no payload
+transform; the stored payload is a zlib stream, so the signature is visible only
+after chunk decoding. The 49 decoded payloads are distinct and range from 2,251
+to 6,605,786 bytes.
 
-The predicate is an exact four-byte match at offset 0 of the decoded payload.
-It is not a whole-file hash and not a substring search anywhere in the payload.
-The stored-byte predicate applies the same four bytes at the stored payload
-offset and finds none of these rows, because every stored payload is a chunked
-zlib stream. Decoding all 49 type-66 rows gives 49 matches and 0 counterexamples.
+The wider 849-manifest cache holds 183,144 row records. A stored-byte scan
+covers all 182,321 readable rows and finds no stored `GFX` prefix. The 49
+type-66 rows and the 37 type-5 rows in the same six archives were decoded; the
+type-5 rows do not begin `GFX`. The remaining 182,235 readable rows were checked
+only at the stored prefix.
 
-| Source | Nested rows | Decoded bytes | Variants | Multi-chunk |
-| --- | ---: | ---: | --- | ---: |
-| `data.rpf` row 1 | 5 | 2,251 to 1,379,793 | `70/0B`, `80/02`, `88/01` | 1 |
-| `data.rpf` row 3 | 4 | 28,148 to 824,949 | `88/01` | 3 |
-| `data.rpf` row 6 | 6 | 926,563 to 6,605,786 | `88/01` | 6 |
-| `data.rpf` row 19 | 31 | 5,345 to 48,658 | `80/02`, `78/05`, `88/01` | 0 |
-| `data.rpf` row 20 | 1 | 2,688 | `88/01` | 0 |
-| `data.rpf` row 39 | 2 | 49,685 to 183,623 | `70/0A`, `88/01` | 1 |
+## Identification
 
-The 49 rows were extracted end to end, including the 11 multi-chunk rows. The
-extraction is exhaustive for the type-66 population, so it covers every observed
-size and all six archive parents. In every row the decoded length equals the
-manifest logical size and the `u32` at `+0x04` equals the decoded length.
-
-## Decoded layout
-
-The offsets below are relative to the start of the decoded payload. `name1` is
-the first printable ASCII run and `name2` the second.
-
-| Offset | Width | Observation | Support |
+| Part | Observation | Support | Status |
 | --- | --- | --- | --- |
-| `+0x00` | 4 | `GFX*` | 49/49 |
-| `+0x04` | 4 | little-endian `u32` equal to the decoded length | 49/49 |
-| `+0x08` | 1 | variant byte: `0x70`, `0x78`, `0x80` or `0x88` | 49/49 |
-| `+0x09` | 1 | zero | 49/49 |
-| `+0x0A` | 1 | variant byte: `0x01`, `0x02`, `0x05`, `0x0A` or `0x0B` | 49/49 |
-| `+0x0B` | 10 to 12 | variant-dependent bytes; no length or count in this region predicts a later extent | 49/49 (positions); Unknown (values) |
-| `name1 - 11` | 9 | the constant run `FA 01 04 00 00 00 00 0E 00` | 49/49 |
-| `name1 - 2` | 2 | big-endian `u16` length of `name1`, 3 to 30, high byte zero | 49/49 |
-| `name1` | 3 to 30 | printable ASCII run | 49/49 |
-| `name1 end` | 15 | interstitial: ten constant bytes, then a three-byte group and a fourth byte, ending in `0x0A` | 49/49 |
-| `name1 end + 15` | 17 to 54 | `name2`, printable ASCII, contains `name1` and ends `_Main` | 49/49 |
-| after `name2` | variable | opaque body | 49/49 (positions); Unknown (content) |
-| length - 10 | 10 | last ten bytes: a printable run ending `.Main`, a zero byte, then little-endian `u32` 64 | 49/49 |
+| Signature | `47 46 58` at `+0x00` | 49/49 | Confirmed |
+| Version | `0x2A` (42) at `+0x03` | 49/49 | Confirmed |
+| Length | little-endian `u32` at `+0x04` equals the payload length | 49/49 | Confirmed |
+| SWF header | RECT, frame rate and frame count follow the length | 49/49 | Confirmed |
+| Tag framing | `u16` record headers with a long form | 49/49 | Confirmed |
+| Family name | GFx container, from the signature and header shape | 49/49 header shape; no executable path traced | Confirmed (header shape) |
 
-The interstitial's three-byte group is `00 00 00` in 46 rows, `FF 00 00` in 2
-and `FF FF FF` in 1. Its fourth byte takes values from 210 to 247. The values
-are observations only.
+No payload has a version other than 42 and no payload has a length mismatch.
+The earlier document called the family unidentified. It is identified by the
+container header and tag framing; the contents of the tags remain uninterpreted.
 
-The last four bytes of the variant-dependent region are `30 01 00 v` in 48 rows
-and `18 01 00 v` in 1; `v` takes values from 15 to 42. This is a repeated
-constant run with one observed exception, not an established field.
+## Header
 
-The constant run before `name1` is fixed relative to the name, so the header is
-not a fixed-size structure. The first name starts at `+0x20` for the `70`
-variants, `+0x21` for `78` and `80`, and `+0x22` for `88`. The first name and
-body therefore need not be aligned: the 49 body starts take 13 different
-residues modulo 16. The decoded lengths take 15 residues modulo 16.
+Offsets are from the start of the decoded payload.
 
-## Variants
+| Offset | Width | Observation | Support | Status |
+| --- | ---: | --- | --- | --- |
+| `+0x00` | 3 | `47 46 58` (`GFX`) | 49/49 | Confirmed |
+| `+0x03` | 1 | version `0x2A` | 49/49 | Confirmed |
+| `+0x04` | 4 | little-endian `u32` total length, equal to the payload length | 49/49 | Confirmed |
+| `+0x08` | 1 | RECT first byte; `nbits = byte >> 3` | 49/49 | Confirmed (size); coordinate bits not decoded |
+| `+0x08` | `ceil((5 + 4 * nbits) / 8)` | bit-packed RECT, 8, 9 or 10 bytes | 49/49 | Confirmed (size); content Unknown |
+| RECT end | 2 | little-endian `u16` frame rate in 8.8 fixed point | 49/49 | Confirmed; 30.0 in 48, 24.0 in 1 |
+| RECT end + 2 | 2 | little-endian `u16` frame count | 49/49 | Confirmed; always 1 |
+| RECT end + 4 | | first tag | 49/49 | Confirmed |
 
-| Bytes at `+0x08` / `+0x0A` | First name offset | Rows | Multi-chunk |
-| --- | ---: | ---: | ---: |
-| `88` / `01` | `+0x22` | 17 | 11 |
-| `80` / `02` | `+0x21` | 28 | 0 |
-| `78` / `05` | `+0x21` | 2 | 0 |
-| `70` / `0B` | `+0x20` | 1 | 0 |
-| `70` / `0A` | `+0x20` | 1 | 0 |
+RECT sizes and first tag offsets:
 
-These are observable variants, not claimed versions or payload kinds. They
-co-occur within one archive: `data.rpf` row 1 contributes a `70/0B`, a `80/02`
-and three `88/01` rows. The 11 multi-chunk rows are all `88/01` (11/11); the
-`88/01` variant also covers 6 single-chunk rows, so multi-chunk implies the
-variant but the variant does not imply multi-chunk.
+| `nbits` | RECT bytes | First tag offset | Rows |
+| ---: | ---: | ---: | ---: |
+| 14 | 8 | `+0x14` | 2 |
+| 15 | 9 | `+0x15` | 2 |
+| 16 | 9 | `+0x15` | 28 |
+| 17 | 10 | `+0x16` | 17 |
 
-## Comparison
+The earlier document read `+0x08` and `+0x0A` as five variant byte pairs and
+`+0x09` as a zero. Both bytes are inside the RECT. The five pairs are RECT byte
+patterns, not payload variants, and the byte at `+0x0A` is not a selector.
 
-- 49 distinct decoded lengths from 2,251 to 6,605,786 bytes; 49 distinct
-  SHA-256 values, so no two payloads are byte-identical.
-- The only prefix shared by all 49 is the four-byte signature; no pair shares
-  the first eight bytes because the size field differs.
-- The suffix shared by all 49 is the ten-byte trailer. 109 of 1,176 pairs share
-  more than ten trailing bytes, up to 29; no pair shares more than 29.
-- A search over every one-, two- and four-byte field in the first 64 bytes, in
-  both byte orders, found no field equal to the body start, body length, first
-  run length or second run length. The only matching field is the `u32` at
-  `+0x04`, which equals the total decoded length (49/49).
-- The three constant markers occur exactly once per payload: the pre-name run
-  `FA 01 04 00 00 00 00 0E 00` (49/49), the ten-byte interstitial prefix
-  (49/49) and the ten-byte trailer (49/49). None recurs in the body.
-- The body starts between offsets 69 and 132. Its first two bytes take 21
-  distinct pairs; the most common pair occurs in 15 of 49. The grammar that
-  holds from offset 0 therefore stops being predictive at the first body byte.
-  A final printable run and the fixed trailer are consistent from the end, but
-  the distance from the body start to that run is not fixed.
+## Tag grammar
+
+After the frame header, the payload is a stream of tag records:
+
+- A record starts with a little-endian `u16` header. `code = header >> 6` and
+  `length = header & 0x3F`.
+- If `length == 0x3F`, a little-endian `u32` extended length follows the
+  `u16` header.
+- The body follows and is `length` bytes long.
+- Code 1 is ShowFrame and code 0 is End; both are zero-length in this sample.
+- Code 39 is a sprite. Its body starts with a `u16` sprite ID and a `u16` frame
+  count, followed by nested tag records. The walker uses this to track nesting.
+
+The final four bytes are two adjacent zero-length tag headers, not a `u32`
+field. The first header is ShowFrame (`0x40 0x00`) and the second is End
+(`0x00 0x00`), so the four bytes are `40 00 00 00`. The earlier document
+recorded this as a little-endian `u32` value 64 and as a ten-byte trailer with a
+printable run. The ten-byte suffix still exists, but its last four bytes are the
+two tag headers.
+
+## Tag walk results
+
+The walker starts at the first tag and stops only when the top-level stream
+reaches the payload end. A partial parse is a failure.
+
+| Result | Count |
+| --- | ---: |
+| Payloads attempted | 49 |
+| Parsed to the payload end | 49 |
+| Failed | 0 |
+| Top-level tag count range | 8 to 2,839 |
+| Top-level tags, total | 12,167 |
+| Payloads containing sprites | 41 |
+| Sprite tags, total | 1,025 |
+| Nested tags, total | 102,306 |
+| Maximum nesting | 1 |
+| Total tags including nested | 114,473 |
+
+There are no failures, so there is no first failing offset or tag code to
+report. The first tag is code 1000 in 49/49 payloads and its length ranges from
+15 to 42 bytes. The last two top-level codes are 1 and 0 in 49/49.
+
+Three payloads in the sample have 11, 28 and 261 top-level tags. Those counts
+reproduce the earlier report. The counts that include sprite bodies are larger;
+for the same three payloads they are 13, 5,616 and 4,227. The difference is the
+nested tags inside sprite bodies, so a tag count MUST state whether it includes
+nested records.
+
+The frame rate is 30.0 in 48 payloads and 24.0 in one. The frame count is 1 in
+all 49. The single 24.0 payload is a counterexample to a uniform 30.0 reading.
+
+## First tag contents
+
+The earlier document recorded a printable-run grammar over the raw byte stream.
+Tag parsing shows that only the first run lies inside the first tag.
+
+- The first tag body is a ten-byte prefix, a printable run of 3 to 30 bytes and
+  two further bytes. The run is preceded by a big-endian `u16` length that equals
+  its length in 49/49 rows.
+- The run end is followed by 15 bytes: the first two are the last two bytes of
+  the first tag body, then the next tag's two-byte header and eleven body bytes.
+  The 15-byte group is ten constant bytes, a three-byte group and a final
+  `0x0A`; the group is zero in 46 rows, `FF 00 00` in 2 and `FF FF FF` in 1.
+- A second printable run starts 13 bytes after the first tag ends, in the
+  following tag stream. It contains the first run, ends in a constant five-byte
+  suffix and is followed by a zero byte.
+- The remaining bytes of the payload are further tag records. The earlier
+  document stopped at the second run and called the rest an opaque body.
+
+The earlier raw-byte grammar therefore crosses a tag boundary. It is not a
+single tag layout. The payload strings and class names are not reproduced.
 
 ## Limits
 
-- One build
-  ([scarlett-e95020b2](../../../builds/gta-vi/scarlett-e95020b2/README.md)) and
-  one local archive set.
-- All 49 type-66 rows in the population were decoded. The 37 non-type-66 rows
-  in the six GFX archives, all type 5, were also decoded; 0 begin `GFX*`. A
-  stored-prefix scan covers all 182,321 readable rows and finds 0 stored `GFX*`;
-  the 86 decoded rows are part of that scan, so 182,235 rows were checked only
-  at the stored prefix. A bounded sample across eight non-type-66 encoding-3
-  types decoded 37 rows and found no `GFX*`; one type-14 row was behind the
-  payload transform. This is a bounded cross-type sample, not a decoded census
-  of every row.
-- No executable path was traced. The archive name, type ID and signature are
-  identifiers for this sample only; no field meaning is established.
-- The inventory reached depth 1. Type-66 rows below that depth were not
-  searched.
-- The ASCII runs are not reproduced. Their presence, offsets and lengths are
-  game-data observations, not format identity.
+- One build and one local archive set.
+- The 49 rows are the type-66 population of the cached depth-1 manifests. A
+  bounded cross-type sample decoded 37 non-type-66 rows and found no `GFX`
+  prefix; that is not a decoded census of every row.
+- The RECT bits, tag bodies, ActionScript and rendering are not decoded. Only
+  tag codes 0 and 1 are named as documented SWF tags.
+- The inventory reached depth 1. Type-66 rows below that depth were not searched.
+- No executable path was traced. The GFx name rests on the header shape, not on
+  a recovered symbol or loader.
+- Movie strings and class names are not reproduced.
 
 Evidence: [evidence/gfx/INDEX.md](../../../evidence/gfx/INDEX.md).

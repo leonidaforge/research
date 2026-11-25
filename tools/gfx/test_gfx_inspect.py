@@ -1,3 +1,4 @@
+import json
 import os
 import struct
 import tempfile
@@ -5,82 +6,104 @@ import unittest
 
 import gfx_inspect
 
-MAGIC = b"GFX*"
-TAIL = bytes.fromhex("fa0104000000000e00")
-INTER = bytes.fromhex("00004411090000004302")
-TRAILER = b".Main\x00\x40\x00\x00\x00"
-NAME_OFFSETS = {
-    (0x70, 0x0A): 0x20,
-    (0x70, 0x0B): 0x20,
-    (0x78, 0x05): 0x21,
-    (0x80, 0x02): 0x21,
-    (0x88, 0x01): 0x22,
-}
+MAGIC = b"GFX"
 
 
-def build_sample(byte8=0x88, byte0a=0x01, name1=b"alpha", name2=b"unit_alpha_Main",
-                 body=b"\x10\x20\x30\x40", final=b"unit.alpha"):
-    name_offset = NAME_OFFSETS[(byte8, byte0a)]
-    pretail = name_offset - 0x16
-    header = bytes([byte8, 0x00, byte0a]) + b"\x11" * pretail
-    header += TAIL + struct.pack(">H", len(name1))
-    header += name1
-    header += INTER + b"\x00\x00\x00\x00" + b"\x0a"
-    header += name2 + b"\x00"
-    raw = MAGIC + struct.pack("<I", 0) + header + body + final + TRAILER
-    return raw[:4] + struct.pack("<I", len(raw)) + raw[8:]
+def encode_tag(code, payload=b""):
+    length = len(payload)
+    if length < 0x3F:
+        return struct.pack("<H", (code << 6) | length) + payload
+    return struct.pack("<H", (code << 6) | 0x3F) + struct.pack("<I", length) + payload
+
+
+def build_raw(body, nbits=17, frame_rate=30.0, frame_count=1, version=0x2A,
+              magic=MAGIC, length_adjust=0):
+    rect_bytes = gfx_inspect.rect_size(nbits)
+    rect = bytes([(nbits << 3) & 0xF8]) + b"\x00" * (rect_bytes - 1)
+    header = magic + bytes([version]) + struct.pack("<I", 0) + rect
+    header += struct.pack("<HH", int(round(frame_rate * 256)), frame_count)
+    raw = header + body
+    raw = raw[:4] + struct.pack("<I", len(raw) + length_adjust) + raw[8:]
+    return raw
+
+
+def build_gfx(tags=None, **kwargs):
+    if tags is None:
+        tags = [(2, b"unit"), (1, b""), (0, b"")]
+    body = b"".join(encode_tag(code, payload) for code, payload in tags)
+    return build_raw(body, **kwargs)
 
 
 class InspectTests(unittest.TestCase):
-    def test_parses_88_variant(self):
-        report = gfx_inspect.inspect_bytes(build_sample())
-        self.assertEqual(report["size"], len(build_sample()))
-        self.assertEqual(report["variant"]["byte_08"], "0x88")
-        self.assertEqual(report["variant"]["name1_offset"], 0x22)
-        self.assertTrue(report["size_field"]["equals_file_size"])
-        self.assertEqual(report["name2"]["length"], len(b"unit_alpha_Main"))
-        self.assertEqual(report["marker_counts"], {
-            "pre_name_tail": 1, "interstitial": 1, "trailer": 1})
+    def test_parses_short_tags_and_final_headers(self):
+        raw = build_gfx(tags=[(2, b"unit"), (1, b""), (0, b"")])
+        report = gfx_inspect.inspect_bytes(raw)
+        self.assertEqual(report["size"], len(raw))
+        self.assertEqual(report["container"]["version"], 0x2A)
+        self.assertTrue(report["container"]["length_matches"])
+        self.assertEqual(report["header"]["rect_nbits"], 17)
+        self.assertEqual(report["header"]["rect_bytes"], 10)
+        self.assertEqual(report["header"]["frame_rate"], 30.0)
+        self.assertEqual(report["header"]["frame_count"], 1)
+        self.assertEqual(report["header"]["first_tag_offset"], 0x16)
+        self.assertEqual(report["tags"]["count"], 3)
+        self.assertEqual(report["tags"]["first_code"], 2)
+        self.assertEqual(report["tags"]["last_two_codes"], [1, 0])
+        self.assertEqual(report["trailer"]["last_four_bytes"], "40000000")
 
-    def test_parses_80_and_70_variants(self):
-        for key, offset in [((0x80, 0x02), 0x21), ((0x70, 0x0B), 0x20)]:
-            report = gfx_inspect.inspect_bytes(build_sample(byte8=key[0], byte0a=key[1]))
-            self.assertEqual(report["variant"]["name1_offset"], offset)
-            self.assertEqual(report["name1"]["offset"], offset)
+    def test_parses_long_tag_form(self):
+        raw = build_gfx(tags=[(2, b"A" * 70), (1, b""), (0, b"")])
+        report = gfx_inspect.inspect_bytes(raw)
+        self.assertEqual(report["tags"]["first_code"], 2)
+        self.assertEqual(report["tags"]["first_length"], 70)
+        self.assertEqual(report["tags"]["count"], 3)
 
-    def test_rejects_unknown_variant(self):
-        raw = build_sample()
-        raw = raw[:0x08] + bytes([0x90, 0x00, 0x01]) + raw[0x0B:]
+    def test_tracks_sprite_nesting(self):
+        nested = struct.pack("<HH", 1, 1)
+        nested += encode_tag(2, b"x") + encode_tag(1) + encode_tag(0)
+        raw = build_gfx(tags=[(39, nested), (1, b""), (0, b"")])
+        report = gfx_inspect.inspect_bytes(raw)
+        self.assertEqual(report["tags"]["count"], 3)
+        self.assertEqual(report["tags"]["sprite_count"], 1)
+        self.assertEqual(report["tags"]["nested_tag_count"], 3)
+        self.assertEqual(report["tags"]["total_tags"], 6)
+        self.assertEqual(report["tags"]["max_depth"], 1)
+
+    def test_rejects_truncated_tag(self):
+        body = struct.pack("<H", (2 << 6) | 10) + b"abcd"
+        with self.assertRaises(gfx_inspect.GfxError):
+            gfx_inspect.inspect_bytes(build_raw(body))
+
+    def test_rejects_bad_rect(self):
+        raw = MAGIC + bytes([0x2A]) + struct.pack("<I", 9) + bytes([31 << 3]) + b"\x00"
         raw = raw[:4] + struct.pack("<I", len(raw)) + raw[8:]
+        with self.assertRaises(gfx_inspect.GfxError):
+            gfx_inspect.inspect_bytes(raw)
+
+    def test_rejects_other_version(self):
+        raw = build_gfx(version=0x2B)
         with self.assertRaises(gfx_inspect.GfxError):
             gfx_inspect.inspect_bytes(raw)
 
     def test_rejects_wrong_magic(self):
-        raw = b"NOPE" + build_sample()[4:]
+        raw = build_gfx(magic=b"GFY")
         with self.assertRaises(gfx_inspect.GfxError):
             gfx_inspect.inspect_bytes(raw)
 
-    def test_rejects_size_mismatch(self):
-        raw = build_sample()
-        raw = raw[:4] + struct.pack("<I", len(raw) + 1) + raw[8:]
+    def test_rejects_length_mismatch(self):
+        raw = build_gfx(length_adjust=1)
         with self.assertRaises(gfx_inspect.GfxError):
             gfx_inspect.inspect_bytes(raw)
 
-    def test_rejects_truncated_prefix(self):
-        with self.assertRaises(gfx_inspect.GfxError):
-            gfx_inspect.inspect_bytes(build_sample()[:0x30])
-
-    def test_rejects_missing_interstitial(self):
-        raw = build_sample()
-        index = raw.index(INTER)
-        raw = raw[:index] + b"\x00" * len(INTER) + raw[index + len(INTER):]
-        raw = raw[:4] + struct.pack("<I", len(raw)) + raw[8:]
+    def test_rejects_trailing_bytes_after_end(self):
+        raw = build_raw(encode_tag(2, b"unit") + encode_tag(1) + encode_tag(0) + b"\x00")
         with self.assertRaises(gfx_inspect.GfxError):
             gfx_inspect.inspect_bytes(raw)
 
-    def test_rejects_second_run_without_first(self):
-        with self.assertRaises(gfx_inspect.GfxError):
-            gfx_inspect.inspect_bytes(build_sample(name2=b"other_Main"))
+    def test_report_does_not_contain_payload_text(self):
+        raw = build_gfx(tags=[(2, b"secret_movie_name"), (1, b""), (0, b"")])
+        report = gfx_inspect.inspect_bytes(raw)
+        self.assertNotIn("secret_movie_name", json.dumps(report))
 
     def test_output_inside_input_directory_is_refused(self):
         with tempfile.TemporaryDirectory() as directory:

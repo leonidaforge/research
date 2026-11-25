@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-"""Report the observed GFX* decoded-payload header and trailer.
+"""Inspect a decoded GFx container and walk its SWF tags.
 
-The tool encodes the grammar that 49 decoded type-66 payloads share. It is an
-experimental structural sampler, not a format validator and not a filename
-decoder. It reads each input read-only, refuses to write output inside an input
-directory, and prints offsets, lengths, variant bytes and counts. It does not
-print the ASCII runs themselves.
+The tool reads each input read-only, refuses to write output inside an input
+directory, and reports offsets, lengths, tag codes and counts. It does not print
+payload bytes or movie strings. It validates the container header and a bounded
+tag walk; it does not decode ActionScript, tags or rendering.
 """
 
 from __future__ import annotations
@@ -18,221 +17,196 @@ import os
 import struct
 import sys
 
-MAGIC = b"GFX*"
-PRE_NAME_TAIL = bytes.fromhex("fa0104000000000e00")
-INTERSTITIAL = bytes.fromhex("00004411090000004302")
-TRAILER = b".Main\x00\x40\x00\x00\x00"
+MAGIC = b"GFX"
+VERSION = 0x2A
+SPRITE_TAG = 39
+END_TAG = 0
 DEFAULT_MAX_BYTES = 64 * 1024 * 1024
-
-# (byte at +0x08, byte at +0x0A) -> offset of the first ASCII run.
-VARIANTS = {
-    (0x70, 0x0A): 0x20,
-    (0x70, 0x0B): 0x20,
-    (0x78, 0x05): 0x21,
-    (0x80, 0x02): 0x21,
-    (0x88, 0x01): 0x22,
-}
 
 
 class GfxError(ValueError):
     pass
 
 
-def _u16be(data, offset):
-    if offset + 2 > len(data):
+def _u16le(data, offset, limit=None):
+    boundary = len(data) if limit is None else limit
+    if offset + 2 > boundary:
         raise GfxError(f"read past end at 0x{offset:x}")
-    return struct.unpack_from(">H", data, offset)[0]
+    return struct.unpack_from("<H", data, offset)[0]
 
 
-def _u32le(data, offset):
-    if offset + 4 > len(data):
+def _u32le(data, offset, limit=None):
+    boundary = len(data) if limit is None else limit
+    if offset + 4 > boundary:
         raise GfxError(f"read past end at 0x{offset:x}")
     return struct.unpack_from("<I", data, offset)[0]
 
 
-def _printable(data, offset, length):
-    return all(0x20 <= byte <= 0x7E for byte in data[offset:offset + length])
+def rect_size(nbits: int) -> int:
+    return (5 + 4 * nbits + 7) // 8
 
 
-def _last_printable_run(data, end):
-    start = end
-    while start > 0 and 0x20 <= data[start - 1] <= 0x7E:
-        start -= 1
-    return start, end - start
+def _read_tag_header(data, offset, limit):
+    if offset + 2 > limit:
+        raise GfxError(f"truncated tag header at 0x{offset:x}")
+    header = _u16le(data, offset, limit)
+    code = header >> 6
+    length = header & 0x3F
+    offset += 2
+    if length == 0x3F:
+        length = _u32le(data, offset, limit)
+        offset += 4
+    return code, length, offset
+
+
+def _walk(data, start, end, depth, stats):
+    """Walk tag records in [start, end). Return (count, reaches_end, last_code)."""
+    position = start
+    count = 0
+    last_code = None
+    while position < end:
+        code, length, body = _read_tag_header(data, position, end)
+        if body + length > end:
+            raise GfxError(
+                f"tag {code} at 0x{position:x} overruns its region"
+                f" (body 0x{body:x} + {length} > 0x{end:x})"
+            )
+        count += 1
+        last_code = code
+        if code == SPRITE_TAG and length >= 4:
+            stats["sprite_count"] += 1
+            nested_start = body + 4
+            nested_count, nested_end, _ = _walk(
+                data, nested_start, body + length, depth + 1, stats
+            )
+            if not nested_end:
+                raise GfxError(f"sprite at 0x{position:x} does not end at its boundary")
+            stats["nested_tag_count"] += nested_count
+            stats["max_depth"] = max(stats["max_depth"], depth + 1)
+        position = body + length
+        if code == END_TAG:
+            break
+    return count, position == end, last_code
 
 
 def inspect_bytes(data: bytes, label: str = "<memory>") -> dict:
     size = len(data)
-    if size < 0x40:
-        raise GfxError(f"{label}: shorter than the observed 0x40-byte prefix")
-    if data[0:4] != MAGIC:
-        raise GfxError(f"{label}: magic is {data[0:4].hex(' ')}, not GFX*")
-
+    if size < 0x10:
+        raise GfxError(f"{label}: shorter than the container header")
+    if data[0:3] != MAGIC:
+        raise GfxError(f"{label}: magic is {data[0:3].hex(' ')}, not GFX")
+    version = data[3]
+    if version != VERSION:
+        raise GfxError(f"{label}: version is 0x{version:02x}, not 0x{VERSION:02x}")
     declared_size = _u32le(data, 0x04)
     if declared_size != size:
-        raise GfxError(f"{label}: size field is {declared_size}, file is {size}")
+        raise GfxError(f"{label}: length field is {declared_size}, file is {size}")
 
-    variant_key = (data[0x08], data[0x0A])
-    name1_offset = VARIANTS.get(variant_key)
-    if name1_offset is None:
+    nbits = data[0x08] >> 3
+    rect_bytes = rect_size(nbits)
+    swf_end = 0x08 + rect_bytes
+    if swf_end + 4 > size:
         raise GfxError(
-            f"{label}: variant {variant_key[0]:02x}/{variant_key[1]:02x} is not in the observed set"
+            f"{label}: RECT of {rect_bytes} bytes leaves no frame header"
         )
+    frame_rate_raw = _u16le(data, swf_end)
+    frame_count = _u16le(data, swf_end + 2)
+    first_tag_offset = swf_end + 4
+    if first_tag_offset > size:
+        raise GfxError(f"{label}: first tag offset is past the file end")
 
-    if data[0x09] != 0:
-        raise GfxError(f"{label}: byte at +0x09 is {data[0x09]:02x}, not zero")
+    stats = {"sprite_count": 0, "nested_tag_count": 0, "max_depth": 0}
+    tag_count, reaches_end, last_code = _walk(data, first_tag_offset, size, 0, stats)
+    if not reaches_end:
+        raise GfxError(f"{label}: tag walk did not reach the file end")
+    if last_code != END_TAG:
+        raise GfxError(f"{label}: last tag code is {last_code}, not End (0)")
 
-    tail_offset = name1_offset - 11
-    if data[tail_offset:name1_offset - 2] != PRE_NAME_TAIL:
-        raise GfxError(f"{label}: the pre-name constant run is absent at 0x{tail_offset:x}")
+    first_code, first_length, _ = _read_tag_header(data, first_tag_offset, size)
 
-    name1_length = _u16be(data, name1_offset - 2)
-    name1_end = name1_offset + name1_length
-    if name1_length == 0 or name1_end + 15 > size:
-        raise GfxError(f"{label}: first run length {name1_length} does not fit")
-    if not _printable(data, name1_offset, name1_length):
-        raise GfxError(f"{label}: first run is not printable ASCII")
-
-    interstitial = data[name1_end:name1_end + 15]
-    if interstitial[0:10] != INTERSTITIAL:
-        raise GfxError(f"{label}: interstitial prefix is absent at 0x{name1_end:x}")
-    if interstitial[14] != 0x0A:
-        raise GfxError(f"{label}: interstitial does not end in 0x0A")
-
-    name2_offset = name1_end + 15
-    name2_end = data.find(b"\x00", name2_offset)
-    if name2_end < 0:
-        raise GfxError(f"{label}: second run is not terminated")
-    name2_length = name2_end - name2_offset
-    if name2_length == 0 or not _printable(data, name2_offset, name2_length):
-        raise GfxError(f"{label}: second run is empty or not printable")
-    first_run = data[name1_offset:name1_end]
-    second_run = data[name2_offset:name2_end]
-    if first_run not in second_run or not second_run.endswith(b"_Main"):
-        raise GfxError(f"{label}: second run does not contain the first run and end in _Main")
-
-    body_offset = name2_end + 1
-    if body_offset >= size - len(TRAILER):
-        raise GfxError(f"{label}: no body before the trailer")
-
-    if data[-len(TRAILER):] != TRAILER:
-        raise GfxError(f"{label}: the observed trailer is absent")
-    trailer_offset = size - len(TRAILER)
-    if body_offset > trailer_offset:
-        raise GfxError(f"{label}: body crosses the trailer")
-
-    final_offset, final_length = _last_printable_run(data, size - 5)
-    if final_offset < body_offset or not data[final_offset:size - 5].endswith(b".Main"):
-        raise GfxError(f"{label}: the trailing printable run is absent or does not end in .Main")
-
-    tail_count = data.count(PRE_NAME_TAIL)
-    interstitial_count = data.count(INTERSTITIAL)
-    trailer_count = data.count(TRAILER)
-    if (tail_count, interstitial_count, trailer_count) != (1, 1, 1):
-        raise GfxError(
-            f"{label}: marker counts are tail={tail_count}, interstitial={interstitial_count},"
-            f" trailer={trailer_count}, expected one each"
-        )
+    if size - 4 < first_tag_offset:
+        raise GfxError(f"{label}: no room for the two final tag headers")
+    last_four = data[-4:]
+    first_header = _u16le(data, size - 4)
+    second_header = _u16le(data, size - 2)
+    if (first_header >> 6, first_header & 0x3F) != (1, 0):
+        raise GfxError(f"{label}: the last four bytes do not begin with a zero-length ShowFrame")
+    if (second_header >> 6, second_header & 0x3F) != (0, 0):
+        raise GfxError(f"{label}: the last four bytes do not end with a zero-length End")
+    last_two = [1, 0]
 
     return {
         "label": label,
         "size": size,
         "sha256": hashlib.sha256(data).hexdigest(),
-        "variant": {
-            "byte_08": f"0x{variant_key[0]:02x}",
-            "byte_0a": f"0x{variant_key[1]:02x}",
-            "name1_offset": name1_offset,
+        "container": {
+            "magic": "GFX",
+            "version": version,
+            "length_field": declared_size,
+            "length_matches": declared_size == size,
         },
-        "size_field": {
-            "offset": 4,
-            "width": 4,
-            "value": declared_size,
-            "equals_file_size": True,
+        "header": {
+            "rect_nbits": nbits,
+            "rect_bytes": rect_bytes,
+            "frame_rate_raw": frame_rate_raw,
+            "frame_rate": frame_rate_raw / 256.0,
+            "frame_count": frame_count,
+            "first_tag_offset": first_tag_offset,
         },
-        "pre_name_tail": {"offset": tail_offset, "length": len(PRE_NAME_TAIL)},
-        "name1": {"offset": name1_offset, "length": name1_length},
-        "interstitial": {
-            "offset": name1_end,
-            "length": 15,
-            "group": interstitial[10:13].hex(),
-            "end_byte": f"0x{interstitial[14]:02x}",
+        "tags": {
+            "count": tag_count,
+            "max_depth": stats["max_depth"],
+            "sprite_count": stats["sprite_count"],
+            "nested_tag_count": stats["nested_tag_count"],
+            "total_tags": tag_count + stats["nested_tag_count"],
+            "first_code": first_code,
+            "first_length": first_length,
+            "last_code": last_code,
+            "last_two_codes": last_two,
         },
-        "name2": {
-            "offset": name2_offset,
-            "length": name2_length,
-            "contains_name1": True,
-            "ends_main": True,
-        },
-        "body": {"offset": body_offset, "length": trailer_offset - body_offset},
-        "final_run": {"offset": final_offset, "length": final_length},
-        "trailer": {"offset": trailer_offset, "length": len(TRAILER)},
-        "marker_counts": {
-            "pre_name_tail": tail_count,
-            "interstitial": interstitial_count,
-            "trailer": trailer_count,
+        "trailer": {
+            "last_four_bytes": last_four.hex(),
+            "last_two_tag_headers": last_two,
         },
     }
 
 
 def _print_text(report: dict, stream) -> None:
-    variant = report["variant"]
+    container = report["container"]
+    header = report["header"]
+    tags = report["tags"]
     print(f"sample: {report['label']}", file=stream)
     print(f"size: {report['size']} bytes", file=stream)
     print(f"sha256: {report['sha256']}", file=stream)
     print(
-        f"variant: byte_08={variant['byte_08']}"
-        f" byte_0a={variant['byte_0a']}"
-        f" name1_offset=0x{variant['name1_offset']:x}",
-        file=stream,
-    )
-    field = report["size_field"]
-    print(
-        f"size field: offset=0x{field['offset']:x} width={field['width']}"
-        f" value={field['value']} equals_file_size={field['equals_file_size']}",
+        f"container: magic={container['magic']}"
+        f" version={container['version']}"
+        f" length_field={container['length_field']}"
+        f" length_matches={container['length_matches']}",
         file=stream,
     )
     print(
-        f"pre-name tail: offset=0x{report['pre_name_tail']['offset']:x}"
-        f" length={report['pre_name_tail']['length']}",
+        f"header: rect_nbits={header['rect_nbits']}"
+        f" rect_bytes={header['rect_bytes']}"
+        f" frame_rate={header['frame_rate']:.2f}"
+        f" frame_count={header['frame_count']}"
+        f" first_tag_offset=0x{header['first_tag_offset']:x}",
         file=stream,
     )
     print(
-        f"first run: offset=0x{report['name1']['offset']:x}"
-        f" length={report['name1']['length']}",
-        file=stream,
-    )
-    inter = report["interstitial"]
-    print(
-        f"interstitial: offset=0x{inter['offset']:x} length={inter['length']}"
-        f" group={inter['group']} end_byte={inter['end_byte']}",
-        file=stream,
-    )
-    print(
-        f"second run: offset=0x{report['name2']['offset']:x}"
-        f" length={report['name2']['length']}"
-        f" contains_name1={report['name2']['contains_name1']}"
-        f" ends_main={report['name2']['ends_main']}",
+        f"tags: count={tags['count']}"
+        f" max_depth={tags['max_depth']}"
+        f" sprite_count={tags['sprite_count']}"
+        f" nested_tag_count={tags['nested_tag_count']}"
+        f" total_tags={tags['total_tags']}"
+        f" first_code={tags['first_code']}"
+        f" first_length={tags['first_length']}"
+        f" last_two={tags['last_two_codes']}",
         file=stream,
     )
     print(
-        f"body: offset=0x{report['body']['offset']:x}"
-        f" length={report['body']['length']}",
-        file=stream,
-    )
-    print(
-        f"final run: offset=0x{report['final_run']['offset']:x}"
-        f" length={report['final_run']['length']}",
-        file=stream,
-    )
-    print(
-        f"trailer: offset=0x{report['trailer']['offset']:x}"
-        f" length={report['trailer']['length']}",
-        file=stream,
-    )
-    counts = report["marker_counts"]
-    print(
-        f"markers: pre_name_tail={counts['pre_name_tail']}"
-        f" interstitial={counts['interstitial']} trailer={counts['trailer']}",
+        f"trailer: last_four_bytes={report['trailer']['last_four_bytes']}"
+        f" last_two_tag_headers={report['trailer']['last_two_tag_headers']}",
         file=stream,
     )
 
@@ -247,8 +221,8 @@ def _output_is_inside_input(output: str, inputs: list[str]) -> bool:
 
 
 def main(argv=None) -> int:
-    parser = argparse.ArgumentParser(description="Report observed GFX* structural fields.")
-    parser.add_argument("samples", nargs="+", help="decoded GFX* payload files")
+    parser = argparse.ArgumentParser(description="Inspect a decoded GFx container and its SWF tags.")
+    parser.add_argument("samples", nargs="+", help="decoded GFx payload files")
     parser.add_argument("--json", action="store_true", help="print JSON instead of text")
     parser.add_argument("--output", help="write output to this file instead of stdout")
     parser.add_argument("--max-bytes", type=int, default=DEFAULT_MAX_BYTES,

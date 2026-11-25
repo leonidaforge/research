@@ -52,9 +52,48 @@ arithmetic removed the 49 and 37 rows from the 183,144 total, but they belong to
 the 182,321 readable population.
 
 GFX-F06 previously placed a 17 to 54 byte "final run" inside the ten-byte
-trailer. The trailer's printable run is five bytes (`.Main`); the 17 to 54 range
-is the second run. GFX-F06 now records the five-byte trailer run and leaves the
-second-run range to GFX-F05 and the format document.
+trailer. The trailer's printable run is five bytes; the 17 to 54 range is the
+second run. GFX-F06 now records the five-byte trailer run and leaves the
+second-run range to GFX-F05 and the format document. The later tag walk in this
+history supersedes the `u32` reading of the last four bytes.
 
 The GFX finding rows now carry the canonical `BINARY` and `CROSS_SAMPLE`
 evidence types.
+
+## 2026-11-25: the GFx container and its tags replace the unidentified-signature reading
+
+The earlier document called `GFX*` an unidentified decoded-payload signature.
+It read `+0x08` and `+0x0A` as five variant byte pairs, treated the bytes after
+the second printable run as an opaque body, and recorded the last four bytes as
+a little-endian `u32` 64 inside a ten-byte trailer.
+
+The 49 decoded payloads show the documented GFx container header:
+
+- `GFX` at `+0x00`, version `0x2A` at `+0x03`, and a little-endian `u32` length
+  at `+0x04` that equals the payload length in 49/49 rows.
+- A bit-packed RECT after the length, then a little-endian `u16` frame rate and
+  a `u16` frame count. The first tag follows.
+- The `+0x08` and `+0x0A` bytes are RECT bytes. The five observed pairs are RECT
+  patterns, not payload variants.
+- The region after the second printable run is a tag stream. The walk reaches
+  the payload end in 49/49 rows and has 0 failures.
+- The earlier printable-run grammar is a raw-byte reading that crosses a tag
+  boundary. The first tag contains the first run; the 15-byte group after it
+  spans the end of that tag and the next tag, and the second run starts 13 bytes
+  after the first tag ends.
+- The last four bytes are two zero-length tag headers, ShowFrame and End, not a
+  `u32` field. The ten-byte suffix ends with those headers.
+
+The earlier three tag counts of 11, 28 and 261 are top-level counts. Sprite
+bodies add nested records; the same three payloads have 13, 5,616 and 4,227
+tags when nested records are included. The maximum nesting depth is 1.
+
+The frame rate is 30.0 in 48 rows and 24.0 in one. The earlier uniform 30.0
+reading is corrected.
+
+The current tree contains no three-byte-only prefix comparison. The earlier
+predicate used four bytes. This history records that the fourth byte is the
+version, so a three-byte comparison would be insufficient.
+
+The family name GFx rests on the header shape; no executable path or loader was
+traced. Tag contents, ActionScript, playback and rendering remain **Unknown**.

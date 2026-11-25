@@ -1,8 +1,8 @@
-# GFX* evidence index
+# GFx evidence index
 
-`GFX*` is a four-byte decoded-payload observation. This index records the
-sample, the predicate, the structural findings and the corrections. The
-identifier remains the observed signature; no format name is claimed.
+`GFX` (`47 46 58`) with version byte `0x2A` is the decoded-payload signature of
+the GFx container. This index records the population, the header, the tag walk
+and the corrections. The container family is identified; tag contents are not.
 
 ## Earlier claim
 
@@ -10,9 +10,9 @@ identifier remains the observed signature; no format name is claimed.
 | --- | --- | --- | --- |
 | `GFX*` under type 66 | Unmerged `research/shared/resource-identification` branch, type inventory commits `1cee8cb` and `ce8629d` | 22,926 rows: five root archives walked, 61 nested archives opened; 49 type-66 rows in six archives | Decoded payload head; every type-66 row is chunked |
 
-The first GFX document described six decoded payloads. The 49-row recount
-confirms the type-66 association and the six archives, and adds the full
-structure recorded below.
+The first GFX document described six decoded payloads and called the family
+unidentified. The 49-row decode identifies the container from its header and
+tag framing. The tag walk replaces the earlier reading of an opaque body.
 
 ## Sample and predicate
 
@@ -23,9 +23,9 @@ structure recorded below.
 | Earlier run frame | 782 unique archives, 169,523 rows; the cache directory holds 67 further unique archives with 13,621 rows |
 | GFX rows | 49 type-66 rows in six depth-1 archives reached from `data.rpf` rows 1, 3, 6, 19, 20 and 39 |
 | Stored form | chunk encoding 3, mode 0, no payload transform, stored prefix `78 DA` |
-| Predicate | exact four bytes `47 46 58 2A` at decoded offset 0 |
+| Predicate | exact `47 46 58` at decoded offset 0 and version `0x2A` at `+0x03` |
 | Predicate scope | prefix at offset 0; not a whole-file hash and not a substring search |
-| Stored-byte result | 0 of all 182,321 readable rows begin `GFX*` at the stored payload offset |
+| Stored-byte result | 0 of all 182,321 readable rows begin `GFX` at the stored payload offset |
 
 All 49 type-66 rows were extracted end to end with `lforge 0.1.0`, including
 the 11 multi-chunk rows. The 67 further cached archives contain no type-66 row.
@@ -42,7 +42,7 @@ this order:
 | ---: | --- | --- | ---: | ---: |
 | 1 | Parent | every record with `kind == "row"` in the 849 manifests | - | 183,144 |
 | 2 | Readable | `contents.readable == true` | 823 unreadable | 182,321 |
-| 3 | Stored-prefix scan | read four bytes at `payload_offset` from the matching cached archive | - | 182,321 scanned; 0 `GFX*` |
+| 3 | Stored-prefix scan | read four bytes at `payload_offset` from the matching cached archive | - | 182,321 scanned; 0 `GFX` |
 | 4 | Decoded type 66 | `type_id == 66` | 49 | 182,272 stored-prefix-only |
 | 5 | Decoded type 5 | `type_id == 5` in the six GFX archives | 37 | 182,235 stored-prefix-only |
 
@@ -61,25 +61,38 @@ that contain type-66 rows.
 
 | ID | Claim | Evidence | Confidence | Limits |
 | --- | --- | --- | --- | --- |
-| GFX-F01 | `GFX*` begins the decoded payload of 49 type-66 rows in six depth-1 archives under `data.rpf`. All 49 rows use chunk encoding 3, mode 0 and no payload transform; all 49 stored payloads begin `78 DA`. A stored-prefix scan covers all 182,321 readable rows and finds 0 stored `GFX*` prefixes; the 49 type-66 and 37 type-5 rows in the six GFX archives were also decoded, leaving 182,235 rows checked only at the stored prefix. | `BINARY`, `CROSS_SAMPLE` | Confirmed (49/49) | One build and one local archive set; the count is the type-66 count of the sampled population, not a decoded census of every row. The 823 unreadable rows have no stored-prefix check |
+| GFX-F01 | `GFX` begins the decoded payload of 49 type-66 rows in six depth-1 archives under `data.rpf`. All 49 rows use chunk encoding 3, mode 0 and no payload transform; all 49 stored payloads begin `78 DA`. A stored-prefix scan covers all 182,321 readable rows and finds 0 stored `GFX` prefixes; the 49 type-66 and 37 type-5 rows in the six GFX archives were also decoded, leaving 182,235 rows checked only at the stored prefix. | `BINARY`, `CROSS_SAMPLE` | Confirmed (49/49) | One build and one local archive set; the count is the type-66 count of the sampled population, not a decoded census of every row. The 823 unreadable rows have no stored-prefix check |
 | GFX-F02 | The 49 decoded lengths are distinct and range from 2,251 to 6,605,786 bytes. In every row the decoded length equals the manifest logical size and the little-endian `u32` at `+0x04`. The 11 multi-chunk rows were reconstructed end to end. | `BINARY`, `CROSS_SAMPLE` | Confirmed (49/49) | No second archive set |
-| GFX-F03 | The bytes at `+0x08` and `+0x0A` form five observed pairs: `88/01` (17 rows, first run at `+0x22`), `80/02` (28, `+0x21`), `78/05` (2, `+0x21`), `70/0B` (1, `+0x20`) and `70/0A` (1, `+0x20`). The pairs co-occur within one archive. | `BINARY`, `CROSS_SAMPLE` | Confirmed (49/49) | The pairs are observable variants; version, purpose and field meaning are Unknown |
-| GFX-F04 | The pre-name header is not fixed-size, but its tail is fixed relative to the first run. In all 49 rows the nine bytes immediately before the run length are `FA 01 04 00 00 00 00 0E 00`; the next two bytes are a big-endian `u16` first-run length (3 to 30); the run is printable ASCII. The four bytes before that run are `30 01 00 v` in 48 rows and `18 01 00 v` in 1, with `v` from 15 to 42. | `BINARY`, `CROSS_SAMPLE` | Confirmed (49/49) | Bytes between `+0x0B` and that run vary; their meaning is Unknown |
-| GFX-F05 | The first run is followed by a 15-byte interstitial. Its first ten bytes are constant `00 00 44 11 09 00 00 00 43 02` in 49/49; the next three bytes are `00 00 00` (46), `FF 00 00` (2) or `FF FF FF` (1); the fifteenth byte is `0x0A` in 49/49. The second printable run starts 15 bytes after the first run and ends `_Main` and contains the first run in 49/49. | `BINARY`, `CROSS_SAMPLE` | Confirmed (bytes and positions); Unknown (meaning) | Four values in the variable group; their roles are not established |
-| GFX-F06 | Every payload ends with a ten-byte trailer: the five-byte printable run `.Main`, a zero byte and the little-endian `u32` 64. The trailer is the common suffix of all 49 payloads. The 17 to 54 byte range belongs to the second run, not to the trailer. | `BINARY`, `CROSS_SAMPLE` | Confirmed (49/49) | The trailer's `.Main` is not shown to be a name or a path |
-| GFX-F07 | The established grammar stops at the first byte after the second run. That offset is 69 to 132. The body's first two bytes take 21 distinct pairs; the most common pair occurs in 15 of 49. The three constant markers occur exactly once per payload and never in the body. | `BINARY`, `CROSS_SAMPLE` | Confirmed (positions and counts); Unknown (body content) | The body was not parsed |
-| GFX-F08 | No two payloads are byte-identical: 49 distinct SHA-256 values and 49 distinct lengths. The only prefix shared by all 49 is the four-byte signature; no pair shares the first eight bytes. 109 of 1,176 pairs share more than the ten-byte common suffix, up to 29 bytes. | `BINARY`, `CROSS_SAMPLE` | Confirmed (49/49) | Pairwise suffix figures are sample counts |
-| GFX-F09 | A search over every one-, two- and four-byte field in the first 64 bytes, in both byte orders, found no field equal to the body start, body length, first run length or second run length. The only matching field is the `u32` at `+0x04`, equal to the total decoded length. | `BINARY`, `CROSS_SAMPLE` | Confirmed (49/49) | Equality only; other arithmetic relations were not tested |
-| GFX-F10 | All observed GFX rows are type 66. In the six GFX archives, 0 of 37 type-5 rows begin `GFX*` after decoding. A bounded sample across eight non-type-66 encoding-3 types decoded 37 rows and found 0 `GFX*`; one type-14 row was behind the payload transform. | `BINARY`, `CROSS_SAMPLE` | Confirmed (sample); no exclusivity claim | The cross-type scan is a bounded sample, not a decoded census of all rows |
+| GFX-F03 | The container header is `GFX` at `+0x00`, version `0x2A` at `+0x03`, a little-endian `u32` length at `+0x04`, then a SWF header. All 49 rows have version 42 and a length field equal to the payload length; no payload has another version or a length mismatch. | `BINARY`, `CROSS_SAMPLE` | Confirmed (49/49) | The GFx name rests on the documented header shape; no executable path was traced |
+| GFX-F04 | The SWF header begins with a bit-packed RECT. Its first byte gives `nbits = byte >> 3` and its size is `ceil((5 + 4 * nbits) / 8)` bytes. Observed `nbits` values are 14 (2 rows), 15 (2), 16 (28) and 17 (17); first tag offsets are `+0x14` (2), `+0x15` (30) and `+0x16` (17). The earlier `+0x08`/`+0x0A` variant pairs are RECT bytes, not payload variants. | `BINARY`, `CROSS_SAMPLE` | Confirmed (bytes and sizes); Unknown (RECT coordinates) | Coordinate values were not decoded |
+| GFX-F05 | The frame rate is a little-endian `u16` in 8.8 fixed point after the RECT. It is 30.0 in 48 rows and 24.0 in one. The frame count is a little-endian `u16` and is 1 in all 49 rows. | `BINARY`, `CROSS_SAMPLE` | Confirmed (49/49) | The single 24.0 row is a counterexample to a uniform frame rate |
+| GFX-F06 | After the frame header the payload is a tag stream. A record has a little-endian `u16` header with `code = header >> 6` and `length = header & 0x3F`; a length of 63 is followed by a little-endian `u32`. The walk reaches the payload end in 49/49 rows and has 0 failures. Top-level tag counts range from 8 to 2,839 and sum to 12,167. The first tag code is 1000 in 49/49 and its length is 15 to 42. The last two top-level codes are 1 and 0 in 49/49. | `BINARY`, `CROSS_SAMPLE`, `SYNTHETIC` | Confirmed (49/49) | Tag bodies are not interpreted; the synthetic tests validate the tool, not the native format |
+| GFX-F07 | Sprite tags (code 39) contain nested tag records. 41 payloads contain at least one sprite; the sample has 1,025 sprite tags and 102,306 nested tags. The maximum nesting depth is 1. Including nested records raises the total from 12,167 to 114,473 tags. A tag count MUST state whether it includes sprite bodies. | `BINARY`, `CROSS_SAMPLE` | Confirmed (49/49) | Nesting is measured only through code 39; other tag bodies are skipped |
+| GFX-F08 | The final four bytes are two adjacent zero-length tag headers, `40 00 00 00`: ShowFrame (code 1) and End (code 0). The earlier reading of a little-endian `u32` 64 is corrected. The printable run immediately before the headers ends at `length - 6`, followed by a zero byte and the two headers. | `BINARY`, `CROSS_SAMPLE` | Confirmed (49/49) | The five-byte printable suffix is not reproduced |
+| GFX-F09 | Three payloads have 11, 28 and 261 top-level tags. Including nested sprite records the same payloads have 13, 5,616 and 4,227 tags. The earlier three tag counts therefore report top-level records only. | `BINARY`, `CROSS_SAMPLE` | Confirmed (sample) | Three selected payloads; the counts are not identifiers |
+| GFX-F10 | The first tag body is a ten-byte prefix, a printable run of 3 to 30 bytes and two further bytes. The run is preceded by a big-endian `u16` length equal to its length in 49/49 rows. The 15-byte group after the run spans a tag boundary: its first two bytes end the first tag, then the next tag's two-byte header and eleven body bytes follow. A second printable run starts 13 bytes after the first tag ends, contains the first run, ends in a constant five-byte suffix and is followed by a zero byte. The rest of the payload is further tags. | `BINARY`, `CROSS_SAMPLE` | Confirmed (bytes and positions); Unknown (meaning) | The printable text and class names are not reproduced; the earlier opaque-body and single-tag readings are withdrawn |
+| GFX-F11 | All observed GFX rows are type 66. In the six GFX archives, 0 of 37 type-5 rows begin `GFX` after decoding. A bounded sample across eight non-type-66 encoding-3 types decoded 37 rows and found 0 `GFX`; one type-14 row was behind the payload transform. | `BINARY`, `CROSS_SAMPLE` | Confirmed (sample); no exclusivity claim | The cross-type scan is a bounded sample, not a decoded census of all rows |
+| GFX-F12 | No two payloads are byte-identical: 49 distinct SHA-256 values and 49 distinct lengths. The only prefix shared by all 49 is the four-byte signature; no pair shares the first eight bytes. | `BINARY`, `CROSS_SAMPLE` | Confirmed (49/49) | Pairwise suffix figures from the earlier index are not repeated here |
 
 ## Corrections
 
-The first GFX document described two header forms from six payloads and split
-the first-run length into a `u16` form and a `u8` form. The 49-row decode shows
-five `+0x08`/`+0x0A` pairs and one big-endian `u16` length in every form; the
-apparent `u8` was the low byte of that field. The earlier absolute offset for
-the second run was a property of the two payloads inspected. See
-[research-history.md](research-history.md).
+The earlier index and format document described five `+0x08`/`+0x0A` variant
+pairs, an opaque body after the second printable run, and a ten-byte trailer
+containing a little-endian `u32` 64. The 49-row tag walk changes those readings:
+
+- The `+0x08` and `+0x0A` bytes are inside the RECT. They are byte patterns of
+  the RECT, not payload variants.
+- The region after the second run is a tag stream, not an opaque body.
+- The last four bytes are the two zero-length tag headers for ShowFrame and End,
+  not a `u32` field.
+- The family is identified as the GFx container, not an unidentified signature.
+
+The current tree contains no statement that compared only the three-byte
+prefix; the earlier predicate already used four bytes. The signature is now
+recorded as three magic bytes plus the version byte, so a three-byte comparison
+is insufficient.
+
+See [research-history.md](research-history.md).
 
 ## Reproduction
 
@@ -93,7 +106,7 @@ lforge archive extract <WORK>/archive.rpf --row <NESTED_ROW> --executable <EXECU
 ```
 
 The manifest predicate is `type_id == 66`; the decoded predicate is
-`payload[0:4] == 47 46 58 2A`. The structural sampler is
+`payload[0:3] == 47 46 58` and `payload[3] == 0x2A`. The sampler is
 [tools/gfx](../../tools/gfx/README.md).
 
 ## Limits
@@ -101,24 +114,24 @@ The manifest predicate is `type_id == 66`; the decoded predicate is
 - One build and one local archive set.
 - The GFX population is the type-66 row set of the cached depth-1 inventories.
   The bounded cross-type sample does not establish that no other type carries
-  `GFX*` outside the sampled archives.
-- The body and every pre-name byte between `+0x0B` and the fixed run remain
-  Unknown.
+  `GFX` outside the sampled archives.
+- The RECT coordinates, tag bodies, ActionScript and rendering remain Unknown.
 - The inventory reached depth 1. Type-66 rows below that depth were not searched.
-- No executable path was traced. The archive name, type ID and signature are
+- No executable path was traced. The archive name, type ID and GFx name are
   identifiers for this sample only.
-- The ASCII runs are not reproduced in repository text.
+- Movie strings and class names are not reproduced in repository text.
 
 ## Open questions
 
-- What distinguishes the five variant pairs, and do they mark versions, payload
-  kinds or stored properties?
-- Does the `u32` 64 in the trailer have a structural role, or is it a constant?
-- What marks the end of the body, and does the body have a record grammar?
+- What do the non-zero tag codes and their bodies mean?
+- Do the RECT coordinate values describe bounds, stage size or another layout?
+- Why does one payload use frame rate 24.0 while 48 use 30.0?
+- What structural role, if any, do the constant first-tag body bytes and the
+  five-byte printable suffix have?
 
 ## Six sample rows carried over
 
-The six rows below were recorded before this index existed. They are kept because they are the only per-row stored and logical sizes in the record; every claim they support is restated with the full 49-row population in GFX-F01 to GFX-F10.
+The six rows below were recorded before this index existed. They are kept because they are the only per-row stored and logical sizes in the record; every claim they support is restated with the full 49-row population in GFX-F01 to GFX-F12.
 
 | Source | Nested row | Stored bytes | Logical bytes | First eight decoded bytes |
 | --- | ---: | ---: | ---: | --- |
