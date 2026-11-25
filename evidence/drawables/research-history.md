@@ -1,7 +1,8 @@
 # Drawable research history
 
-Interpretations that were checked against the samples and not adopted. The
-current model is in the [format document](../../formats/resources/drawables/README.md).
+Interpretations that were checked against the samples and not adopted. New
+observations are recorded in the format document and evidence index, not here.
+The current model is in the [format document](../../formats/resources/drawables/README.md).
 
 ## Two header fields were expected in one sample only
 
@@ -37,13 +38,6 @@ six texture parameters and 54 total, binds four slots, leaves two unbound and
 has four distinct keys (DRAW-F18). The union of the two shaders has six distinct
 keys. The counts are per shader; the drawable does not have a single declared
 and bound count.
-
-## Sample B has two geometries per model
-
-**Addition.** The reported observation says sample B has four populated LOD
-slots, each with one model. The records also give each model two geometry
-pointers, so B has eight geometries in total (DRAW-F05). The reported statement
-is not contradicted; it stops at the model count.
 
 ## The graphics pointer was expected to start with packed descriptors
 

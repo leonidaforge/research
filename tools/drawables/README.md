@@ -61,8 +61,9 @@ layout holds `vertex_count`, `flags`, `attribute_stride`, `attribute_end` and an
 zero-based index in the 52-entry table; it is not a recovered name.
 
 Issue codes include `input_cap`, `size`, `truncated_header`, `header_zero`,
-`missing_pointer`, `pointer_outside`, `pointer_segment`, `lod_group`, `lod_count`,
-`model`, `model_count`, `geometry`, `vertex_buffer`, `buffer_size`,
+`missing_pointer`, `pointer_outside`, `pointer_segment`, `pointer_undecodable`,
+`pointer_read`, `array_outside`, `lod_group`, `lod_count`, `model`,
+`model_count`, `geometry`, `vertex_buffer`, `buffer_size`,
 `buffer_outside_graphics`, `layout`, `index_descriptor`, `index_buffer`,
 `index_outside_graphics`, `shader_group`, `shader`, `shader_constant`,
 `shader_count`, `parameter_table`, `parameter_count` and `page_map`.
@@ -71,27 +72,30 @@ Status vocabulary:
 
 - `complete`: every walked record resolved and the attribute ranges fit the
   declared buffer sizes.
-- `partial`: some record or pointer could not be resolved, but the header and
-  at least one chain element were read.
+- `partial`: a pointer or array could not be resolved, but the header and at
+  least one chain element were read.
 - `unverified`: the header is truncated or its zero word is nonzero.
 
 ## Graphics base
 
-The graphics base is not stored. The tool derives it from two or more
-vertex-buffer graphics pointers that land on the four-byte marker
-`42 40 00 00`. For each marker occurrence it subtracts a pointer offset; a base
-supported by at least two distinct pointers is a candidate. If the candidate
-set contains the supplied system length, that base is reported; a single other
-candidate is also reported; several unrelated candidates are reported as
-ambiguous. The marker is an observation, not a format signature.
+The graphics base is not stored. The tool derives it from at least two distinct
+vertex-buffer graphics offsets whose targets land on the four-byte marker
+`42 40 00 00`. Two geometries that share one graphics offset count once. For each
+marker occurrence the tool subtracts a pointer offset; a base supported by both
+distinct offsets is a candidate. If the candidate set contains the supplied
+system length, that base is reported; a single other candidate is also reported;
+several unrelated candidates are reported as ambiguous. The marker is an
+observation, not a format signature.
 
 ## What it refuses
 
 - A system length that is zero, negative or larger than the input.
 - A record that would cross its segment boundary.
+- A nonzero pointer that is not a decodable system or graphics value.
 - A pointer whose upper 32 bits are nonzero, whose selector is not `5` or `6`,
   or whose offset is outside its segment.
 - A model, geometry, shader or parameter count above the built-in cap.
+- A pointer array that overruns the system segment; the report is partial.
 - A shader whose `+0x04` word is not `0x6D657461`.
 - A vertex-buffer attribute range that does not match the declared buffer
   bytes.
@@ -104,9 +108,12 @@ python -m unittest discover -s tools/drawables/tests
 
 The tests build the system and graphics segments with `struct` and `bytearray`.
 They cover a one-LOD drawable with two geometries, a four-LOD drawable, a null
-LOD slot, a truncated header, a nonzero header zero word, an out-of-range
-geometry pointer, an out-of-range graphics pointer and a declared buffer-size
-mismatch. They do not use game files.
+LOD slot, overrunning model, geometry, shader and texture-slot arrays,
+undecodable and segment-mismatched pointers, a page-map read across the system
+boundary, a shared graphics pointer, a single shifted base and an ambiguous
+base. Negative cases include a truncated header, a nonzero header zero word, an
+out-of-range geometry pointer, an out-of-range graphics pointer and a declared
+buffer-size mismatch. They do not use game files.
 
 ## Limits
 

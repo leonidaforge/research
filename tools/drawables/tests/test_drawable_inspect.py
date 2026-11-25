@@ -1,5 +1,7 @@
 """Synthetic tests for drawable_inspect.py. No game files are used."""
 
+import contextlib
+import io
 import os
 import struct
 import sys
@@ -170,10 +172,11 @@ class Fixture:
             self.u64(name + 0x08, 0x0102030405060708 + slot)
 
     def build(self, lod_count=1, models=1, geometries=2, shaders=2,
-              texture_parameters=2, bound_slots=1, null_slots=()):
-        self.system[0x88] = 1
-        self.system[0x89] = 1
-        self.system_pointer(0x08, 0x80)
+              texture_parameters=2, bound_slots=1, null_slots=(), pages=(1, 1)):
+        page_map = self.alloc(0x20)
+        self.system[page_map + 8] = pages[0]
+        self.system[page_map + 9] = pages[1]
+        self.system_pointer(0x08, page_map)
         self.system[0x00:0x08] = b"\0" * 8
         for index in range(3):
             self.f32(0x20 + 4 * index, 0.0)
@@ -234,9 +237,20 @@ class DrawableCase(unittest.TestCase):
             handle.write(graphics)
         return path
 
+    def write_raw(self, data):
+        path = os.path.join(self.temp.name, "drawable-raw.bin")
+        with open(path, "wb") as handle:
+            handle.write(data)
+        return path
+
     def analyze(self, fixture, system_length=SYSTEM_SIZE):
         system, graphics = fixture.build()
         return di.analyze(self.write(system, graphics), system_length)
+
+    def patched(self, system, graphics, patch, system_length=SYSTEM_SIZE):
+        data = bytearray(system + graphics)
+        patch(data)
+        return di.analyze(self.write_raw(bytes(data)), system_length)
 
     def issue_codes(self, report):
         return [issue["code"] for issue in report["issues"]]
@@ -246,6 +260,8 @@ class HeaderTests(DrawableCase):
     def test_one_lod_two_geometries(self):
         report = self.analyze(Fixture())
         self.assertEqual(report["status"], "complete", self.issue_codes(report))
+        self.assertEqual(report["page_map"]["system_pages"], 1)
+        self.assertEqual(report["page_map"]["graphics_pages"], 1)
         self.assertEqual(len(report["lod_slots"]), 1)
         lod = report["lod_slots"][0]
         self.assertEqual(lod["slot"], 0)
@@ -277,6 +293,8 @@ class HeaderTests(DrawableCase):
         system, graphics = fixture.build(lod_count=4, geometries=1)
         report = di.analyze(self.write(system, graphics), SYSTEM_SIZE)
         self.assertEqual(report["status"], "complete", self.issue_codes(report))
+        self.assertEqual(report["page_map"]["system_pages"], 1)
+        self.assertEqual(report["page_map"]["graphics_pages"], 1)
         self.assertEqual([lod["slot"] for lod in report["lod_slots"]], [0, 1, 2, 3])
         for lod in report["lod_slots"]:
             self.assertEqual(lod["model_count"], 1)
@@ -288,6 +306,8 @@ class HeaderTests(DrawableCase):
         system, graphics = fixture.build(lod_count=3, geometries=1, null_slots=(1,))
         report = di.analyze(self.write(system, graphics), SYSTEM_SIZE)
         self.assertEqual(report["status"], "complete", self.issue_codes(report))
+        self.assertEqual(report["page_map"]["system_pages"], 1)
+        self.assertEqual(report["page_map"]["graphics_pages"], 1)
         self.assertEqual([lod["slot"] for lod in report["lod_slots"]], [0, 2])
 
     def test_bounds_and_distances(self):
@@ -370,6 +390,175 @@ class NegativeTests(DrawableCase):
         report = di.analyze(self.write(bytes(data[:SYSTEM_SIZE]), bytes(data[SYSTEM_SIZE:])), SYSTEM_SIZE)
         self.assertEqual(report["status"], "partial")
         self.assertIn("buffer_size", self.issue_codes(report))
+
+    def test_page_map_read_crosses_system_boundary(self):
+        system, graphics = Fixture().build(geometries=1)
+        report = self.patched(
+            system,
+            graphics,
+            lambda data: struct.pack_into("<Q", data, 0x08, di.SYSTEM_BASE | (SYSTEM_SIZE - 1)),
+        )
+        self.assertEqual(report["status"], "partial")
+        self.assertIn("page_map", self.issue_codes(report))
+        self.assertIsNone(report["page_map"])
+
+    def test_overrunning_model_array(self):
+        system, graphics = Fixture().build(geometries=1)
+        good = di.analyze(self.write(system, graphics), SYSTEM_SIZE)
+        group = good["lod_slots"][0]["offset"]
+
+        def patch(data):
+            struct.pack_into("<Q", data, group, di.SYSTEM_BASE | (SYSTEM_SIZE - 8))
+            struct.pack_into("<H", data, group + 0x08, 2)
+
+        report = self.patched(system, graphics, patch)
+        self.assertEqual(report["status"], "partial")
+        self.assertIn("array_outside", self.issue_codes(report))
+
+    def test_overrunning_geometry_array(self):
+        system, graphics = Fixture().build(geometries=1)
+        good = di.analyze(self.write(system, graphics), SYSTEM_SIZE)
+        model = good["lod_slots"][0]["models"][0]["offset"]
+
+        def patch(data):
+            struct.pack_into("<Q", data, model + 0x08, di.SYSTEM_BASE | (SYSTEM_SIZE - 8))
+            struct.pack_into("<H", data, model + 0x10, 2)
+
+        report = self.patched(system, graphics, patch)
+        self.assertEqual(report["status"], "partial")
+        self.assertIn("array_outside", self.issue_codes(report))
+
+    def test_overrunning_shader_array(self):
+        system, graphics = Fixture().build(geometries=1)
+        good = di.analyze(self.write(system, graphics), SYSTEM_SIZE)
+        group = good["materials"]["group"]
+
+        def patch(data):
+            struct.pack_into("<Q", data, group + 0x10, di.SYSTEM_BASE | (SYSTEM_SIZE - 8))
+            struct.pack_into("<H", data, group + 0x18, 3)
+
+        report = self.patched(system, graphics, patch)
+        self.assertEqual(report["status"], "partial")
+        self.assertIn("array_outside", self.issue_codes(report))
+
+    def test_overrunning_texture_slot_array(self):
+        system, graphics = Fixture().build(geometries=1)
+        good = di.analyze(self.write(system, graphics), SYSTEM_SIZE)
+        shader = good["materials"]["shaders"][0]["offset"]
+
+        def patch(data):
+            struct.pack_into("<Q", data, shader + 0x10, di.SYSTEM_BASE | (SYSTEM_SIZE - 8))
+
+        report = self.patched(system, graphics, patch)
+        self.assertEqual(report["status"], "partial")
+        self.assertIn("array_outside", self.issue_codes(report))
+
+    def test_invalid_selector_in_lod_slot(self):
+        system, graphics = Fixture().build(geometries=1)
+        report = self.patched(
+            system,
+            graphics,
+            lambda data: struct.pack_into("<Q", data, 0x50, 0x70000000),
+        )
+        self.assertEqual(report["status"], "partial")
+        self.assertIn("pointer_undecodable", self.issue_codes(report))
+        self.assertEqual(report["lod_slots"], [])
+
+    def test_nonzero_upper_bits_in_geometry_array(self):
+        system, graphics = Fixture().build(geometries=1)
+        good = di.analyze(self.write(system, graphics), SYSTEM_SIZE)
+        geometry_array = good["lod_slots"][0]["models"][0]["geometry_array"]["offset"]
+        geometry = good["lod_slots"][0]["models"][0]["geometries"][0]["offset"]
+
+        def patch(data):
+            struct.pack_into("<Q", data, geometry_array, 0x1_0000_0000 | (di.SYSTEM_BASE | geometry))
+
+        report = self.patched(system, graphics, patch)
+        self.assertEqual(report["status"], "partial")
+        self.assertIn("pointer_undecodable", self.issue_codes(report))
+
+    def test_segment_mismatch_in_geometry_array(self):
+        system, graphics = Fixture().build(geometries=1)
+        good = di.analyze(self.write(system, graphics), SYSTEM_SIZE)
+        geometry_array = good["lod_slots"][0]["models"][0]["geometry_array"]["offset"]
+
+        def patch(data):
+            struct.pack_into("<Q", data, geometry_array, di.GRAPHICS_BASE)
+
+        report = self.patched(system, graphics, patch)
+        self.assertEqual(report["status"], "partial")
+        self.assertIn("pointer_segment", self.issue_codes(report))
+
+    def test_invalid_selector_in_vertex_buffer_pointer(self):
+        system, graphics = Fixture().build(geometries=1)
+        good = di.analyze(self.write(system, graphics), SYSTEM_SIZE)
+        geometry = good["lod_slots"][0]["models"][0]["geometries"][0]["offset"]
+
+        def patch(data):
+            struct.pack_into("<Q", data, geometry + 0x08, 0x70000000)
+
+        report = self.patched(system, graphics, patch)
+        self.assertEqual(report["status"], "partial")
+        self.assertIn("pointer_undecodable", self.issue_codes(report))
+
+    def test_invalid_selector_in_shader_slot_table(self):
+        system, graphics = Fixture().build(geometries=1)
+        good = di.analyze(self.write(system, graphics), SYSTEM_SIZE)
+        shader = good["materials"]["shaders"][0]["offset"]
+
+        def patch(data):
+            struct.pack_into("<Q", data, shader + 0x10, 0x40000000)
+
+        report = self.patched(system, graphics, patch)
+        self.assertEqual(report["status"], "partial")
+        self.assertIn("pointer_undecodable", self.issue_codes(report))
+
+
+class GraphicsBaseTests(DrawableCase):
+    def test_shared_graphics_pointer_does_not_derive_a_base(self):
+        system, graphics = Fixture().build(geometries=2)
+        good = di.analyze(self.write(system, graphics), SYSTEM_SIZE)
+        first = good["lod_slots"][0]["models"][0]["geometries"][0]["vertex_buffer_record"]
+        second = good["lod_slots"][0]["models"][0]["geometries"][1]["vertex_buffer_record"]
+        data = bytearray(system + graphics)
+        shared = struct.unpack_from("<Q", data, first["offset"] + 0x18)[0]
+        struct.pack_into("<Q", data, second["offset"] + 0x18, shared)
+        report = di.analyze(self.write_raw(bytes(data)), SYSTEM_SIZE)
+        self.assertEqual(report["status"], "complete", self.issue_codes(report))
+        self.assertIsNone(report["graphics_base"])
+
+    def test_single_shifted_candidate_is_reported(self):
+        system, graphics = Fixture().build(geometries=2)
+        data = system + b"\0" * 0x10 + graphics
+        report = di.analyze(self.write_raw(data), SYSTEM_SIZE)
+        self.assertEqual(report["status"], "complete", self.issue_codes(report))
+        self.assertEqual(report["graphics_base"]["base"], SYSTEM_SIZE + 0x10)
+        self.assertEqual(len(report["graphics_base"]["candidates"]), 1)
+
+    def test_two_supported_candidates_are_ambiguous(self):
+        system, graphics = Fixture().build(geometries=2)
+        good = di.analyze(self.write(system, graphics), SYSTEM_SIZE)
+        offsets = [
+            geometry["vertex_buffer_record"]["graphics"]["offset"]
+            for geometry in good["lod_slots"][0]["models"][0]["geometries"]
+        ]
+        data = bytearray(system + b"\0" * 0x10 + graphics + b"\0" * 0x800)
+        second_base = SYSTEM_SIZE + 0x410
+        for offset in offsets:
+            at = second_base + offset
+            data[at : at + 4] = di.GRAPHICS_MARKER
+        report = di.analyze(self.write_raw(bytes(data)), SYSTEM_SIZE)
+        self.assertEqual(report["status"], "complete", self.issue_codes(report))
+        self.assertIsNone(report["graphics_base"]["base"])
+        self.assertEqual(len(report["graphics_base"]["candidates"]), 2)
+
+    def test_text_report_prints_hexadecimal_base(self):
+        system, graphics = Fixture().build(geometries=2)
+        report = di.analyze(self.write(system, graphics), SYSTEM_SIZE)
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            di.print_text(report)
+        self.assertIn(f"graphics base: {SYSTEM_SIZE:#x}", output.getvalue())
 
 
 class PointerTests(unittest.TestCase):

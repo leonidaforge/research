@@ -129,6 +129,12 @@ class Inspector:
         value = self.u64(at, self.system_len, what)
         pointer = decode_pointer(value)
         if pointer is None:
+            if value:
+                self.add(
+                    "pointer_undecodable",
+                    f"{what} at {at:#x} is {value:#018x}, not a decodable "
+                    f"system or graphics pointer",
+                )
             return None, value
         if pointer.segment != segment:
             self.add(
@@ -146,6 +152,20 @@ class Inspector:
             )
             return None, value
         return pointer, value
+
+    def array_count(self, base: int, count: int, entry_size: int, what: str) -> int:
+        """Clamp a declared array to the entries that fit in the system segment."""
+        if not count:
+            return 0
+        available = 0 if base >= self.system_len else (self.system_len - base) // entry_size
+        if count > available:
+            self.add(
+                "array_outside",
+                f"{what} at {base:#x} declares {count} entries of {entry_size} "
+                f"bytes but only {available} fit in the system segment",
+            )
+            return available
+        return count
 
     def system_pointer(self, at: int, what: str):
         return self.pointer(at, "system", what)
@@ -274,21 +294,30 @@ class Inspector:
             self.add("lod_count", f"{what} declares {count} models, above the {MAX_MODELS} cap")
             return None
         models = []
+        array_count = 0
         if model_array is not None:
-            for index in range(count):
-                pointer, value = self.system_pointer(
-                    model_array.offset + 8 * index, f"{what} model pointer {index}"
-                )
+            array_count = self.array_count(model_array.offset, count, 8, what + " model array")
+            for index in range(array_count):
+                try:
+                    pointer, value = self.system_pointer(
+                        model_array.offset + 8 * index, f"{what} model pointer {index}"
+                    )
+                except DrawableError as err:
+                    self.add("pointer_read", str(err))
+                    break
                 if pointer is None:
                     continue
                 model = self.read_model(pointer.offset, slot, index)
                 if model is not None:
                     models.append(model)
+        elif count:
+            self.add("missing_pointer", f"{what} has {count} model(s) but no model array pointer")
         return {
             "slot": slot,
             "offset": offset,
             "model_array": self._pointer_report(model_array, model_value),
             "model_count": count,
+            "model_array_entries": array_count,
             "model_capacity": capacity,
             "shader_indices": [shader_indices & 0xFFFF, (shader_indices >> 16) & 0xFFFF],
             "tail": f"{marker:#018x}",
@@ -312,23 +341,32 @@ class Inspector:
             self.add("model_count", f"{what} declares {count} geometries, above the {MAX_GEOMETRIES} cap")
             return None
         geometries = []
+        array_count = 0
         if geometry_array is not None:
-            for geometry_index in range(count):
-                pointer, value = self.system_pointer(
-                    geometry_array.offset + 8 * geometry_index,
-                    f"{what} geometry pointer {geometry_index}",
-                )
+            array_count = self.array_count(geometry_array.offset, count, 8, what + " geometry array")
+            for geometry_index in range(array_count):
+                try:
+                    pointer, value = self.system_pointer(
+                        geometry_array.offset + 8 * geometry_index,
+                        f"{what} geometry pointer {geometry_index}",
+                    )
+                except DrawableError as err:
+                    self.add("pointer_read", str(err))
+                    break
                 if pointer is None:
                     continue
                 geometry = self.read_geometry(pointer.offset, slot, index, geometry_index)
                 if geometry is not None:
                     geometries.append(geometry)
+        elif count:
+            self.add("missing_pointer", f"{what} has {count} geometry(ies) but no geometry array pointer")
         return {
             "slot": slot,
             "index": index,
             "offset": offset,
             "geometry_array": self._pointer_report(geometry_array, geometry_value),
             "geometry_count": count,
+            "geometry_array_entries": array_count,
             "geometry_capacity": capacity,
             "uninterpreted_14": f"{unknown_14:#010x}",
             "aabb": self._pointer_report(aabb, aabb_value),
@@ -354,6 +392,10 @@ class Inspector:
             "vertex_buffer_record": None,
             "index_descriptor_record": None,
         }
+        if vertex_buffer is None and vertex_value == 0:
+            self.add("missing_pointer", f"{what} has no vertex buffer pointer")
+        if index_descriptor is None and index_value == 0:
+            self.add("missing_pointer", f"{what} has no index descriptor pointer")
         if vertex_buffer is not None:
             report["vertex_buffer_record"] = self.read_vertex_buffer(vertex_buffer.offset, what)
         if index_descriptor is not None:
@@ -387,6 +429,10 @@ class Inspector:
             "graphics_marker": None,
             "layout_record": None,
         }
+        if graphics is None and graphics_value == 0:
+            self.add("missing_pointer", f"{what} has no graphics pointer")
+        if layout is None and layout_value == 0:
+            self.add("missing_pointer", f"{what} has no layout pointer")
         if graphics is not None:
             marker = self.graphics_marker(graphics)
             report["graphics_marker"] = None if marker is None else marker.hex(" ")
@@ -472,6 +518,8 @@ class Inspector:
             "constant": f"{constant:#018x}",
             "buffer": None,
         }
+        if buffer_record is None and buffer_value == 0:
+            self.add("missing_pointer", f"{what} has no index-buffer record pointer")
         if buffer_record is not None:
             report["buffer"] = self.read_index_buffer(buffer_record.offset, what)
         return report
@@ -482,11 +530,13 @@ class Inspector:
             element_count = self.u32(offset + 0x08, self.system_len, what + " element count")
             element_unit = self.u16(offset + 0x0C, self.system_len, what + " element unit")
             graphics, graphics_value = self.graphics_pointer(offset + 0x18, what + " graphics")
-            layout, layout_value = self.system_pointer(offset + 0x28, what + " layout")
+            pointer_28, pointer_28_value = self.system_pointer(offset + 0x28, what + " +0x28")
         except DrawableError as err:
             self.add("index_buffer", str(err))
             return None
         declared_bytes = element_count * element_unit
+        if graphics is None and graphics_value == 0:
+            self.add("missing_pointer", f"{what} has no graphics pointer")
         if graphics is not None and graphics.offset + declared_bytes > self.graphics_len:
             self.add(
                 "index_outside_graphics",
@@ -499,7 +549,7 @@ class Inspector:
             "element_unit": element_unit,
             "declared_bytes": declared_bytes,
             "graphics": self._pointer_report(graphics, graphics_value),
-            "declaration": self._pointer_report(layout, layout_value),
+            "uninterpreted_28": self._pointer_report(pointer_28, pointer_28_value),
         }
 
     def read_materials(self):
@@ -520,21 +570,30 @@ class Inspector:
             self.add("shader_count", f"{what} declares {count} shaders, above the {MAX_SHADERS} cap")
             return None
         shaders = []
+        array_count = 0
         if shader_list is not None:
-            for index in range(count):
-                pointer, value = self.system_pointer(
-                    shader_list.offset + 8 * index, f"{what} shader pointer {index}"
-                )
+            array_count = self.array_count(shader_list.offset, count, 8, what + " shader array")
+            for index in range(array_count):
+                try:
+                    pointer, value = self.system_pointer(
+                        shader_list.offset + 8 * index, f"{what} shader pointer {index}"
+                    )
+                except DrawableError as err:
+                    self.add("pointer_read", str(err))
+                    break
                 if pointer is None:
                     continue
                 shader = self.read_shader(pointer.offset, index)
                 if shader is not None:
                     shaders.append(shader)
+        elif count:
+            self.add("missing_pointer", f"{what} has {count} shader(s) but no shader array pointer")
         return {
             "group": group,
             "optional": self._pointer_report(optional, optional_value),
             "shader_list": self._pointer_report(shader_list, shader_value),
             "shader_count": count,
+            "shader_array_entries": array_count,
             "shader_capacity": capacity,
             "shaders": shaders,
         }
@@ -562,6 +621,8 @@ class Inspector:
             "parameter_table": self._pointer_report(parameters, parameters_value),
             "parameters": None,
         }
+        if parameters is None and parameters_value == 0:
+            self.add("missing_pointer", f"{what} has no parameter table pointer")
         if parameters is not None:
             report["parameters"] = self.read_parameters(parameters.offset, slots, what)
         return report
@@ -595,44 +656,63 @@ class Inspector:
         textures = []
         keys = []
         bound = 0
+        slot_limit = 0
+        if slots is not None:
+            slot_limit = self.array_count(slots.offset, texture_count, 8, what + " slot table")
+        elif texture_count:
+            self.add(
+                "missing_pointer",
+                f"{what} declares {texture_count} texture parameter(s) but no slot table",
+            )
         for index in range(texture_count):
             if index >= len(pairs):
                 break
             packed = int(pairs[index]["packed"], 0)
             slot = packed // 4
             entry = {"index": index, "name": pairs[index]["name"], "packed": pairs[index]["packed"], "slot": slot, "record": None, "key": None}
-            if slots is not None and slot < texture_count:
-                pointer, value = self.system_pointer(slots.offset + 8 * slot, what + f" slot {slot}")
+            if slots is not None and slot < slot_limit:
+                try:
+                    pointer, value = self.system_pointer(
+                        slots.offset + 8 * slot, what + f" slot {slot}"
+                    )
+                except DrawableError as err:
+                    self.add("pointer_read", str(err))
+                    break
                 if pointer is not None:
                     bound += 1
                     entry["record"] = self._pointer_report(pointer, value)
-                    name_record, name_value = self.system_pointer(
-                        pointer.offset + 0x30, what + f" texture record {slot} name"
-                    )
-                    if name_record is not None:
-                        key = self.u64(name_record.offset + 0x08, self.system_len, what + " key")
-                        entry["key"] = f"{key:#018x}"
-                        keys.append(key)
+                    try:
+                        name_record, _ = self.system_pointer(
+                            pointer.offset + 0x30, what + f" texture record {slot} name"
+                        )
+                        if name_record is not None:
+                            key = self.u64(name_record.offset + 0x08, self.system_len, what + " key")
+                            entry["key"] = f"{key:#018x}"
+                            keys.append(key)
+                    except DrawableError as err:
+                        self.add("pointer_read", str(err))
             textures.append(entry)
         return {
             "offset": offset,
             "texture_count": texture_count,
             "total": total,
             "texture_parameters": textures,
+            "slot_table_entries": slot_limit,
             "bound": bound,
             "unbound": texture_count - bound,
             "distinct_keys": len(set(keys)),
         }
 
     def derive_graphics_base(self):
-        """Derive a base from at least two graphics pointers landing on the marker."""
-        pointers = []
+        """Derive a base from at least two distinct graphics pointers landing on the marker."""
+        pointers = set()
         for lod in self.lods:
             for model in lod["models"]:
                 for geometry in model["geometries"]:
                     record = geometry.get("vertex_buffer_record")
                     if record and record.get("graphics", {}).get("resolved"):
-                        pointers.append(record["graphics"]["offset"])
+                        pointers.add(record["graphics"]["offset"])
+        pointers = sorted(pointers)
         if len(pointers) < 2:
             return None
         supports = {}
@@ -644,11 +724,11 @@ class Inspector:
             if at < 0 or hits >= MAX_MARKER_HITS:
                 break
             hits += 1
-            for index, offset in enumerate(pointers):
+            for offset in pointers:
                 base = at - offset
                 if base < 0:
                     continue
-                supports.setdefault(base, set()).add(index)
+                supports.setdefault(base, set()).add(offset)
             start = at + 1
         candidates = {base: found for base, found in supports.items() if len(found) >= 2}
         if not candidates:
@@ -752,10 +832,9 @@ def print_text(report):
                     print(f"      AABB at {aabb['offset']:#x}")
     graphics_base = report.get("graphics_base")
     if graphics_base:
-        print(
-            f"graphics base: {graphics_base['base'] if graphics_base['base'] is not None else 'ambiguous'} "
-            f"from {graphics_base['pointer_count']} pointer(s)"
-        )
+        base = graphics_base["base"]
+        shown = "ambiguous" if base is None else f"{base:#x}"
+        print(f"graphics base: {shown} from {graphics_base['pointer_count']} pointer(s)")
     materials = report.get("materials")
     if materials:
         print(f"shader group: {materials['shader_count']} shader(s), capacity {materials['shader_capacity']}")

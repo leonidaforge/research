@@ -1,9 +1,12 @@
 # Drawables
 
-A drawable is the resource payload behind the local type ID 2. It carries a
-header, up to four LOD slots, model and geometry records, vertex-buffer and
-index records, and a shader/material chain. This document describes the
-reconstructed layout observed in two decoded payloads of the Scarlett build
+This document describes the decoded payload structure observed in two rows that
+carry local type ID 2. The two samples carry a header, up to four LOD slots,
+model and geometry records, vertex-buffer and index records, and a
+shader/material chain. The type ID is a local CLI assignment, not a format
+identity; other type-2 rows and other type IDs were not inspected. The label
+"drawable" is the subject name used by this iteration. The samples come from the
+Scarlett build
 [e95020b2](../../../builds/gta-vi/scarlett-e95020b2/README.md).
 
 No engine code path was traced. Segment names follow RAGE convention and are
@@ -17,10 +20,10 @@ as `DRAW-F01` and listed in
 The parent archive is `<GAME_ROOT>/levels.rpf`, row 5. That row is a nested
 archive of 22,172,864 bytes with SHA-256
 `450B6A5A95578A31133F686AE5D1D8151B4C7A38197F039895311D44742DBC96`.
-It holds 316 rows: 92 of type ID 2 and 224 of type ID 3.
+It holds 316 rows: 92 of local type ID 2 and 224 of local type ID 3.
 
-| Sample | Row | Type | Stored bytes | Decoded bytes | Chunks | Declared pages | System bytes | Graphics bytes |
-| ------ | --: | ---: | -----------: | ------------: | -----: | -------------- | -----------: | -------------: |
+| Sample | Row | Local type | Stored bytes | Decoded bytes | Chunks | Declared pages | System bytes | Graphics bytes |
+| ------ | --: | ---------: | -----------: | ------------: | -----: | -------------- | -----------: | -------------: |
 | A      |   5 |    2 |        2,352 |         7,840 |      2 | 1 system, 1 graphics | 5,872 (`0x16F0`) | 1,968 (`0x7B0`) |
 | B      |  10 |    2 |       54,752 |        90,624 |      3 | 1 system, 2 graphics | 16,624 (`0x40F0`) | 74,000 (`0x12110`) |
 
@@ -29,10 +32,10 @@ the chunk counts and the page counts are observations. The system/graphics byte
 boundary is **not stored**: it is inferred from the highest resolved system
 pointer and from the graphics-base derivation in
 [Geometry](#geometry-chain). For A, the page map is at system `0x14D0`; for B,
-at `0x3BB0`. The declared pages equal the stored chunk counts (1+1=2 and 1+2=3),
-so no page is missing. B's graphics length also splits as `0x10000 + 0x2110`,
-consistent with its two declared graphics pages ([pages.md](../pages.md)); A has
-one graphics page. The boundary is still a derived quantity, and claims that
+at `0x3BB0`. The page counts match the chunk counts (1+1=2 and 1+2=3), and the
+sample B page-size split is consistent: its graphics length splits as
+`0x10000 + 0x2110` with two declared graphics pages ([pages.md](../pages.md)); A
+has one graphics page. The boundary is still a derived quantity, and claims that
 depend on it are marked as sample-verified rather than stored.
 
 ## Header
@@ -233,9 +236,9 @@ pointers whose targets are identified in the reconstructed row:
   and `0x6000A2F0` targets `0xE3E0`; both start with `42 40 00 00`. The bases
   agree at `0x40F0`, and all eight pointers then land on the same marker.
 
-`42 40 00 00` is an observation, not a format signature. The base is
-over-determined by independent pointers in both samples; the tool requires at
-least two supporting pointers before reporting one.
+`42 40 00 00` is an observation, not a format signature. The base is supported
+by two independent pointers in both samples; the tool requires at least two
+distinct graphics offsets before reporting one.
 
 ### Index descriptor and index buffer
 
@@ -279,9 +282,9 @@ No triangles were reconstructed. The element counts, byte sizes and bounds are
 structural; the cluster count is the only index field read as a count.
 
 The walked vertex-buffer and index-buffer ranges do not cover every graphics
-byte. In A they cover `0x300..0x7B0`; the first `0x300` bytes of the graphics
-segment are not addressed by the walked pointers. In B the ranges are
-interleaved with small gaps and do not start at `0x0`. The unaddressed bytes
+byte. A's ranges cover `0x300..0x7B0`; the first `0x300` bytes are not addressed
+by the walked pointers. B starts at graphics offset `0x0` with its first vertex
+buffer; later vertex and index ranges leave small gaps. The unaddressed bytes
 were not interpreted.
 
 ## Materials (structure only)
@@ -350,7 +353,8 @@ not reproduced; the key is not resolved.
 
 The two A parameter tables carry the same six texture-parameter `u32` hashes:
 `0xC8E8C282`, `0x739E3D0D`, `0x2C8D7182`, `0x0CD27763`, `0xC6F46E79` and
-`0x1E77BF4C`. They are reported as uninterpreted values, not names.
+`0x1E77BF4C`. The six values are format constants in these samples, not
+per-payload values; they are reported as uninterpreted values, not names.
 
 In A shader 0, slot 3 is null, so the fourth texture parameter is declared but
 unbound. In A shader 1, slots 2 and 3 are null. The union of the two A shaders
@@ -384,8 +388,8 @@ size is published.
 
 | Sample | Reconstruction state | Verified chain elements | Structure only | Remaining dependencies |
 | ------ | -------------------- | ----------------------- | -------------- | ---------------------- |
-| A (row 5) | Decoded payload; page map 1/1; 2 chunks; system/graphics split `0x16F0`/`0x7B0` derived | Header, one LOD slot, one model, two geometries, both vertex buffers, layout entries, buffer sizes, graphics base, index bounds, shader group and two parameter tables | Attribute semantics, format codes, 0x80 prefix, 0x4042 marker, index cluster layout, material keys, parameter meanings | Texture store/key resolution; engine record meanings; independent re-inflation |
-| B (row 10) | Decoded payload; page map 1/2; 3 chunks; split `0x40F0`/`0x12110` derived | Header, four LOD slots, four models, eight geometries, eight vertex buffers, layout entries, buffer sizes, graphics base, index bounds, shader group and two parameter tables | Same as A | Same as A |
+| A (row 5) | Decoded payload; page map system/graphics 1/1; 2 chunks; system/graphics split `0x16F0`/`0x7B0` derived | Header, one LOD slot, one model, two geometries, both vertex buffers, layout entries, buffer sizes, graphics base, index bounds, shader group and two parameter tables | Attribute semantics, format codes, 0x80 prefix, 0x4042 marker, index cluster layout, material keys, parameter meanings | Texture store/key resolution; engine record meanings; independent re-inflation |
+| B (row 10) | Decoded payload; page map system/graphics 1/2; 3 chunks; split `0x40F0`/`0x12110` derived | Header, four LOD slots, four models, eight geometries, eight vertex buffers, layout entries, buffer sizes, graphics base, index bounds, shader group and two parameter tables | Same as A | Same as A |
 
 The drawable is **not** reconstructed in the engine sense. The decoded payload
 is split into two segments at an inferred boundary. No texture is resolved.
@@ -415,8 +419,9 @@ column lists what remains uninterpreted.
 ## Limits
 
 - Two rows, one nested archive, one build. The cross-sample evidence is within
-  this population.
-- Type ID 2 is the local CLI assignment, not a format identity.
+  this population. Other type-2 rows and other type IDs were not inspected.
+- The local type ID 2 is a CLI assignment, not a format identity; the label
+  "drawable" is the subject name used by this iteration.
 - The stored rows were decoded by the CLI; the zlib streams were not
   independently re-inflated for this document.
 - The system/graphics boundary is derived from pointers and page counts, not
@@ -426,3 +431,6 @@ column lists what remains uninterpreted.
 - Payload ASCII names are not reproduced.
 - The material section is structural only. No key, texture or material name is
   resolved.
+- The system-wide pointer sweep, the `+0xB0` list shape, the AABB arithmetic
+  and the texture-store absence are manual observations; the published
+  inspector does not produce them.
