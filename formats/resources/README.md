@@ -91,6 +91,7 @@ The pointer at `+0x38` leads to a sequence of 16-byte records in the system segm
 - The samples rechecked for this document are the primary sample and the rows in [Sample locators](../../evidence/resources/INDEX.md#sample-locators). Other archives were not scanned.
 - The page sizes and the 32 MiB split are observations. No engine code that allocates or validates pages was traced. Page allocation and runtime validation remain **Unknown**.
 - The page slots are zero in every stored resource. Their runtime content and the exact slot width cannot be checked from data.
+- One `textures.rpf` nested row at entry `0x1000` declares one page more than the payload stores; the counterexample is in [pages.md](pages.md#counterexample-a-declared-page-with-no-stored-chunk). Its archive row locator is not retained (Probable).
 - A page of exactly 32 MiB cannot be distinguished from a split page by stream length alone.
 - A stored page can be raw (not a zlib stream). A reader that only finds zlib streams loses that page; the current CLI reports `partial` for such a row although the bytes are present (RES-F24, RES-F25).
 - No packed page, one stream covering two declared pages, was observed. The packing rule is untested (RES-F27).

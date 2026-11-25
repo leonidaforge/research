@@ -36,7 +36,9 @@ Interpretations that were once used for RAGE resources and later corrected. The 
 
 **Old state.** The originating branch recorded a second-system-page sample with its map at `0x24EC0` in a 192,240-byte system segment, and a system-only sample whose entry sits at `0x1B33B90` with a `0x40` map and 96 bytes of system data.
 
-**Correction.** The structural sample was re-derived from seven resources, recorded as RES-F23 and listed in the pages document. The earlier rows record no archive or row index for their subjects, so the change cannot be attributed to a recheck rather than to a different subject selection; the record does not distinguish the two. The earlier values are not retained because they cannot be matched to a named resource.
+**Correction.** The structural sample was first re-derived from seven resources, recorded as RES-F23 and listed in the pages document. The earlier rows record no archive or row index for their subjects, so the change cannot be attributed to a recheck rather than to a different subject selection; the record does not distinguish the two. The earlier values are not retained because they cannot be matched to a named resource.
+
+**Update.** The raw-page representative was added, so the structural sample now has eight rows: the primary sample, the 625,472-byte sample, the raw-page representative, four split-page rows and the system-only row. The selection rule and the count are stated in RES-F23 and in the pages document.
 
 ## Stream-only reconstruction lost a raw stored page
 
@@ -49,3 +51,9 @@ Interpretations that were once used for RAGE resources and later corrected. The 
 **Committed claim.** RES-F29 and RES-F32 ended with comparisons against values that were not part of their samples.
 
 **Correction.** RES-F29 now lists the four `u16` values and the `+0x20` word observed in its type 11, 73 and 74 samples, and states that the field positions are validated while the individual values are not a rule. RES-F32 now states only its sampled population and limits. Both findings state what their samples contain and make no comparison beyond them.
+
+## The missing-page counterexample was removed and restored
+
+**Removed by a correction.** A correction that removed external-count comparisons also deleted the RES-F13 counterexample from the pages document, the evidence index and the README. Its removal was not recorded here.
+
+**Restored.** The counterexample is back at its previous strength in the pages document and RES-F13, marked **Probable** with its archive row locator not retained. It is accepted evidence that the rule reports `partial` when a declared page is genuinely absent.

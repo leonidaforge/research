@@ -80,7 +80,7 @@ The stored row is 47,520 bytes: 16 prefix + 38,734 stored zlib + 2 fill + 8,768 
 | 112       | 65,536            | 8,304         | 73,840         | `0xF5A0` |
 | 139       | 131,072           | 14,176        | 145,248        | `0x1E900` |
 
-Three more type 6 rows in other terrain tiles store an 8,768-byte raw last page, with page maps at `0xF7D0`, `0xFA80` and `0xF2A0`. The raw page sizes measured in the representative tile are 8,768, 4,464, 16,288, 8,304 and 14,176 bytes. These rows are listed with stored-row digests in [Sample locators](../../evidence/resources/INDEX.md#sample-locators).
+Three more type 6 rows in other terrain tiles (`levels.rpf` rows 216, 1005 and 1406; inner rows 219, 47 and 45) store an 8,768-byte raw last page, with page maps at `0xF7D0`, `0xFA80` and `0xF2A0`. One additional row in `levels.rpf` row 1361, inner row 82, stores an 8,000-byte raw page. Nine raw-page rows are located in total: five in the representative tile and four in other nested archives. The raw page sizes in the representative tile are 8,768, 4,464, 16,288, 8,304 and 14,176 bytes. These rows are listed with stored-row digests in [Sample locators](../../evidence/resources/INDEX.md#sample-locators).
 
 The last chunk is a page, not padding, for these reasons:
 
@@ -173,6 +173,10 @@ The byte `0xAA` occurs in short runs: 24 bytes in six 4-byte runs in this segmen
 
 The declared counts match the reconstructed page groups in every rechecked complete resource. A raw page counts as one page group. The rechecked samples cover 1/0 (type 11), 1/1 (primary and type 73), 2/0 (raw-page and type 74) and 2/1 (625,472-byte) page-count pairs. Counts are one byte each, so a segment can declare up to 255 pages.
 
+### Counterexample: a declared page with no stored chunk
+
+One `textures.rpf` nested row at entry `0x1000` declares one system page and two graphics pages but stores two streams. The current CLI reports status `partial` and `1 of 2 graphics pages found`. The graphics page present is `0x420000` bytes, a multiple of `0x10000`, consistent with a missing last page. Whether the absent page is missing or empty is not established (RES-F13). The archive row locator is not retained; the row is **Probable**.
+
 ## Page sizes
 
 Page sizes are not stored as lengths. They follow from the reconstructed chunk sizes.
@@ -195,7 +199,7 @@ Page sizes are not stored as lengths. They follow from the reconstructed chunk s
 
 ## Rechecked samples
 
-The rechecked samples below come from the primary nested archive and from nested archives in `levels.rpf` and `data.rpf`. Each located row is identified in [Sample locators](../../evidence/resources/INDEX.md#sample-locators). The split-page and system-only rows are identified by payload offset and size; their archive row locators are not retained.
+The rechecked samples below come from the primary nested archive and from nested archives in `levels.rpf` and `data.rpf`. Each located row is identified in [Sample locators](../../evidence/resources/INDEX.md#sample-locators). The split-page and system-only rows are identified by payload offset and size; their archive row locators are not retained. These eight rows define the structural sample. The selection rule is that each row exercises a page-map or page-size condition; the raw-page representative is one of the eight, and the other raw-page rows are not separate structural samples.
 
 | Sample                        | Payload   | Map       | System pages | Graphics pages | System bytes | Graphics bytes | Split pages |
 | ----------------------------- | --------- | --------- | ------------ | -------------- | ------------ | -------------- | ----------- |
