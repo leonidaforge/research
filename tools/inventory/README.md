@@ -154,3 +154,40 @@ python -m unittest discover -s tools/inventory
 
 The tests use synthetic rows, synthetic cache bytes and temporary directories.
 They do not read game files.
+
+## Full type-0 census
+
+`full_census.py` attempts every readable type-0 row in a directory of
+top-level manifests, extracts it, records the archive header, and reads its
+nested manifest. It is the driver behind the population counts in
+[evidence/inventory/INDEX.md](../../evidence/inventory/INDEX.md).
+
+```sh
+python tools/inventory/full_census.py \
+  --inventory-dir <top-level-manifest-directory> \
+  --output-dir <scratch-directory> \
+  --lforge <leonida-forge-cli> \
+  --executable <game-executable> \
+  --batch-size 50
+```
+
+Every row is attempted once. `rows.jsonl` holds one record per attempt,
+`manifests/<sha256>.jsonl` the decoded nested manifest, and `state.json` the
+atomically rewritten progress. A rerun resumes from `rows.jsonl` and refuses a
+population whose row keys differ from the saved state.
+
+Rows larger than the CLI `archive extract` output limit are copied from their
+manifest `payload_offset` when the location record is a plain stored range
+(mode 0, no chunk table, no payload transform, equal stored and logical size).
+Any other over-limit row is recorded as `operational limit`. The copy is
+bounds-checked against the parent archive size and written through a temporary
+file.
+
+Run `--summarize-only` after a completed or interrupted run to rebuild
+`report.json` without touching an archive. Failures are grouped by the stage
+that stopped them: `missing input`, `metadata readability`, `unsupported
+transformation`, `framing error`, `unsupported storage class`, `corrupt
+compressed stream`, `incomplete reconstruction`, `operational limit` or
+`unclassified`. A stage is assigned from the CLI message or the observed size,
+not guessed from a row type.
+
