@@ -39,6 +39,22 @@ checked out or integrated. Each item below was classified before transfer.
 `RDS5-F01` to `RDS5-F19` keep the source order. The local application checks are
 `RDS5-F20` to `RDS5-F22`.
 
+## Disproved readings
+
+Interpretations that were tested and failed. They are kept so the same reading is
+not retried without new evidence. Each was disproved by the source branch's
+measurements, which the verification on `main` re-read.
+
+| Reading | Why it fails |
+| --- | --- |
+| The header is `0x100` bytes in every file | True only when the record array plus padding fits in `0x100` bytes. One sample places its ETPF chunk at `0x3100`, another at `0x24F00` |
+| The record array starts at `0x18` | Two samples place ETPF exactly at `0x10 + 8*C`; a `0x18` start would overlap the chunk by 8 bytes |
+| The record offset field is 16 bits | Files above 16 MiB need the offset's high bits; reading the low 16 bits alone gives positions far below the file size in every large sample |
+| The high 16 bits of the ETPF entry `+0x08` are an uncompressed size | They do not track the page-counter differences or the block sizes |
+| Block records' `hi[16:32]` is `crc32` or `adler32` of the stored or unpacked block | Checked on 5 blocks; no match |
+| Non-zlib blocks are stored uncompressed | Their stored range is smaller than the uncompressed size derived from the counter |
+| The first block follows the ETPF content at the next `0x100` boundary | The first block sits at a `0x1000` boundary measured from the chunk start in 55 samples, and two carry an extra `0x100` or `0x200` |
+
 ## 2026-11-25: selector 2 added
 
 The source text named selectors 1 and 3 as the unidentified codec and omitted selector
