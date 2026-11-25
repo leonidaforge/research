@@ -13,13 +13,13 @@ This document sets the method and the publication limits for this repository. It
 
 Every significant claim carries one of these labels.
 
-| Level | Meaning |
-|---|---|
-| **Confirmed** | Directly supported by verified observations, such as decompiled control flow, disassembly or data checked against samples |
-| **Probable** | Strong evidence, but not fully demonstrated |
-| **Speculative** | A plausible hypothesis that needs further investigation |
-| **Rejected** | Contradicted by reliable evidence |
-| **Unknown** | Not sufficiently investigated |
+| Level           | Meaning                                                                                                                   |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| **Confirmed**   | Directly supported by verified observations, such as decompiled control flow, disassembly or data checked against samples |
+| **Probable**    | Strong evidence, but not fully demonstrated                                                                               |
+| **Speculative** | A plausible hypothesis that needs further investigation                                                                   |
+| **Rejected**    | Contradicted by reliable evidence                                                                                         |
+| **Unknown**     | Not sufficiently investigated                                                                                             |
 
 A confirmed mechanism can still have field meanings that are only probable. State the level for each part separately.
 
@@ -81,11 +81,11 @@ Public research MUST remain compatible with automatic local recognition. It MUST
 
 Every public finding states one of these:
 
-| Label | Meaning |
-|---|---|
-| **Publicly reproducible** | Checkable from this repository and synthetic inputs alone |
+| Label                          | Meaning                                                                                                                                  |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| **Publicly reproducible**      | Checkable from this repository and synthetic inputs alone                                                                                |
 | **Private-evidence supported** | Verified against restricted local evidence; the public text states the conclusion and the dependency without the locator or secret bytes |
-| **Not demonstrated** | A hypothesis or an incomplete result |
+| **Not demonstrated**           | A hypothesis or an incomplete result                                                                                                     |
 
 Private-evidence findings may cite stable opaque evidence IDs. They MUST NOT be described as independently reproducible from this repository alone. The repository does not include the private locators or secret state needed to repeat them.
 

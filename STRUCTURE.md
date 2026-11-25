@@ -4,32 +4,32 @@ Each mechanism is documented once, in the section that owns it. Other sections l
 
 ## Sections
 
-| Directory | Holds | Does not hold |
-|---|---|---|
-| `formats/` | On-disk structures, field tables, encoding rules, parsing behavior | Function addresses, cipher internals, research narrative |
-| `cryptography/` | Cipher selection, processing spans, integrity and authentication, key-provider architecture | Key material, encoded secret states, key-material locators |
-| `engine/` | Runtime mechanisms that more than one format uses, such as name dictionaries or device abstractions | Behavior used by a single format, which stays with that format |
-| `builds/` | RVAs, vtables, object layouts and function roles for one identified executable | Format rules that do not depend on the build |
-| `evidence/` | Source list, finding index and research history per subject | Raw reports, decompiler output, game data |
-| `tools/` | Original, publishable research tools and their synthetic fixtures, including generic recognition interfaces | Private scripts, key-material dumps, extraction reports |
-| `names/` | Published, hash-validated name mappings and their format/provenance notes | Payload text, executable extracts, unvalidated candidates |
+| Directory       | Holds                                                                                                       | Does not hold                                                  |
+| --------------- | ----------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| `formats/`      | On-disk structures, field tables, encoding rules, parsing behavior                                          | Function addresses, cipher internals, research narrative       |
+| `cryptography/` | Cipher selection, processing spans, integrity and authentication, key-provider architecture                 | Key material, encoded secret states, key-material locators     |
+| `engine/`       | Runtime mechanisms that more than one format uses, such as name dictionaries or device abstractions         | Behavior used by a single format, which stays with that format |
+| `builds/`       | RVAs, vtables, object layouts and function roles for one identified executable                              | Format rules that do not depend on the build                   |
+| `evidence/`     | Source list, finding index and research history per subject                                                 | Raw reports, decompiler output, game data                      |
+| `tools/`        | Original, publishable research tools and their synthetic fixtures, including generic recognition interfaces | Private scripts, key-material dumps, extraction reports        |
+| `names/`        | Published, hash-validated name mappings and their format/provenance notes                                   | Payload text, executable extracts, unvalidated candidates      |
 
-A format document says *what* the structure is. The build catalog says *where* in one executable the evidence was found. The evidence index connects the two. Format documents cite findings by ID, such as `RPF9-F07`, and do not repeat addresses.
+A format document says _what_ the structure is. The build catalog says _where_ in one executable the evidence was found. The evidence index connects the two. Format documents cite findings by ID, such as `RPF9-F07`, and do not repeat addresses.
 
 ## Formats
 
 `formats/` is split by category. Create a category only when the first format in it has researched content.
 
-| Category | Content |
-|---|---|
+| Category      | Content                                                                              |
+| ------------- | ------------------------------------------------------------------------------------ |
 | `containers/` | Formats that group or index several assets or records: archives, dictionaries, banks |
-| `resources/` | RAGE resource serialization: segments, pages, pointers |
-| `textures/` | Texture pixel formats and compression |
-| `models/` | Geometry and model encodings |
-| `animations/` | Clip and animation encodings |
-| `audio/` | Audio sample and stream encodings |
-| `scripts/` | Script bytecode and script containers |
-| `metadata/` | Structured data formats such as PSO or XML schemas |
+| `resources/`  | RAGE resource serialization: segments, pages, pointers                               |
+| `textures/`   | Texture pixel formats and compression                                                |
+| `models/`     | Geometry and model encodings                                                         |
+| `animations/` | Clip and animation encodings                                                         |
+| `audio/`      | Audio sample and stream encodings                                                    |
+| `scripts/`    | Script bytecode and script containers                                                |
+| `metadata/`   | Structured data formats such as PSO or XML schemas                                   |
 
 Only `containers/` exists so far.
 
