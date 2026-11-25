@@ -1,0 +1,26 @@
+{
+  "summary": {
+    "lsch_payloads": 483,
+    "lsch_marker_records": 10537,
+    "lsch_tail_min": 0,
+    "lsch_tail_max": 59776,
+    "lsch_tail_multiple_16": true,
+    "lsch_header_words": {
+      "768": 441,
+      "512": 35,
+      "1024": 7
+    },
+    "lenm_empty": 254,
+    "lenm_nonempty": 229,
+    "lenm_header_multiple_8": 229,
+    "lenm_zero_extra": 54,
+    "lenm_extra": 175,
+    "lenm_extra_min": 40,
+    "lenm_extra_max": 134872,
+    "pmap_payloads": 62,
+    "name_blocks": 41,
+    "name_total": 8342,
+    "name_distinct": 1385,
+    "psch_unused_ids_total": 711
+  }
+}
