@@ -143,6 +143,96 @@ First and last record types:
 The type bytes are structural observations. No type byte is assigned a stream,
 chunk or codec meaning.
 
+## Stream descriptors
+
+Two record types carry the per-stream descriptor. They do not establish a codec
+name; they carry a codec byte and a rate field.
+
+| Record | Offset | Field | Support |
+| --- | --- | --- | ---: |
+| `0x76` | `+0x00` | `u32` declared count | 14,665/14,665 |
+| `0x76` | `+0x08` | low `u16` rate, high `u16` flags | 14,665/14,665 |
+| `0x76` | `+0x1C` | codec byte in the first byte of the last `u32` | 14,665/14,665 |
+| `0x48` | `+0x00` | `u32` page count | 275/275 |
+| `0x48` | `+0x04` | `u32` page stride in bytes, a multiple of 2,048 | 275/275 |
+| `0x48` | `+0x08` | `u32` sub-stream count | 275/275 |
+| `0x48` | `+0x0C` | `sub-stream count` entries of 16 bytes | 275/275 |
+
+A `0x76` record is 32 bytes. A `0x48` record is `12 + 16 * count` bytes; the
+size relation holds in 275/275 records. A 24-byte per-sub-stream header does
+not fit the observed sizes; the entry is 16 bytes.
+
+```text
+0x48 entry: [u32 unknown][u32 decoded][u32 rate_flags][u16 codec_word][u16 flags]
+            rate = rate_flags >> 16, rate flags = rate_flags & 0xFFFF
+            codec byte = low byte of codec_word
+```
+
+`FF25` carries one `0x48` record with one to eight entries and one `0x55`
+record shared by those entries. `FF02`, `FF21` and `FF61` pair one `0x76` with
+one `0x55` in record order.
+
+Codec byte counts over the 768 rows:
+
+| Codec byte | Descriptors | `0x55` records | Rows |
+| --- | ---: | ---: | ---: |
+| `0x0B` | 15,038 | 14,940 | 768 |
+| `0x02` | 227 | 227 | 43 |
+| any other | 0 | 0 | 0 |
+
+The 15,038 `0x0B` descriptors are 14,665 `0x76` records plus 373 `0x48`
+entries. The codec byte is not assigned an identity.
+
+## Packet framing
+
+The `0x55` records carry the encoded stream. For every `0x0B` `0x55` record,
+the size is a multiple of 2,048 bytes and the data is a run of 2,048-byte
+blocks. Over the 14,940 `0x0B` records:
+
+| Measure | Value |
+| --- | ---: |
+| Blocks | 505,723 |
+| Data blocks | 502,373 |
+| Metadata blocks | 1,794 |
+| Zero blocks | 1,556 |
+| Packets | 4,961,453 |
+| Packet payload bytes | 951,673,715 |
+| Padding bytes | 66,258,537 |
+| Framing violations | 0 |
+
+A data block is a sequence of `[u16 length][packet]`. A zero length terminates
+the block and the rest of the block is zero. A block that ends exactly at 2,048
+bytes has no terminator. No length crosses the block end and no non-zero byte
+follows a terminator. Packet lengths range from 3 to 480 bytes; the most common
+are 320 (2,233,972 packets), 80 (730,611), 50 (474,247), 160 (249,660) and 240
+(189,639). The first packet byte has eight observed values:
+
+| First byte | Packets |
+| --- | ---: |
+| `0xFC` | 2,463,483 |
+| `0xF8` | 1,276,418 |
+| `0x78` | 821,494 |
+| `0xD8` | 178,792 |
+| `0x68` | 156,359 |
+| `0xB8` | 39,528 |
+| `0x48` | 20,314 |
+| `0xDC` | 5,065 |
+
+The `FF02`, `FF21` and `FF61` variants have no metadata blocks. Every one of
+their `0x55` blocks is a data block. `FF25` divides the `0x55` record into pages
+of the `0x48` page stride. A page starts with a sentinel block (`u32`
+`0xFFFFFFFF`) and one metadata block, or two metadata blocks in 26 of the 27
+pages with a 882-block stride. Data blocks follow, then zero blocks to the page
+boundary. The page count equals the `0x48` page-count field in 275/275 rows.
+The 1,768 pages have strides of 256 blocks (257 rows), 231 (1), 60 (15), 882
+(1) and 54 (1). No page has an unexplained block or a data block that fails the
+framing rule.
+
+Codec byte `0x02` does not use the length framing. Its `0x55` record size is
+`4 * declared` in 227/227 records, where `declared` is the `0x76` `u32` at
+`+0x00`. The bytes are four-byte values consistent with a float range; no
+decoder was run.
+
 ## FF02 count formula
 
 For `FF02`, let `streams` be the `u32` at `+0x08` and `chunks[i]` the high three
@@ -186,6 +276,34 @@ Archive family changes only one observed relation: the `FF02` width-36 rows are
 family. `FF21`, `FF25` and `FF61` use the same positions and formulas in both
 families. Archive placement is provenance; the predicates are header arithmetic.
 
+## Hypothesis results
+
+| Hypothesis | Result | Population | Confidence |
+| --- | --- | --- | --- |
+| H1: codec byte `0x0B` and `[u16 length][packet]` framing in 2,048-byte blocks | Framing rule holds with zero violations. The byte is consistent with a codec selector; its identity is not established | 14,940 `0x55` records, 4,961,453 packets | Confirmed (framing); Unknown (codec identity) |
+| H2: codec byte `0x05` is a 32 kHz mono stream | Rejected for this population: no descriptor carries `0x05` and no rate field is 32,000 | 15,265 descriptor entries | Rejected (absence) |
+| H3: codec byte `0x02` is 4 bytes per declared sample | `size == 4 * declared` in 227/227 records | 227 records in 43 rows | Confirmed (size relation); Unknown (sample type) |
+| H4: low `u16` of the `0x76` descriptor is a source rate | The rate is the low `u16` at `+0x08`, not the descriptor's lowest `u16`. It is 48,000 in 14,625 `0x76` records and 12,000, 22,050 or 11,025 in 40 records. `0x48` entries carry the rate in the high `u16` of their third word. 48 kHz decode is not verified | 14,665 `0x76` records, 373 `0x48` entries | Confirmed (field position and values); Unknown (decode rate) |
+| H5: a `0xA3` entry is a seek position | Every `A3` table starts at 0 and is non-decreasing. `FF02`/`FF21`/`FF61` have one entry per 2,048-byte block plus the initial 0 (14,665/14,665); `FF25` has one entry per page (275/275). The unit and the terminal relation to decoded samples are Unknown | 14,940 paired streams | Probable (position table); Unknown (unit) |
+
+The 43 `FF21` rows whose last record is `0x76` carry no `0xA3` record; they are
+outside the H5 count. The 40 non-48 kHz `0x76` records occur in 14 rows in two
+depth-1 archives under `audio.rpf`. They are not a music-only exception and are
+listed in the evidence index.
+
+## Decode dependency
+
+No decoder was installed, copied or run. The framing result is a container
+result: it shows that the blocks and packet boundaries are consistent, not that
+the packets decode.
+
+To confirm codec identity and the declared sample count, an authorized decoder
+must decode the `0x0B` packets and compare the decoded sample count with the
+container's declared count (`0x76` at `+0x00`, `0x48` entry at `+0x04`) and with
+the terminal `0xA3` entry. The same test decides whether `0x02` is a float
+sample stream. No `0x05` stream exists in the 768-row sample, so a decoder
+cannot be tested against that hypothesis here.
+
 ## Identification
 
 Identification MUST use the payload bytes. `ADAT` at offset 0 identifies the
@@ -204,15 +322,21 @@ be recorded with the signature, because the high half selects the table layout.
   uninterpreted.
 - The record type bytes and the second `FF61` offset have no established
   meaning.
-- No executable path was traced. No audio codec, AWC identity or packet framing
-  is assigned.
+- No executable path was traced and no decoder was run. The codec bytes, the
+  packet framing and the `0x48` page fields are structural observations; no
+  codec identity is assigned.
+- The `0x48` entry fields `unknown` and `decoded`, the `0x76` declared count and
+  the `0xA3` unit are not mapped to decoded samples.
 
 ## Open questions
 
 - What do the record type bytes select?
 - What are the `8 * streams + 4` bytes before the record run?
 - What is the second `FF61` offset pointing to?
-- Does the encoded stream after `+0x0C` use one codec for all four variants?
+- Which codec decodes each codec byte, and does the decoded sample count match
+  the descriptor count?
+- Do the 40 non-48 kHz `0x76` records describe a resampled source or a different
+  stream role?
 - Why do 18 type-255 rows in one `audio.rpf` archive begin a zlib stream instead
   of `ADAT`?
 

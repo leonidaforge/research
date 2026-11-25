@@ -77,6 +77,14 @@ are retired and are not reused; the findings below start at `ADAT-F06`.
 | ADAT-F18 | The 8-byte record run ends exactly at `+0x0C` in 768/768 rows with a 0-byte remainder. No record has size zero; no record's `offset + size` exceeds the payload; no record points before the data offset. The last record's type byte equals the byte before `+0x0C` in 768/768 rows. | `BINARY`, `CROSS_SAMPLE`, `SYNTHETIC` | Confirmed (768/768) | Synthetic tests validate the tool, not the native format |
 | ADAT-F19 | A record is a little-endian 64-bit word: type in bits 63..56, size in bits 55..28 and payload-relative offset in bits 27..0. Record type bytes are `0x36`, `0x48`, `0x55`, `0x5C`, `0x76`, `0xA3`, `0xB2` and `0xBD`. `FF25` begins with `0x48` in 275/275 rows; `FF02` begins with `0x36` in 124/124 rows. No type byte is assigned a stream or codec meaning. | `BINARY`, `CROSS_SAMPLE` | Confirmed (fields and byte values) | Type meanings are Unknown |
 | ADAT-F20 | The earlier `FF02` record-width heuristic explains 123 of 124 rows. Width 36 covers 113 `audio.rpf` rows, 44 covers 4 other rows and 60 covers 6 other rows. The remaining other row has mixed chunk counts, an integer width of 39 and no integral width; `ADAT-F12` explains it. | `BINARY`, `CROSS_SAMPLE` | Confirmed (sample) | The width relation holds only when every stream has the same chunk count |
+| ADAT-F21 | `0x76` records carry a codec byte at `+0x1C` and a rate field at `+0x08`. The codec byte is `0x0B` in 15,038 descriptors and `0x02` in 227; no other value occurs. The 15,038 are 14,665 `0x76` records and 373 `0x48` entries. | `BINARY`, `CROSS_SAMPLE` | Confirmed (byte values and positions) | The codec byte is not assigned an identity; no decoder was run |
+| ADAT-F22 | Every `0x0B` `0x55` record is a multiple of 2,048 bytes. Over 14,940 records and 505,723 blocks, 502,373 data blocks parse as `[u16 length][packet]`; a zero length terminates a block, the remainder is zero, and no length crosses the block end. There are 0 framing violations. The FF02, FF21 and FF61 variants have no metadata blocks. | `BINARY`, `CROSS_SAMPLE`, `SYNTHETIC` | Confirmed (framing) | The packets are not decoded; the framing does not identify a codec |
+| ADAT-F23 | The 4,961,453 `0x0B` packets carry 951,673,715 payload bytes and 66,258,537 padding bytes. Packet lengths range from 3 to 480 bytes; the most common are 320, 80, 50, 160 and 240. The first packet byte has eight values, led by `0xFC` (2,463,483) and `0xF8` (1,276,418). | `BINARY`, `CROSS_SAMPLE` | Confirmed (values) | The first byte is not mapped to a frame duration without a decoder |
+| ADAT-F24 | The `0x48` record is `12 + 16 * count` bytes: `u32` page count, `u32` page stride in bytes, `u32` sub-stream count, then 16-byte entries. The size relation holds in 275/275 records. `FF25` divides its one `0x55` record into pages of that stride: a sentinel block, one or two metadata blocks, data blocks and zero padding. The page count equals the field in 275/275 rows and the 1,768 pages have no unexplained block. | `BINARY`, `CROSS_SAMPLE`, `SYNTHETIC` | Confirmed (layout and counts) | The entry `unknown` and `decoded` fields are not interpreted. A 24-byte entry does not fit the observed sizes |
+| ADAT-F25 | The rate field is the low `u16` at `0x76 +0x08`, not the descriptor's lowest `u16`. It is 48,000 in 14,625 records and 12,000 (30), 22,050 (8) or 11,025 (2) in 40 records from 14 rows in two depth-1 archives. `0x48` entries carry the rate in the high `u16` of the third entry word and are 48,000 in 373/373 entries. | `BINARY`, `CROSS_SAMPLE` | Confirmed (field position and values) | The decode rate and the meaning of the 40 non-48 kHz records are Unknown |
+| ADAT-F26 | For codec byte `0x02`, the `0x55` size equals `4 * declared` in 227/227 records in 43 rows, where `declared` is the `0x76` `u32` at `+0x00`. | `BINARY`, `CROSS_SAMPLE` | Confirmed (size relation) | No sample type is established; the data is not decoded |
+| ADAT-F27 | `0xA3` tables start at 0 and are non-decreasing in 14,940/14,940 paired `0x0B` streams. `FF02`, `FF21` and `FF61` have one entry per 2,048-byte block plus the initial 0 (14,665/14,665); `FF25` has one entry per page (275/275). The 43 `FF21` rows whose last record is `0x76` have no `0xA3` record. | `BINARY`, `CROSS_SAMPLE`, `SYNTHETIC` | Probable (position table); Confirmed (counts) | The unit and the terminal relation to decoded samples are Unknown |
+| ADAT-F28 | No descriptor in the 768 rows carries codec byte `0x05` and no rate field is 32,000. The 15,265 codec positions are `0x0B` or `0x02`. No field or codec byte in the observed descriptors selects a stream for the second named codec hypothesis. | `BINARY`, `CROSS_SAMPLE` | Rejected (H2); Unknown (second codec selector) | Absence in this depth-1 sample does not rule out other archives or builds |
 
 ## Variant table detail
 
@@ -255,6 +263,29 @@ The 768-row re-read changes those readings:
 The four variants remain one format family. No codec, AWC identity or packet
 framing is assigned.
 
+### Iteration 11 descriptor and framing model
+
+The earlier index left every record type and the encoded stream uninterpreted.
+The 768-row re-read adds a structural stream model without assigning a codec:
+
+- `0x76` records carry a declared count, a rate/flags word and a codec byte at
+  `+0x1C`. `0x48` records carry a page count, a page stride, a sub-stream count
+  and 16-byte entries. The earlier 24-byte entry hypothesis is rejected.
+- Every `0x0B` `0x55` record is block-framed: 505,723 blocks, 4,961,453
+  packets, no length crossing a block and no non-zero padding.
+- `FF25` adds pages from the `0x48` stride. The page count matches the `0x48`
+  field in 275/275 rows and every page block is classified.
+- `0x02` records satisfy `size == 4 * declared` in 227/227 records.
+- The rate field is `0x76 +0x08` low `u16`, not the descriptor's lowest `u16`.
+- `0xA3` is a non-decreasing position table, with one entry per block for the
+  three non-music variants and one per page for `FF25`. Its unit is Unknown.
+- No `0x05` descriptor and no 32 kHz rate occur. The `0x05` hypothesis is
+  rejected for this population and no selector for the second codec hypothesis
+  is established.
+
+No decoder was installed or run. The framing result does not establish a codec
+identity or a decoded sample count.
+
 ## Reproduction
 
 `<WORK>` is a scratch directory outside the repository. The cache paths and
@@ -271,9 +302,10 @@ archive. No payload file is committed.
 
 For the table-end test, read `u16[streams]` at `+0x10` (`FF21`, `FF25`) or
 `+0x14` (`FF61`), compare adjacent entries, and read the next `u16`. For the
-record run, use `tools/adat/adat_inspect.py`. For the post-table gap, subtract
-the table end from the `+0x0C` offset. For the byte boundary, compare the bytes
-at `offset - 1` and `offset`.
+record run, use `tools/adat/adat_inspect.py`. Add `--framing` to walk the
+`0x55` blocks, classify the `FF25` pages and count packets. For the post-table
+gap, subtract the table end from the `+0x0C` offset. For the byte boundary,
+compare the bytes at `offset - 1` and `offset`.
 
 ## Limits
 
@@ -282,5 +314,8 @@ at `offset - 1` and `offset`.
   archive size cap.
 - The 18 zlib type-255 rows in one `audio.rpf` archive were not decoded.
 - The region between the variant table and the data offset is not interpreted.
-- No executable path was traced. Field meaning beyond count and offset is
-  Unknown, and no codec identity is assigned.
+- No executable path was traced and no decoder was run. The framing and codec
+  bytes are container observations; no codec identity, decoded sample count or
+  playback result is established.
+- The `0x48` entry fields, the `0x76` declared count and the `0xA3` unit are not
+  mapped to decoded samples.
