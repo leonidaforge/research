@@ -61,7 +61,7 @@ The match uses the little-endian reading. The big-endian reading of the same 16 
 
 The table maps 17,431 first-field keys to 6,845 distinct stored keys; 1,176 of those stored keys have more than one first-field key, and the largest group is 723.
 
-The direction is **Confirmed** for `textures.rpf` row 20 and **Unknown** for the other two nonempty tables. Their second-field keys do not occur in the 46-store set. The local set is smaller than the 57-store sample used by the RDS5 document, so a missing store is the first explanation to test. The direction is not refuted: no table maps a stored key to an absent key.
+The direction is **Confirmed** for `textures.rpf` row 20 and **Unknown** for the other two nonempty tables. Their second-field keys do not occur in the 46-store set. The local set is smaller than the 57-store sample used by the RDS5 document, so a missing store is the first explanation to test. No table inverts the relation: no table has a first-field key present in a store while its second-field key is absent.
 
 ## Trailing blob
 
@@ -81,9 +81,10 @@ The count-0 payload has a 16-byte blob, constant across the two byte-identical r
 | Stored-byte signature census          | Confirmed (3 rows of the 22-archive inventory) |
 | Decoded-content occurrence            | Confirmed (5 rows; bounded scan for small rows) |
 | Count, length and 16-byte entry width | Confirmed (four distinct payloads)             |
-| Little-endian field reading           | Probable                                       |
+| Count and blob-length little-endian reading | Probable                                       |
+| Entry-field little-endian reading     | Confirmed (`textures.rpf` row 20)              |
 | Two 8-byte entry fields               | Confirmed (one table; disjoint key sets)       |
-| First-field-to-stored-key direction | Confirmed (`textures.rpf` row 20); Unknown (two tables) |
+| First-field-to-stored-key direction   | Confirmed (`textures.rpf` row 20); Unknown (two tables) |
 | Trailing blob                         | Unknown (decoder and width tests negative)     |
 | Independent format                    | Probable                                       |
 

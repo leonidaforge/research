@@ -202,7 +202,7 @@ A marker record is 32 bytes and starts with eight `0xAA` bytes.
 | `+0x0E` | `u16` little-endian | Uninterpreted |
 | `+0x10` | 16 bytes | Uninterpreted |
 
-The marker run is exact. Every `0xAA` run in the body is a marker record, all 10,537 records start at a 16-byte boundary, and every consecutive pair is 32 bytes apart. The run starts at `+0x10` in 483 of 483 payloads. The tail has no marker. The tail grammar and the record fields are **Unknown**.
+The marker run is exact. Every `0xAA` run in the body is a marker record, all 10,537 records start at a 16-byte boundary, and every consecutive pair is 32 bytes apart. The run starts at `+0x10` in 483 of 483 payloads. The tail has no marker. Tails are 0 to 59,776 bytes and all are multiples of 16; only widths 1, 2, 4, 8 and 16 divide every tail length, so no fixed-width record table larger than a byte is established. The tail grammar and the record fields are **Unknown**.
 
 ### `LENM` body
 
@@ -215,7 +215,7 @@ The body is empty in 254 top-level payloads. The 229 nonempty bodies share a hea
 | `+0x10` | `u32` little-endian | Count-like word `N`; meaning **Unknown** |
 | `+0x14` | bytes | Body continues; length minus `0x14` is a multiple of 8 in 229 of 229 |
 
-`N` does not delimit the body. The relation `length == 0x18 + 16 * N` holds in 54 of 229 bodies. The other 175 are longer by a positive multiple of 8. The chain and the extra region are **Unknown**.
+`N` does not delimit the body. The relation `length == 0x18 + 16 * N` holds in 54 of 229 bodies. The other 175 are longer by a positive multiple of 8; the extra regions are 40 to 134,872 bytes, and only widths 1, 2, 4 and 8 divide every extra length. The chain and the extra region are **Unknown**.
 
 Neither body contains a co-located plaintext name. The printable-byte ratio is at most 0.24 for `LSCH` and 0.20 for `LENM`; the short printable runs in `LSNS` and `LGID` are not names. No semantic label is assigned.
 
