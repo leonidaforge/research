@@ -10,21 +10,9 @@ Entries here are identified by observable payload bytes only. A signature is not
 | `SGD5`    | 2                    | `shaders.rpf` | [sgd5](sgd5/README.md)     |
 | none      | 1                    | `data.rpf`    | [type14](type14/README.md) |
 | `PSIN`    | 18 sampled           | 5 archives    | [psin](psin/README.md)     |
+| `GFX*`    | 49                   | 6 depth-1 under `data.rpf`   | [gfx](gfx/README.md)       |
+| `ADAT`    | 729                  | 59 depth-1 under `audio.rpf` | [adat](adat/README.md)     |
 
 These counts come from a signature census over the 6,534 unique rows of the 22 top-level archives, reading the first eight stored bytes of every untransformed row with at least eight stored bytes. Chunked rows are included; rows behind the payload transform are not, so the counts are lower bounds for those archives. Every other row in that set begins with a zlib stream, except the single encoding-2 row, whose first 16 stored bytes are the prefix recorded in RPF9-F119. PSIN is recorded from decoded payloads, not from stored bytes: its rows are chunked, so the census sees a zlib stream where the decoded payload begins with `PSIN`. `EDUP` shows the same effect: the stored-byte census sees three rows, but decoding the two other rows with the same name key adds two, so the decoded occurrence is five. The table records both counts for `EDUP`. The `KB2n` figure is 505 from the current 515-row `movies.rpf` manifest. An earlier census reported 787 over a 797-row `movies.rpf` population whose manifest is not preserved; that figure is not interchangeable with the current one. The two populations and their selection rules are listed in [KB2-F12](../../evidence/kb2j/INDEX.md#census-reconciliation).
-| Signature | Rows       | Archives                     | Document                   |
-| --------- | ---------- | ---------------------------- | -------------------------- |
-| `EDUP`    | 3          | 3                            | [edup](edup/README.md)     |
-| `KB2j`    | 10         | `movies.rpf`                 | [kb2j](kb2j/README.md)     |
-| `KB2n`    | 787        | `movies.rpf`                 | [kb2j](kb2j/README.md)     |
-| `SGD5`    | 2          | `shaders.rpf`                | [sgd5](sgd5/README.md)     |
-| none      | 1          | `data.rpf`                   | [type14](type14/README.md) |
-| `PSIN`    | 18 sampled | 5 archives                   | [psin](psin/README.md)     |
-| `GFX*`    | 49         | 6 depth-1 under `data.rpf`   | [gfx](gfx/README.md)       |
-| `ADAT`    | 729        | 59 depth-1 under `audio.rpf` | [adat](adat/README.md)     |
-
-The `EDUP`, `KB2j`, `KB2n`, `SGD5` and type 14 counts come from a signature census over the 6,534 unique rows of the 22 top-level archives, reading the first eight stored bytes of every untransformed row with at least eight stored bytes. Chunked rows are included; rows behind the payload transform are not, so the counts are lower bounds for those archives. Every other row in that set begins with a zlib stream, except the single encoding-2 row, whose first 16 stored bytes are the prefix recorded in RPF9-F119. PSIN is recorded from decoded payloads, not from stored bytes: its rows are chunked, so the census sees a zlib stream where the decoded payload begins with `PSIN`.
-
-`GFX*` and `ADAT` are outside that census; their counts come from the newer 782-archive scratch run. Both occur in depth-1 nested archives: `GFX*` in decoded chunked type-66 rows and `ADAT` in stored type-255 rows. Their parent type-0 rows begin `9FPR`, and the chunked type-66 rows begin a zlib stream at the payload offset. See [GFX* and ADAT](../../evidence/gfx-adat/INDEX.md).
 
 Evidence: [evidence/unknown-payloads/INDEX.md](../../evidence/unknown-payloads/INDEX.md).
