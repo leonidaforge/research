@@ -12,7 +12,7 @@
   payload.
 - [kb2j](kb2j/README.md): bounded `KB2j`/`KB2n` header and frame-table
   inspector.
-- [resources](resources/README.md): resource page and pointer inspectors, raw-page reconstruction, 0DRP table walks, the texture dictionary parser and the dictionary census under `tools/resources/`.
+- [resources](resources/README.md): resource page, pointer, raw-page reconstruction and 0DRP table tools, plus the texture dictionary parser and the dictionary census under `tools/resources/`.
 - [rpf9](rpf9/README.md): bounded encoding-2 framing, trailer and secondary-area probes.
 - [drawables](drawables/README.md): bounded drawable, LOD, geometry and material inspector.
 - [adat](adat/README.md): ADAT header and chunk-table inspector.
