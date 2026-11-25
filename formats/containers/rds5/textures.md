@@ -73,9 +73,10 @@ consequence in this iteration.
 
 | Format id | Unit | Bytes | Extent fit | Independent consequence |
 |---|---|---|---|---|
-| 28 | L4 | 4 per texel | single-level rows fit; multi-level tile-0 rows do not all fit and are excluded | none tested |
+| 28 | L4 | 4 per texel | single-level rows fit; multi-level tile-0 rows do not all fit and are excluded | **none**; no independent test was run |
 | 54 | L2 | 2 per texel | sampled rows fit | **none**; no multi-level sample was tested |
-| 71, 72 | B8 | 8 per 4 x 4 tile | total fits | BC1 candidate mip check passes on a private sample |
+| 71 | B8 | 8 per 4 x 4 tile | total fits | BC1 candidate mip check passes on a private sample; BC4 single-channel and nibble candidates rejected |
+| 72 | B8 | 8 per 4 x 4 tile | total fits | BC1 candidate mip check passes on a private sample |
 | 77 | B16 | 16 per 4 x 4 tile | total fits | single-plane BC4 candidate mip check passes on a few tile-mode 2 and 3 samples |
 | 80 | B8 | 8 per 4 x 4 tile | total fits | single-plane BC4 candidate mip check passes on a private sample |
 | 83 | B16 | 16 per 4 x 4 tile | total fits | two-plane BC4 candidate mip check passes on a private sample |
@@ -162,8 +163,8 @@ cannot show a mode field. No layout is selected for this sample.
 | Stored block selection | Established | RDS5-F33, RDS5-F38 |
 | Decompression | Established | RDS5-F24, RDS5-F38 |
 | Virtual reconstruction | Established | RDS5-F28, RDS5-F38 |
-| Pixel-format interpretation | Fit only; codec unidentified; layout tested only where linear is rejected for 98 at tile 3 | RDS5-F39, RDS5-F42 |
-| Element ordering | Unknown; a BC1 row-major candidate exists for 71 only | RDS5-F40 |
+| Pixel-format interpretation | Fit only; codec unidentified; candidate layouts pass mip checks for 71, 72, 77, 80 and 83; linear rejected for 98 at tile 3 | RDS5-F39, RDS5-F40, RDS5-F42 |
+| Element ordering | Unknown; BC1 row-major candidates exist for 71 and 72 | RDS5-F40 |
 | Mip selection | Not established for the control sample; level-count recovery unresolved | RDS5-F44 |
 | Output dimensions and arrangement | Dimensions probable; arrangement unknown | RDS5-F38 |
 
@@ -173,7 +174,7 @@ encoding remain speculative.
 ## Limits
 
 - The storage units are extent fits. No unit is individually confirmed, and
-  format 54 has no consequence independent of the fit.
+  formats 28, 54 and 99 have no consequence independent of the fit.
 - The candidate decoders are standard specifications used as hypotheses. A
   passing mip check supports the element ordering and level layout, not a codec
   identity or a pixel format.
