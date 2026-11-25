@@ -292,10 +292,10 @@ families. Archive placement is provenance; the predicates are header arithmetic.
 | H4: low `u16` of the `0x76` descriptor is a source rate | The rate is the low `u16` at `+0x08`, not the descriptor's lowest `u16`. It is 48,000 in 14,625 `0x76` records and 12,000, 22,050 or 11,025 in 40 records. `0x48` entries carry the rate in the high `u16` of their third word. 48 kHz decode is not verified | 14,665 `0x76` records, 373 `0x48` entries | Confirmed (field position and values); Unknown (decode rate) |
 | H5: a `0xA3` entry is a seek position | Every `A3` table starts at 0 and is non-decreasing. `FF02`/`FF21`/`FF61` have one entry per 2,048-byte block plus the initial 0 (14,665/14,665); `FF25` has one entry per page (275/275). The unit and the terminal relation to decoded samples are Unknown | 14,940 paired streams | Probable (position table); Unknown (unit) |
 
-The 43 `FF21` rows whose last record is `0x76` carry no `0xA3` record; they are
-outside the H5 count. The 40 non-48 kHz `0x76` records occur in 14 rows in two
-depth-1 archives under `audio.rpf`. They are not a music-only exception and are
-listed in the evidence index.
+The 43 `FF21` rows that carry codec `0x02` streams have no `0xA3` record; they
+are outside the H5 count. The 40 non-48 kHz `0x76` records occur in 14 rows in
+two depth-1 archives under `audio.rpf`. They are not a music-only exception and
+are listed in the evidence index.
 
 ## Decode dependency
 
