@@ -24,6 +24,7 @@ This repository holds the knowledge base behind [Leonida Forge](https://github.c
 | RDS5 containers                 | Header, records, entry field ranges, block catalogue and eight storage classes known. zlib and stored classes decode; six classes undecoded; one zlib-only texture reconstructed to the byte level, pixels speculative                                               | [formats/containers/rds5](formats/containers/rds5/README.md)                                                              |
 
 Native RPF9 table-of-contents listing works after metadata authentication. Stored and chunked payloads extract; rows behind the payload transform do not, and names remain hashes. Limits are in the [RPF9 overview](formats/containers/rpf9/README.md#limits-of-native-toc-extraction).
+
 The 178 terminal copy-chunk classifications in the payload row are Probable, not established: every observed candidate had zero padding, and the padded case is covered only by a synthetic fixture.
 
 ## Navigating the repository
