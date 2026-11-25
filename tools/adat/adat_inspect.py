@@ -327,6 +327,15 @@ def inspect_framing(data: bytes, label: str = "<memory>") -> dict:
     streams = _u32(data, 0x08)
     data_offset = _u32(data, 0x0C)
     records = _read_records(data, variant, streams, data_offset)
+    for record in records:
+        if record["data_offset"] < data_offset:
+            raise AdatError(
+                f"{label}: record at 0x{record['offset']:x} points before the data offset"
+            )
+        if record["data_offset"] + record["size"] > len(data):
+            raise AdatError(
+                f"{label}: record at 0x{record['offset']:x} overruns the payload"
+            )
 
     descriptors = []
     chunk_records = []

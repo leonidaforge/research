@@ -192,6 +192,21 @@ class FramingTests(unittest.TestCase):
         kinds = {item["kind"] for item in report["streams"][0]["violations"]}
         self.assertIn("page_count_mismatch", kinds)
 
+    def test_framing_rejects_record_overrun(self):
+        data = build_with_records(0xFF21, 1, [
+            (0x76, descriptor_76(), 0),
+            (0x55, b"\x00" * 2048, 32),
+        ])
+        damaged = bytearray(data)
+        struct.pack_into("<I", damaged, 0x08, 1)
+        # Point the 0x55 record beyond the payload.
+        record_position = record_start(0xFF21, 1) + 8
+        value = struct.unpack_from("<Q", damaged, record_position)[0]
+        value = (value & ~0xFFFFFFF) | (len(damaged) - 8)
+        struct.pack_into("<Q", damaged, record_position, value)
+        with self.assertRaises(adat_inspect.AdatError):
+            adat_inspect.inspect_framing(bytes(damaged))
+
     def test_short_0x76_is_rejected(self):
         data = build_with_records(0xFF21, 1, [
             (0x76, b"\x00" * 16, 0),
