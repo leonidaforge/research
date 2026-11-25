@@ -1,10 +1,21 @@
 # ADAT evidence index
 
+<<<<<<< HEAD
 `ADAT` (`41 44 41 54`) is a stored-payload head from type-255 rows inside
 depth-1 archives reached from `audio.rpf`. This index records its provenance,
 sample and findings. The `GFX*` observations that were formerly recorded here
 are now in [GFX*](../gfx/INDEX.md); the two subjects share a method but not a
 payload family. The directory keeps its former combined name.
+=======
+The current ADAT findings are in [evidence/adat/INDEX.md](../adat/INDEX.md). The
+ADAT sections below are the earlier 21-row record; their findings `ADAT-F01` to
+`ADAT-F05` are superseded and the identifiers are retired.
+
+Two payload signatures were recorded in earlier notes: `GFX*` under type ID 66
+and `ADAT` under type ID 255 in `audio.rpf`. This index recovers the observation
+level of each claim, the sample that produced it, and why a later top-level
+stored-byte census did not repeat it.
+>>>>>>> 5b14c54 (docs(adat): establish the depth-1 header structure)
 
 `ADAT` does not occur at offset 0 of a top-level row, so it does not belong to
 the census that reads only the first eight stored bytes of the 6,534 top-level

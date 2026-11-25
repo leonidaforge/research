@@ -18,7 +18,7 @@ Subjects:
 - [RAGE resources](resources/INDEX.md)
 - [KB2j and KB2n](kb2j/INDEX.md)
 - [GFX*](gfx/INDEX.md)
-- [ADAT](gfx-adat/INDEX.md)
+- [ADAT](adat/INDEX.md)
 - [Inventory](inventory/INDEX.md)
 - [RDS5 verification](rds5-verification/INDEX.md)
 - [Shared hashing](shared/INDEX.md)
