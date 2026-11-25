@@ -79,6 +79,32 @@ type IDs, using 3 samples per top-level archive and an 8 MiB archive cap. It
 also found no type-0 row in its 44 depth-1 manifests. Its findings remain valid
 for that frame and are listed below as INV-F01 to INV-F08.
 
+## Population accounting
+
+Four counts describe the comprehensive run. They are separate populations, not
+alternative totals.
+
+Let `C` be the type-0 rows in the 22 top-level manifests that satisfy
+`kind == "row"`, `type_id == 0`, `contents.readable == true` and an integer
+`logical_size`. No type-0 row in this frame is unreadable, so `C` also equals
+the `type0_rows` gap total.
+
+- `4,351` = `|C|`, over every logical size.
+- `3,970` = rows in `C` with `logical_size <= 67,108,864` (64 MiB), the
+  `readable_within_cap` gap. These rows are eligible for the per-parent rule.
+- `381` = rows in `C` with `logical_size > 67,108,864`, the
+  `over_archive_size_cap` gap. They were never eligible.
+- `782` = rows selected from the 3,970 eligible rows under
+  `samples_depth1 = 128` and extracted. `782` is also the archive extraction
+  attempt and success count: 599 fresh extractions exited 0 and 183 reused a
+  cached artifact. The 2,000-archive and joint 20 GiB caps did not bind.
+- `3,188` = eligible rows not selected, `3,970 - 782`. These rows are a subset
+  of `C` and disjoint from the 782.
+
+The identities are `4,351 = 3,970 + 381` and
+`3,970 = 782 + 3,188`, hence `4,351 = 782 + 3,188 + 381`. The 782 rows cover
+18.0% of `C` and 19.7% of the eligible rows.
+
 ## Top-level coverage
 
 Type-0 counts are readable rows. `Within 64 MiB` rows were eligible for the
@@ -126,6 +152,7 @@ type-0 rows were skipped because they contain no archive container row.
 | INV-F24 | The 137 unique payloads fall into four prefix classes: 112 zero-prefix, 8 `PSIN`, 4 `RBF0` and 13 unrecognized. `RBF0` occurs only in type 11, across chunk encoding 3 and no chunk table, in two archives. `PSIN` occurs only in types 93 and 94, chunk encoding 3, across eight payloads from one archive. The 13 unrecognized samples are types 64, 66, 105 and 255 with chunk encoding 3, from six archives. The zero-prefix class spans 29 type IDs from 49 archives. No sample begins with `9FPR`, a zlib container header or another documented magic. | Payload prefix | Confirmed (classes and counts); Unknown (format identity) | First 8 bytes only. Exact prefixes stay in scratch. Each non-zero class comes from one or a few archives and a small number of rows. |
 | INV-F25 | Type ID does not determine the sampled prefix class. The zero-prefix class spans 29 type IDs; `RBF0` covers type 11; `PSIN` covers types 93 and 94; unrecognized covers types 64, 66, 105 and 255. | Payload prefix | Confirmed (sample independence); Unknown (format identity) | 36 of 40 type IDs were sampled. An 8-byte prefix is weak evidence of format. |
 | INV-F26 | Content-hash deduplication found no duplicate archive among the 782 extractions and seven duplicate payloads among 144 attempts. Sampling by name or row index alone would have counted those seven payload extractions twice. | Hash fingerprint | Confirmed (sample) | The archive duplicate count covers the 782 sampled archives, not the whole game. |
+| INV-F27 | The comprehensive counts are disjoint populations: 4,351 readable type-0 rows over all sizes; 3,970 of them with `logical_size <= 67,108,864`; 381 with `logical_size > 67,108,864`; and 782 selected from the 3,970 by the per-parent quantile rule with `samples_depth1 = 128` and extracted. The other 3,188 eligible rows were not selected. `4,351 = 782 + 3,188 + 381`; the joint 20 GiB and 2,000-archive caps did not bind. | Sample audit (`selection_gaps`, `select_quantiles`), native extraction | Confirmed (sample) | One build and one 22-archive top-level set. The predicates cover readable type-0 rows only. The 782 are a bounded sample, not archive coverage. |
 
 ### Prior expanded sample (250 archives)
 
