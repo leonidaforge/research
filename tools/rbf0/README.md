@@ -35,11 +35,11 @@ Text output reports:
 - Header marker `0xFFFB` and header value `1`.
 - Object body with `u32` reserved word, `u16` attribute count and `u16 0xFFFF` terminator.
 - Object fields `0x0001` and `0x0002`.
-- String fields with value tag `0xFFFD`, NUL-terminated bytes and `u16 0xFFFF` value terminator.
-- Attribute fields `0x6000` and above.
+- String fields `0x0004` to `0x000A` with value tag `0xFFFD`, NUL-terminated bytes and `u16 0xFFFF` value terminator.
+- Attribute fields `0x6003` and `0x6004` in the counted attribute position.
 - Fixed 8-byte field `0x1006`.
 
-Any other identifier, value tag or header marker is reported as unsupported. A nonzero reserved word or value header is reported without stopping the parse.
+Any other identifier, value tag or header marker is reported as unsupported, including field identifiers `0x000B` to `0x5FFF` that have the string value shape. An attribute identifier in the field stream is also reported as unsupported because attribute position is unresolved. A nonzero reserved word or value header is reported without stopping the parse.
 
 ## Dependencies
 

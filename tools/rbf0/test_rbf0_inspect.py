@@ -88,6 +88,40 @@ class InspectorTests(unittest.TestCase):
         self.assertTrue(inspector.report.unsupported)
         self.assertEqual(inspector.report.unsupported[0]["tag"], 0xFFFE)
 
+    def test_highest_evidenced_string_identifier_is_accepted(self) -> None:
+        header = b"RBF0" + u16(0xFFFB) + u32(1) + name(b"doc")
+        fields = u16(0x000A) + name(b"text") + string_value(b"x\x00")
+        report = inspect.Inspector(header + object_body(0, b"", fields)).run()
+        self.assertEqual(report.counts["string_fields"], 1)
+
+    def test_string_identifiers_outside_evidence_are_unsupported(self) -> None:
+        header = b"RBF0" + u16(0xFFFB) + u32(1) + name(b"doc")
+        for field_id in (0x000B, 0x1007, 0x5FFF):
+            with self.subTest(field_id=field_id):
+                fields = u16(field_id) + name(b"text") + string_value(b"x\x00")
+                inspector = inspect.Inspector(header + object_body(0, b"", fields))
+                with self.assertRaises(inspect.ParseError):
+                    inspector.run()
+                self.assertEqual(inspector.report.counts["string_fields"], 0)
+                self.assertEqual(inspector.report.unsupported[0]["tag"], field_id)
+
+    def test_attribute_identifier_in_field_stream_is_unsupported(self) -> None:
+        header = b"RBF0" + u16(0xFFFB) + u32(1) + name(b"doc")
+        fields = u16(0x6003) + name(b"kind") + u16(3) + b"abc"
+        inspector = inspect.Inspector(header + object_body(0, b"", fields))
+        with self.assertRaises(inspect.ParseError):
+            inspector.run()
+        self.assertEqual(inspector.report.unsupported[0]["tag"], 0x6003)
+        self.assertIn("attribute identifier", inspector.report.unsupported[0]["reason"])
+
+    def test_attribute_identifiers_outside_evidence_are_unsupported(self) -> None:
+        header = b"RBF0" + u16(0xFFFB) + u32(1) + name(b"doc")
+        attributes = u16(0x6005) + name(b"kind") + u16(3) + b"abc"
+        inspector = inspect.Inspector(header + object_body(1, attributes, b""))
+        with self.assertRaises(inspect.ParseError):
+            inspector.run()
+        self.assertEqual(inspector.report.unsupported[0]["tag"], 0x6005)
+
     def test_truncated_payload_is_an_error(self) -> None:
         data = build_document()[:-4]
         with self.assertRaises(inspect.ParseError):

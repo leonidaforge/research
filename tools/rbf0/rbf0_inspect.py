@@ -23,6 +23,8 @@ ROOT_TERMINATOR = 0xFFFF
 STRING_VALUE_TAG = 0xFFFD
 FIXED8_FIELD = 0x1006
 OBJECT_FIELD_IDS = frozenset((0x0001, 0x0002))
+STRING_FIELD_IDS = frozenset(range(0x0004, 0x000B))
+ATTRIBUTE_FIELD_IDS = frozenset((0x6003, 0x6004))
 
 
 class ParseError(Exception):
@@ -131,7 +133,13 @@ class Inspector:
 
     def parse_attribute(self) -> None:
         self.report.counts["attributes"] += 1
+        offset = self.reader.pos
         field_id = self.reader.u16("attribute id")
+        if field_id not in ATTRIBUTE_FIELD_IDS:
+            self.report.unsupported.append(
+                {"offset": offset, "tag": field_id, "reason": "unsupported attribute id"}
+            )
+            raise ParseError(offset, f"unsupported attribute id 0x{field_id:04X}")
         self.read_definition(field_id)
         value_len = self.reader.u16("attribute value length")
         self.reader.take(value_len, "attribute value")
@@ -150,13 +158,7 @@ class Inspector:
             self.reader.take(8, "fixed 8-byte value")
             return
 
-        if field_id >= 0x6000:
-            self.report.counts["attributes"] += 1
-            value_len = self.reader.u16("attribute value length")
-            self.reader.take(value_len, "attribute value")
-            return
-
-        if field_id >= 4:
+        if field_id in STRING_FIELD_IDS:
             self.report.counts["string_fields"] += 1
             reserved = self.reader.u32("field reserved")
             zero = self.reader.u16("field zero")
@@ -184,8 +186,12 @@ class Inspector:
             self.reader.expect_u16(ROOT_TERMINATOR, "string value terminator")
             return
 
+        if field_id & 0xF000 == 0x6000:
+            reason = "attribute identifier in field stream; attribute position is unresolved"
+        else:
+            reason = "unsupported field id"
         self.report.unsupported.append(
-            {"offset": self.reader.pos - 2, "tag": field_id, "reason": "unsupported field id"}
+            {"offset": self.reader.pos - 2, "tag": field_id, "reason": reason}
         )
         raise ParseError(self.reader.pos - 2, f"unsupported field id 0x{field_id:04X}")
 
