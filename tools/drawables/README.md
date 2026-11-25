@@ -47,6 +47,17 @@ per-model AABB union and the header AABB union. It reports the model and
 drawable counts, pass/fail counts, and the header-exception causes by null LOD
 slot count. It reads only. The manifest and files are local inputs.
 
+## Material census
+
+```text
+python material_census.py --manifest <MANIFEST.jsonl> [--json]
+```
+
+The manifest format is the same. The tool counts drawables with a material
+chain, shaders, declared texture slots, bound and unbound slots, null keys, and
+the occurrence of every shader hash and parameter hash. It attempts no store
+join and reports no resolved count. It reads only.
+
 ## Output
 
 The text report lists the segment sizes, the page-map counts, the header bounds,

@@ -78,8 +78,8 @@ re-inflated independently for this index.
 | DRAW-F25 | The index descriptor `+0x0A` is count A and `+0x0C` bits 8..23 are count B; the low byte of `+0x0C` is zero in all ten samples. The index bytes begin with `0x80000000 \| cluster_count`, then count A and count B, and the header matches the descriptor in 10/10 geometries. | `BINARY`, `CROSS_SAMPLE` | Confirmed (counts and header) | Ten geometries; the low byte is uninterpreted |
 | DRAW-F26 | Each sampled index body contains an ascending `u16` run starting at zero. The run length is not the vertex count in general: A-1 32/32, A-2 4/4, B-1 115/902, B-3 114/540. The run is cluster-local; the cluster boundaries and the triangle grammar are Unknown, and no flat triangle list was produced. | `BINARY`, `CROSS_SAMPLE` | Confirmed (run structure); Unknown (grammar) | Ten geometries; no triangles reconstructed |
 | DRAW-F27 | The shader `+0x00` `u32` is stable for a parameter schema: `0xBCF03FC1` carries 6 texture and 55 total parameters, `0x512937B5` carries 7 and 68, and `0xF28992E6` carries 6 and 54 in both A and B and in recovered drawables. It is a probable shader hash, not a per-material identifier or a name. | `BINARY`, `CROSS_SAMPLE` | Probable (stable hash) | Ten shader hashes over eight drawables; the hash namespace is Unknown |
-| DRAW-F28 | Five texture-parameter hashes equal folded `joaat` of a researcher-supplied candidate spelling: `0xC8E8C282` = `DiffuseTex` (48 occurrences), `0x1E77BF4C` = `BumpTex` (48), `0xC6F46E79` = `SpecularTex` (48), `0x739E3D0D` = `SpecularTex2` (47) and `0x0DF47048` = `DiffuseTex2` (7). `0x2C8D7182` and `0x0CD27763` stay hashes (52 each). The candidates were not extracted from game data or the executable; each was hashed and compared to the observed value. The control `joaat("alpha/beta") = 0x75438640` reproduces. A match proves a preimage, not the original spelling. | `BINARY`, `SYNTHETIC` (control) | Confirmed (hash match); candidate names | Eight drawables; `DiffuseTex2` has 7 occurrences; no name dictionary for the remaining hashes |
-| DRAW-F29 | Across eight recovered drawables (the first eight in recovery order with at least two shaders) there are 348 declared texture slots: 278 bound, 70 unbound and 0 null keys. All 278 bound slots carry a nonzero 64-bit key; every unbound slot is reported with key `0x0000000000000000`. No store join was attempted, so no key was resolved and the resolved count is unset rather than zero. | `BINARY`, `CROSS_SAMPLE` | Confirmed (bound, unbound and null counts); Unknown (store) | No texture store was reached; no direct-store or EDUP count is claimed |
+| DRAW-F28 | Five texture-parameter hashes equal folded `joaat` of a researcher-supplied candidate spelling: `0xC8E8C282` = `DiffuseTex` (48 occurrences), `0x1E77BF4C` = `BumpTex` (48), `0xC6F46E79` = `SpecularTex` (48), `0x739E3D0D` = `SpecularTex2` (47) and `0x0DF47048` = `DiffuseTex2` (7). `0x2C8D7182` and `0x0CD27763` stay hashes (52 each). The candidates were not extracted from game data or the executable; each was hashed and compared to the observed value. Counts come from `material_census.py` over the eight-drawable manifest. The control `joaat("alpha/beta") = 0x75438640` reproduces. A match proves a preimage, not the original spelling. | `BINARY`, `SYNTHETIC` (control) | Confirmed (hash match); candidate names | Eight drawables; `DiffuseTex2` has 7 occurrences; no name dictionary for the remaining hashes |
+| DRAW-F29 | `material_census.py` over the first eight decoded drawables in recovery order with at least two shaders reports 8 drawables, 52 shaders and 348 declared texture slots: 278 bound, 70 unbound and 0 null keys. All 278 bound slots carry a nonzero 64-bit key; every unbound slot is reported with key `0x0000000000000000`. No store join was attempted, so no key was resolved and the resolved count is unset rather than zero. | `BINARY`, `CROSS_SAMPLE` | Confirmed (bound, unbound and null counts); Unknown (store) | No texture store was reached; no direct-store or EDUP count is claimed |
 | DRAW-F30 | The two named rows were re-located in the `levels.rpf` recovery population at archive offsets `0x10112BE010` (A, 7,840 bytes, 2 streams) and `0x1010FBD010` (B, 90,624 bytes, 3 streams); their header bounds and chain counts match the named rows. | `BINARY`, `CROSS_SAMPLE` | Confirmed (reproduction) | One archive; recovery offsets are not native row indices |
 
 ## Method per finding
@@ -118,8 +118,8 @@ the rest.
 | DRAW-F25 | Inspector index descriptor and header read | Yes |
 | DRAW-F26 | Inspector ascending-run read | Yes |
 | DRAW-F27 | Inspector shader-hash read; cross-drawable comparison | Yes |
-| DRAW-F28 | Manual `joaat` comparison over candidate names; synthetic control vector | No |
-| DRAW-F29 | Inspector key counts over eight drawables | Yes |
+| DRAW-F28 | Manual `joaat` comparison over candidate names; `material_census.py` occurrence counts; synthetic control vector | No |
+| DRAW-F29 | `material_census.py` over eight drawables | Yes |
 | DRAW-F30 | Recovery export and inspector comparison with the named rows | Partly |
 
 ## Counters and negative results
@@ -167,6 +167,7 @@ lforge archive recover <GAME_ROOT>/levels.rpf --id 0x1010FBD010 --output <WORK>/
 python tools/drawables/drawable_inspect.py inspect --file <WORK>/drawA.bin --system-length 0x16F0 --json
 python tools/drawables/drawable_inspect.py inspect --file <WORK>/drawB.bin --system-length 0x40F0 --json
 python tools/drawables/aabb_census.py --manifest <WORK>/census.jsonl --json
+python tools/drawables/material_census.py --manifest <WORK>/materials.jsonl --json
 python -m unittest discover -s tools/drawables -p "test_*.py"
 ```
 
@@ -178,7 +179,8 @@ The `archive ls` output supplies the row type IDs, stored sizes, decoded sizes
 and chunk counts. The recovery commands reproduce the two named rows by archive
 offset; a recovery offset is not a native row index. The inspector commands
 reproduce the findings marked `Yes` or `Partly` above. The census reproduces
-DRAW-F22's header counts and exception causes. The manual reads do not reproduce
+DRAW-F22's header counts and exception causes, and the material census
+reproduces DRAW-F28 and DRAW-F29. The manual reads do not reproduce
 DRAW-F08, DRAW-F09, DRAW-F28 or DRAW-F19; DRAW-F19 remains not demonstrated. The system-length values
 are derived from the graphics targets and the page counts, not from a stored
 field.

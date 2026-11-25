@@ -511,8 +511,9 @@ The candidate spellings were supplied by the researcher as common RAGE texture
 parameter names; they were not extracted from the game data or the executable.
 Each candidate was hashed with folded `joaat` and compared to the observed
 value. The occurrence count is the number of texture slots carrying that hash in
-the eight-drawable material census. A single occurrence is weaker evidence for a
-name than a repeated one.
+the eight-drawable material census (`tools/drawables/material_census.py`, the
+first eight decoded drawables in recovery order with at least two shaders). A
+single occurrence is weaker evidence for a name than a repeated one.
 
 | Hash | Candidate `joaat` preimage | Occurrences | Confidence |
 | ---- | -------------------------- | ----------: | ---------- |
@@ -539,9 +540,11 @@ a probable shader hash, not a per-material identifier and not a name.
 
 Every bound slot yields a 64-bit key from its name record. Every unbound slot
 is reported with the key `0x0000000000000000` and status `unbound`, not with a
-missing value. Across eight recovered drawables (the first eight in recovery
-order with at least two shaders) there are 348 declared texture slots: 278
-bound, 70 unbound and 0 null keys. All 278 bound slots carry a nonzero key.
+missing value. `tools/drawables/material_census.py` aggregates the counts over a
+JSON Lines manifest. Over the first eight decoded drawables in recovery order
+with at least two shaders, the census reports 8 drawables, 52 shaders, 348
+declared texture slots, 278 bound, 70 unbound and 0 null keys. All 278 bound
+slots carry a nonzero key. The manifest and decoded files are local inputs.
 
 No store join was attempted. The resolved count is left unset rather than zero,
 because a direct-store or EDUP match cannot be counted without a texture store.
