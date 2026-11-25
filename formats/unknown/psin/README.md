@@ -103,7 +103,7 @@ The aligned `+0x04` form is the only variant that fits every `LSCH` payload. The
 
 ## `PMAP` family
 
-The first section is `PMAP`. The family is separate from `LSCH`: it has no descriptor table, its block directory is inside the `PMAP` section, and all unaligned first-section offsets in the sample belong to it.
+The first section is `PMAP`. The family is separate from `LSCH`: it has no descriptor table, its block directory is inside the `PMAP` section, and all unaligned first-section offsets in the sample belong to it. All 62 `PMAP` payloads use `PMAP` -> `PSCH` -> `PSIG` -> [`STDN` or `STFN`] -> `STNS` -> `CHKS`; 55 carry neither extra section, six carry `STDN` and one carries `STFN`. The tag match rate is 62 of 62.
 
 ### Pre-section block table
 
@@ -178,7 +178,7 @@ Fixed record widths 1 to 64 do not consume all 1,170 `PSCH` values: only widths 
 
 ## `LSCH` and `LENM` section bodies
 
-The two bodies are separate structures. They are described structurally; no field is assigned a semantic name.
+The two bodies are separate structures. They are described structurally; no field is assigned a semantic name. All 483 top-level `LSCH` payloads use the established `LSCH` -> `LENM` -> `LSNS` -> `LGID` -> `LRSC` -> `CHKS` tag sequence; the tag match rate is 483 of 483.
 
 ### `LSCH` body
 
