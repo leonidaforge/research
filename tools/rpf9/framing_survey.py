@@ -90,6 +90,8 @@ def _decode_row(fileobj, file_size, row, limits):
     logical = _int(row["logical_size"])
     count = int(row["chunks"]["count"])
     _check(offset, stored, file_size, "row %s" % row.get("row"))
+    if stored < PREFIX:
+        raise BoundsError("row %s is shorter than its stored prefix" % row.get("row"))
     with open(fileobj, "rb") as fh:
         fh.seek(offset)
         prefix = fh.read(PREFIX)

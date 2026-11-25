@@ -99,6 +99,12 @@ class FramingSurveyTest(unittest.TestCase):
         self.assertEqual(summary["out_of_bounds"], 1)
         self.assertEqual(summary["prefix"], {"all_zero": 0, "other": 0})
 
+    def test_row_shorter_than_prefix_is_refused(self):
+        self.place(0x700, b"\x00" * 8)
+        self.manifest["rows"].append(row(0, 0x700, 8, 8))
+        summary = framing_survey.survey(self.archive, self.manifest)
+        self.assertEqual(summary["out_of_bounds"], 1)
+
     def test_manifest_absent_chunks_is_ignored(self):
         self.manifest["rows"].append({"row": 0, "payload_offset": 0, "stored_size": 4,
                                       "logical_size": 4, "chunks": None})
