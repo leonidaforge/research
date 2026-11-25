@@ -87,10 +87,9 @@ Passing checks were observed for format ids 71, 72, 77, 80 and 83 at tile modes
 1, 2 and 3, on both 8-byte and 16-byte block candidates. The exact per-class
 counts were measured with the committed analyser but the selection driver is
 scratch-only and is not committed, so this document does not cite them. The
-per-class rate is not uniform: format 71 mode 1 and mode 3 pass almost every
-sampled texture, while format 71 mode 2 passes fewer than half. A mixed rate
-means the candidate decoder is incomplete for that class, not that the texture
-has no mip relation. Rejected pairs stay rejected.
+per-class rate is not uniform across tile modes and formats. A mixed rate means
+the candidate decoder is incomplete for that class, not that the texture has no
+mip relation. Rejected pairs stay rejected.
 
 The sampled run produced passing checks for five format ids on both 8-byte and
 16-byte block candidates. The number of passing textures and the selection
