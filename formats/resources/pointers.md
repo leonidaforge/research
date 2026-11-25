@@ -21,7 +21,7 @@ The high bits select a segment; the remaining bits are an offset inside that seg
 | 16-bit selector | high 16 bits select the segment, low 16 bits are the offset           | Rejected (RES-F16)                                                    |
 | Virtual address | value is `segment_base + offset`, bases `0x50000000` and `0x60000000` | Arithmetically identical to the 4-bit selector for the observed bases |
 
-The primary sample alone cannot separate these readings: both segments are small. A second sample separates them. One resource places its page map at system offset `0x988E0` and holds an in-bounds system pointer at `0x98B34`; a 16-bit offset cannot express either value. The 4-bit selector with a 28-bit offset fits. The same resource also contains one pointer-like value outside the segment, at offset `0xC74C225`, which is reported as a warning rather than used as structure (RES-F18).
+The primary sample alone cannot separate these readings: both segments are small. A second sample separates them. One resource places its page map at system offset `0x988E0` and holds an in-bounds system pointer at `0x98B34`; a 16-bit offset cannot express either value. The 4-bit selector with a 28-bit offset fits. The same resource also contains one value that matches the pointer encoding but lies outside the segment; it is reported as a warning rather than used as structure (RES-F18).
 
 The offset is at most `0x0FFFFFFF`. A larger offset would set bit 28 and change the decoded segment, so the encoding cannot express more. This is a property of the scheme, not an observed upper bound. The largest observed in-bounds offsets are `0x740` (system) and `0xB000` (graphics) in the primary sample, and `0x2600000` (graphics, about 39.8 MB) in a split-page sample.
 
@@ -39,13 +39,13 @@ Primary sample:
 | Highest graphics offset      | `0xB000`                |
 | Values outside their segment | 0                       |
 
-The reported survey of 1,466 authenticated rows counted 34,022 system-shaped values and 6,609 graphics-shaped values in system data, with 1,353 and 591 outside their segment. A further 1,560 resources from the `data.rpf` data area were re-parsed by the source survey: 2,112,806 system-shaped values (44,463 outside) and 94,564 graphics-shaped values (52,873 outside). Those totals come from the source survey and were not re-counted in this consolidation.
+The reported survey of 1,466 authenticated rows counted 34,022 system-shaped values and 6,609 graphics-shaped values in system data, with 1,353 and 591 outside their segment. A further 1,560 resources from the `data.rpf` data area were re-parsed by the source survey: 2,112,806 system-shaped values (44,463 outside) and 94,564 graphics-shaped values (52,873 outside). Those totals are carried forward from the source survey and were not re-counted in this consolidation (RES-F22).
 
 Scan predicate: every 8-byte aligned `u64` whose upper half is zero and whose low 32 bits have top nibble `0x5` or `0x6`. Mutual consistency supports the model but does not prove it. Values outside a segment are expected in arbitrary data (RES-F18).
 
 ## Segment-wide offsets
 
-Pointer offsets address the concatenated pages of a segment, not a page. In one rechecked resource the page map is at system offset `0x988E0`, beyond the 65,536-byte first system page, and in-bounds system pointers reach `0x98B34` (RES-F17). A page-relative offset could not express either value.
+Pointer offsets address the concatenated pages of a segment, not a page. In one rechecked resource the page map is at system offset `0x988E0`, inside the second system page of a 625,472-byte segment whose first page is therefore `0x90000` bytes, and in-bounds system pointers reach `0x98B34` (RES-F17). A page-relative offset could not express either value.
 
 ## Pointer table
 

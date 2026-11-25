@@ -66,7 +66,7 @@ Issue codes: `payload_error`, `not_a_resource`, `map_in_header`, `map_outside`, 
 - A payload whose first 16 bytes are not zero, whose padding between streams is not zero, or whose first stream does not start with the resource header.
 - A page map outside the system pages, a map with nonzero bytes outside the counts, or a map declaring no system page.
 - A stream that does not reach end of stream, exceeds the per-stream cap, or pushes the total over the cap.
-- A page count that does not match the derived pages, without reporting it as an issue rather than choosing silently.
+- A page count that does not match the derived pages is reported as an issue instead of being chosen silently.
 
 ## Tests
 

@@ -31,3 +31,9 @@ Interpretations that were once used for RAGE resources and later corrected. The 
 **Old assumption.** The primary sample was read as a probable texture dictionary because the page map is followed by short ASCII names and the 12 graphics targets begin with small header-like values (RES-F07).
 
 **Correction.** The name meaning and pixel format were not established. The observation does not identify the payload format, so the current documents do not carry the texture-dictionary reading.
+
+## The rechecked structural samples replaced an earlier set
+
+**Old state.** The originating branch recorded a second-system-page sample with a `0x24EC0` map and a 2,192,240-byte system segment, and a system-only sample with a `0x1B33B90` map and 96 bytes of system data. Those rows described subject resources whose stored entries could not be reproduced with the current CLI.
+
+**Correction.** The structural sample was rebuilt from seven resources that the current CLI reconstructs deterministically, recorded as RES-F23 and listed in the pages document. The earlier values are not retained because their subjects cannot be re-derived, and a number that cannot be reproduced is not evidence.

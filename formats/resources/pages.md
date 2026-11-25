@@ -122,7 +122,7 @@ One resource declares one system page and two graphics pages but stores two stre
 Page sizes are not stored as lengths. They follow from the chunk sizes.
 
 - **Unit.** In a segment with more than one page, every page except the last is a multiple of `0x10000` and the last is at most `0x10000`. The reported survey counted 965 multi-page segments without exception (RES-F14). A single-page segment is not constrained: the primary sample has 1,888 and 49,152 bytes.
-- **Split pages.** A page larger than 32 MiB is stored as consecutive chunks. Every chunk but the last of a split page inflates to exactly `0x2000000` (32 MiB). Four split pages were rechecked with the current CLI, with tails of `0x200000` (2 MiB), `0x170000` (1.5 MiB) and `0x600000` (6 MiB, twice) (RES-F15).
+- **Split pages.** A page larger than 32 MiB is stored as consecutive chunks. Every chunk but the last of a split page inflates to exactly `0x2000000` (32 MiB). Four split pages were rechecked with the current CLI, with tails of `0x200000` (2 MiB), `0x170000` (1.4375 MiB) and `0x600000` (6 MiB, twice) (RES-F15).
 
   `0x200000` (2 MiB) is not a split length. The 2 MiB stream in the survey is the tail of a 35,651,584-byte page whose first stream is `0x2000000`.
 
