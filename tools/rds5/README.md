@@ -20,6 +20,8 @@ python tools/rds5/rds5.py scan ROOT [--json] [--headers]
 python tools/rds5/rds5.py descriptors PATH [--json]
 python tools/rds5/rds5.py decode PATH --block N [--out FILE]
 python tools/rds5/rds5.py reconstruct PATH --descriptor N [--bytes-per-texel B --levels L] [--max-total-bytes B] [--json]
+python tools/rds5/textures.py probe PATH --descriptor N [--unit B8|B16|L4|L2|L1] [--levels N] [--decoder none|bc1|bc4|channels] [--json]
+python tools/rds5/textures.py units
 ```
 
 `inspect` parses one file. `--records` adds every decoded record. `--descriptors`
@@ -50,6 +52,37 @@ block and to the running total.
 Block and descriptor indices are checked against the parsed array before any
 record or offset arithmetic. An out-of-range index raises a typed error that
 names the index and the array length.
+
+## Texture candidate analysis
+
+`textures.py` reads one descriptor's decoded stream and reports candidate
+structure, not a codec identity.
+
+`probe` decodes every block in the descriptor's virtual range through `rds5`
+and prints:
+
+- descriptor fields, range, block indices, classes, decoded block sizes;
+- the observed format-id storage unit from `units`;
+- level counts whose reverse-order slot total equals the decoded extent;
+- the levels that can be peeled from the end while each level start is an
+  observed block boundary;
+- optionally, the slot layout for a stated level count;
+- optionally, a box-downsample error between consecutive block-aligned levels
+  under the `bc1`, `bc4` or linear `channels` candidate decoder;
+- first-byte statistics of 8-byte or 16-byte candidate blocks: distinct count,
+  zero count, the fraction of block-first bytes that are multiples of 16, the
+  same fraction over all bytes, and the lowest-set-bit histogram.
+
+The last two items are structural discriminators. They never print pixel bytes
+or write an image.
+
+`mip_check.pass` is true only when at least two block-aligned levels were
+decoded and every pair is below `--threshold` (default 25.0). Levels whose
+start is not a block boundary are excluded and the stop reason is reported.
+The tool does not infer a level count from the descriptor fields.
+
+`units` prints the observed format-id storage units. They are size fits, not
+codec names. Formats not in the table need `--unit`.
 
 Limits, all overridable on the command line:
 
@@ -123,3 +156,8 @@ fields, sorted and unsorted key tables, a small mip chain, block and descriptor
 index bounds, refusal to overwrite the input, the cumulative reconstruction cap,
 every rejection path, the decompression cap, an 8 MiB gap scanned without
 allocating it, and the CLI commands. No game files are needed.
+
+`test_textures.py` adds synthetic checks for the reverse-order slot layout, the
+minimum slot, level peeling, the BC1 and BC4 block decoders, first-byte
+statistics, a passing mip check, a deliberately broken level that must fail, and
+the `probe` CLI.
