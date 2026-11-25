@@ -555,6 +555,10 @@ class Census:
             record["attempt"]["stage"] = "operational limit"
             record["attempt"]["reason"] = str(error)[:500]
             return record
+        except OSError as error:
+            record["attempt"]["stage"] = "operational limit"
+            record["attempt"]["reason"] = f"I/O error: {error}"[:500]
+            return record
         except subprocess.TimeoutExpired:
             record["attempt"]["stage"] = "operational limit"
             record["attempt"]["reason"] = f"the command exceeded {self.runner.timeout} seconds"
@@ -659,6 +663,10 @@ def aggregate(output_dir: Path) -> dict:
         attempts[attempt.get("mode")] += 1
         if attempt.get("stage"):
             stages[attempt["stage"]] += 1
+
+    effective = [record for record in records if not record.get("duplicate_of")]
+    for record in effective:
+        attempt = record["attempt"]
         manifest = record.get("manifest")
         if not attempt.get("ok") or not manifest:
             continue
@@ -717,6 +725,7 @@ def aggregate(output_dir: Path) -> dict:
         "failed": sum(1 for record in records if not record["attempt"].get("ok")),
         "unique_archive_contents": len(unique),
         "duplicate_rows": duplicates,
+        "histogram_population": "unique_archive_contents",
         "extraction_modes": dict(attempts),
         "failure_stages": dict(sorted(stages.items())),
         "manifest_authentication": dict(sorted(auth.items())),

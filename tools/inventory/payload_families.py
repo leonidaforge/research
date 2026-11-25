@@ -173,6 +173,7 @@ def run(selected: list[dict], output_dir: Path, runner: Runner) -> dict:
     classes = Counter()
     tags = Counter()
     wrappers = Counter()
+    page_maps = Counter()
     per_type = defaultdict(Counter)
     stages = Counter()
     successes = 0
@@ -224,6 +225,9 @@ def run(selected: list[dict], output_dir: Path, runner: Runner) -> dict:
                     tags[record["classification"].get("tag_hex")] += 1
                     if record["classification"].get("wrapper_tag"):
                         wrappers[record["classification"]["wrapper_tag"]] += 1
+                    page_map = record["classification"].get("page_map")
+                    if page_map:
+                        page_maps[f"{page_map['system_pages']}/{page_map['graphics_pages']}"] += 1
                     per_type[row.get("type_id")][record["classification"]["class"]] += 1
                     successes += 1
         finally:
@@ -238,6 +242,7 @@ def run(selected: list[dict], output_dir: Path, runner: Runner) -> dict:
         "classes": dict(sorted(classes.items())),
         "tags_at_0x10": {str(key): value for key, value in sorted(tags.items(), key=lambda item: str(item[0]))},
         "wrapper_tags": dict(sorted(wrappers.items())),
+        "page_maps": dict(sorted(page_maps.items())),
         "per_type": {str(key): dict(sorted(value.items())) for key, value in sorted(per_type.items(), key=lambda item: str(item[0]))},
     }
     inventory.write_json(output_dir / "summary.json", summary)
