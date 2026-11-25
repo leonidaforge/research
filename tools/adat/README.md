@@ -14,9 +14,13 @@ python tools/adat/adat_inspect.py --input-list <LIST> --summary --json --output 
 ```
 
 All paths are required. `--max-bytes` (default 64 MiB) bounds each read.
-`--input-list` adds one path per line; blank lines and `#` comments are skipped.
-`--summary` aggregates the inputs instead of printing one report per sample.
-`--output` writes atomically outside the input directory.
+`--input-list` adds one entry per line; blank lines and `#` comments are
+skipped. A plain line is a path. A JSON line with `file`, `parent_id` and `row`
+(plus optional `archive_sha256`) is deduplicated by `(parent_id, row)` for
+`--summary`. `--summary` aggregates the inputs instead of printing one report
+per sample and reports the raw count, collapsed count, copy count, parent count
+and archive-copy count. `--output` writes atomically outside the input
+directory.
 
 ## Checks
 
@@ -49,9 +53,11 @@ name.
 | `0x48` | `+0x08` | `u32` sub-stream count |
 | `0x48` | `+0x0C` | `sub-stream count` entries of 16 bytes |
 
-A `0x48` entry is `[u32 unknown][u32 decoded][u32 rate_flags][u16 codec_word][u16 flags]`.
-The record size must equal `12 + 16 * count`. `FF25` uses one `0x55` record for
-all entries; the other variants pair one `0x76` with one `0x55` in record order.
+Supported `0x76` records are exactly 32 bytes and occur in variants `FF02`,
+`FF21` and `FF61`. `FF25` uses `0x48` instead. A `0x48` entry is
+`[u32 unknown][u32 decoded][u32 rate_flags][u16 codec_word][u16 flags]`. The
+record size must equal `12 + 16 * count`. `FF25` uses one `0x55` record for all
+entries; the other variants pair one `0x76` with one `0x55` in record order.
 An `FF25` stream reports the codec and rate of every entry, and a record with
 mixed codecs or rates is a violation.
 

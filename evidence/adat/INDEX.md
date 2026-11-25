@@ -20,11 +20,15 @@ archive size cap. The cache contains 849 archive manifests after deduplication
 of repeated `archives.jsonl` entries; 75 archives contain at least one type-255
 row, and 65 contain ADAT rows.
 
-The raw scan holds 923 ADAT rows across 75 archive copies. The population is
-deduplicated by `(parent archive identity, row index)`: repeated copies of the
-same parent archive are collapsed, giving 768 rows in 65 parent archives. The
-payload digest is not the deduplication key. The committed inspector reports
-`samples=768` for an input list built from this deduplicated set.
+The raw scan holds 923 ADAT rows across 65 archive copies and 65 parent
+identities. The population is deduplicated by `(parent archive identity, row
+index)`: repeated copies of the same parent archive are collapsed, giving 768
+rows, 155 collapsed copies, 65 parents and 65 archive copies. The payload digest
+is not the deduplication key. The committed inspector reports
+`raw_inputs=923`, `deduped_inputs=768`, `copies=155`, `parents=65` and
+`archive_copies=65` for the raw input list. The 75 type-255 archives in the
+depth-1 frame are a different set: 65 contain ADAT rows and 10 contain only
+zlib type-255 rows.
 
 The ADAT rows are all depth 1:
 
