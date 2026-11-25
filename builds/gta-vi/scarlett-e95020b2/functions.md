@@ -201,24 +201,38 @@ Batch operations:
 
 Reads and seeks:
 
-| RVA         | Role                                                                                                                                                             | Confidence           | Finding  |
-| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | -------- |
-| `0x314330`  | Read dispatcher: chunk fast path, compressed stream or plain                                                                                                     | Confirmed            | F34      |
-| `0x28CD3B0` | Seek: modes 0, 1, 2, clamp to logical size, 4 KiB decode-and-discard for compressed forward seeks                                                                | Confirmed            | F37      |
-| `0x28CF820` | Seek helper for chunked entries: finds the chunk holding the target with 32-bit sums, moves position and stored cursor to its start                              | Confirmed            | F37, F79 |
-| `0x13307C0` | Sets the current chunk index and clears the per-chunk decoder counters                                                                                           | Confirmed            | F79      |
-| `0x28CF940` | Plain read, clamped to the logical size                                                                                                                          | Confirmed            | F34      |
-| `0x13308E0` | Compressed stream read: fills the stream buffer in pieces of up to 0x10000 bytes, then decodes. Traps on decoder failure, returns without status on read failure | Confirmed            | F34, F80 |
-| `0x1330B60` | Stored-byte read. Branches on the payload transform flag                                                                                                         | Confirmed            | F33, F38 |
-| `0x1330C10` | Device read at `fileObject[+0x20] + payloadOffset + position`                                                                                                    | Confirmed            | F33      |
-| `0x4F60AB0` | Read-source index, key `0xCBB68FF7B7078DB7`, `0xFFFFFFFF` if absent                                                                                              | Confirmed            | F41      |
-| `0x4F60A90` | Read handle: main handle for `0xFFFFFFFF`, else `alternates[index]` without bounds or null checks                                                                | Confirmed (assembly) | F41, F73 |
-| `0x1331470` | Transform read: stores `position & ~0xF` in the context, reads whole blocks, processes them in place, handles partial blocks                                                     | Confirmed            | F38, F109, F110 |
-| `0x19C380`  | Positions the payload transform context: stores the aligned position at context `+0x38`                                                                          | Confirmed            | F38, F110 |
-| `0x1616150` | Buffered whole-block consumer; calls slot `+0x30` of the per-stream algorithm object for each run                                                                | Confirmed            | F109     |
-| `0x140FC9020` | Trampoline to the context's source object, vtable slot `+0x30`                                                                                                | Confirmed            | F109     |
-| `0x140FC9040` | Algorithm `0x10` slot `+0x30`: continue CBC (mode 1) or set the IV to the parameter plus the block index (mode 3), then update                                  | Confirmed            | F109, F112 |
-| `0x28CF9C0` | Partial block: reads the whole 16-byte block, transforms it, copies the requested sub-range                                                                      | Confirmed            | F110     |
+| RVA           | Role                                                                                                                                                             | Confidence           | Finding         |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | --------------- |
+| `0x314330`    | Read dispatcher: chunk fast path, compressed stream or plain                                                                                                     | Confirmed            | F34             |
+| `0x28CD3B0`   | Seek: modes 0, 1, 2, clamp to logical size, 4 KiB decode-and-discard for compressed forward seeks                                                                | Confirmed            | F37             |
+| `0x28CF820`   | Seek helper for chunked entries: finds the chunk holding the target with 32-bit sums, moves position and stored cursor to its start                              | Confirmed            | F37, F79        |
+| `0x13307C0`   | Sets the current chunk index and clears the per-chunk decoder counters                                                                                           | Confirmed            | F79             |
+| `0x28CF940`   | Plain read, clamped to the logical size                                                                                                                          | Confirmed            | F34             |
+| `0x13308E0`   | Compressed stream read: fills the stream buffer in pieces of up to 0x10000 bytes, then decodes. Traps on decoder failure, returns without status on read failure | Confirmed            | F34, F80        |
+| `0x1330B60`   | Stored-byte read. Branches on the payload transform flag                                                                                                         | Confirmed            | F33, F38        |
+| `0x1330C10`   | Device read at `fileObject[+0x20] + payloadOffset + position`                                                                                                    | Confirmed            | F33             |
+| `0x4F60AB0`   | Read-source index, key `0xCBB68FF7B7078DB7`, `0xFFFFFFFF` if absent                                                                                              | Confirmed            | F41             |
+| `0x4F60A90`   | Read handle: main handle for `0xFFFFFFFF`, else `alternates[index]` without bounds or null checks                                                                | Confirmed (assembly) | F41, F73        |
+| `0x1331470`   | Transform read: stores `position & ~0xF` in the context, reads whole blocks, processes them in place, handles partial blocks                                     | Confirmed            | F38, F109, F110 |
+| `0x19C380`    | Positions the payload transform context: stores the aligned position at context `+0x38`                                                                          | Confirmed            | F38, F110       |
+| `0x1616150`   | Buffered whole-block consumer; calls slot `+0x30` of the per-stream algorithm object for each run                                                                | Confirmed            | F109            |
+| `0x140FC9020` | Trampoline to the context's source object, vtable slot `+0x30`                                                                                                   | Confirmed            | F109            |
+| `0x140FC9040` | Algorithm object slot `+0x30`: continue the chain (mode 1) or set the IV to the parameter plus the block index (mode 3), then update. Algorithm `0x11` objects carry mode 3, algorithm `0x10` objects carry mode 2 and are refused | Confirmed            | F109, F112, F115 |
+| `0x28CF9C0`   | Partial block: reads the whole 16-byte block, transforms it, copies the requested sub-range                                                                      | Confirmed            | F110             |
+
+Payload transform cipher:
+
+| RVA           | Role                                                                                                                                                            | Confidence                    | Finding          |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- | ---------------- |
+| `0x1415DBE40` | Attaches the transform to a stream: fetches the entry's transform field and calls `0x141641EF0`, else returns without a transform                              | Confirmed                     | F114             |
+| `0x141641EF0` | Resolves the field value and the stream size, then installs the cipher on the stream's transform object                                                        | Confirmed                     | F114             |
+| `0x1428CEBC0` | Lays out the transform context and calls `0x140536A70` with the field value as the descriptor                                                                  | Confirmed                     | F114             |
+| `0x140536A70` | Descriptor initializer: type table lookup, key selector, algorithm object init. Shared with the metadata cipher                                                | Confirmed                     | F114             |
+| `0x14171FD00` | Algorithm `0x11` object factory: same vtable as algorithm `0x10`, mode byte 3, one engine of vtable `0x14674B070`                                              | Confirmed                     | F115             |
+| `0x1455DC890` | Algorithm `0x11` engine init: four-byte state magic, 60-word schedule, sixteen key tables, counter                                                              | Confirmed                     | F115             |
+| `0x1455DC010` | Algorithm `0x11` process: counter-mode XOR, one advance per 16-byte block, partial-block tail kept                                                            | Confirmed                     | F115             |
+| `0x1455DBF40` | Algorithm `0x11` reset: reloads the counter and clears the tail                                                                                                | Confirmed                     | F115             |
+| `0x1456437C0` | Algorithm `0x11` block generator over the fixed tables at `0x6040F30` and `0x6041F30`                                                                         | Confirmed (structure)         | F115, F117       |
 
 Decoding and chunks:
 

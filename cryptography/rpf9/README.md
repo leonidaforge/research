@@ -302,20 +302,47 @@ A plausible `A` table is structural evidence that one ciphertext span decoded un
 
 ## Payload transform
 
-Payload reads have their own transform path. The read routines call RVAs `0x19C380` (position the context), `0x1616150` (whole blocks) and `0x28CF9C0` (partial blocks), not the metadata span runner directly (RPF9-F38). The three routines are now analyzed: the whole-block consumer calls slot `+0x30` of an algorithm-`0x10` object, which runs the same update and engine process as the metadata cipher (RPF9-F109).
+Payload reads have their own transform path. The read routines call RVAs `0x19C380` (position the context), `0x1616150` (whole blocks) and `0x28CF9C0` (partial blocks), not the metadata span runner directly (RPF9-F38). The whole-block consumer calls slot `+0x30` of a per-stream algorithm object of the same class as the metadata cipher's object. That slot is shared, but the engine behind the object is selected by the descriptor's cipher type, and real transform descriptors select algorithm `0x11` (RPF9-F114, RPF9-F115).
 
-| Part                            | Status                                                                                                                                                                                                 | Evidence |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------- |
-| Selection                       | Per entry, by the presence of key `0x286030A358A789FB` in the [schema](../../formats/containers/rpf9/schema.md#known-columns). Confirmed                                                               | RPF9-F38 |
-| Granularity                     | The engine stores `position & ~0xF` in a per-stream context, reads whole 16-byte blocks and processes them in place. A partial block reads the whole block, transforms it and copies the sub-range. Confirmed | RPF9-F110 |
-| Seeks                           | Reposition the context to the stored cursor; the per-block position then selects the IV in mode 3. Confirmed                                                                                            | RPF9-F110, RPF9-F112 |
-| Interaction                     | Entries with the flag never use the chunk fast path, and stored bytes are transformed before inflation. Confirmed                                                                                       | RPF9-F111 |
-| Algorithm                       | Encoded AES-256 CBC decryption (`0x10`), through the same engine as the metadata cipher. Confirmed (call chain)                                                                                         | RPF9-F109 |
-| IV repositioning                | Object mode 1 continues the CBC chain; mode 3 sets the IV to the 16-byte parameter plus the block index. Confirmed                                                                                      | RPF9-F112 |
-| Key source                      | Unknown. It is not the archive `B` sub-block 1 descriptor or the executable static descriptor in the tested combinations, under either provider mode. Unknown                                          | RPF9-F113 |
-| Relation to the metadata cipher | It is the same algorithm class and engine, with a separate per-stream object. Confirmed                                                                                                                 | RPF9-F109 |
+| Part                            | Status                                                                                                                                                                                                        | Evidence             |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
+| Selection                       | Per entry, by the presence of key `0x286030A358A789FB` in the [schema](../../formats/containers/rpf9/schema.md#known-columns). Confirmed                                                                      | RPF9-F38             |
+| Granularity                     | The engine stores `position & ~0xF` in a per-stream context, reads whole 16-byte blocks and processes them in place. A partial block reads the whole block, transforms it and copies the sub-range. Confirmed | RPF9-F110            |
+| Seeks                           | Reposition the context to the stored cursor; the per-block position then selects the counter in mode 3. Confirmed                                                                                            | RPF9-F110, RPF9-F112 |
+| Interaction                     | Entries with the flag never use the chunk fast path, and stored bytes are transformed before inflation. Confirmed                                                                                             | RPF9-F111            |
+| Algorithm                       | Selected by the descriptor's cipher type. Sampled transform descriptors use type `0x11`, which selects algorithm `0x11`, a counter-mode keystream over the encoded block generator (RPF9-F115). Confirmed (call chain)                                                         | RPF9-F114, RPF9-F115 |
+| IV repositioning                | Object mode 1 continues the CBC chain; mode 3 sets the IV to the 16-byte parameter plus the block index. The algorithm-`0x11` factory sets mode 3, the algorithm-`0x10` factory sets mode 2, which this slot refuses. Confirmed                                                   | RPF9-F112, RPF9-F115 |
+| Key source                      | The descriptor is the value of the entry's transform field (RPF9-F114) and the key identifier resolves through the static registry (RPF9-F97) to one provider-2 state carrying the algorithm-`0x11` magic (RPF9-F116). Confirmed (sample)                                       | RPF9-F114, RPF9-F116 |
+| Block program                   | Not reproduced. A transcription of the generator does not decode sampled chunks, so transformed payloads stay unsupported. Unknown                                                                                                                            | RPF9-F117            |
+| Relation to the metadata cipher | Same object class, initializer, update and reset path, and a separate per-stream instance; the algorithm and engine differ. Confirmed                                                                                                                        | RPF9-F109, RPF9-F114 |
 
 The read path is described in [payloads.md](../../formats/containers/rpf9/payloads.md#payload-transform). Routines are listed in the [function catalog](../../builds/gta-vi/scarlett-e95020b2/functions.md#entries-names-payloads).
+
+### Cipher descriptor of a transform entry
+
+The descriptor is the value of the entry field `0x286030A358A789FB`, not an archive descriptor (RPF9-F114):
+
+| Offset  | Type     | Meaning        |
+| ------- | -------- | -------------- |
+| `+0x00` | `u32`    | Key identifier |
+| `+0x04` | `u16`    | Cipher type    |
+| `+0x06` | 16 bytes | Parameter      |
+
+A stream attaches it with `0x1415DBE40` -> `0x141641EF0` -> `0x1428CEBC0` -> `0x140536A70`, the initializer the metadata descriptors also use, with mode 1, so the parameter reaches the algorithm object's `+0x20` and the type reaches the engine's 19-entry type table. The descriptor is therefore per entry, and different entries can carry different key identifiers and parameters.
+
+### Algorithm `0x11`
+
+Type `0x11` selects algorithm `0x11` (RPF9-F115). Its object carries mode 3, so slot `+0x30` repositions before every run: the counter becomes the 128-bit big-endian parameter plus the block index of the run.
+
+The engine is a counter-mode keystream:
+
+| Step   | Behavior                                                                                                                       |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| Init   | Validates a four-byte state magic, expands a 60-word schedule and sixteen key-dependent 256-byte tables, loads the counter       |
+| Process | Generates one 16-byte block per counter value, XORs it into the data in place, and advances the counter once per block           |
+| Reset  | Reloads the counter from the parameter plus block index and drops the unused tail of a partial block                             |
+
+The block generator runs fourteen rounds over two fixed table regions read from the image: sixteen 256-byte stage tables, then sixteen 256-entry round tables. Its exact round program is not reproduced, so no payload can be transformed (RPF9-F117). The earlier negative probe mixed the archive descriptor with the metadata cipher and therefore says nothing about this engine (RPF9-F113).
 
 ## Synthetic and public checks
 
@@ -351,7 +378,7 @@ Whether RPF9 shares any cryptography with earlier RPF versions is unknown. Nothi
 
 ## Open questions
 
-- Algorithms 1, 2, `0x11` and `0x12`.
+- Algorithms 1, 2 and `0x12`.
 - Whether the 240-byte schedule is the standard AES-256 expansion of a raw key in encoded form. The block transform is established (RPF9-F89, RPF9-F90, RPF9-F91); the key blob was not read.
 - Whether a second executable build registers the same keys or binds to the same archives. Every verified result covers build e95020b2 and its local archive set.
 - The cipher type of `B` sub-block 1 in real archives. It is readable only after step 1, which the provider now performs.
@@ -360,4 +387,4 @@ Whether RPF9 shares any cryptography with earlier RPF versions is unknown. Nothi
 - Which message types real archives use beyond the observed type 1, and whether every build registers the same key.
 - The role of the `B` trailer.
 - The `A` table content is identical across observed archives although it lies inside a processed span. The static descriptor uses a fixed key identifier and a fixed IV, which would explain identical stored bytes for identical plaintext. Not verified.
-- The payload transform's key state: which descriptor or key-provider path initializes its per-stream algorithm object, and whether it uses mode 1 or 3. Its algorithm is the same encoded AES-256 CBC engine as the metadata cipher (RPF9-F109), but the archive sub-block 1 and executable static descriptors do not decrypt real transformed rows in the tested combinations (RPF9-F113). Payload bytes are not authenticated by the metadata signature.
+- The block program of the payload transform's algorithm `0x11`: its round structure, table roles and key use. The descriptor, the algorithm selection and the key state are established (RPF9-F114 to RPF9-F116), but no transformed payload decodes yet (RPF9-F117). Payload bytes are not authenticated by the metadata signature.

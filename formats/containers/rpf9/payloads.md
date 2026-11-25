@@ -227,9 +227,11 @@ When key `0x286030A358A789FB` is present, stored bytes do not come straight from
 3. For each run the consumer calls slot `+0x30` (`0x140FC9040`) of the algorithm-`0x10` object. That method either continues the CBC chain (mode 1) or first resets the IV to the 16-byte parameter plus the block index (mode 3), then runs the same update (`0x6137D0`) and engine process (`0x1455DBCF0`) as the metadata cipher (RPF9-F109).
 4. A partial block at the start or end reads the whole 16-byte block at the block boundary, transforms it, and copies the requested sub-range (`0x28CF9C0`, RPF9-F110).
 
-The same flag disables the chunk fast path. A transformed compressed entry is decrypted first and decoded second (RPF9-F111). Seeks reposition the context at the stored cursor. The block operation is the encoded AES-256 decryption of [cryptography/rpf9](../../../cryptography/rpf9/README.md#algorithm-0x10), with a 16-byte block and CBC chaining.
+The same flag disables the chunk fast path. A transformed compressed entry is transformed first and decoded second (RPF9-F111). Seeks reposition the context at the stored cursor.
 
-The transform's key identifier, IV and descriptor are not the archive's `B` sub-block 1 descriptor or the executable's static descriptor in the tested combinations, under either provider mode (RPF9-F112, RPF9-F113). The state that initializes its per-stream cipher object is therefore unknown, and the transform stays unsupported for reading. See [cryptography/rpf9](../../../cryptography/rpf9/README.md#payload-transform).
+The cipher descriptor is the value of the entry's transform field itself, not an archive descriptor (RPF9-F114): `u32` key identifier, `u16` cipher type, 16-byte parameter. The type selects the algorithm through the engine's own type table, and the descriptor is therefore per entry. In the sampled rows the type is `0x11`, which selects algorithm `0x11`: a counter-mode keystream over the encoded block generator (RPF9-F115). The counter starts at the 16-byte parameter plus the block index of a payload-relative stored position and advances by one per 16-byte block, and each block is XORed into the stored bytes. The key identifier resolves through the static key registry to one key state for the selected provider (RPF9-F97, RPF9-F116).
+
+The block program of algorithm `0x11` is not reproduced yet, so the transform cannot be inverted and transformed entries stay unsupported (RPF9-F117). The negative results of the first probe came from reading the archive descriptor with the metadata cipher instead (RPF9-F113).
 
 ## Relation between code and data
 
@@ -245,7 +247,7 @@ These agree. The data observations were made by scanning, not by following nativ
 
 Once the metadata signature verifies, payloads can be read through native location records rather than by scanning. In the 22 tested archives, 5150 rows were stored and 929 decoded through chunk tables; 455 rows carried the payload transform and were refused (RPF9-F103). Stored and chunked extractions produced exactly the logical size (RPF9-F104).
 
-No raw DEFLATE row without a chunk table was observed, so that path remains confirmed by code but unconfirmed by real extraction. The payload transform runs the same encoded AES-256 CBC engine as the metadata cipher, but the key state that initializes it is not the archive descriptor in the tested combinations, so transformed rows are still refused (RPF9-F109, RPF9-F113). The metadata signature covers none of these payload bytes; successful extraction is not authentication.
+No raw DEFLATE row without a chunk table was observed, so that path remains confirmed by code but unconfirmed by real extraction. Transformed rows read their cipher descriptor from their own metadata field and select algorithm `0x11` (RPF9-F114, RPF9-F116), whose block program is not reproduced, so they are still refused (RPF9-F117). The metadata signature covers none of these payload bytes; successful extraction is not authentication.
 
 ## Observed storage layout
 
