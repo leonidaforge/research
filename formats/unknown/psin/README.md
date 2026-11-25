@@ -15,7 +15,13 @@ PSIN payloads occur in RPF9 type 11, 93 and 94 rows. The type ID does not identi
 | Shared outer framing | Confirmed (PSIN-F02, F04) |
 | `LSCH` descriptor table and count | Confirmed (695/695, PSIN-F10) |
 | `PMAP` header marker | Confirmed (62/62, PSIN-F12) |
-| `PMAP` pre-section grammar | Unknown (PSIN-F14) |
+| `PMAP` pre-section block table | Confirmed (62/62, PSIN-F15) |
+| `PMAP` block padding and offset formula | Confirmed (62/62, PSIN-F16) |
+| `PSCH` ID/offset table | Confirmed (62/62, PSIN-F17) |
+| `PSCH` value internals | Unknown (bounded by offsets) |
+| `LSCH` body marker run and tail | Confirmed (483/483, PSIN-F18) |
+| `LENM` body framing | Confirmed (229/229 nonempty, PSIN-F19) |
+| `LENM` chain and extra data | Unknown |
 | `CHKS` integrity section | Confirmed (757/757, PSIN-F11) |
 | Purpose, tag meanings, record semantics | Unknown |
 
@@ -97,21 +103,121 @@ The aligned `+0x04` form is the only variant that fits every `LSCH` payload. The
 
 ## `PMAP` family
 
-The first section is `PMAP`. The pre-section area begins with eight `0x70` bytes at `+0x08` in 62 of 62 unique payloads. The descriptor relation has no solution for any `PMAP` payload, and the unaligned first-section offsets all belong to this family.
+The first section is `PMAP`. The family is separate from `LSCH`: it has no descriptor table, its block directory is inside the `PMAP` section, and all unaligned first-section offsets in the sample belong to it.
 
-The remaining pre-section area is not constant:
+### Pre-section block table
 
-| Test | Outcome |
-| ---- | ------- |
-| Constant bytes | Negative. The 62 areas have 62 distinct SHA-256 values; only the first eight bytes are constant |
-| Fixed-stride table | Negative. The number of `0x70` runs ranges from 1 to 41 and their positions vary |
-| Compressed data | Negative for the tested signatures and decoders. No zlib, gzip, xz, bzip2, LZ4 or zstd signature occurs at `+0x10`; zlib, gzip, bzip2 and LZMA produced no non-empty output |
-| Embedded payload | Negative. No `PSIN`, `RBF0` or section tag occurs inside the pre-section area |
-| Length pattern | In 52 of 62 payloads `(pre_section_length - 8) mod 16` is 0; nine have remainder 8 and one has remainder 4 |
+The pre-section area starts at `+0x08`. It is the concatenation of a fixed prefix, one or more blocks, and `0x70` padding between blocks.
 
-The cheapest first case is the 216-byte payload: a 40-byte pre-section area with two `0x70` runs, zero bytes and two small big-endian words. It does not decode as a compressed stream or an embedded payload.
+| Offset | Type | Observation |
+| ------ | ---- | ----------- |
+| `+0x08` | 8 bytes | `0x70` in 62 of 62 payloads |
+| `+0x10` | block 0 | First block; every block starts on a 16-byte boundary |
+| between blocks | bytes | `0x70` padding to the next 16-byte boundary |
+| after the last block | none | The last block ends at the first-section offset, with no trailing padding |
 
-The area is probably a structured record area with `0x70` padding, but its grammar is **Unknown**. The marker alone is enough to classify the family, not to decode the records.
+The block directory is the `PMAP` section body, not the pre-section area.
+
+| Body offset | Type | Observation |
+| ----------- | ---- | ----------- |
+| `+0x00` | `u32` big-endian | Mode word. Observed values 1, 2, 3, 4, 9, 10 and 170; meaning **Unknown** |
+| `+0x04` | `u32` big-endian | Zero in 61 of 62 payloads; 41 in one. Meaning **Unknown** |
+| `+0x08` | `u16` big-endian | Block count `B` |
+| `+0x0A` | 6 bytes | `0x70` in 62 of 62 payloads |
+| `+0x10` | `B * 16` | Blocks, 16 bytes each |
+
+Each block record is four big-endian words:
+
+| Record offset | Type | Observation |
+| ------------- | ---- | ----------- |
+| `+0x00` | `u32` | Block id |
+| `+0x04` | `u32` | Absolute payload offset |
+| `+0x08` | `u32` | Zero in 62 of 62 payloads |
+| `+0x0C` | `u32` | Block length in bytes |
+
+The table consumes the pre-section exactly:
+
+```text
+block[0].offset                == 0x10
+block[i].offset                == 0x10 + sum(align16(block[j].length)) for j < i
+first_section_offset           == 0x10 + sum(align16(block[j].length)) for j < B-1
+                                  + block[B-1].length
+```
+
+The second relation omits padding after the last block. That omission is required: a model that pads after every block fits the 52 payloads whose last length is a multiple of 16 and fails the other ten. The ten unaligned first-section offsets are therefore predicted by the block table, not exceptional.
+
+### Block ids
+
+Block ids are not uniform.
+
+| Class | Ids | Blocks | Observation |
+| ----- | --- | -----: | ----------- |
+| Small | 1, 2, 6, 7, 8, 12 | 62 | Do not occur in the `PSCH` id table |
+| Hashed | all other observed ids | 459 | Every hashed id occurs in the `PSCH` id table (62 of 62 payloads) |
+
+Id 1 marks a name block in 41 payloads. Its bytes are NUL-terminated printable ASCII in 41 of 41: 8,342 names, with repeats across payloads. The names are data, not format semantics. The other block bodies are opaque.
+
+### `PSCH` section
+
+The `PSCH` body holds a count and a table of `(id, offset)` pairs, followed by one value per id.
+
+| Body offset | Type | Observation |
+| ----------- | ---- | ----------- |
+| `+0x00` | `u32` big-endian | Count `P` |
+| `+0x04` | `P * 8` | Pairs of big-endian `u32` id and absolute body offset |
+| table end | 8 bytes | Uninterpreted; values start after it |
+| value `i` | bytes | `[offset_i, offset_{i+1})`, or to the body end for the last value |
+
+The table tiles the body exactly in 62 of 62 payloads: the first offset is the table end plus 8, offsets increase, and the last value ends at the body length. The value bytes are opaque. Their internal layout is not decoded.
+
+The `PSCH` id set contains every hashed `PMAP` block id in 62 of 62 payloads. The reverse does not hold: `PSCH` carries ids that no `PMAP` block uses.
+
+### Negative tests for the values
+
+Fixed record widths 1 to 64 do not consume all 1,170 `PSCH` values: only widths 1, 2 and 4 divide every value length, and those are byte granularities, not records. No zlib, gzip, bzip2, xz, LZMA, zstd or LZ4 signature occurs at a block start. A strict inflate of every block with raw deflate, zlib, gzip, bzip2 and LZMA yields no complete stream with zero unused input. The value and block internals remain **Unknown**.
+
+## `LSCH` and `LENM` section bodies
+
+The two bodies are separate structures. They are described structurally; no field is assigned a semantic name.
+
+### `LSCH` body
+
+The body length is a multiple of 16 in 483 of 483 top-level `LSCH` payloads.
+
+| Body offset | Type | Observation |
+| ----------- | ---- | ----------- |
+| `+0x00` | 8 bytes | Uninterpreted |
+| `+0x08` | `u32` little-endian | Observed 512 (441), 768 (35), 1024 (7). Meaning **Unknown** |
+| `+0x0C` | 4 bytes | Zero in 483 of 483 |
+| `+0x10` | `M * 32` | Marker records |
+| after the records | bytes | Tail, a multiple of 16 bytes |
+
+A marker record is 32 bytes and starts with eight `0xAA` bytes.
+
+| Record offset | Type | Observation |
+| ------------- | ---- | ----------- |
+| `+0x00` | 8 bytes | `0xAA` in every marker record |
+| `+0x08` | `u32` little-endian | Uninterpreted |
+| `+0x0C` | `u16` little-endian | Zero in the sampled records |
+| `+0x0E` | `u16` little-endian | Uninterpreted |
+| `+0x10` | 16 bytes | Uninterpreted |
+
+The marker run is exact. Every `0xAA` run in the body is a marker record, all 10,537 records start at a 16-byte boundary, and every consecutive pair is 32 bytes apart. The run starts at `+0x10` in 483 of 483 payloads. The tail has no marker. The tail grammar and the record fields are **Unknown**.
+
+### `LENM` body
+
+The body is empty in 254 top-level payloads. The 229 nonempty bodies share a header:
+
+| Body offset | Type | Observation |
+| ----------- | ---- | ----------- |
+| `+0x00` | 8 bytes | Uninterpreted |
+| `+0x08` | 8 bytes | `0xEE` in 229 of 229 |
+| `+0x10` | `u32` little-endian | Count-like word `N`; meaning **Unknown** |
+| `+0x14` | bytes | Body continues; length minus `0x14` is a multiple of 8 in 229 of 229 |
+
+`N` does not delimit the body. The relation `length == 0x18 + 16 * N` holds in 54 of 229 bodies. The other 175 are longer by a positive multiple of 8. The chain and the extra region are **Unknown**.
+
+Neither body contains a co-located plaintext name. The printable-byte ratio is at most 0.24 for `LSCH` and 0.20 for `LENM`; the short printable runs in `LSNS` and `LGID` are not names. No semantic label is assigned.
 
 ## `CHKS` integrity section
 
@@ -145,15 +251,15 @@ The total-length word is a descriptive label supported by equality across the sa
 
 Identification MUST use the payload bytes. The classifier reports the family from the first section tag:
 
-- `LSCH` is reported with its descriptor count and formula result.
-- `PMAP` is reported as a second grammar with its `0x70` marker and pre-section length, not as a failed parse.
+- `LSCH` is reported with its descriptor count, formula result, and the `LSCH`/`LENM` body structure.
+- `PMAP` is reported with its block table, padding result, `PSCH` tiling result and name-block summary, not as a failed parse.
 - An unknown first tag is reported as `OTHER`; `first_tag` reports the raw tag bytes.
 
 The RPF9 type ID alone is not sufficient.
 
 ## Tools
 
-`tools/psin/psin_inspect.py` reports the shared framing, the family, the descriptor count, and the integrity result. It does not decode section bodies or print payload text.
+`tools/psin/psin_inspect.py` reports the shared framing, the family, the `LSCH` descriptor count, the `PMAP` block table, the `PSCH` table, the `LSCH`/`LENM` body structure and the integrity result. It does not decode value internals, print payload text or print block names.
 
 ```text
 python tools/psin/psin_inspect.py <sample> [<sample> ...] [--json]
@@ -161,7 +267,7 @@ python tools/psin/psin_inspect.py <sample> [<sample> ...] [--json]
 
 `--max-bytes` and `--max-sections` bound the read and the section walk. The tool reads inputs read-only and has no default pointing at a game installation.
 
-Synthetic fixtures are generated by `tools/psin/synthetic.py`. Tests include a valid `LSCH` document, a `PMAP` document, an unaligned `PMAP` document, and a corrupted payload that must fail the checksum:
+Synthetic fixtures are generated by `tools/psin/synthetic.py`. Tests include a valid `LSCH` document, a `PMAP` document with a block table, an unaligned `PMAP` document, and a corrupted payload that must fail the checksum:
 
 ```text
 python -m unittest discover -s tools/psin
@@ -169,11 +275,11 @@ python -m unittest discover -s tools/psin
 
 ## Limits
 
-- The sample is not random. It covers readable type 11 rows in the selected archives and a nested-archive bound of 2 MiB.
+- The sample is not random. It covers readable type 11 rows in the selected archives and a nested-archive bound of 2 MiB. The `LSCH`/`LENM` body counts use the 483 unique top-level `LSCH` payloads; the earlier 695 figure adds nested payloads that were not re-extracted in this pass.
 - One build and one local archive set were examined.
 - The earlier 103 figure describes a narrower selection; the 757 figure covers the stated scope.
 - No executable path was traced and no historical RAGE format is claimed as a match.
-- Tags and section bodies were not assigned meanings. The `PMAP` pre-section grammar is undecoded.
+- No tag or value was assigned a semantic name. The `PSCH` value internals, the `LSCH` body tail, and the `LENM` chain and extra region are undecoded.
 - The descriptor `+0x00` word is uninterpreted.
 - The checksum seed is unexplained, and the algorithm is validated only on this container family.
 - Exact payload bytes stay outside this repository.
@@ -181,7 +287,9 @@ python -m unittest discover -s tools/psin
 ## Open questions
 
 - What selects the `LSCH` and `PMAP` grammars?
-- Is the `PMAP` pre-section area a record table, a packed structure or another encoding layer?
+- What do the `PSCH` values encode, and why does every hashed `PMAP` block id occur in `PSCH`?
+- What do the `LSCH` marker-record fields and tail encode?
+- What does the `LENM` count delimit, and what follows the first chain?
 - Do the `LSCH` descriptor words identify data blocks, schemas or record counts?
 - Do the section tags map to records, and does the `CHKS` body protect only the payload bytes?
 - Does the same framing occur in type 93 and 94 rows with the same two families?

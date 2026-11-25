@@ -45,7 +45,13 @@ The PSIN-F01 claim in the earlier revision recorded 103 unique payloads: 18 earl
 | PSIN-F11 | The `CHKS` section has a 20-byte section length and a 12-byte body of big-endian total length, big-endian checksum, and ASCII `zppp`. The total-length word equals the payload size in 757 of 757 payloads. The checksum is a one-at-a-time hash over signed bytes seeded with `0x3FAC7125`, over the payload with the total-length and checksum words zeroed; it verifies in 757 of 757 payloads. An unsigned-byte variant matches 0 of 757 | `BINARY`, `CROSS_SAMPLE`, `SYNTHETIC` | Confirmed (sample) | The seed is unexplained; the variant is validated only on this container family |
 | PSIN-F12 | The `PMAP` family has a stable header-area marker: eight `0x70` bytes at `+0x08` in 62 of 62 unique payloads. The marker is absent from the `LSCH` descriptors | `BINARY`, `CROSS_SAMPLE` | Confirmed (sample) | Marker meaning is Unknown |
 | PSIN-F13 | The two families share the outer framing and the `CHKS` integrity section, but differ in the pre-section grammar. The descriptor arithmetic fits every `LSCH` payload and no `PMAP` payload; all unaligned first-section offsets are `PMAP`. They are two grammars of one container, not separate file formats | `BINARY`, `CROSS_SAMPLE` | Confirmed (sample) | Family purpose and record semantics are Unknown |
-| PSIN-F14 | The `PMAP` pre-section area is not constant. The 62 unique areas have 62 distinct SHA-256 values; only the first eight bytes are constant. It is not a fixed-stride table: the number of `0x70` runs ranges from 1 to 41 and their positions vary. No tested compressed-stream signature occurs at `+0x10`, and zlib, gzip, bzip2 and LZMA produced no non-empty output. No `PSIN`, `RBF0` or section tag occurs inside the area. It is probably a structured record area with `0x70` padding, but its grammar is not decoded | `BINARY`, `CROSS_SAMPLE` | Confirmed (negative tests); Speculative (structured area) | The 216-byte payload is the smallest case; larger areas were not decoded |
+| PSIN-F14 | The `PMAP` pre-section area is not constant. The 62 unique areas have 62 distinct SHA-256 values; only the first eight bytes are constant. The number of `0x70` runs ranges from 1 to 41 and their positions vary. No tested compressed-stream signature occurs at `+0x10`, and zlib, gzip, bzip2 and LZMA produced no non-empty output. No `PSIN`, `RBF0` or section tag occurs inside the area. These negative tests stand; PSIN-F15 to PSIN-F17 supersede the earlier conclusion that the area had no decoded grammar | `BINARY`, `CROSS_SAMPLE` | Confirmed (negative tests) | Tests the old whole-area reading; the block table is now decoded at the block level |
+| PSIN-F15 | The `PMAP` pre-section area is a block table. It is eight `0x70` bytes at `+0x08`, then blocks from `0x10`, with `0x70` padding between blocks to 16-byte boundaries and no padding after the last block. The directory is the `PMAP` section body: big-endian mode word, a second word that is zero in 61 of 62 payloads, a big-endian `u16` count `B`, six `0x70` bytes, then `B` 16-byte records of `{u32 id, u32 offset, u32 zero, u32 length}`. All 521 block offsets are 16-byte aligned, the first is `0x10`, the unused word is zero, and the ranges are in order and in bounds (62 of 62) | `BINARY`, `CROSS_SAMPLE` | Confirmed (sample) | Block contents are opaque; the mode and second header word have no established meaning |
+| PSIN-F16 | The block table predicts the first-section offset. The relation `first_offset = 0x10 + sum(align16(length_i) for i < B-1) + length_last` holds in 62 of 62 `PMAP` payloads. A model that also pads after the last block fits only the 52 payloads whose last length is a multiple of 16 and fails the ten unaligned payloads | `BINARY`, `CROSS_SAMPLE` | Confirmed (counterexample set) | The ten unaligned first-section offsets are 72, 104, 152, 152, 260, 344, 888, 2,456, 307,048 and 972,552 (PSIN-F08) |
+| PSIN-F17 | The `PSCH` body is a count table. It holds a big-endian `u32` count `P`, `P` pairs of big-endian `u32` id and absolute body offset, eight uninterpreted bytes, then `P` values delimited by the offsets. The first value starts at the table end plus eight and the last ends at the body length in 62 of 62 payloads. Every hashed `PMAP` block id (459 blocks) occurs in the `PSCH` id set; the small ids 1, 2, 6, 7, 8 and 12 (62 blocks) do not. Fixed widths 1 to 64 do not consume all 1,170 values; zlib, gzip, bzip2, xz, LZMA, raw deflate, zstd and LZ4 tests are negative for a complete stream | `BINARY`, `CROSS_SAMPLE` | Confirmed (table); Unknown (value internals) | Value contents are not decoded; the eight-byte prefix is uninterpreted |
+| PSIN-F18 | The `LSCH` section body has a fixed 16-byte header, a marker run and a 16-byte tail. The body length is a multiple of 16 in 483 of 483 top-level `LSCH` payloads. At `+0x08` a little-endian `u32` is 512 (441), 768 (35) or 1024 (7); `+0x0C` is zero in 483 of 483. The marker run starts at `+0x10` in 483 of 483 and consists of 32-byte records that start with eight `0xAA` bytes. There are 10,537 records; every `0xAA` run in a body is one of them, and every consecutive pair is 32 bytes apart. The tail is a multiple of 16 bytes | `BINARY`, `CROSS_SAMPLE` | Confirmed (sample) | The record fields and the tail are not decoded; the count is the 483 unique top-level payloads |
+| PSIN-F19 | A nonempty `LENM` body starts with eight arbitrary bytes, eight `0xEE` bytes at `+0x08`, a little-endian `u32` at `+0x10`, and a remainder whose length minus `0x14` is a multiple of 8. The relation `length = 0x18 + 16*N` holds in 54 of 229 nonempty bodies; the other 175 are longer by a positive multiple of 8. An empty body occurs in 254 top-level payloads | `BINARY`, `CROSS_SAMPLE` | Confirmed (header); Unknown (chain and extra region) | The count does not delimit the body; no field meaning is established |
+| PSIN-F20 | Held-out prediction. The block-table rule was fitted on the 52 aligned `PMAP` payloads and predicted the block offsets and first-section offsets of all ten unaligned payloads exactly. A random ten-payload hold-out also passed 10 of 10. The classifier reproduces all 62 `PMAP` and 483 `LSCH` structural checks with synthetic tests for malformed input | `CROSS_SAMPLE`, `SYNTHETIC` | Confirmed (sample) | One build and one local archive set; the rule is arithmetic and does not decode block contents |
 
 ## Counterexamples
 
@@ -57,6 +63,9 @@ The PSIN-F01 claim in the earlier revision recorded 103 unique payloads: 18 earl
 | 16-byte alignment of `+0x04` | 10 `PMAP` payloads are unaligned, including offsets 260, 307,048 and 972,552 |
 | Type ID 11 implies PSIN | The same rows include 238 unique RBF0 payloads |
 | One header model | `PMAP` has no descriptor solution, while `LSCH` has a unique solution in 695 of 695 payloads |
+| Padding after every `PMAP` block | The 10 unaligned `PMAP` first-section offsets (72 to 972,552) are produced by omitting padding after the last block; padding after it overshoots by 4 to 15 bytes |
+| Fixed `PSCH` value width | Widths 1 to 64 do not divide all 1,170 value lengths; only 1, 2 and 4 do, and those are byte granularities |
+| `PSCH` values as a compressed stream | No complete zlib, raw deflate, gzip, bzip2, xz, LZMA, zstd or LZ4 stream occurs across the 521 `PMAP` blocks |
 
 ## Reproduction
 
@@ -68,7 +77,7 @@ lforge archive extract <ARCHIVE> --row <ROW> --output <WORK>/row.bin --executabl
 python tools/psin/psin_inspect.py <WORK>/row.bin --json
 ```
 
-The tool tests build synthetic `LSCH` and `PMAP` payloads, including a corrupted payload:
+The tool tests build synthetic `LSCH` and `PMAP` payloads, including a block-table `PMAP`, an unaligned `PMAP` and a corrupted payload:
 
 ```text
 python -m unittest discover -s tools/psin
@@ -80,6 +89,7 @@ python -m unittest discover -s tools/psin
 - One build and one local archive set were examined.
 - The earlier 103 figure describes a narrower selection; the 757 figure covers the stated scope.
 - No executable path was traced and no historical RAGE format is claimed as a match.
-- Fields and tags were not assigned meanings. Section bodies were not decoded into records.
-- The `PMAP` pre-section grammar is Unknown.
+- Fields and tags were not assigned meanings. `PSCH` value internals, `LSCH` body fields and tail, and the `LENM` chain and extra region were not decoded.
+- The `LSCH`/`LENM` body counts use the 483 unique top-level `LSCH` payloads; the 695 family total includes nested payloads that were not re-extracted in this pass.
+- The `PMAP` block table and `PSCH` table cover all 62 unique `PMAP` payloads.
 - Exact payload bytes stay outside this repository.
