@@ -5,6 +5,9 @@ from authenticated top-level manifests. It extracts type-0 rows, manifests the
 nested archives, repeats to a bounded depth, and samples readable payloads per
 type. Inputs are opened read-only.
 
+The extracted-byte cap is a single joint budget over unique archive bytes and
+unique payload bytes. It is not a per-kind allowance.
+
 ## Usage
 
 ```sh
@@ -28,13 +31,23 @@ The defaults are bounded and can be lowered or raised explicitly.
 | --- | ---: | --- |
 | `--max-depth` | 3 | Maximum archive depth, 1 to 3 |
 | `--max-nested` | 400 | Unique nested archives |
-| `--max-bytes` | 3 GiB | Unique extracted archive and payload bytes |
+| `--max-bytes` | 3 GiB | Joint unique archive and payload bytes |
+| `--max-rows` | 0 | Nested rows enumerated; 0 means no row cap |
 | `--max-archive-bytes` | 16 MiB | Largest sampled type-0 row |
 | `--max-payload-bytes` | 1 MiB | Largest sampled payload row |
 | `--samples-depth1` | 24 | Type-0 samples per top-level archive |
 | `--samples-depth2` | 6 | Type-0 samples per depth-1 archive |
 | `--samples-depth3` | 3 | Type-0 samples per depth-2 archive |
 | `--max-payloads-per-type` | 4 | Payload samples per type |
+
+`--max-bytes` covers the cache as a whole. An archive and a payload share the
+same budget, so the sum of their stored bytes cannot exceed the value. A cached
+sample does not consume budget again.
+
+`--max-rows` bounds the rows read from nested manifests. When a manifest crosses
+the cap, its rows are truncated in manifest order and traversal stops. The
+manifest's reported row count is unchanged; `rows_enumerated` records how many
+rows were actually used.
 
 ## Selection rule
 
@@ -47,6 +60,36 @@ order. The rule depends only on the manifests and the caps.
 Payloads are selected per type from unique nested manifests. Readable rows at
 or below the payload size cap are ordered by `(logical_size, archive hash,
 row)` and the first `--max-payloads-per-type` are taken.
+
+## Stop reasons
+
+`summary.json` records one run-level `stop_reason`:
+
+| Reason | Meaning |
+| --- | --- |
+| `complete` | The sampled population was exhausted |
+| `depth` | Type-0 rows exist at `--max-depth` but were not expanded |
+| `archive limit` | `--max-nested` unique archives were reached |
+| `row limit` | `--max-rows` was reached |
+| `byte budget` | The joint `--max-bytes` budget would be exceeded |
+| `transform` | Only unreadable transform type-0 rows remained at a depth |
+| `failure` | Every archive extraction failed |
+
+Each depth also records its own stop reason. Unreadable payload-transform rows
+are not extracted; they remain counted in the manifest state and type histogram.
+
+## Authentication provenance
+
+Nested manifests inherit the CLI signature result of the archive that produced
+them. The summary separates:
+
+- `rechecked`: the manifest command ran in this invocation.
+- `cached`: the manifest file was reused from the cache.
+- `inherited`: a duplicate archive reused the first archive's manifest.
+- `failed`: the manifest command or parse failed.
+
+Top-level authentication comes from the input manifests; `top_level_authenticated`
+counts headers whose status is `authenticated`.
 
 ## Cache and deduplication
 
@@ -68,13 +111,17 @@ Duplicate payloads are recorded the same way.
 
 | File | Content |
 | --- | --- |
-| `summary.json` | caps, top-level results, depth progress, unique archives, payloads, failures, gaps, totals |
-| `archives.jsonl` | one record per archive extraction attempt, without row lists |
-| `payloads.jsonl` | one record per payload attempt, including signature class |
+| `summary.json` | stop reason, caps, top-level results, depth progress, unique archives, payloads, authentication provenance, failures, gaps, totals |
+| `archives.jsonl` | one record per successful archive extraction, without row lists |
+| `payloads.jsonl` | one record per payload extraction attempt, including failures and signature class |
 | `failures.jsonl` | extraction and manifest failures |
 | `report.md` | aggregate report |
 | `run.log` | progress log |
 | `plan.json` | depth-1 selection with `--plan-only` |
+
+The `*_attempts` totals count every extraction attempt. `*_successes` and
+`*_failures` partition those attempts, so a failed extraction is never hidden
+from the attempt count.
 
 Only the first eight extracted bytes are read for classification. Exact
 prefixes, archive paths and archived rows stay in the scratch directory.
