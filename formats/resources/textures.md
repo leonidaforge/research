@@ -111,9 +111,11 @@ The hash array is `count` little-endian `u32` values in ascending order. The
 value array is `count` 8-byte values in the same order: `hash[i]` and
 `value[i]` describe the same texture. The value array is a set of distinct
 record pointers; its order is not always the index order. The parser reports
-`value_order_matches_index`. In 1,315 of the 1,422 multi-record dictionaries the
-value order equals the index order, and in 107 it differs. A reader MUST follow
-`value[i]`, not compute a record address from `i`.
+`value_order_matches_index`. It compares each value entry's record address with
+the sorted recorded addresses, not with a fixed stride, so the one 0x20-byte gap
+does not by itself count as a mismatch. In 1,315 of the 1,422 multi-record
+dictionaries the value order equals the index order, and in 107 it differs. A
+reader MUST follow `value[i]`, not compute a record address from `i`.
 
 Across the 2,852 distinct hashes, 2,842 occur in one record, 8 occur in two
 records and 2 occur in 1,313 records. A hash is therefore not unique to one
@@ -171,10 +173,17 @@ extent ends at the graphics end. The sum is therefore
 The parser requires every record to have an allocation pointer, no two starts
 to be equal, the first start to be zero, and the summed extents to equal the
 graphics size. It reports these as `allocations_in_bounds`, `partition_ok` and
-`starts_at_zero`. In the sample, 1,440 of 1,440 resources pass all three (the 9
-empty dictionaries have no graphics bytes and pass trivially). The weaker
-`allocation_sum_ok` is the `<=` check and is kept for callers that only need a
-bound.
+`starts_at_zero`. The weaker `allocation_sum_ok` is the `<=` check and is kept
+for callers that only need a bound.
+
+The equality is a consistency check between the extent table and the start
+table, not independent evidence of a partition. With distinct starts and a zero
+first start, the extents telescope to `graphics_size`, so the equality cannot
+fail unless the extent computation is inconsistent. The 1,440 of 1,440 result
+says the extent computation agrees with the start table in the sample; it does
+not verify an independent allocation map. The 9 empty dictionaries have no
+graphics bytes and pass trivially. All three checks hold in 1,440 of 1,440
+resources.
 
 A start equal to the graphics size is not accepted as in bounds; a missing
 allocation pointer is not in bounds. If two records share a start, the parser
