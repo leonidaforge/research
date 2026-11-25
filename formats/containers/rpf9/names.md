@@ -108,6 +108,7 @@ Both hashes map every input byte through the same table before mixing: ASCII `A`
 - `\` and `/` are interchangeable.
 - Nothing else is normalized. Repeated separators, `.` and `..` components and surrounding spaces are hashed as they are.
 - The extension test is a case-sensitive string comparison. `ITEM.YDR` and `item.ydr` give the same stem hash but may select different types.
+- Explicit vectors confirm the ASCII-only bound: `caf\xC3\xA9/item` and `caf\xC3\x89/item` differ for both hashes (HSH-F04).
 
 ## 64-bit hash
 
@@ -117,7 +118,7 @@ The hash is MurmurHash3 x64-128 with seed 0, returning the first 64-bit word of 
 hash64(s) = MurmurHash3_x64_128_h1(fold(s), seed = 0, length_mixed = len(s) & 0xFF)
 ```
 
-A null pointer and the empty string both give 0. The engine also has a variant without folding. It is not used for RPF9 paths.
+A null pointer and the empty string both give 0. A NUL byte inside the input is hashed like any other byte and counts toward the length, so it changes the result (HSH-F04). The engine also has a variant without folding. It is not used for RPF9 paths.
 
 The implementation was checked against the independent `mmh3` 5.3.1 package for MurmurHash3_x64_128, seed 0, first 64-bit word, on eleven inputs below 256 bytes; every result agreed (RPF9-F105). From 256 bytes on no independent implementation of the low-byte length rule exists, so that part rests on the decompiled code (RPF9-F56).
 
@@ -130,7 +131,7 @@ for each byte b: h += fold(b); h += h << 10; h ^= h >> 6
 h += h << 3; h ^= h >> 11; h += h << 15
 ```
 
-If the string starts with `"`, the quote is skipped and hashing stops at the next `"` or at the end. `"a/b"x`, `"a/b` and `a/b` therefore have the same key.
+If the string starts with `"`, the quote is skipped and hashing stops at the next `"` or at the end. `"a/b"x`, `"a/b` and `a/b` therefore have the same key. Hashing also stops at the first NUL byte (HSH-F04).
 
 That the archive stores `joaat(stem)` in key `0xB707…` follows from the lookup. It has not been checked against archive data. The implementation follows the published one-at-a-time definition and its reference vectors, but no verified GTA VI name/key pair is available to test the archive side (RPF9-F57, RPF9-F105).
 

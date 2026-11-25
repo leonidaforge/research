@@ -104,3 +104,15 @@ Lifetime (RPF9-F72):
 - The parent MUST outlive every archive and stream opened through it. No mechanism that invalidates children when a parent goes away was found.
 
 Object layouts and vtable slots are in the [build catalog](../builds/gta-vi/scarlett-e95020b2/functions.md).
+
+## Field-key hashing
+
+RPF9 column descriptors are keyed by 64-bit values (RPF9-F08). The hash behind those keys is not established.
+
+A bounded falsification test compared the nine keys listed in `formats/containers/rpf9/schema.md` with the 64-bit path hash and joaat over 80 spellings of 16 documented labels. No key matched (HSH-F02). The same probe reproduced published LUT records for the 64-bit hash from their stems (HSH-F01), so the negative result is not a probe failure.
+
+A wider bounded scan compared the same keys with 52,516 distinct printable-string variants from one executable's initialized data sections and 368 identifier tokens from one readable `.meta` payload. It covered both MurmurHash3 x64-128 words, folded and unfolded, joaat in both fold modes, both string encodings and the 32-bit half-words. No key matched (HSH-F05). A seed sweep over 0 through 15 and the identifier-like candidates also found no match (HSH-F06). These are bounded misses: a field name that never appears as text in those sources is outside the search space.
+
+The key hash therefore stays **Unknown**. A miss over documentation-derived labels is expected when the real preimages are unknown. Do not describe the field keys as MurmurHash3 or joaat without a matched preimage.
+
+Evidence: [evidence/shared/INDEX.md](../evidence/shared/INDEX.md).
