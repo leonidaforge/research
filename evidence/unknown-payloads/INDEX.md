@@ -13,7 +13,7 @@ This subject records payload signatures that are identified by bytes only. Sampl
 
 `<GAME_ROOT>`, `<EXECUTABLE>` and `<WORK>` are local inputs. No payload text beyond a four-byte signature is reproduced.
 
-The census covers top-level stored bytes only. Depth-1 nested payloads add `GFX*` under type 66 and `ADAT` under type 255; see [GFX* and ADAT](../gfx-adat/INDEX.md).
+The census covers top-level stored bytes only. Depth-1 nested payloads add `GFX*` under type 66, recorded in [GFX*](../gfx/INDEX.md), and `ADAT` under type 255, recorded in [ADAT](../gfx-adat/INDEX.md).
 
 ## Findings
 
