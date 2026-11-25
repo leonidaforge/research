@@ -130,11 +130,12 @@ record. The aggregate equals the union of the per-geometry records within
 | A | 1 | 3 (aggregate + 2) | yes, both geometries |
 | B | 4 | 3 (aggregate + 2) | yes, all four models |
 
-Across 2,006 models in the recovered `levels.rpf` population whose array shape
-matched, the aggregate equalled the union of the per-geometry records in
-2,006. In 1,932 of 1,990 drawables, the union of all model aggregates equalled
-the header AABB within `2e-3`; the header is the union across models and LOD
-slots, so a single model is not expected to match it in a multi-model drawable.
+Across 2,006 models in the first 6,000 decoded recovery candidates below
+400 KiB that carried a model chain, the aggregate equalled the union of the
+per-geometry records in 2,006. In 1,932 of those 1,990 drawables, the union of
+all model aggregates equalled the header AABB within `2e-3`; the header is the
+union across models and LOD slots, so a single model is not expected to match it
+in a multi-model drawable.
 
 This corrects the earlier reading that the target "starts with the model
 min/max". It is also the per-geometry bounds source used by the material and
@@ -485,12 +486,14 @@ a probable shader hash, not a per-material identifier and not a name.
 
 Every bound slot yields a 64-bit key from its name record. Every unbound slot
 is reported with the key `0x0000000000000000` and status `unbound`, not with a
-missing value. Across eight recovered drawables (348 declared texture slots):
-278 bound, 70 unbound, 0 null keys, 0 direct-store matches, 0 EDUP
-indirections and 278 unresolved keys. A null key means a bound name record
-whose key is zero; none occurred. A direct-store match or an EDUP indirection
-requires a texture store that was not reached, so both counts are zero. The
-join is exact for these inputs and does not claim a resolution.
+missing value. Across eight recovered drawables (the first eight in recovery order with at least
+two shaders) there are 348 declared texture slots: 278 bound, 70 unbound, 0 null
+keys, 0 direct-store matches, 0 EDUP indirections and 278 unresolved keys. Every
+unbound slot is reported with key `0x0000000000000000`; every bound slot yields
+a 64-bit key. A null key means a bound name record whose key is zero; none
+occurred. A direct-store match or an EDUP indirection requires a texture store
+that was not reached, so both counts are zero. The join is exact for these
+inputs and does not claim a resolution.
 
 No local texture store was reached from these samples. Resolving a key depends
 on a resource-side texture dictionary or store reference path that was not
