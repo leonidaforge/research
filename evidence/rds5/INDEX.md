@@ -103,7 +103,8 @@ content is never reproduced. Decoded images stay in scratch and are not committe
 
 Finding IDs `RDS5-F01` to `RDS5-F22` keep the numbering of the transferred
 evidence. `RDS5-F23` to `RDS5-F37` are the iteration 10 measurements and the
-open discrimination candidate. Superseded rows stay in the table so the earlier
+open discrimination candidate. `RDS5-F38` to `RDS5-F44` are the iteration 11
+texture measurements. Superseded rows stay in the table so the earlier
 reading is traceable; the corrections are recorded in the
 [research history](research-history.md).
 
