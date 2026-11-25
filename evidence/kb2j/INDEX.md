@@ -15,6 +15,7 @@ tooling observations that connect them.
 | Census           | Every row's first 48 header bytes read at its payload offset                                           |
 | Extraction       | 10 `KB2j` rows and 2 `KB2n` rows, 12 payloads total                                                    |
 | Frame validation | Frame index tables read for all 515 rows; tables capped at 8 MiB                                       |
+| Audio validation | Leading record of every frame read for the 196 audio rows: 372,043 frames; no packet payload read     |
 
 `<ARCHIVE>`, `<EXECUTABLE>`, `<WORK>` and `<PAYLOAD>` are local inputs. Payload
 bytes are not reproduced. Header field values and sizes are reported because
@@ -37,6 +38,11 @@ they are the finding.
 | KB2-F11 | `+0x24`, `+0x26` and `+0x2C` are observed but unexplained. `+0x24` is 18 or 19; `+0x26` is 0, 4, 16 or 20; `+0x2C` is `0x02070D00` for all `KB2j` rows and `0x87E90500`, `0x87E80400` or `0x87E70200` for `KB2n` rows                                                                                                                                                                                                                                                                                                                                                                  | Header census                                                                                                                       | Confirmed (values); Unknown (meaning)                                      | Values may be codec or encoder identifiers                                                                                                                            |
 | KB2-F12 | Two `KB2n` counts describe different `movies.rpf` populations. The current 515-row manifest inspected every row, excluded none and reads 505 `KB2n` and 10 `KB2j`. An earlier census reported 787 `KB2n`; its implied population was 797 rows (787 `KB2n` + 10 `KB2j`), but its source manifest, duplicate handling and exclusions were not preserved                                                                                                                                                                                                                                  | Current manifest, signature census; earlier census record                                                                           | Confirmed (current 515-row manifest); Unknown (earlier 797-row population) | The earlier figure is not reproducible from the current archive. `KB2n` content duplicates in the current archive were not measured. The figures MUST NOT be combined |
 | KB2-F13 | The `KB2n` stored prefix is not confined to `movies.rpf`. A stored-byte census of the top-level rows reads `KB2n` in 787 rows across four archives: `movies.rpf` 505, `story000.rpf` 264, `core_restofworld.rpf` 11, `story000_restofworld.rpf` 7. No `KB2j` stored prefix was observed outside `movies.rpf` in the 6,079 inspected top-level rows. Only the `movies.rpf` 515-row population has been inspected structurally; the other 282 rows are counted by first stored bytes only. This corrects the earlier confinement claim (UPL-F06). The four-archive total of 787 is not the historical 787 of KB2-F12 and the two MUST NOT be combined | Top-level stored-byte census over 6,079 of 6,534 rows (INV-F31); current `movies.rpf` manifest; `BINARY`, `CROSS_SAMPLE`            | Confirmed (prefix count); Unknown (format identity outside `movies.rpf`)   | First eight stored bytes only; 455 rows behind the payload transform were not inspected; nothing outside `movies.rpf` was parsed, validated as a container, or decoded                                                          |
+| KB2-F14 | `+0x24` is one little-endian `u32` flags word. The values are `0x00040013` (441), `0x00040012` (33), `0x00140012` (29), `0x00100012` (9), `0x00140013` (2) and `0x00000012` (1). The low `u16` is `0x12` or `0x13`; the high `u16` is 0, 4, 16 or 20. Bit `0x100000` is set in 40 rows | Header census | `BINARY`, `CROSS_SAMPLE` | Confirmed (515/515 for the `u32` read); Unknown (bit meanings) | The `0x100000` bit is not proven to mean alpha; no decoded frame was checked | 
+| KB2-F15 | Frame table entry 0 equals the table end plus one in 515/515 rows; masking bit 0 gives the table end. Masked entries are non-decreasing and lie between the table end and the file size in 515/515 rows. The last entry equals the file size and has bit 0 clear in 515/515 rows. Every row has at least one set bit; entry 0 is always set; 1 to 107 entries per row are set | Header and table census | `BINARY`, `CROSS_SAMPLE` | Confirmed (offsets and mask); Probable (keyframe meaning) | No decoded frame confirms that bit 0 is a keyframe flag | 
+| KB2-F16 | Audio array 1 is 145,920 in 229/229 tracks and equals the largest decoded byte count in 196/196 audio rows. It is not the largest compressed record, which is 36,436 bytes. Array 2 is 48,000 in 229/229 tracks with high-`u16` flags `0x7000` (227) or `0x3000` (2). Array 3 is a permutation of `0..n-1` in 187 of the 196 audio rows | Header and audio-frame census | `BINARY`, `CROSS_SAMPLE` | Confirmed (values and relations); Unknown (flag and `decoded_bytes` meanings) | The nine exceptions are two-track rows 10 `[3,1]`, 18 `[1,3]`, 40 `[3,1]`, 46 `[3,1]`, 225 `[3,1]`, 268 `[1,3]`, 274 `[3,1]`, 344 `[3,1]` and 440 `[0,2]` | 
+| KB2-F17 | The audio frame start carries one record per track in track order: `u32 record_bytes`, `u32 decoded_bytes`, then `record_bytes - 4` packet bytes. A zero `record_bytes` is a four-byte empty record. Over 196 audio rows and 372,043 frames there are 398,992 non-empty records, 84,662 zero records and 0 frame-boundary violations | Frame-data read at frame starts | `BINARY`, `CROSS_SAMPLE` | Confirmed (layout and counts) | The codec, the video region and the `decoded_bytes` unit are not established; no payload was decoded | 
+| KB2-F18 | The 515-row `movies.rpf` manifest was re-read in full. The frame table and header checks in KB2-F15 hold on 515/515 rows. The audio record checks in KB2-F16 and KB2-F17 hold on all 196 audio rows with the nine track-id exceptions listed. This does not extend to the 282 `KB2n` rows counted by stored prefix outside `movies.rpf` | Full-manifest re-read | `BINARY`, `CROSS_SAMPLE` | Confirmed (movies population) | The stored-prefix population remains unparsed; the two populations are not merged | 
 
 ## Census reconciliation
 
@@ -64,16 +70,27 @@ here.
 ```text
 lforge archive manifest <ARCHIVE> --executable <EXECUTABLE> --format jsonl --output <WORK>/rows.jsonl
 lforge archive extract <ARCHIVE> --row <ROW> --executable <EXECUTABLE> --output <WORK>/row.bin
-python tools/kb2j/kb2_probe.py <WORK>/row.bin
+python tools/kb2j/kb2_probe.py <WORK>/row.bin --validate
 ffprobe -show_streams -show_packets <WORK>/row.bin
 ```
 
 The header census reads 48 bytes at each row's `payload_offset`. The frame-table
 census uses the audio track count at `+0x28` to find the table start and reads
-`4 * (frame_count + 1)` bytes, capped at 8 MiB.
+`4 * (frame_count + 1)` bytes, capped at 8 MiB. `--validate` walks the leading
+audio record of each frame without reading packet bytes.
 
 ## Research history
 
+- 2026-11-25: Iteration 11 re-read the 515-row manifest and added KB2-F14 to
+  KB2-F18. `+0x24` is now a `u32` flags word; the earlier two-`u16` reading is
+  the same bytes. The frame table mask and last-entry relation hold 515/515.
+  The audio array 1 is the maximum decoded count, not the maximum compressed
+  record. The audio frame record layout is measured on 372,043 frames. Nine
+  two-track rows use a track id outside `0..n-1`. The 282 stored-prefix rows
+  outside `movies.rpf` remain unparsed and are not merged into these counts.
+- 2026-11-25: KB2-F11 recorded `+0x24` and `+0x26` as unexplained `u16` fields.
+  KB2-F14 keeps the observed values but records the `u32` read and the
+  `0x100000` bit. The alpha meaning remains unverified.
 - 2026-11-25: `UPL-F06` confined `KB2n` to `movies.rpf`. The top-level
   stored-byte census contradicts the confinement: `KB2n` appears in four
   archives and totals 787 rows, of which `movies.rpf` contributes 505. The
