@@ -122,6 +122,8 @@ class PoolReport:
     shaders: list = field(default_factory=list)
     issues: list = field(default_factory=list)
     other_class: int = 0
+    other_entries: int = 0
+    other_accepted: int = 0
     pointers: dict = field(default_factory=dict)
 
     def add(self, code, detail):
@@ -134,7 +136,9 @@ class PoolReport:
     @property
     def counts(self):
         result = {"shaders": len(self.shaders), "texture": 0, "index_in": 0,
-                  "bound": 0, "null": 0, "bad": 0, "other_class": self.other_class}
+                  "bound": 0, "null": 0, "bad": 0, "other_class": self.other_class,
+                  "other_entries": self.other_entries,
+                  "other_accepted": self.other_accepted}
         for ref in self.references:
             result["texture"] += 1
             if ref.index is not None:
@@ -202,6 +206,11 @@ def parse_shader_pool(system: bytes, max_shaders: int = MAX_SHADERS,
     count = _u16(system, group + 0x18)
     if count > max_shaders:
         raise PoolReferenceError(f"the shader count {count} exceeds the {max_shaders} cap")
+    if array + 8 * count > len(system):
+        raise PoolReferenceError(
+            f"the {count}-entry shader array at {array:#x} leaves the "
+            f"{len(system)}-byte system segment"
+        )
     report = PoolReport()
     report.pointers = scan_pointers(system, graphics_length)
     for shader_index in range(count):
@@ -221,22 +230,26 @@ def parse_shader_pool(system: bytes, max_shaders: int = MAX_SHADERS,
                 f"shader {shader_index} declares {texture_count} texture and "
                 f"{parameter_count} total parameters, above the {max_parameters} cap"
             )
+        # The parameter table has parameter_count entries. A texture count above
+        # it cannot be read from the declared table, so clamp the loop and report
+        # the mismatch instead of reading unrelated words.
+        texture_limit = min(texture_count, parameter_count)
         if parameter_count < texture_count:
             report.add(
                 "parameter_count",
                 f"shader {shader_index} declares {texture_count} texture parameters "
-                f"but only {parameter_count} total",
+                f"but only {parameter_count} total; the loop reads {texture_limit}",
             )
         table_end = parameter_table + 8 + 8 * parameter_count
         if table_end > len(system):
             raise PoolReferenceError(f"shader {shader_index} parameter table leaves the segment")
-        slot_end = slot_table + 8 * texture_count
+        slot_end = slot_table + 8 * texture_limit
         if slot_end > len(system):
             raise PoolReferenceError(f"shader {shader_index} slot table leaves the segment")
         shader = Shader(shader_index, texture_count, parameter_count)
-        for parameter in range(texture_count):
+        for parameter in range(texture_limit):
             packed = _u32(system, parameter_table + 12 + 8 * parameter)
-            accepted, index = decode_slot_reference(packed, texture_count)
+            accepted, index = decode_slot_reference(packed, texture_limit)
             if not accepted:
                 state = "class" if packed & SLOT_CLASS_MASK else "index"
                 shader.references.append(
@@ -288,9 +301,11 @@ def parse_shader_pool(system: bytes, max_shaders: int = MAX_SHADERS,
                 SlotReference(parameter, packed, index, "bound", target[1], name_hash,
                               key64, name_variant)
             )
-        for parameter in range(texture_count, parameter_count):
+        for parameter in range(texture_limit, parameter_count):
             packed = _u32(system, parameter_table + 12 + 8 * parameter)
-            report.other_class += int((packed & SLOT_CLASS_MASK) == SLOT_CLASS_MASK)
+            report.other_entries += 1
+            report.other_class += int((packed & SLOT_CLASS_MASK) != 0)
+            report.other_accepted += int(decode_slot_reference(packed, texture_limit)[0])
         report.shaders.append(shader)
     return report
 

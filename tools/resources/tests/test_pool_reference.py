@@ -69,6 +69,32 @@ def make_drawable(packed=(0, 4), other=(0x00800003,), slot0=True,
     return data
 
 
+def make_tail_buffer(array_at=None, parameter_at=None, texture_count=2, parameter_count=1,
+                     length=0x200):
+    """A minimal shader chain whose array or parameter table sits at the end."""
+    data = bytearray(length)
+    group_at = 0x100
+    shader_at = 0x140
+    struct.pack_into("<Q", data, 0x10, _ptr("system", group_at))
+    struct.pack_into("<Q", data, group_at + 0x10, _ptr("system", array_at or 0x120))
+    struct.pack_into("<H", data, group_at + 0x18, 1)
+    struct.pack_into("<Q", data, 0x120, _ptr("system", shader_at))
+    struct.pack_into("<Q", data, shader_at + 0x10, _ptr("system", 0x1A0))
+    struct.pack_into("<Q", data, shader_at + 0x20, _ptr("system", parameter_at or 0x1E0))
+    table = parameter_at or 0x1E0
+    data[table + 0] = 1
+    data[table + 1] = texture_count
+    struct.pack_into("<H", data, table + 4, parameter_count)
+    for index in range(parameter_count):
+        at = table + 8 + 8 * index
+        struct.pack_into("<I", data, at, 0x1000 + index)
+        struct.pack_into("<I", data, at + 4, 4 * index)
+    if array_at is not None:
+        struct.pack_into("<H", data, group_at + 0x18, 2)
+        struct.pack_into("<Q", data, array_at, _ptr("system", shader_at))
+    return data
+
+
 class ParseTests(unittest.TestCase):
     def test_reads_shader_parameters_and_slots(self):
         report = pr.parse_shader_pool(bytes(make_drawable()))
@@ -109,6 +135,17 @@ class ParseTests(unittest.TestCase):
         self.assertIsNone(reference.name_hash)
         self.assertEqual(reference.name_variant, "other")
         self.assertEqual(reference.key64, 0x1122334455667788)
+
+    def test_shader_array_near_the_end_is_refused(self):
+        with self.assertRaises(pr.PoolReferenceError):
+            pr.parse_shader_pool(bytes(make_tail_buffer(array_at=0x1F8)))
+
+    def test_texture_count_above_parameter_count_is_clamped(self):
+        report = pr.parse_shader_pool(
+            bytes(make_tail_buffer(parameter_at=0x1F0, texture_count=2, parameter_count=1))
+        )
+        self.assertIn("parameter_count", [issue.code for issue in report.issues])
+        self.assertEqual(len(report.references), 1)
 
     def test_parameter_count_below_texture_count_is_an_issue(self):
         report = pr.parse_shader_pool(bytes(make_drawable(other=(), total=1)))
