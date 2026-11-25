@@ -16,7 +16,7 @@ python tools/inventory/recursive_inventory.py \
   --executable <game-executable>
 ```
 
-All paths are required. The scratch directory MUST NOT lie inside the game or
+`--game-dir` is used only to reject a scratch directory inside the game installation; the sampler never reads archives from it directly, it reads the manifests you pass. All paths are required. The scratch directory MUST NOT lie inside the game or
 manifest directory. Add `--plan-only` to write `plan.json` without extracting.
 
 ## Sample rule

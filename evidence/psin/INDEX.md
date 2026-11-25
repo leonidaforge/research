@@ -26,14 +26,14 @@ The sample is a convenience sample. It does not establish the type's population 
 | ID       | Claim                                                                                                | Evidence          | Confidence                                 | Limits                                                     |
 | -------- | ---------------------------------------------------------------------------------------------------- | ----------------- | ------------------------------------------ | ---------------------------------------------------------- |
 | PSIN-F01 | Payloads start with ASCII `PSIN` (`0x4E495350`) at offset 0                                          | Payload data      | Confirmed                                  | 18 rows, 5 archives                                        |
-| PSIN-F02 | Bytes `+0x04` are `00 00` in 17 rows and `00 02` in one, which is `u16` 0 and `0x0200` little-endian | Consistency check | Confirmed (observation); Unknown (meaning) | Meaning not established                                    |
+| PSIN-F02 | Bytes `+0x04` are `00 00` in 17 rows and `00 02` in one. A little-endian `u16` reading gives 0 and `0x0200` | Consistency check | Confirmed (bytes); Probable (u16 reading); Unknown (meaning) | Meaning not established                                    |
 | PSIN-F03 | In these 18 samples, no `u16` or `u32` in the first 32 bytes equals the payload size                 | Consistency check | Confirmed (bounded observation)            | Only the first 32 bytes and the sample were checked        |
 | PSIN-F04 | Many payloads contain runs of `0xAA` and `0x70`, which fits padding or uninitialised bytes           | Payload data      | Speculative                                | Could be meaningful data                                   |
 | PSIN-F05 | The 18 sampled type 11 rows all carry PSIN | Payload data | Confirmed | Sample only; does not establish the type's full population |
 
 ## Reproduction
 
-The following commands ran on 2026-11-25 with the `lforge` CLI built from `leonidaforge/leonida-forge` commit `fce79a34ab622b1eeb0370c9dceee4700f0b897f`. `<GAME_ROOT>` is a local installation, `<WORK>` a scratch directory outside it, and `<EXECUTABLE>` the game executable that matches the archive, used only to authenticate its metadata. Repeat for each archive in the sample table:
+The samples were extracted on 2026-11-25 with the `lforge` CLI built from `leonidaforge/leonida-forge` commit `fce79a34ab622b1eeb0370c9dceee4700f0b897f`, before the encoding-2 extraction fix. The reproduction below was re-run against the release CLI at commit `fc841ea`: `data.rpf` row 42 extracts to 25,476 bytes and begins with `PSIN`, matching the sampled rows behind PSIN-F02 and PSIN-F03. `<GAME_ROOT>` is a local installation, `<WORK>` a scratch directory outside it, and `<EXECUTABLE>` the game executable that matches the archive, used only to authenticate its metadata. Repeat for each archive in the sample table:
 
 ```text
 lforge archive manifest <ARCHIVE> --executable <EXECUTABLE> --format jsonl --output <WORK>/rows.jsonl
@@ -44,7 +44,7 @@ lforge archive extract <ARCHIVE> --row <ROW> --output <WORK>/row.bin --executabl
 
 ## Limits
 
-- Some rows listed as decoded fail extraction with a DEFLATE error. Those rows were skipped; the exact count is not recorded here.
+- Some rows listed as decoded failed extraction with a DEFLATE error before the encoding-2 fix. Those rows were skipped; the exact count is not recorded here.
 - Fields were not assigned names. `+0x04` is the only field with a recorded observation; other offsets are unexamined.
 
 ## Next experiments

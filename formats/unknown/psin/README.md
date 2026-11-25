@@ -9,7 +9,8 @@ The name expands to nothing established. Nothing about its purpose, its field me
 | Part                   | Status                                       |
 | ---------------------- | -------------------------------------------- |
 | Magic and occurrence   | Confirmed (18 rows, five archives, PSIN-F01) |
-| Little-endian integers | Probable (PSIN-F02)                          |
+| Bytes at `+0x04`       | Confirmed (PSIN-F02)                         |
+| Reading them as a little-endian `u16` | Probable (PSIN-F02) |
 | Header fields          | Unknown                                      |
 | No payload-size field in the first 32 bytes | Confirmed for 18 samples (PSIN-F03) |
 | Record structure       | Unknown                                      |
@@ -24,7 +25,7 @@ The name expands to nothing established. Nothing about its purpose, its field me
 | Offset  | Observation                                           |
 | ------- | ----------------------------------------------------- |
 | `+0x00` | `50 53 49 4E` (PSIN-F01)                              |
-| `+0x04` | `u16`: `00 00` in 17 samples and `00 02` in one (PSIN-F02) |
+| `+0x04` | Bytes `00 00` in 17 samples and `00 02` in one; a `u16` reading gives 0 and `0x0200` (Probable) (PSIN-F02) |
 
 No checked header field in the first 32 bytes equals the payload size (PSIN-F03). No field was assigned a meaning. Runs of `0xAA` and `0x70` appear in parts of many payloads; their meaning is **Speculative** (PSIN-F04).
 
