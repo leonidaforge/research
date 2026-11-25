@@ -49,7 +49,7 @@ Each record has this layout:
 
 | Offset | Type | Use |
 | --- | --- | --- |
-| `+0x00` | `u32` | Identifier, uninterpreted (T14-F10) |
+| `+0x00` | `u32` | One-at-a-time hash of the same-index string-table entry (T14-F11) |
 | `+0x04` | `u16` | Name length |
 | `+0x06` | bytes | ASCII name |
 | remainder | bytes | Zero padding to `+0x28` |
@@ -59,6 +59,38 @@ lengths are 7, 6, 4, 12, 16, 4, 6 and 10 bytes. Seven match the string-table
 lengths; the fifth entry differs (16 bytes in the record, 10 in the string
 table). A scan of strides 8 to `0x80` found no other record table ending at the
 payload end.
+
+## Record identifiers (T14-F11)
+
+The eight `u32` identifiers at record `+0x00` each equal the one-at-a-time
+("joaat") hash of the string-table entry at the same index, over the exact entry
+bytes excluding the terminating `0x00`. The string table has no padding, so the
+input boundary is the entry start to the byte before the terminator.
+
+| Hash input | Matches |
+| --- | ---: |
+| folded lower-case, no terminator | 8/8 |
+| case-sensitive, no terminator | 8/8 |
+| folded lower-case, with terminator | 0/8 |
+| case-sensitive, with terminator | 0/8 |
+| folded lower-case, big-endian output | 0/8 |
+| case-sensitive, no terminator, big-endian output | 0/8 |
+
+The eight string-table entries are lower-case ASCII in this payload, so the
+folded and case-sensitive variants coincide. That is a property of this sample,
+not an equivalence in general.
+
+The record name field is not the preimage. Six of eight record names differ from
+the same-index string only by case; two have different text, and one of those is
+16 bytes against a 10-byte string. Hashing the record name field gives 6/8 for
+the folded form and 0/8 for the case-sensitive form. The string table supplies
+all eight matches.
+
+The header words at `+0x20`, `+0x24` and `+0x28` match none of the tested hashes
+of the eight strings or the eight record names. Their meaning remains Unknown.
+
+This relation is established on one decoded payload. It does not generalise to
+other record types or to the second type 14 row behind the payload transform.
 
 ## Hypothesis checks (T14-F07, T14-F08)
 
@@ -92,7 +124,7 @@ The payload is probably a serialized structure rather than a typical standalone
 file, but an unlabelled standalone file is not excluded. Its purpose and name
 remain unknown.
 
-## Confidence (T14-F04, T14-F09)
+## Confidence (T14-F04, T14-F09, T14-F11)
 
 | Part | Status |
 | --- | --- |
@@ -101,7 +133,8 @@ remain unknown.
 | String and record tables | Confirmed (one payload) |
 | Header and table relations | Confirmed (values); Unknown (meaning) |
 | Serialized or standalone | Probable (serialized); Unknown (identity) |
-| Field purposes and record IDs | Unknown |
+| Record identifiers | Confirmed (single payload); exact input boundary known |
+| Field purposes other than the record identifiers | Unknown |
 
 ## Limits
 
@@ -109,9 +142,20 @@ remain unknown.
   and was not compared.
 - A local scan of 293 extracted files found no other payload beginning `30 03`
   or sharing the first 16 bytes (T14-F03). This is not a game-wide census.
-- The high-entropy header values and the record IDs are not interpreted
-  (T14-F10).
+- The high-entropy header values are not interpreted (T14-F10). The record
+  identifiers are interpreted only as hashes of the same-index string-table
+  entries; that relation was not tested on another payload or record type.
 - No executable code path was traced.
 - String contents are game data and are not reproduced here.
+
+## Open questions
+
+- Whether the second type 14 row uses the same table layout and identifier
+  relation after its transform.
+- Whether the identifier relation holds for other payloads or record types.
+- What the values at `+0x20`, `+0x24` and `+0x28` mean.
+- Why the values at `+0x10` and `+0x1C` are `0x10` below the two table starts.
+- Whether the payload is written by a serializer or is an unlabelled standalone
+  file.
 
 Evidence: [evidence/type14/INDEX.md](../../../evidence/type14/INDEX.md).
