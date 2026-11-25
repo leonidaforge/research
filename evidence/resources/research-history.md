@@ -34,6 +34,6 @@ Interpretations that were once used for RAGE resources and later corrected. The 
 
 ## The rechecked structural samples replaced an earlier set
 
-**Old state.** The originating branch recorded a second-system-page sample with a `0x24EC0` map and a 2,192,240-byte system segment, and a system-only sample with a `0x1B33B90` map and 96 bytes of system data. Those rows described subject resources whose stored entries could not be reproduced with the current CLI.
+**Old state.** The originating branch recorded a second-system-page sample with a `0x24EC0` map and a 2,192,240-byte system segment, and a system-only sample with a `0x1B33B90` map and 96 bytes of system data.
 
-**Correction.** The structural sample was rebuilt from seven resources that the current CLI reconstructs deterministically, recorded as RES-F23 and listed in the pages document. The earlier values are not retained because their subjects cannot be re-derived, and a number that cannot be reproduced is not evidence.
+**Correction.** The structural sample was re-derived from seven resources, recorded as RES-F23 and listed in the pages document. Both the earlier rows and the current rows identify their subjects only by stored payload offset, so the change cannot be attributed to a recheck rather than to a different subject selection; the record does not distinguish the two. The earlier values are not retained because they cannot be matched to a resource by archive and row index.
