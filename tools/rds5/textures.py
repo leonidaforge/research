@@ -34,18 +34,15 @@ UNITS = ("B8", "B16", "L4", "L2", "L1")
 # Observed storage unit per format id. These are size fits, not codec names.
 # ``None`` means the format id was not measured; pass --unit explicitly.
 OBSERVED_UNITS: Dict[int, str] = {
-    71: "B8",
-    72: "B8",
-    80: "B8",
     28: "L4",
     54: "L2",
+    71: "B8",
+    72: "B8",
+    77: "B16",
+    80: "B8",
+    83: "B16",
     98: "B16",
     99: "B16",
-    77: "B16",
-    78: "B16",
-    83: "B16",
-    95: "B16",
-    96: "B16",
 }
 
 
@@ -320,6 +317,7 @@ def analyse(path: str, info: rds5.Rds5File, descriptor_index: int, unit: str,
             levels: Optional[int] = None, decoder: str = "none",
             channels: int = 1, planes: int = 1,
             max_uncompressed: int = rds5.DEFAULT_MAX_UNCOMPRESSED,
+            max_block_bytes: int = rds5.DEFAULT_MAX_BLOCK_BYTES,
             max_total_bytes: int = rds5.DEFAULT_MAX_TOTAL_BYTES,
             threshold: float = 25.0) -> dict:
     descriptor = info.descriptors[descriptor_index]
@@ -334,7 +332,7 @@ def analyse(path: str, info: rds5.Rds5File, descriptor_index: int, unit: str,
         decoded = rds5.decode_block(
             path, info, index,
             max_uncompressed=min(max_uncompressed, remaining),
-            max_block_bytes=rds5.DEFAULT_MAX_BLOCK_BYTES,
+            max_block_bytes=max_block_bytes,
         )
         sizes.append(len(decoded.data))
         chunks.append(decoded.data)
@@ -451,6 +449,7 @@ def cmd_probe(args: argparse.Namespace) -> int:
                      levels=args.levels, decoder=args.decoder,
                      channels=args.channels, planes=args.planes,
                      max_uncompressed=args.max_uncompressed,
+                     max_block_bytes=args.max_block_bytes,
                      max_total_bytes=args.max_total_bytes,
                      threshold=args.threshold)
     if args.json:

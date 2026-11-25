@@ -73,8 +73,9 @@ and prints:
   zero count, the fraction of block-first bytes that are multiples of 16, the
   same fraction over all bytes, and the lowest-set-bit histogram.
 
-The last two items are structural discriminators. They never print pixel bytes
-or write an image.
+The last two items are descriptive statistics. They do not by themselves
+discriminate a linear layout from a blocked layout. The tool never prints pixel
+bytes or writes an image.
 
 `mip_check.pass` is true only when at least two block-aligned levels were
 decoded and every pair is below `--threshold` (default 25.0). Levels whose

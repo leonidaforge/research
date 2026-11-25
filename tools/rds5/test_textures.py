@@ -161,6 +161,24 @@ class AnalyseTest(unittest.TestCase):
         report = json.loads(out.getvalue())
         self.assertTrue(report["mip_check"]["pass"])
 
+    def test_block_byte_cap_is_honoured(self):
+        levels = _levels(1024, 512, 4)
+        blob, _sizes = _texture_store(levels)
+        path = self._write(blob)
+        info = rds5.parse(path)
+        with self.assertRaises(rds5.Rds5Error):
+            textures.analyse(path, info, 0, "L1", max_block_bytes=1024)
+
+    def test_cli_block_byte_cap(self):
+        levels = _levels(1024, 512, 4)
+        blob, _sizes = _texture_store(levels)
+        path = self._write(blob)
+        with contextlib.redirect_stderr(io.StringIO()) as err:
+            code = textures.main(["probe", path, "--descriptor", "0",
+                                  "--unit", "L1", "--max-block-bytes", "1024"])
+        self.assertEqual(code, 1)
+        self.assertIn("exceeds limit", err.getvalue())
+
     def test_descriptor_index_rejected(self):
         levels = _levels(256, 256, 2)
         blob, _sizes = _texture_store(levels)
