@@ -172,9 +172,11 @@ python tools/inventory/full_census.py \
 ```
 
 Every row is attempted once. `rows.jsonl` holds one record per attempt,
-`manifests/<sha256>.jsonl` the decoded nested manifest, and `state.json` the
-atomically rewritten progress. A rerun resumes from `rows.jsonl` and refuses a
-population whose row keys differ from the saved state.
+`manifests/<sha256>.jsonl` the decoded nested manifest, `identity.json` the CLI
+version, binary SHA-256, executable SHA-256 and the optional `--app-revision`,
+and `state.json` the atomically rewritten progress. A rerun resumes from
+`rows.jsonl` and refuses a population whose row keys differ from the saved
+state.
 
 Rows larger than the CLI `archive extract` output limit are copied from their
 manifest `payload_offset` when the location record is a plain stored range
