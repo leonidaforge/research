@@ -35,7 +35,7 @@ def _u32(data: bytes, offset: int) -> int:
     return struct.unpack_from("<I", data, offset)[0]
 
 
-def _read_frame_records(handle, payload_offset, file_size, starts, ends,
+def _read_frame_records(handle, payload_offset, payload_size, starts, ends,
                         audio_count, max_frames):
     """Read the leading per-track records of each frame without payload data."""
     result = {
@@ -51,25 +51,50 @@ def _read_frame_records(handle, payload_offset, file_size, starts, ends,
         if frame_index >= max_frames:
             result["violations"].append({"kind": "frame_limit", "frame": frame_index})
             break
-        if end < start:
-            result["violations"].append({"kind": "negative_frame", "frame": frame_index})
-            break
+        if start < 0 or end < start or end > payload_size:
+            raise Kb2Error(
+                f"frame {frame_index} range {start}..{end} is outside"
+                f" the payload size {payload_size}"
+            )
         position = start
         bounded = True
         for track in range(audio_count):
-            if position + 4 > end:
+            if position + 4 > end or position + 4 > payload_size:
                 result["violations"].append(
-                    {"kind": "size_past_frame", "frame": frame_index, "track": track}
+                    {
+                        "kind": "size_past_frame",
+                        "frame": frame_index,
+                        "track": track,
+                        "offset": position,
+                    }
                 )
                 bounded = False
                 break
             handle.seek(payload_offset + position)
-            record_bytes = struct.unpack("<I", handle.read(4))[0]
+            raw_size = handle.read(4)
+            if len(raw_size) != 4:
+                raise Kb2Error(
+                    f"short read for frame {frame_index} track {track}"
+                    f" at payload offset 0x{position:x}"
+                )
+            record_bytes = struct.unpack("<I", raw_size)[0]
             if record_bytes == 0:
                 result["zero_packets"] += 1
                 position += 4
                 continue
-            if position + 4 + record_bytes > end:
+            if record_bytes < 4:
+                result["violations"].append(
+                    {
+                        "kind": "record_too_short",
+                        "frame": frame_index,
+                        "track": track,
+                        "record_bytes": record_bytes,
+                        "offset": position,
+                    }
+                )
+                bounded = False
+                break
+            if position + 4 + record_bytes > end or position + 4 + record_bytes > payload_size:
                 result["violations"].append(
                     {
                         "kind": "record_past_frame",
@@ -77,12 +102,19 @@ def _read_frame_records(handle, payload_offset, file_size, starts, ends,
                         "track": track,
                         "record_bytes": record_bytes,
                         "remaining": end - position,
+                        "offset": position,
                     }
                 )
                 bounded = False
                 break
             handle.seek(payload_offset + position + 4)
-            decoded = struct.unpack("<I", handle.read(4))[0]
+            raw_decoded = handle.read(4)
+            if len(raw_decoded) != 4:
+                raise Kb2Error(
+                    f"short decoded-count read for frame {frame_index}"
+                    f" track {track} at payload offset 0x{position + 4:x}"
+                )
+            decoded = struct.unpack("<I", raw_decoded)[0]
             result["packets"] += 1
             result["max_packet"] = max(result["max_packet"], record_bytes)
             result["max_decoded"] = max(result["max_decoded"], decoded)

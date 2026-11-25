@@ -146,6 +146,40 @@ class ValidationTests(unittest.TestCase):
         self.assertTrue(audio["array1_is_max_decoded"])
         self.assertEqual(audio["violations"], [])
 
+    def test_out_of_range_frame_table_raises_typed_error(self):
+        frames = 1
+        total = 0x58
+        table_end = 0x44
+        offsets = [table_end + 1, total + 0x100]
+        body = header(b"KB2n", total - 8, frames, 32, 32, 32, 1, 0x87E90500)
+        body += struct.pack("<III", 145920, 0x7000BB80, 0)
+        body += struct.pack(f"<{len(offsets)}I", *offsets)
+        body += bytes(total - len(body))
+        with tempfile.TemporaryDirectory() as directory:
+            with self.assertRaises(probe.Kb2Error):
+                probe.probe_file(
+                    write_payload(directory, "sample.bin", body),
+                    validate_frames=True,
+                )
+
+    def test_record_too_short_is_a_violation(self):
+        frames = 1
+        total = 0x50
+        table_end = 0x44
+        offsets = [table_end + 1, total]
+        body = header(b"KB2n", total - 8, frames, 32, 32, 32, 1, 0x87E90500)
+        body += struct.pack("<III", 145920, 0x7000BB80, 0)
+        body += struct.pack(f"<{len(offsets)}I", *offsets)
+        body += struct.pack("<I", 2)
+        body += bytes(total - len(body))
+        with tempfile.TemporaryDirectory() as directory:
+            result = probe.probe_file(
+                write_payload(directory, "sample.bin", body), validate_frames=True
+            )
+        kinds = {item["kind"] for item in result["audio_validation"]["violations"]}
+        self.assertIn("record_too_short", kinds)
+        self.assertFalse(probe._valid(result))
+
     def test_audio_record_past_frame_is_reported(self):
         frames = 1
         total = 0x58
