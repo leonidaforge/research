@@ -65,9 +65,9 @@ with a sentinel block (`u32` `0xFFFFFFFF`), may carry one or more metadata
 blocks, then data blocks, then zero blocks to the page end. The page count must
 equal the `0x48` field. The block classes are counted per page.
 
-For a descriptor codec byte `0x02`, the tool reports
-`size == 4 * declared` and does not walk packet lengths. Codec bytes other than
-`0x0B` and `0x02` are reported but not framed.
+The observed codec bytes are `0x0B` and `0x02`. For `0x02`, the tool reports
+`size == 4 * declared` and does not walk packet lengths. A different codec byte
+is reported; no framing rule is assigned to it.
 
 ## Record layout
 
