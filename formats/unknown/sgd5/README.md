@@ -4,7 +4,7 @@
 
 The archive name is provenance, not evidence of purpose. Nothing about the payload purpose, field meanings, data encoding, rendering stage or graphics API is established.
 
-## Status
+## Status (SGD5-F01, SGD5-F02)
 
 | Part                                       | Status                              |
 | ------------------------------------------ | ----------------------------------- |
@@ -15,7 +15,7 @@ The archive name is provenance, not evidence of purpose. Nothing about the paylo
 | Field meanings, purpose, data encoding     | Unknown                             |
 | Additional samples                         | None found in the bounded search    |
 
-## Samples
+## Samples (SGD5-F01, SGD5-F02)
 
 | Archive        | Row | Type ID | Stored bytes | Decoded bytes | SHA-256                                                            |
 | -------------- | --: | ------: | -----------: | ------------: | ------------------------------------------------------------------ |
@@ -67,7 +67,7 @@ The block length equals `24 + 8n` in all 36 table blocks. The `index` runs from 
 
 ### Entry census (SGD5-F05)
 
-Fifteen distinct `u16` kind values occur. The most frequent are `0x0102` and `0x0405`. No kind was assigned a meaning.
+Fifteen distinct `u16` kind values occur (SGD5-F05). The finding records the distinct-value counts and the byte-identical tables; it does not rank kinds by frequency, so no ranking is stated here. No kind was assigned a meaning.
 
 The `u32` value is not a file offset or a size. The largest value in the sample is `0xFF18999D`, which exceeds both payload sizes. 299 of the 486 values in row 1 and 488 of the 2,423 values in row 2 are distinct.
 
@@ -104,7 +104,7 @@ At the next record the 24-byte stride no longer holds. A NUL-terminated printabl
 
 Neither payload contains a second `SGD5` sequence or an `RPF9`, `RBF0`, `PSIN`, `EDUP`, `KB2j` or `KB2n` signature (SGD5-F08). The two-byte sequences `0x78 0x9C` and `0x78 0xDA` occur; they are not evidence of a compressed stream without a valid stream parse.
 
-## Identification
+## Identification (SGD5-F02)
 
 Identification MUST use the payload bytes. Type ID 255 also carries unrelated payloads (UPL-F09), so the type ID is not an identifier.
 

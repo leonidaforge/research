@@ -4,7 +4,8 @@ Observations from one decoded payload in the Scarlett build
 [e95020b2](../../builds/gta-vi/scarlett-e95020b2/README.md), using `lforge 0.1.0`
 from `leonidaforge/leonida-forge` app commit `92af6e2`. No executable code path
 was traced. Findings with payload bytes or tool output are **Private-evidence
-supported**.
+supported**. Corrected interpretations are recorded in the
+[research history](research-history.md).
 
 ## Sample and method
 

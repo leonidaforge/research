@@ -2,12 +2,11 @@
 
 One row in the 22 top-level archives carries type ID 14: `data.rpf` row 262,
 layout F, mode 0, one chunk with entry encoding 3. It decodes to 1,280 bytes.
-The expanded nested manifests contain a second type 14 row behind the
-unsupported payload transform; its bytes were not compared.
+The expanded nested manifests contain a second type 14 row behind the unsupported payload transform; its bytes were not decoded or compared (T14-F02).
 
 The payload has no printable magic at offset 0.
 
-## Header
+## Header (T14-F01, T14-F06)
 
 All offsets are from the start of the decoded payload. Offsets and lengths
 stored in the header are file-relative.
@@ -32,7 +31,7 @@ stored in the header are file-relative.
 | `+0x24` | `u32` | `0xC0010280` | Unknown |
 | `+0x28` | `u32` | `0x00004000` | Unknown |
 
-## Layout
+## Layout (T14-F04, T14-F05)
 
 | Range | Content |
 | --- | --- |
@@ -61,7 +60,7 @@ lengths; the fifth entry differs (16 bytes in the record, 10 in the string
 table). A scan of strides 8 to `0x80` found no other record table ending at the
 payload end.
 
-## Hypothesis checks
+## Hypothesis checks (T14-F07, T14-F08)
 
 A repeated `u16` is not evidence of a table count:
 
@@ -93,7 +92,7 @@ The payload is probably a serialized structure rather than a typical standalone
 file, but an unlabelled standalone file is not excluded. Its purpose and name
 remain unknown.
 
-## Confidence
+## Confidence (T14-F04, T14-F09)
 
 | Part | Status |
 | --- | --- |
