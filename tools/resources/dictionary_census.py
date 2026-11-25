@@ -270,9 +270,13 @@ def negative_census(sources):
             by_type[entry["type_id"]] += 1
             try:
                 system, graphics = decode(source, entry)
+            except CensusError:
+                stats["decode_fail"] += 1
+                continue
+            try:
                 dictionary = texture_dictionary.parse_dictionary(system, len(graphics))
-            except (CensusError, texture_dictionary.TextureDictionaryError):
-                stats["rejected"] += 1
+            except texture_dictionary.TextureDictionaryError:
+                stats["rejected_structural"] += 1
                 continue
             stats["accepted"] += 1
             stats["accepted_empty"] += int(dictionary.record_count == 0)
@@ -280,10 +284,11 @@ def negative_census(sources):
     return {
         "stats": {
             "selected": sum(by_type.values()),
+            "decode_fail": stats["decode_fail"],
+            "rejected_structural": stats["rejected_structural"],
             "accepted": stats["accepted"],
             "accepted_empty": stats["accepted_empty"],
             "accepted_nonempty": stats["accepted_nonempty"],
-            "rejected": stats["rejected"],
         },
         "selected_by_type": dict(by_type),
     }

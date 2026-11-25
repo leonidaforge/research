@@ -74,7 +74,11 @@ class CensusTests(unittest.TestCase):
         self.assertEqual(report["dictionaries"]["stats"]["rows"], 1)
         self.assertEqual(report["dictionaries"]["stats"]["records"], 1)
         self.assertEqual(report["negatives"]["stats"].get("accepted", 0), 0)
-        self.assertEqual(report["negatives"]["stats"]["rejected"], 1)
+        self.assertEqual(
+            report["negatives"]["stats"].get("decode_fail", 0)
+            + report["negatives"]["stats"].get("rejected_structural", 0),
+            1,
+        )
         self.assertEqual(report["control"]["trials"], 10000)
         self.assertEqual(report["control"]["slot_accepted"], 0)
         self.assertEqual(report["control"]["hash_matched"], 0)

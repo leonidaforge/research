@@ -57,9 +57,9 @@ A reader applies these structural tests to a decoded resource:
 7. Every value is a system pointer to a 0x70-byte record.
 
 All 1,431 non-empty dictionaries pass steps 1–7. The 9 empty dictionaries have
-zero pointers and counts and pass steps 1–5 trivially. The 469 negative rows
-fail at least one step: 0 were accepted as empty dictionaries and 0 as
-non-empty ones.
+zero pointers and counts and pass steps 1–5 trivially. Of the 469 negative rows,
+80 (type 66) fail during stored-row reconstruction, 389 (224 type 3, 164 type
+73, 1 type 74) are rejected by the structural test, and 0 are accepted.
 
 This is a structural test, not a proof of format identity. Steps 1–2 are generic
 resource-header fields, and the positive sample was selected by type ID 5. The
