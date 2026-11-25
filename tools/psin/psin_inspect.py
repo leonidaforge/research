@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Report the PSIN outer framing, family grammar and integrity section.
+"""Report PSIN framing, family grammars, body structure and integrity.
 
 PSIN payloads share one outer framing and carry two section grammars, keyed by
-their first section tag (`LSCH` and `PMAP`). The tool classifies the family and
-reports the family-specific structure without treating the second family as a
-failed parse. It reads each input read-only and does not decode section bodies.
+their first section tag (`LSCH` and `PMAP`). The tool reports the `LSCH`
+descriptor table and `LSCH`/`LENM` body structure, and the `PMAP` block table,
+`PSCH` table and id containment. It reads each input read-only and does not
+decode value, block or tail internals.
 """
 
 from __future__ import annotations
