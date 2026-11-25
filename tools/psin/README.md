@@ -40,7 +40,7 @@ It applies the no-trailing-pad and pad-after-last rules, records the 52 aligned 
 
 ```sh
 python tools/psin/value_probe.py --samples <DIRECTORY> --json
-python tools/psin/value_probe.py --samples <DIRECTORY> --output value-record.json
+python tools/psin/value_probe.py --samples <DIRECTORY> --summary-only --output value-record.json
 ```
 
 `value-record.json` is the committed record for the 62 `PMAP` payloads: 1,170 values and 521 blocks. The probe rejects an output path equal to the sample directory and writes atomically.

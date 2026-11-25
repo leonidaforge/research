@@ -289,7 +289,7 @@ python tools/psin/psin_inspect.py <sample> [<sample> ...] [--json]
 
 ```text
 python tools/psin/pmap_heldout.py --samples <DIRECTORY> --output heldout-record.json
-python tools/psin/value_probe.py --samples <DIRECTORY> --output value-record.json
+python tools/psin/value_probe.py --samples <DIRECTORY> --summary-only --output value-record.json
 ```
 
 `--max-bytes` and `--max-sections` on the classifier bound the read and the section walk. The tools read inputs read-only and have no default pointing at a game installation.

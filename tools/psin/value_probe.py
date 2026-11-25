@@ -230,6 +230,7 @@ def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description="Probe PMAP values and blocks.")
     parser.add_argument("--samples", required=True, help="directory of extracted .bin payloads")
     parser.add_argument("--json", action="store_true", help="print JSON")
+    parser.add_argument("--summary-only", action="store_true", help="omit per-payload reports")
     parser.add_argument("--output", help="write JSON atomically to this file")
     parser.add_argument(
         "--max-bytes", type=int, default=DEFAULT_MAX_BYTES,
@@ -249,6 +250,8 @@ def main(argv=None) -> int:
         print("error: no PMAP payloads found", file=sys.stderr)
         return 1
     document = {"reports": reports, "summary": aggregate(reports)}
+    if args.summary_only:
+        document = {"summary": document["summary"]}
     rendered = json.dumps(document, indent=2) + "\n"
     if args.output:
         target = os.path.abspath(args.output)
