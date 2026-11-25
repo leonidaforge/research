@@ -12,7 +12,7 @@
 
 All five are chunked with entry encoding 3 and none carries the payload transform. All share `name_hash` `0x21E7013DF19FB4FA` and `name_key` `0x3BE189DE`; no other row in the 22-archive inventory has that key.
 
-The stored-byte census sees `EDUP` in only three of the five rows. The other two store zlib chunks; their `EDUP` signature appears only after decoding. A decoded-content scan of all 290 unique readable type-255 rows at or below 64 KiB found four `EDUP` rows; the fifth is 965,964 bytes and was located through the shared name key.
+The stored-byte census sees `EDUP` in three of the five rows. The other two store zlib chunks; their `EDUP` signature appears only after decoding. A decoded-content scan of all 290 unique readable type-255 rows at or below 64 KiB found four `EDUP` rows: it includes the 1,548-byte row but not the 965,964-byte row, which is above the cap. The fifth row was located through the shared name key, not through that scan.
 
 ## Observed structure
 
@@ -41,11 +41,11 @@ Counterexamples to simpler readings: in the 236-byte payload the `u32` at `+0x04
 
 ## Entries and trailing blob
 
-The entries are not sorted by their 128-bit value in either byte order. Every entry is distinct within its payload. In the 4-entry, 33-entry and 17,431-entry payloads, the first 8 bytes are all distinct; the last 8 bytes take 4, 21 and 6,845 distinct values respectively. In the 17,431-entry payload every byte position takes all 256 values, so the repeats are whole 8-byte values, not a constant byte. No entry contains the shared name hash or key in either byte order. The entry is therefore two 8-byte fields, not one 128-bit value.
+The entries are not sorted by their 128-bit value in either byte order. Every entry is distinct within its payload. In the 4-entry, 33-entry and 17,431-entry payloads, the first 8 bytes are all distinct. The second 8 bytes take 4, 21 and 6,845 distinct values: the 4-entry table has no repeated second-field value, while the 33-entry and 17,431-entry tables do. In the 17,431-entry payload every byte position takes all 256 values, so the repeats are whole 8-byte values, not a constant byte. No entry contains the shared name hash or key in either byte order. The entry is therefore two 8-byte fields, not one 128-bit value.
 
 ## Key relationship
 
-The two 8-byte fields read as little-endian keys. The first field is unique in every nonempty table. The second field repeats. The two key sets are disjoint in every nonempty table: no second-field value occurs as a first-field value, and no first-field value occurs as a second-field value.
+The two 8-byte fields read as little-endian keys. The first field is unique in every nonempty table. The second field repeats in the 33-entry and 17,431-entry tables and is distinct in the 4-entry table. The two key sets are disjoint in every nonempty table: no second-field value occurs as a first-field value, and no first-field value occurs as a second-field value.
 
 The second field was tested against the 64-bit key tables of the local RDS5/ETPF texture stores. The store population is the 46 `.ttpf` files present under the local texture data directory: 352,461 keys, 352,417 distinct across the set.
 
@@ -65,11 +65,11 @@ The direction is **Confirmed** for `textures.rpf` row 20 and **Unknown** for the
 
 ## Trailing blob
 
-The blob is length-delimited and opaque. Every blob length is a multiple of 16 bytes, so every payload size is `12 mod 16`. The four blob lengths are 16, 160, 1,008 and 687,056 bytes.
+The blob is length-delimited and opaque. Every blob length is a multiple of 16 bytes, so every payload size is `12 mod 16`. The four blob lengths are 16, 160, 1,008 and 687,056 bytes. Their common divisors are 1, 2, 4, 8 and 16; no width above 16 divides all four.
 
-Tested record widths 1 to 64: only widths 1, 2 and 4 divide every blob length. No width produces a record table whose count equals the entry count or the distinct second-field count, and no fixed-offset 4-byte field is strictly increasing. The 16-byte records are all distinct in every blob. No 8-byte word matches a store key.
+Tested record widths 1 to 64 on each blob. No single width fits all four. Two blobs have a width whose record count equals a table count: the 160-byte blob at width 40 gives 4 records, equal to that table's entry count and distinct second-field count; the 1,008-byte blob at width 48 gives 21 records, equal to its distinct second-field count. The 687,056-byte blob has no width 1 to 64 with either equality. These are possible per-table widths, not a common stride, and the record contents are not decoded. The 16-byte records are all distinct in every blob. No 8-byte word matches a store key.
 
-Tested decoders on the complete blob: zlib, raw deflate, gzip, bzip2, xz and LZMA-alone. All fail; raw deflate and LZMA also produce no complete stream with zero unused input. No zstd or LZ4 frame signature occurs at the blob start. Entropy is 3.9, 6.8, 7.8 and 8.0 bits/byte for the four blobs.
+Tested decoders on the complete blob: zlib, raw deflate, gzip, bzip2, xz and LZMA-alone. All fail; no blob reaches end-of-stream with zero unused input. No zstd or LZ4 frame signature occurs at the blob start. Entropy is 3.9, 6.8, 7.8 and 8.0 bits/byte for the four blobs.
 
 The count-0 payload has a 16-byte blob, constant across the two byte-identical rows. It does not match the first or last 16 bytes of MD5, SHA-1, SHA-256, SHA-512 or BLAKE2 digests of the five payloads, and the byte at `+0x06` does not take a standard UUID version nibble. Its identity remains Unknown. The blob is kept opaque: content, a digest table, compressed data and encrypted data are all consistent with the negative tests.
 
@@ -94,9 +94,12 @@ The magic and the count/length framing are self-contained and fit all five paylo
 
 `tools/edup/edup_inspect.py` reports the layout, the two entry fields as counts only, and an optional membership test against local RDS5/ETPF stores. It never prints key values or payload bytes.
 
+`tools/edup/blob_probe.py` re-runs the width, divisor, signature and decoder tests and writes the committed `blob-record.json`.
+
 ```text
 python tools/edup/edup_inspect.py <sample> [<sample> ...] [--store <ttpf> ...] [--store-dir <dir>] [--json]
-python -m unittest discover -s tools/edup
+python tools/edup/blob_probe.py <sample> [<sample> ...] [--json] [--output <record>]
+python -m unittest discover -s tools/edup -p "test_*.py"
 ```
 
 ## Limits

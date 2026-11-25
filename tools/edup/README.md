@@ -23,10 +23,21 @@ All paths are required. The tool has no default pointing at a game installation.
 
 The tool never prints a key value, a store key value or payload text.
 
+## Blob probe
+
+`blob_probe.py` re-runs the width and decoder tests on one or more EDUP payloads and writes a JSON record:
+
+```sh
+python tools/edup/blob_probe.py <SAMPLE> [<SAMPLE> ...] --json
+python tools/edup/blob_probe.py <SAMPLE> [...] --store-dir <DIRECTORY> --label-size --output blob-record.json
+```
+
+It reports the blob lengths, common divisors, per-width record counts against the entry count and distinct second-field count, a fixed decoder set, zstd/LZ4 signature checks and optional store-key membership counts. It never prints key values or blob bytes. `blob-record.json` is the committed record for the four distinct payloads.
+
 ## Tests
 
 ```sh
-python -m unittest discover -s tools/edup
+python -m unittest discover -s tools/edup -p "test_*.py"
 ```
 
 `tools/edup/synthetic.py` writes the synthetic fixtures:
