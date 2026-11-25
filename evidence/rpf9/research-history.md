@@ -174,6 +174,12 @@ Some earlier notes used "A" and "B" for `hdr[0x04]` and `hdr[0x08]`. Those lette
 
 **Correction.** Once step 1 runs with the recognized provider and steps 4 and 5 decode the primary area, the columnar table of contents parses directly. All 22 tested archives authenticate and yield 6534 native rows (RPF9-F102, RPF9-F103). The location record layouts are confirmed in real data: F on 6533 rows and R on one row; all listed rows use read source `main` and mode 0. Stored and chunked rows extract to exactly their logical sizes, while rows behind the payload transform are refused (RPF9-F104). Names remain hashes, type meanings remain mostly unknown, and payload bytes remain outside the signature. Native listing therefore needs metadata authentication but does not make payload content authenticated.
 
+## Key-state setup addresses withdrawn
+
+**Old assumption.** The function catalog and the evidence index listed RVAs for the key-registry lookup, its lazy initialization, and the integrity gate and thunks around key-state setup, next to the algorithm-`0x10` setup routine.
+
+**Correction.** Those addresses are withdrawn. Together they lead from a descriptor's key identifier to the executable's embedded key-material storage, which the research policy keeps out of this repository. The behavior stays documented: selector construction (RPF9-F94), the `0x10F4`-byte state and its `0x1100`-byte copy (RPF9-F95), and the structural recognition method (RPF9-F97). Ordinary cryptographic processing functions keep their RVAs, including the selector construction and the setup routine. Some rows had also been written as full virtual addresses. Those are withdrawn with the rows above, or corrected to RVAs against the image base recorded in the build document where they remain.
+
 ## Open
 
 - Meaning of descriptor `+0x08`, and any use of `+0x12`.
