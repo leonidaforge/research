@@ -139,11 +139,11 @@ def probe_document(data: bytes, label: str, store_keys: dict | None = None) -> d
     sixteen = [blob[index:index + 16] for index in range(0, len(blob) - 15, 16)]
     words_le = [
         int.from_bytes(blob[index:index + 8], "little")
-        for index in range(0, len(blob) - 7, 8)
+        for index in range(0, len(blob) - 7)
     ]
     words_be = [
         int.from_bytes(blob[index:index + 8], "big")
-        for index in range(0, len(blob) - 7, 8)
+        for index in range(0, len(blob) - 7)
     ]
     store_hits = store_hits_be = None
     if store_keys is not None:
