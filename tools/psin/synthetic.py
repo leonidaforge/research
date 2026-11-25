@@ -59,6 +59,20 @@ def with_checksum(prefix: bytes, sections) -> bytes:
     return bytes(data)
 
 
+def psch_body(ids, values, prefix: bytes = b"\0" * 8) -> bytes:
+    table = b"".join(struct.pack(">II", identifier, 0) for identifier in ids)
+    first = 4 + 8 * len(ids) + len(prefix)
+    offsets = []
+    position = first
+    for value in values:
+        offsets.append(position)
+        position += len(value)
+    table = b"".join(
+        struct.pack(">II", ids[i], offsets[i]) for i in range(len(ids))
+    )
+    return be32(len(ids)) + table + prefix + b"".join(values)
+
+
 def lsch_document(lengths, sections=None) -> bytes:
     descriptors = b"".join(
         le32(0xDEAD0000 + index) + le32(length) + AA
@@ -72,8 +86,13 @@ def lsch_document(lengths, sections=None) -> bytes:
     first_offset = 8 + len(pre_section)
     prefix = MAGIC + be32(first_offset) + pre_section
     if sections is None:
+        lsch_body = (
+            b"\x11" * 8 + le32(3) + le32(0)
+            + AA + le32(4) + struct.pack("<HH", 0, 1) + b"\0" * 16
+            + b"\0" * 16
+        )
         sections = [
-            (b"LSCH", b"\0" * 16),
+            (b"LSCH", lsch_body),
             (b"LENM", b""),
             (b"LSNS", be32(0)),
             (b"LGID", b""),
@@ -82,20 +101,45 @@ def lsch_document(lengths, sections=None) -> bytes:
     return with_checksum(prefix, sections)
 
 
-def pmap_document(pre_section: bytes = None, unaligned: bool = False) -> bytes:
-    if pre_section is None:
-        pre_section = PAD70 + b"\0" * 8 + PAD70 + be32(1) + be32(0) + be32(1) + be32(1)
+def pmap_document(block_lengths=None, mode: int = 3, extra: int = 0, unaligned: bool = False) -> bytes:
+    if block_lengths is None:
+        block_lengths = [17, 16]
+    block_lengths = list(block_lengths)
     if unaligned:
-        pre_section += b"\0" * 3
+        block_lengths[-1] += 3
+
+    kinds = [1] + [0x100 + index for index in range(len(block_lengths) - 1)]
+    pre_section = bytearray(PAD70)
+    entries = []
+    for index, (kind, length) in enumerate(zip(kinds, block_lengths)):
+        offset = 8 + len(pre_section)
+        entries.append((kind, offset, 0, length))
+        if kind == 1:
+            block = b"chassis\0wheel_lf\0"
+            block = (block + b"\0" * length)[:length]
+        else:
+            block = bytes([0x40 + index % 26]) * length
+        pre_section += block
+        if index + 1 < len(block_lengths):
+            padding = align16(length) - length
+            pre_section += b"\x70" * padding
     first_offset = 8 + len(pre_section)
-    prefix = MAGIC + be32(first_offset) + pre_section
+    pmap = (
+        be32(mode) + be32(extra) + struct.pack(">H", len(entries)) + PAD70[:6]
+        + b"".join(struct.pack(">IIII", *entry) for entry in entries)
+    )
+    psch = psch_body(
+        [kind for kind in kinds if kind >= 0x100],
+        [b"\0" * 8 for kind in kinds if kind >= 0x100],
+    )
     sections = [
-        (b"PMAP", b"\0" * 16),
-        (b"PSCH", b"\0" * 16),
+        (b"PMAP", pmap),
+        (b"PSCH", psch),
         (b"PSIG", be32(0)),
         (b"STNS", b"\0" * 16),
     ]
-    return with_checksum(prefix, sections)
+    return with_checksum(MAGIC + be32(first_offset) + bytes(pre_section), sections)
+
 
 
 def corrupted_lsch() -> bytes:
