@@ -55,7 +55,7 @@ Authenticated metadata gives each row's location record, type ID, compression mo
 3. Entries with the payload transform flag. Their stored bytes cannot be read without the unknown transform.
 4. Payload bytes are not authenticated by the metadata signature.
 
-Stored rows and chunked rows have been extracted from authenticated metadata with exact logical sizes; raw DEFLATE mode-1 rows without a chunk table were not observed in the sample (RPF9-F103, RPF9-F104).
+Stored rows and chunked rows have been extracted from authenticated metadata with exact logical sizes. A nested archive also yields raw DEFLATE mode-1 rows without a chunk table, eight of which extracted to exact logical sizes (RPF9-F103, RPF9-F104, RPF9-F114).
 
 The engine does not validate the table's structure. A tool that reads RPF9 metadata MUST bounds-check counts, offsets and indices itself.
 

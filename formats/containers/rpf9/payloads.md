@@ -242,7 +242,7 @@ The block program of algorithm `0x11` is not reproduced yet, so the transform ca
 | zlib streams that inflate completely   | Chunk method 3 decodes one zlib stream per chunk      |
 | One stream per 64 KiB of inflated data | Chunk encoding 3 measures sizes from 0x10000          |
 
-These agree. The data observations were made by scanning, not by following native offsets. Entries with mode 1 and no chunk table hold raw DEFLATE, which the scan does not detect. Whether the data contains such entries is not established.
+These agree. The data observations were made by scanning, not by following native offsets. Entries with mode 1 and no chunk table hold raw DEFLATE, which the scan does not detect. A nested archive contains such entries (RPF9-F118).
 
 ## Native reads from authenticated metadata
 
