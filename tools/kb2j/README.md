@@ -17,8 +17,9 @@ python tools/kb2j/kb2_probe.py <PAYLOAD> [<PAYLOAD> ...] [--json] [--strict]
 | `--max-table-bytes N` | Refuse frame tables larger than `N` bytes (default 8 MiB) |
 
 Inputs are opened read-only. The tool writes nothing except standard output and
-errors. It refuses payloads shorter than the header, payloads whose frame table
-runs past the file, unsupported signatures, and frame tables above the limit.
+errors. It refuses payloads shorter than the header, payloads that declare zero
+frames, payloads whose frame table runs past the file, unsupported signatures,
+and frame tables above the limit.
 
 ## Output
 

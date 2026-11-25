@@ -40,6 +40,8 @@ def probe_file(path: str, max_table_bytes: int = DEFAULT_MAX_TABLE_BYTES) -> dic
 
         size_field = _u32(header, 0x04)
         frame_count = _u32(header, 0x08)
+        if frame_count == 0:
+            raise Kb2Error("payload declares zero frames")
         largest_frame = _u32(header, 0x0C)
         duplicate_count = _u32(header, 0x10)
         width = _u32(header, 0x14)

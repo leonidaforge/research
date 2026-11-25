@@ -89,6 +89,16 @@ class AudioTests(unittest.TestCase):
 
 
 class RejectionTests(unittest.TestCase):
+    def test_zero_frame_payload_is_rejected(self):
+        total = 0x40
+        body = header(b"KB2j", total - 8, 0, 0, 16, 16, 0, 0)
+        body += struct.pack("<I", total)
+        body += bytes(total - len(body))
+        with tempfile.TemporaryDirectory() as directory:
+            path = write_payload(directory, "sample.bin", body)
+            with self.assertRaises(probe.Kb2Error):
+                probe.probe_file(path)
+
     def test_unknown_signature_is_rejected(self):
         body = header(b"XXXX", 0x48, 1, 8, 16, 16, 0, 0)
         body += struct.pack("<II", 0x41, 0x50)
