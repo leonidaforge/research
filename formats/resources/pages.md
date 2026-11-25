@@ -70,7 +70,17 @@ The representative type 6 resource has these properties (RES-F24):
 | Logical system segment       | 74,304 bytes                                       |
 | Reconstructed by the CLI     | 65,536 bytes, status `partial`                     |
 
-The stored row is 47,520 bytes: 16 prefix + 38,734 stored zlib + 2 fill + 8,768 raw. Three further type 6 rows store a raw last page of 8,768 bytes; their page maps are at `0xF7D0`, `0xFA80` and `0xF2A0`. A 16,384-byte raw page was not located.
+The stored row is 47,520 bytes: 16 prefix + 38,734 stored zlib + 2 fill + 8,768 raw. The same terrain-tile archive holds five type 6 rows with a raw last system page; each declares 2 system pages and 0 graphics pages (RES-F24):
+
+| Inner row | First page (zlib) | Raw last page | Logical system | Page map |
+| --------- | ----------------- | ------------- | -------------- | -------- |
+| 46        | 65,536            | 8,768         | 74,304         | `0xFD60` |
+| 62        | 65,536            | 4,464         | 70,000         | `0xFF70` |
+| 89        | 131,072           | 16,288        | 147,360        | `0x1FF30` |
+| 112       | 65,536            | 8,304         | 73,840         | `0xF5A0` |
+| 139       | 131,072           | 14,176        | 145,248        | `0x1E900` |
+
+Three more type 6 rows in other terrain tiles store an 8,768-byte raw last page, with page maps at `0xF7D0`, `0xFA80` and `0xF2A0`. A 16,384-byte raw page was not located; the largest in the tile is 16,288 bytes.
 
 The last chunk is a page, not padding, for these reasons:
 
@@ -97,7 +107,7 @@ The current CLI reports `system_size` 65,536, status `partial` and "1 of 2 syste
 
 The rule was run over 4,647 resources from 12 instance-placement nested archives. It reconstructs all 4,647 as complete: 9,041 zlib pages and 496 raw pages, with no packed page and no missing page. The packed split was not needed. The CLI reports `partial` for many of the same rows. This is the largest sample checked; it is not a survey of every archive (RES-F35).
 
-The 16,384-byte raw page variant named in the task was not located. A packed page was not observed in the sample; the synthetic fixture is its only test (RES-F27).
+The 16,384-byte raw page figure was not reproduced; the largest raw page in the representative tile is 16,288 bytes. A packed page was not observed in the sample; the synthetic fixture is its only test (RES-F27).
 
 ## System segment
 
