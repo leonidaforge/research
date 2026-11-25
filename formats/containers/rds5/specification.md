@@ -147,7 +147,7 @@ chunk content, chunk padding and block padding is not observable.
 
 | Offset | Type | Observed |
 |---|---|---|
-| `+0x00` | u32 | 202 distinct values. Bits 0, 1 and 14 are set in every entry, bit 15 in all but one. Low 16 bits take 12 values: `0xC000 \| ((1 << k) - 1)` in 357,114 entries, and `0x40FF` in one entry with `w0 = 0x100040FF` (RDS5-F15, RDS5-F19). Meaning **Unknown** |
+| `+0x00` | u32 | 202 distinct values. Low 16 bits take 12 values: `0xC000 \| ((1 << k) - 1)` in 357,114 entries, and `0x40FF` in one entry with `w0 = 0x100040FF` (RDS5-F15, RDS5-F19). Meaning **Unknown** |
 | `+0x04` | u32 | 133 distinct values. High 16 bits take 16 values in the range `0x0020..0x1320`, low 16 bits 80 values. Meaning **Unknown** |
 | `+0x08` | u32 | Low 16 bits behave as a page counter in 0x1000-byte units (below). The word has 349,703 distinct values across 357,115 entries and its high 16 bits take 613 values; probably a hash or identifier fragment, **Unknown** |
 | `+0x0C` | u32 | 24 distinct values. Splits into two 16-bit values with 16 and 12 observed values. Meaning **Unknown** |
@@ -177,7 +177,7 @@ zlib block of nine files and eight sampled blocks of a tenth. The remaining 916,
 zlib blocks were classified by their first two bytes only. Uncompressed sizes are
 multiples of 0x1000 in every measured case, up to 4 MiB.
 
-Non-zlib blocks (RDS5-F11, RDS5-F18): 108,610 ranges carry high-entropy data. They are
+Non-zlib blocks (RDS5-F11, RDS5-F18): 108,610 ranges are not zlib streams. Their stored spans and selector values are recorded; no content test was applied to them. They are
 not zlib, gzip or raw DEFLATE, under the rule that the whole stored range must decode
 as one stream with no leftover bytes. The test allowed the stream to start at offset 0
 to 8. The codec is **Unknown**. No LZ4 result is claimed here because independent
