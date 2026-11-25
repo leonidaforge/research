@@ -13,6 +13,7 @@ Subjects:
 - [RBF0](rbf0/INDEX.md)
 - [PSIN](psin/INDEX.md)
 - [Unknown payloads](unknown-payloads/INDEX.md)
+- [Inventory](inventory/INDEX.md)
 - [RDS5 verification](rds5-verification/INDEX.md)
 - [Shared hashing](shared/INDEX.md)
 - [Nested archive inventory](inventory/INDEX.md)

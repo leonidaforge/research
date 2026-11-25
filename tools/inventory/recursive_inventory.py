@@ -2,9 +2,11 @@
 """Deterministic recursive RPF9 inventory sampler.
 
 Reads top-level native manifests, extracts a deterministic sample of readable
-type-0 rows, manifests the nested archives, repeats one level deeper, and
-samples readable payloads per type. All inputs are opened read-only.
+type-0 rows, manifests the nested archives, and repeats to a bounded depth. It
+then samples readable payloads per type. All inputs are opened read-only.
 
+Every extracted artifact is content-addressed by SHA-256. A repeated row or a
+duplicate archive reuses the cached artifact instead of extracting it again.
 Outputs stay in the scratch directory. Nothing is written next to an input.
 """
 
@@ -13,6 +15,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import subprocess
 import sys
@@ -20,50 +23,72 @@ import time
 from pathlib import Path
 
 RPF9_MAGIC = b"9FPR"
-MAX_ARCHIVE_BYTES = 8 * 1024 * 1024
+MAX_ARCHIVE_BYTES = 16 * 1024 * 1024
 MAX_PAYLOAD_BYTES = 1 * 1024 * 1024
-MAX_NESTED_ARCHIVES = 60
-MAX_EXTRACTED_BYTES = 512 * 1024 * 1024
+MAX_NESTED_ARCHIVES = 400
+MAX_EXTRACTED_BYTES = 3 * 1024 * 1024 * 1024
+MAX_DEPTH = 3
+MAX_PAYLOADS_PER_TYPE = 4
+
+# Signature classes from evidence/unknown-payloads and the documented formats.
+# A class is a byte observation, not a format identity.
+MAGIC_CLASSES = (
+    (b"9FPR", "rpf9-magic"),
+    (b"RBF0", "rbf0-magic"),
+    (b"PSIN", "psin-magic"),
+    (b"SGD5", "sgd5-magic"),
+    (b"EDUP", "edup-magic"),
+    (b"KB2j", "kb2j-magic"),
+    (b"KB2n", "kb2n-magic"),
+    (b"RDS5", "rds5-magic"),
+    (b"PTFX", "ptfx-magic"),
+)
+
+# Classes the reference sampler reported before this expansion.
+BASELINE_SIGNATURES = frozenset(
+    {"rpf9-magic", "zlib-container-header", "zero-prefix", "unrecognized"}
+)
 
 SELECTION_RULE = {
     "top_level": (
-        "For each top-level archive, take the smallest, upper-median "
-        "(index n//2) and largest readable type-0 row with logical size "
-        "<= 8 MiB, ordered by (logical_size, row). Duplicate row indices "
-        "are removed. Archives without such a row are skipped."
+        "For each top-level archive, order readable type-0 rows with logical "
+        "size <= the archive size cap by (logical_size, row) and take "
+        "quantile-spaced indices, including the smallest and largest. When "
+        "the candidate count is at or below the per-parent limit, take all."
     ),
-    "depth2": (
-        "For each extracted depth-1 archive, take the smallest and largest "
-        "readable type-0 row with logical size <= 8 MiB, ordered by "
-        "(logical_size, row). Duplicate row indices are removed."
+    "nested": (
+        "For each unique extracted archive, apply the same quantile rule to "
+        "its readable type-0 rows at the next depth. The per-depth limits are "
+        "explicit caps, and archives are processed in discovery order."
     ),
     "payloads": (
-        "For each distinct type across nested manifests, take up to two "
-        "readable rows with logical size <= 1 MiB, ordered by "
-        "(logical_size, archive id, row)."
+        "For each distinct type across unique nested manifests, take up to "
+        "the per-type limit of readable rows with logical size <= the payload "
+        "size cap, ordered by (logical_size, archive hash, row)."
+    ),
+    "deduplication": (
+        "Archives and payloads are keyed by SHA-256 of their extracted bytes. "
+        "A duplicate is recorded against the first sample that produced the "
+        "hash and is not expanded again."
     ),
     "caps": {
-        "max_depth": 2,
+        "max_depth": MAX_DEPTH,
         "max_nested_archives": MAX_NESTED_ARCHIVES,
         "max_extracted_bytes": MAX_EXTRACTED_BYTES,
         "max_archive_bytes": MAX_ARCHIVE_BYTES,
         "max_payload_bytes": MAX_PAYLOAD_BYTES,
-        "max_depth2_per_parent": 2,
-        "max_payloads_per_type": 2,
+        "samples_depth1": 24,
+        "samples_depth2": 6,
+        "samples_depth3": 3,
+        "max_payloads_per_type": MAX_PAYLOADS_PER_TYPE,
     },
 }
 
-FIELDS = (
-    "type_id",
-    "row",
-    "logical_size",
-    "stored_size",
-    "mode",
-    "chunks",
-    "payload_transform",
-    "contents",
-    "layout",
-)
+DEPTH_LIMIT_ARG = {
+    1: "samples_depth1",
+    2: "samples_depth2",
+    3: "samples_depth3",
+}
 
 
 def read_jsonl(path: Path) -> list[dict]:
@@ -78,9 +103,11 @@ def read_jsonl(path: Path) -> list[dict]:
 
 def write_json(path: Path, value: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", encoding="utf-8", newline="\n") as handle:
+    temporary = path.with_name(path.name + ".tmp")
+    with temporary.open("w", encoding="utf-8", newline="\n") as handle:
         json.dump(value, handle, indent=2, sort_keys=True)
         handle.write("\n")
+    os.replace(temporary, path)
 
 
 def append_jsonl(path: Path, value: object) -> None:
@@ -103,8 +130,9 @@ def sha256_file(path: Path) -> str:
 
 
 def classify_signature(prefix: bytes) -> str:
-    if prefix.startswith(RPF9_MAGIC):
-        return "rpf9-magic"
+    for magic, label in MAGIC_CLASSES:
+        if prefix.startswith(magic):
+            return label
     if len(prefix) >= 2 and prefix[0] == 0x78 and prefix[1] in (0x01, 0x5E, 0x9C, 0xDA):
         return "zlib-container-header"
     if len(prefix) >= 8 and prefix == b"\x00" * 8:
@@ -127,6 +155,22 @@ def type0_rows(rows: list[dict], max_size: int) -> list[dict]:
         and is_readable(row)
     ]
     return sorted(candidates, key=lambda row: (row["logical_size"], row["row"]))
+
+
+def _select_indices(count: int, limit: int) -> list[int]:
+    if count <= 0 or limit <= 0:
+        return []
+    if count <= limit:
+        return list(range(count))
+    if limit == 1:
+        return [0]
+    return sorted({round(index * (count - 1) / (limit - 1)) for index in range(limit)})
+
+
+def select_quantiles(rows: list[dict], max_size: int, limit: int) -> tuple[list[dict], int]:
+    candidates = type0_rows(rows, max_size)
+    selected = [candidates[index] for index in _select_indices(len(candidates), limit)]
+    return selected, len(candidates)
 
 
 def select_three(rows: list[dict], max_size: int) -> tuple[list[dict], int]:
@@ -260,15 +304,111 @@ def ensure_outside_inputs(scratch: Path, game_dir: Path, inventory_dir: Path) ->
             raise SystemExit(f"the {label} MUST NOT be inside the scratch directory")
 
 
+def selection_gaps(rows: list[dict], max_size: int, limit: int) -> dict:
+    type0 = [row for row in rows if row.get("kind") == "row" and row.get("type_id") == 0]
+    readable = [row for row in type0 if is_readable(row)]
+    within = [
+        row
+        for row in readable
+        if isinstance(row.get("logical_size"), int) and row["logical_size"] <= max_size
+    ]
+    selected, _ = select_quantiles(rows, max_size, limit)
+    return {
+        "type0_rows": len(type0),
+        "unreadable_type0": len(type0) - len(readable),
+        "over_archive_size_cap": len(readable) - len(within),
+        "readable_within_cap": len(within),
+        "selected": len(selected),
+        "not_selected_per_parent_limit": len(within) - len(selected),
+    }
+
+
+class ContentCache:
+    """Content-addressed store for extracted archives and payloads."""
+
+    def __init__(self, scratch: Path):
+        self.root = scratch / "cache"
+        self.archive_dir = self.root / "archives"
+        self.payload_dir = self.root / "payloads"
+        self.manifest_dir = self.root / "manifests"
+        self.tmp_dir = self.root / "tmp"
+        for directory in (self.archive_dir, self.payload_dir, self.manifest_dir, self.tmp_dir):
+            directory.mkdir(parents=True, exist_ok=True)
+        self.index_path = self.root / "index.json"
+        self.entries: dict[str, dict] = {}
+        if self.index_path.exists():
+            try:
+                self.entries = json.loads(self.index_path.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError):
+                self.entries = {}
+        self.archive_bytes = sum(
+            path.stat().st_size for path in self.archive_dir.glob("*.rpf")
+        )
+        self.payload_bytes = sum(
+            path.stat().st_size for path in self.payload_dir.glob("*.bin")
+        )
+
+    def entry_path(self, kind: str, digest: str) -> Path:
+        suffix = "rpf" if kind == "archive" else "bin"
+        directory = self.archive_dir if kind == "archive" else self.payload_dir
+        return directory / f"{digest}.{suffix}"
+
+    def save(self) -> None:
+        write_json(self.index_path, self.entries)
+
+    def lookup(self, kind: str, sample_key: str, expected_size: int) -> tuple[dict, Path] | None:
+        entry = self.entries.get(f"{kind}:{sample_key}")
+        if not entry:
+            return None
+        path = self.entry_path(kind, entry["sha256"])
+        if path.exists() and path.stat().st_size == expected_size == entry.get("size"):
+            return entry, path
+        return None
+
+    def temporary(self, kind: str, sample_key: str) -> Path:
+        path = self.tmp_dir / f"{kind}-{safe_name(sample_key)}.part"
+        if path.exists():
+            path.unlink()
+        return path
+
+    def store(self, kind: str, sample_key: str, temporary: Path, expected_size: int) -> tuple[str, Path, bool]:
+        digest = sha256_file(temporary)
+        destination = self.entry_path(kind, digest)
+        is_new = not destination.exists()
+        if is_new:
+            os.replace(temporary, destination)
+        else:
+            temporary.unlink()
+        size = destination.stat().st_size
+        self.entries[f"{kind}:{sample_key}"] = {"sha256": digest, "size": size}
+        if is_new:
+            if kind == "archive":
+                self.archive_bytes += size
+            else:
+                self.payload_bytes += size
+        self.save()
+        return digest, destination, is_new
+
+    def manifest_path(self, digest: str) -> Path:
+        return self.manifest_dir / f"{digest}.jsonl"
+
+
+def public_record(record: dict) -> dict:
+    value = dict(record)
+    value.pop("rows", None)
+    return value
+
+
 class Sampler:
     def __init__(self, lforge: Path, executable: Path, scratch: Path):
         self.lforge = lforge
         self.executable = executable
         self.scratch = scratch
-        self.nested_records: list[dict] = []
+        self.cache = ContentCache(scratch)
+        self.records: list[dict] = []
+        self.unique_records: dict[str, dict] = {}
         self.payload_records: list[dict] = []
         self.failures: list[dict] = []
-        self.extracted_bytes = 0
         self.started = time.time()
         self.log_handle = None
 
@@ -289,26 +429,51 @@ class Sampler:
             check=False,
         )
 
+    def record_failure(self, failure: dict) -> None:
+        self.failures.append(failure)
+        append_jsonl(self.scratch / "failures.jsonl", failure)
+
     def extract(
         self,
+        kind: str,
+        sample_key: str,
         parent: Path,
         row: dict,
-        output: Path,
         label: dict,
-    ) -> dict:
+        budget: int,
+    ) -> tuple[dict, str | None, Path | None, bool]:
         expected = row["logical_size"]
-        output.parent.mkdir(parents=True, exist_ok=True)
-        if output.exists() and output.stat().st_size == expected:
-            self.extracted_bytes += expected
-            return {
-                "ok": True,
-                "cached": True,
-                "exit": 0,
-                "actual_size": expected,
-                "expected_size": expected,
-            }
-        if output.exists():
-            output.unlink()
+        cached = self.cache.lookup(kind, sample_key, expected)
+        if cached:
+            entry, path = cached
+            return (
+                {
+                    "ok": True,
+                    "cached": True,
+                    "exit": 0,
+                    "actual_size": expected,
+                    "expected_size": expected,
+                },
+                entry["sha256"],
+                path,
+                False,
+            )
+        used = self.cache.archive_bytes if kind == "archive" else self.cache.payload_bytes
+        if used + expected > budget:
+            return (
+                {
+                    "ok": False,
+                    "cached": False,
+                    "exit": None,
+                    "actual_size": None,
+                    "expected_size": expected,
+                    "reason": "byte cap",
+                },
+                None,
+                None,
+                False,
+            )
+        temporary = self.cache.temporary(kind, sample_key)
         command = [
             str(self.lforge),
             "archive",
@@ -317,47 +482,63 @@ class Sampler:
             "--row",
             str(row["row"]),
             "--output",
-            str(output),
+            str(temporary),
             "--executable",
             str(self.executable),
         ]
         result = self.run(command)
-        actual = output.stat().st_size if output.exists() else None
-        ok = result.returncode == 0 and actual == expected
-        if ok:
-            self.extracted_bytes += expected
-        record = {
-            "ok": ok,
-            "cached": False,
-            "exit": result.returncode,
-            "actual_size": actual,
-            "expected_size": expected,
-            "stdout": result.stdout.strip(),
-            "stderr": result.stderr.strip(),
-        }
-        if not ok:
-            failure = dict(label)
-            failure.update(
+        actual = temporary.stat().st_size if temporary.exists() else None
+        if result.returncode == 0 and actual == expected:
+            digest, destination, is_new = self.cache.store(kind, sample_key, temporary, expected)
+            return (
                 {
-                    "kind": "failed_extraction",
-                    "row_type_id": row.get("type_id"),
-                    "chunk_encoding": chunk_label(row),
-                    "compression_mode": row.get("mode"),
-                    "payload_transform": row.get("payload_transform"),
-                    "contents_state": row_state(row),
-                    "expected_size": expected,
+                    "ok": True,
+                    "cached": False,
+                    "exit": 0,
                     "actual_size": actual,
-                    "exit": result.returncode,
-                    "error": (result.stderr or result.stdout).strip(),
-                }
+                    "expected_size": expected,
+                },
+                digest,
+                destination,
+                is_new,
             )
-            self.failures.append(failure)
-            append_jsonl(self.scratch / "failures.jsonl", failure)
-        return record
+        if temporary.exists():
+            temporary.unlink()
+        reason = "size mismatch" if result.returncode == 0 else "nonzero exit"
+        failure = dict(label)
+        failure.update(
+            {
+                "kind": "failed_extraction",
+                "failure_category": reason,
+                "row_type_id": row.get("type_id"),
+                "chunk_encoding": chunk_label(row),
+                "compression_mode": row.get("mode"),
+                "payload_transform": row.get("payload_transform"),
+                "contents_state": row_state(row),
+                "expected_size": expected,
+                "actual_size": actual,
+                "exit": result.returncode,
+                "error": (result.stderr or result.stdout).strip()[:500],
+            }
+        )
+        self.record_failure(failure)
+        return (
+            {
+                "ok": False,
+                "cached": False,
+                "exit": result.returncode,
+                "actual_size": actual,
+                "expected_size": expected,
+                "reason": reason,
+            },
+            None,
+            None,
+            False,
+        )
 
-    def manifest(self, archive: Path, output: Path) -> dict:
-        output.parent.mkdir(parents=True, exist_ok=True)
-        if not output.exists():
+    def manifest(self, digest: str, archive: Path, label: dict) -> tuple[dict, list[dict]]:
+        path = self.cache.manifest_path(digest)
+        if not path.exists():
             command = [
                 str(self.lforge),
                 "archive",
@@ -366,34 +547,64 @@ class Sampler:
                 "--format",
                 "jsonl",
                 "--output",
-                str(output),
+                str(path),
                 "--overwrite",
                 "--executable",
                 str(self.executable),
             ]
             result = self.run(command)
             if result.returncode != 0:
-                return {
-                    "ok": False,
-                    "exit": result.returncode,
-                    "error": (result.stderr or result.stdout).strip(),
-                }
+                failure = dict(label)
+                failure.update(
+                    {
+                        "kind": "failed_manifest",
+                        "failure_category": "manifest command",
+                        "exit": result.returncode,
+                        "error": (result.stderr or result.stdout).strip()[:500],
+                    }
+                )
+                self.record_failure(failure)
+                return {"ok": False, "exit": result.returncode, "error": failure["error"]}, []
         try:
-            documents = read_jsonl(output)
+            documents = read_jsonl(path)
         except (OSError, json.JSONDecodeError) as error:
-            return {"ok": False, "exit": None, "error": str(error)}
+            path.unlink(missing_ok=True)
+            failure = dict(label)
+            failure.update(
+                {
+                    "kind": "failed_manifest",
+                    "failure_category": "manifest parse",
+                    "exit": None,
+                    "error": str(error)[:500],
+                }
+            )
+            self.record_failure(failure)
+            return {"ok": False, "exit": None, "error": str(error)}, []
         if not documents or documents[0].get("kind") != "header":
-            return {"ok": False, "exit": None, "error": "missing manifest header"}
+            path.unlink(missing_ok=True)
+            failure = dict(label)
+            failure.update(
+                {
+                    "kind": "failed_manifest",
+                    "failure_category": "missing header",
+                    "exit": None,
+                    "error": "manifest has no header record",
+                }
+            )
+            self.record_failure(failure)
+            return {"ok": False, "exit": None, "error": "missing manifest header"}, []
         header = documents[0]
         rows = documents[1:]
-        return {
-            "ok": True,
-            "exit": 0,
-            "authentication": header.get("authentication", {}),
-            "rows": len(rows),
-            "types": type_histogram(rows),
-            "documents": rows,
-        }
+        return (
+            {
+                "ok": True,
+                "exit": 0,
+                "authentication": header.get("authentication", {}),
+                "rows": len(rows),
+                "types": type_histogram(rows),
+            },
+            rows,
+        )
 
 
 def nested_record(
@@ -408,8 +619,8 @@ def nested_record(
     digest: str,
     first8: bytes,
     duplicate_of: str | None,
+    rows: list[dict],
 ) -> dict:
-    manifest_documents = manifest.pop("documents", [])
     return {
         "kind": "nested",
         "depth": depth,
@@ -431,7 +642,7 @@ def nested_record(
         "duplicate_of": duplicate_of,
         "extraction": extraction,
         "manifest": manifest,
-        "rows": manifest_documents,
+        "rows": rows,
     }
 
 
@@ -439,7 +650,6 @@ def aggregate_nested(records: list[dict]) -> dict:
     by_depth = {}
     by_signature = {}
     by_type = {}
-    duplicates = {}
     auth = {}
     for record in records:
         depth = record["depth"]
@@ -447,7 +657,11 @@ def aggregate_nested(records: list[dict]) -> dict:
         signature = record["signature_class"]
         by_signature[signature] = by_signature.get(signature, 0) + 1
         manifest = record["manifest"]
-        status = manifest.get("authentication", {}).get("status") if manifest.get("ok") else "manifest-failed"
+        status = (
+            manifest.get("authentication", {}).get("status")
+            if manifest.get("ok")
+            else "manifest-failed"
+        )
         auth[status] = auth.get(status, 0) + 1
         for bucket in manifest.get("types", []):
             key = str(bucket["type_id"])
@@ -463,26 +677,20 @@ def aggregate_nested(records: list[dict]) -> dict:
             entry["rows"] += bucket["rows"]
             entry["readable"] += bucket["readable"]
             entry["archives"] += 1
-        if record["duplicate_of"]:
-            duplicates.setdefault(record["duplicate_of"], []).append(record["parent_id"])
     return {
         "by_depth": {str(key): value for key, value in sorted(by_depth.items())},
         "by_signature": by_signature,
-        "by_type": [by_type[key] for key in sorted(by_type, key=int)],
-        "duplicates": duplicates,
+        "by_type": [by_type[key] for key in sorted(by_type, key=lambda value: (value is None, value))],
         "authentication": auth,
     }
 
 
 def payload_candidates(
-    nested_records: list[dict], max_per_type: int, max_size: int
+    unique_records: list[dict], max_per_type: int, max_size: int
 ) -> tuple[dict[int, list[tuple[dict, dict]]], dict[int, dict]]:
     buckets: dict[int, list[tuple[dict, dict]]] = {}
     stats: dict[int, dict] = {}
-    for record in nested_records:
-        manifest = record["manifest"]
-        if not manifest.get("ok"):
-            continue
+    for record in unique_records:
         for row in record.get("rows", []):
             if row.get("kind") != "row":
                 continue
@@ -494,9 +702,10 @@ def payload_candidates(
                     "rows": 0,
                     "readable": 0,
                     "readable_within_limit": 0,
+                    "over_payload_size_cap": 0,
                     "chunk_encodings": {},
+                    "selected": 0,
                     "failures": 0,
-                    "extracted": 0,
                 },
             )
             entry["rows"] += 1
@@ -506,6 +715,7 @@ def payload_candidates(
                 continue
             entry["readable"] += 1
             if not isinstance(row.get("logical_size"), int) or row["logical_size"] > max_size:
+                entry["over_payload_size_cap"] += 1
                 continue
             entry["readable_within_limit"] += 1
             buckets.setdefault(type_id, []).append((row, record))
@@ -515,11 +725,12 @@ def payload_candidates(
             candidates,
             key=lambda item: (
                 item[0]["logical_size"],
-                item[1]["parent_id"],
+                item[1]["sha256"],
                 item[0]["row"],
             ),
         )
         selected[type_id] = ordered[:max_per_type]
+        stats[type_id]["selected"] = len(selected[type_id])
     return selected, stats
 
 
@@ -535,24 +746,33 @@ def aggregate_payloads(records: list[dict], stats: dict[int, dict]) -> dict:
                 "attempted": 0,
                 "succeeded": 0,
                 "failed": 0,
+                "unique": 0,
+                "duplicates": 0,
                 "signatures": {},
             },
         )
         entry["attempted"] += 1
         if record["extraction"]["ok"]:
             entry["succeeded"] += 1
+            if record["duplicate_of"]:
+                entry["duplicates"] += 1
+            else:
+                entry["unique"] += 1
         else:
             entry["failed"] += 1
         signature = record["signature_class"]
         entry["signatures"][signature] = entry["signatures"].get(signature, 0) + 1
-        by_signature[signature] = by_signature.get(signature, 0) + 1
-    for type_id, entry in stats.items():
+        if record["duplicate_of"] is None:
+            by_signature[signature] = by_signature.get(signature, 0) + 1
+    for type_id in stats:
         if type_id not in by_type:
             by_type[type_id] = {
                 "type_id": type_id,
                 "attempted": 0,
                 "succeeded": 0,
                 "failed": 0,
+                "unique": 0,
+                "duplicates": 0,
                 "signatures": {},
             }
     return {
@@ -561,8 +781,34 @@ def aggregate_payloads(records: list[dict], stats: dict[int, dict]) -> dict:
     }
 
 
+def failure_summary(failures: list[dict]) -> list[dict]:
+    buckets: dict[tuple, dict] = {}
+    for failure in failures:
+        key = (
+            failure.get("kind"),
+            failure.get("failure_category"),
+            failure.get("depth"),
+            failure.get("contents_state"),
+            failure.get("chunk_encoding"),
+        )
+        bucket = buckets.setdefault(
+            key,
+            {
+                "kind": failure.get("kind"),
+                "category": failure.get("failure_category"),
+                "depth": failure.get("depth"),
+                "contents_state": failure.get("contents_state"),
+                "chunk_encoding": failure.get("chunk_encoding"),
+                "count": 0,
+            },
+        )
+        bucket["count"] += 1
+    return [buckets[key] for key in sorted(buckets, key=lambda value: tuple(str(item) for item in value))]
+
+
 def write_report(path: Path, summary: dict) -> None:
-    lines = ["# Recursive inventory scratch report", ""]
+    totals = summary["totals"]
+    lines = ["# Expanded recursive inventory scratch report", ""]
     lines.append(f"Generated: {time.strftime('%Y-%m-%dT%H:%M:%S')}")
     lines.append("")
     lines.append("## Caps")
@@ -570,22 +816,72 @@ def write_report(path: Path, summary: dict) -> None:
     for key, value in summary["selection"]["caps"].items():
         lines.append(f"- {key}: {value}")
     lines.append("")
-    lines.append("## Top-level archives")
+    lines.append("## Totals")
     lines.append("")
-    lines.append("| Archive | Rows | Type-0 candidates | Selected | Nested extracted |")
-    lines.append("| --- | ---: | ---: | ---: | ---: |")
-    for item in summary["top_level"]:
+    lines.append("| Measure | Value |")
+    lines.append("| --- | ---: |")
+    for key in (
+        "top_level_archives",
+        "top_level_rows",
+        "unique_archives",
+        "duplicate_archives",
+        "max_depth_reached",
+        "unique_rows",
+        "readable_rows",
+        "unreadable_rows",
+        "archive_extraction_attempts",
+        "archive_extraction_successes",
+        "archive_extraction_failures",
+        "distinct_archive_hashes",
+        "archive_bytes",
+        "payload_attempts",
+        "payload_successes",
+        "payload_failures",
+        "unique_payloads",
+        "duplicate_payloads",
+        "distinct_payload_hashes",
+        "payload_bytes",
+        "extracted_bytes",
+    ):
+        lines.append(f"| {key} | {totals.get(key)} |")
+    lines.append("")
+    lines.append("## Depth progress")
+    lines.append("")
+    lines.append("| Depth | Parents | Candidates | Selected | Attempts | Unique | Duplicates | Failures | Stop reason |")
+    lines.append("| ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |")
+    for item in summary["depths"]:
         lines.append(
-            "| {relative} | {rows} | {candidates} | {selected} | {nested} |".format(**item)
+            "| {depth} | {parents} | {candidates} | {selected} | {attempts} | {unique} | "
+            "{duplicates} | {failures} | {stop_reason} |".format(**item)
         )
     lines.append("")
-    lines.append("## Nested archives")
+    lines.append("## Top-level archives")
     lines.append("")
-    lines.append(
-        "| Depth | Parent row | Size | SHA-256 | Signature | Auth | Rows | Duplicate of |"
-    )
+    lines.append("| Archive | Rows | Type-0 | Readable within cap | Selected | Extracted | Skipped |")
+    lines.append("| --- | ---: | ---: | ---: | ---: | ---: | --- |")
+    for item in summary["top_level"]:
+        skipped = item["skip_reason"] or (
+            f"{item['gaps']['not_selected_per_parent_limit']} per-parent limit"
+            if item["gaps"]["not_selected_per_parent_limit"]
+            else ""
+        )
+        lines.append(
+            "| {relative} | {rows} | {type0} | {within} | {selected} | {nested} | {skipped} |".format(
+                relative=item["relative"],
+                rows=item["rows"],
+                type0=item["gaps"]["type0_rows"],
+                within=item["gaps"]["readable_within_cap"],
+                selected=item["gaps"]["selected"],
+                nested=item["nested"],
+                skipped=skipped or "-",
+            )
+        )
+    lines.append("")
+    lines.append("## Unique nested archives")
+    lines.append("")
+    lines.append("| Depth | Parent row | Size | SHA-256 | Signature | Auth | Rows | Duplicate of |")
     lines.append("| ---: | ---: | ---: | --- | --- | --- | ---: | --- |")
-    for record in summary["nested"]:
+    for record in summary["unique_archives"]:
         lines.append(
             "| {depth} | {parent_row} | {logical_size} | `{sha256}` | {signature_class} | "
             "{auth} | {rows} | {duplicate_of} |".format(
@@ -600,11 +896,17 @@ def write_report(path: Path, summary: dict) -> None:
             )
         )
     lines.append("")
-    lines.append("## Depth 2")
+    lines.append("## Duplicate extractions")
     lines.append("")
-    lines.append(f"- Candidates: {summary['depth2']['candidates']}")
-    lines.append(f"- Extracted: {summary['depth2']['extracted']}")
-    lines.append(f"- Reason: {summary['depth2']['reason'] or 'sampled'}")
+    if summary["duplicates"]:
+        lines.append("| Depth | Sample | SHA-256 | Duplicate of |")
+        lines.append("| ---: | --- | --- | --- |")
+        for record in summary["duplicates"]:
+            lines.append(
+                "| {depth} | {parent_id} | `{sha256}` | {duplicate_of} |".format(**record)
+            )
+    else:
+        lines.append("No duplicate archive content was found.")
     lines.append("")
     lines.append("## Nested type histogram")
     lines.append("")
@@ -617,8 +919,8 @@ def write_report(path: Path, summary: dict) -> None:
     lines.append("")
     lines.append("## Payload samples")
     lines.append("")
-    lines.append("| Type | Attempted | Succeeded | Failed | Signatures |")
-    lines.append("| ---: | ---: | ---: | ---: | --- |")
+    lines.append("| Type | Attempted | Succeeded | Failed | Unique | Duplicates | Signatures |")
+    lines.append("| ---: | ---: | ---: | ---: | ---: | ---: | --- |")
     for item in summary["payload_aggregate"]["by_type"]:
         signatures = ", ".join(
             f"{key}: {value}" for key, value in sorted(item["signatures"].items())
@@ -626,24 +928,39 @@ def write_report(path: Path, summary: dict) -> None:
         values = dict(item)
         values["signatures"] = signatures or "-"
         lines.append(
-            "| {type_id} | {attempted} | {succeeded} | {failed} | {signatures} |".format(
-                **values
-            )
+            "| {type_id} | {attempted} | {succeeded} | {failed} | {unique} | {duplicates} | "
+            "{signatures} |".format(**values)
         )
     lines.append("")
-    lines.append("## Failures")
+    lines.append("## Payload signatures")
     lines.append("")
-    if summary["failures"]:
-        lines.append("| Kind | Type | Chunk encoding | Exit | Error |")
-        lines.append("| --- | ---: | --- | ---: | --- |")
-        for failure in summary["failures"]:
+    lines.append("| Class | Unique payloads |")
+    lines.append("| --- | ---: |")
+    for key, value in sorted(summary["payload_aggregate"]["by_signature"].items()):
+        lines.append(f"| {key} | {value} |")
+    lines.append("")
+    lines.append("## Gaps")
+    lines.append("")
+    if summary["gaps"]:
+        lines.append("| Gap | Count |")
+        lines.append("| --- | ---: |")
+        for key, value in sorted(summary["gaps"].items()):
+            lines.append(f"| {key} | {value} |")
+    else:
+        lines.append("No gap was recorded.")
+    lines.append("")
+    lines.append("## Archive extraction failures")
+    lines.append("")
+    if summary["failure_summary"]:
+        lines.append("| Kind | Category | Depth | Contents state | Chunk encoding | Count |")
+        lines.append("| --- | --- | ---: | --- | --- | ---: |")
+        for item in summary["failure_summary"]:
             lines.append(
-                "| {kind} | {row_type_id} | {chunk_encoding} | {exit} | {error} |".format(
-                    **failure
-                )
+                "| {kind} | {category} | {depth} | {contents_state} | {chunk_encoding} | "
+                "{count} |".format(**item)
             )
     else:
-        lines.append("No extraction failures.")
+        lines.append("No extraction or manifest failure.")
     path.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
 
 
@@ -654,16 +971,19 @@ def main() -> int:
     parser.add_argument("--scratch-dir", required=True, type=Path)
     parser.add_argument("--lforge", required=True, type=Path)
     parser.add_argument("--executable", required=True, type=Path)
+    parser.add_argument("--max-depth", type=int, default=MAX_DEPTH)
     parser.add_argument("--max-nested", type=int, default=MAX_NESTED_ARCHIVES)
     parser.add_argument("--max-bytes", type=int, default=MAX_EXTRACTED_BYTES)
     parser.add_argument("--max-archive-bytes", type=int, default=MAX_ARCHIVE_BYTES)
     parser.add_argument("--max-payload-bytes", type=int, default=MAX_PAYLOAD_BYTES)
-    parser.add_argument("--max-depth2-per-parent", type=int, default=2)
-    parser.add_argument("--max-payloads-per-type", type=int, default=2)
+    parser.add_argument("--samples-depth1", type=int, default=24)
+    parser.add_argument("--samples-depth2", type=int, default=6)
+    parser.add_argument("--samples-depth3", type=int, default=3)
+    parser.add_argument("--max-payloads-per-type", type=int, default=MAX_PAYLOADS_PER_TYPE)
     parser.add_argument(
         "--plan-only",
         action="store_true",
-        help="write the deterministic selection without running extraction",
+        help="write the deterministic depth-1 selection without running extraction",
     )
     args = parser.parse_args()
 
@@ -675,17 +995,23 @@ def main() -> int:
         raise SystemExit(f"lforge not found: {args.lforge}")
     if not args.executable.is_file():
         raise SystemExit(f"executable not found: {args.executable}")
+    if args.max_depth < 1 or args.max_depth > 3:
+        raise SystemExit("max depth MUST be between 1 and 3")
     ensure_outside_inputs(args.scratch_dir, args.game_dir, args.inventory_dir)
     args.scratch_dir.mkdir(parents=True, exist_ok=True)
 
-    selection = {key: value for key, value in SELECTION_RULE.items()}
+    selection = {key: value for key, value in SELECTION_RULE.items() if key != "caps"}
+    selection["caps"] = dict(SELECTION_RULE["caps"])
     selection["caps"].update(
         {
+            "max_depth": args.max_depth,
             "max_nested_archives": args.max_nested,
             "max_extracted_bytes": args.max_bytes,
             "max_archive_bytes": args.max_archive_bytes,
             "max_payload_bytes": args.max_payload_bytes,
-            "max_depth2_per_parent": args.max_depth2_per_parent,
+            "samples_depth1": args.samples_depth1,
+            "samples_depth2": args.samples_depth2,
+            "samples_depth3": args.samples_depth3,
             "max_payloads_per_type": args.max_payloads_per_type,
         }
     )
@@ -697,25 +1023,29 @@ def main() -> int:
     sampler.log(f"manifests: {len(manifests)}")
 
     top_level = []
-    depth1_plan = []
+    top_plan = []
     for item in manifests:
         archive = Path(item["header"]["archive"])
         relative = str(item["header"].get("relative") or archive.name)
-        selected, candidate_count = select_three(item["rows"], args.max_archive_bytes)
-        depth1_plan.append((item, archive, relative, selected))
+        selected, _ = select_quantiles(item["rows"], args.max_archive_bytes, args.samples_depth1)
+        gaps = selection_gaps(item["rows"], args.max_archive_bytes, args.samples_depth1)
         top_level.append(
             {
                 "archive": str(archive),
                 "relative": relative,
                 "rows": len([row for row in item["rows"] if row.get("kind") == "row"]),
-                "candidates": candidate_count,
-                "selected": len(selected),
                 "nested": 0,
+                "gaps": gaps,
                 "skip_reason": None
                 if selected
-                else "no readable type-0 row at or below the archive size limit",
+                else (
+                    "no readable type-0 row"
+                    if gaps["type0_rows"] == 0 or gaps["unreadable_type0"] == gaps["type0_rows"]
+                    else "no readable type-0 row within the archive size cap"
+                ),
             }
         )
+        top_plan.append((item, archive, relative, selected))
 
     if args.plan_only:
         plan = {
@@ -727,188 +1057,241 @@ def main() -> int:
                     "rows": [row["row"] for row in selected],
                     "sizes": [row["logical_size"] for row in selected],
                 }
-                for _, archive, _, selected in depth1_plan
+                for _, archive, _, selected in top_plan
             ],
         }
         write_json(args.scratch_dir / "plan.json", plan)
         sampler.log("plan-only: no extraction run")
+        sampler.log_handle.close()
         return 0
 
-    digest_first: dict[str, str] = {}
-    d1_entries = []
-    for item, archive, relative, selected in depth1_plan:
-        top_record = next(entry for entry in top_level if entry["archive"] == str(archive))
-        if not selected:
-            sampler.log(f"skip {relative}: no candidate")
-            continue
-        for row in selected:
-            if len(sampler.nested_records) >= args.max_nested:
-                sampler.log(f"stop {relative} row {row['row']}: nested archive cap")
-                top_record["skip_reason"] = "nested archive cap"
-                break
-            if sampler.extracted_bytes + row["logical_size"] > args.max_bytes:
-                sampler.log(f"stop {relative} row {row['row']}: byte cap")
-                top_record["skip_reason"] = "extracted byte cap"
-                break
-            identifier = f"d1:{relative}:{row['row']}"
-            output = (
-                args.scratch_dir
-                / "nested"
-                / "d1"
-                / safe_name(relative)
-                / f"row-{row['row']:05d}.rpf"
-            )
-            label = {
-                "sample": identifier,
-                "depth": 1,
-                "parent_archive": str(archive),
-                "parent_row": row["row"],
-                "top_relative": relative,
-            }
-            extraction = sampler.extract(archive, row, output, label)
-            if not extraction["ok"]:
-                sampler.log(f"extract failed {identifier}")
-                continue
-            digest = sha256_file(output)
-            duplicate_of = digest_first.get(digest)
-            digest_first.setdefault(digest, identifier)
-            with output.open("rb") as handle:
-                first8 = handle.read(8)
-            manifest = sampler.manifest(output, output.with_suffix(".jsonl"))
-            record = nested_record(
-                1,
-                archive,
-                identifier,
-                relative,
-                row,
-                output,
-                extraction,
-                manifest,
-                digest,
-                first8,
-                duplicate_of,
-            )
-            sampler.nested_records.append(record)
-            append_jsonl(args.scratch_dir / "nested.jsonl", record)
-            d1_entries.append(record)
-            top_record["nested"] += 1
-            sampler.log(
-                f"d1 {identifier} {row['logical_size']} bytes profile={record['signature_class']}"
-            )
+    gaps: dict[str, int] = {}
 
-    depth2_plan = []
-    for record in sorted(d1_entries, key=lambda item: (item["top_relative"], item["parent_row"])):
-        if len(sampler.nested_records) >= args.max_nested:
+    def add_gap(name: str, count: int = 1) -> None:
+        if count:
+            gaps[name] = gaps.get(name, 0) + count
+
+    depth_reports = []
+    stopped = False
+    for depth in range(1, args.max_depth + 1):
+        if stopped:
             break
-        selected, candidate_count = select_two(record["rows"], args.max_archive_bytes)
-        depth2_plan.append((record, selected, candidate_count))
+        per_parent = getattr(args, DEPTH_LIMIT_ARG[depth])
+        if depth == 1:
+            parents = [
+                {
+                    "rows": item["rows"],
+                    "parent": archive,
+                    "parent_id": relative,
+                    "top_relative": relative,
+                    "sha256": None,
+                }
+                for item, archive, relative, _ in top_plan
+            ]
+        else:
+            parents = [
+                record
+                for record in sorted(
+                    sampler.unique_records.values(),
+                    key=lambda value: (value["top_relative"], value["parent_id"], value["sha256"]),
+                )
+                if record["depth"] == depth - 1 and record["manifest"].get("ok")
+            ]
+        plan = []
+        candidates = 0
+        selected_total = 0
+        for parent in parents:
+            selected, candidate_count = select_quantiles(
+                parent["rows"], args.max_archive_bytes, per_parent
+            )
+            candidates += candidate_count
+            selected_total += len(selected)
+            parent_gaps = selection_gaps(parent["rows"], args.max_archive_bytes, per_parent)
+            add_gap("type0_unreadable", parent_gaps["unreadable_type0"])
+            add_gap("type0_over_archive_size_cap", parent_gaps["over_archive_size_cap"])
+            add_gap(
+                "type0_not_selected_per_parent_limit",
+                parent_gaps["not_selected_per_parent_limit"],
+            )
+            plan.append((parent, selected))
 
-    depth2_candidates = sum(candidate_count for _, _, candidate_count in depth2_plan)
-    if len(sampler.nested_records) >= args.max_nested:
-        depth2_reason = "nested archive cap reached after depth-1 extraction"
-    elif not depth2_plan:
-        depth2_reason = "no depth-1 archive was extracted"
-    elif depth2_candidates == 0:
-        depth2_reason = (
-            "no readable type-0 row at or below the archive size limit in any "
-            "extracted depth-1 archive"
+        attempts = 0
+        successes = 0
+        failures = 0
+        unique_added = 0
+        duplicate_added = 0
+        stop_reason = None
+        for parent, selected in plan:
+            if stopped:
+                add_gap("parents_not_visited_cap", 1)
+                continue
+            for row in selected:
+                if len(sampler.unique_records) >= args.max_nested:
+                    stop_reason = "nested archive cap"
+                    add_gap("nested_archive_cap")
+                    stopped = True
+                    break
+                if sampler.cache.archive_bytes + row["logical_size"] > args.max_bytes:
+                    stop_reason = "extracted byte cap"
+                    add_gap("extracted_byte_cap")
+                    stopped = True
+                    break
+                if depth == 1:
+                    sample_key = f"d1:{parent['parent_id']}:{row['row']}"
+                    parent_path = parent["parent"]
+                else:
+                    sample_key = f"d{depth}:{parent['sha256']}:{row['row']}"
+                    parent_path = Path(parent["output"])
+                attempts += 1
+                label = {
+                    "sample": sample_key,
+                    "depth": depth,
+                    "parent_archive": str(parent_path),
+                    "parent_row": row["row"],
+                    "top_relative": parent["top_relative"],
+                }
+                extraction, digest, output, _ = sampler.extract(
+                    "archive",
+                    sample_key,
+                    parent_path,
+                    row,
+                    label,
+                    args.max_bytes,
+                )
+                if not extraction["ok"]:
+                    failures += 1
+                    add_gap("archive_extraction_failure")
+                    if extraction.get("reason") == "byte cap":
+                        stop_reason = "extracted byte cap"
+                        add_gap("extracted_byte_cap")
+                        stopped = True
+                        break
+                    sampler.log(f"extract failed {sample_key}")
+                    continue
+                successes += 1
+                duplicate_of = None
+                if digest in sampler.unique_records:
+                    duplicate_of = sampler.unique_records[digest]["parent_id"]
+                first8 = b""
+                with output.open("rb") as handle:
+                    first8 = handle.read(8)
+                if duplicate_of:
+                    manifest = dict(sampler.unique_records[digest]["manifest"])
+                    rows = []
+                    duplicate_added += 1
+                    add_gap("duplicate_archive_content")
+                else:
+                    manifest, rows = sampler.manifest(digest, output, label)
+                    unique_added += 1
+                    if not manifest.get("ok"):
+                        add_gap("archive_manifest_failure")
+                record = nested_record(
+                    depth,
+                    parent_path,
+                    sample_key,
+                    parent["top_relative"],
+                    row,
+                    output,
+                    extraction,
+                    manifest,
+                    digest,
+                    first8,
+                    duplicate_of,
+                    rows,
+                )
+                sampler.records.append(record)
+                append_jsonl(args.scratch_dir / "archives.jsonl", public_record(record))
+                if not duplicate_of:
+                    sampler.unique_records[digest] = record
+                if depth == 1:
+                    top_entry = next(
+                        entry for entry in top_level if entry["relative"] == parent["parent_id"]
+                    )
+                    top_entry["nested"] += 1
+                sampler.log(
+                    f"d{depth} {sample_key} {row['logical_size']} bytes "
+                    f"profile={record['signature_class']}"
+                    + (" duplicate" if duplicate_of else "")
+                )
+        if selected_total == 0:
+            stop_reason = "no readable type-0 row within the archive size cap"
+        depth_reports.append(
+            {
+                "depth": depth,
+                "parents": len(parents),
+                "candidates": candidates,
+                "selected": selected_total,
+                "attempts": attempts,
+                "unique": unique_added,
+                "duplicates": duplicate_added,
+                "failures": failures,
+                "stop_reason": stop_reason or "sampled",
+            }
         )
-    else:
-        depth2_reason = None
-
-    for parent_record, selected, _ in depth2_plan:
-        if len(sampler.nested_records) >= args.max_nested:
+        if not parents:
+            stop_reason = "no parent archive at the previous depth"
+            depth_reports[-1]["stop_reason"] = stop_reason
             break
-        for row in selected[: args.max_depth2_per_parent]:
-            if len(sampler.nested_records) >= args.max_nested:
-                break
-            if sampler.extracted_bytes + row["logical_size"] > args.max_bytes:
-                sampler.log(f"stop depth2 {parent_record['parent_id']}: byte cap")
-                break
-            parent = Path(parent_record["output"])
-            identifier = f"d2:{parent_record['parent_id']}:{row['row']}"
-            output = (
-                args.scratch_dir
-                / "nested"
-                / "d2"
-                / safe_name(parent_record["parent_id"])
-                / f"row-{row['row']:05d}.rpf"
-            )
-            label = {
-                "sample": identifier,
-                "depth": 2,
-                "parent_archive": str(parent),
-                "parent_row": row["row"],
-                "top_relative": parent_record["top_relative"],
-            }
-            extraction = sampler.extract(parent, row, output, label)
-            if not extraction["ok"]:
-                sampler.log(f"extract failed {identifier}")
-                continue
-            digest = sha256_file(output)
-            duplicate_of = digest_first.get(digest)
-            digest_first.setdefault(digest, identifier)
-            with output.open("rb") as handle:
-                first8 = handle.read(8)
-            manifest = sampler.manifest(output, output.with_suffix(".jsonl"))
-            record = nested_record(
-                2,
-                parent,
-                identifier,
-                parent_record["top_relative"],
-                row,
-                output,
-                extraction,
-                manifest,
-                digest,
-                first8,
-                duplicate_of,
-            )
-            sampler.nested_records.append(record)
-            append_jsonl(args.scratch_dir / "nested.jsonl", record)
-            sampler.log(
-                f"d2 {identifier} {row['logical_size']} bytes profile={record['signature_class']}"
-            )
+
+    unique_records = sorted(
+        sampler.unique_records.values(), key=lambda value: (value["depth"], value["sha256"])
+    )
+
+    # Archives beyond the depth cap were not expanded; count the type-0 rows there.
+    if unique_records:
+        deepest = max(record["depth"] for record in unique_records)
+        if deepest >= args.max_depth:
+            for record in unique_records:
+                if record["depth"] == args.max_depth and record["manifest"].get("ok"):
+                    _, count = select_quantiles(
+                        record["rows"], args.max_archive_bytes, args.max_nested
+                    )
+                    add_gap("type0_beyond_depth_cap", count)
 
     available_payloads, payload_stats = payload_candidates(
-        sampler.nested_records,
+        unique_records,
         args.max_payloads_per_type,
         args.max_payload_bytes,
     )
+    payload_duplicates: dict[str, str] = {}
     for type_id in sorted(available_payloads, key=lambda value: (value is None, value)):
         for row, parent_record in available_payloads[type_id]:
-            if sampler.extracted_bytes + row["logical_size"] > args.max_bytes:
-                sampler.log(f"stop payload type {type_id}: byte cap")
+            if sampler.cache.payload_bytes + row["logical_size"] > args.max_bytes:
+                add_gap("payload_extracted_byte_cap")
                 break
-            parent = Path(parent_record["output"])
-            identifier = (
-                f"payload:{type_id}:{parent_record['parent_id']}:{row['row']}"
-            )
-            output = (
-                args.scratch_dir
-                / "payloads"
-                / f"type-{type_id}"
-                / f"{safe_name(parent_record['parent_id'])}-row-{row['row']:05d}.bin"
-            )
+            sample_key = f"{parent_record['sha256']}:{row['row']}"
             label = {
-                "sample": identifier,
-                "depth": parent_record["depth"],
-                "parent_archive": str(parent),
+                "sample": f"payload:{type_id}:{sample_key}",
+                "depth": parent_record["depth"] + 1,
+                "parent_archive": parent_record["output"],
                 "parent_row": row["row"],
                 "top_relative": parent_record["top_relative"],
             }
-            extraction = sampler.extract(parent, row, output, label)
-            first8 = b""
+            extraction, digest, output, _ = sampler.extract(
+                "payload",
+                sample_key,
+                Path(parent_record["output"]),
+                row,
+                label,
+                args.max_bytes,
+            )
+            duplicate_of = None
             if extraction["ok"]:
+                if digest in payload_duplicates:
+                    duplicate_of = payload_duplicates[digest]
+                else:
+                    payload_duplicates[digest] = sample_key
+            first8 = b""
+            if extraction["ok"] and output is not None:
                 with output.open("rb") as handle:
                     first8 = handle.read(8)
-            else:
-                payload_stats[type_id]["failures"] += 1
             record = {
                 "kind": "payload",
                 "type_id": type_id,
+                "sample": sample_key,
+                "parent_sha256": parent_record["sha256"],
                 "parent_id": parent_record["parent_id"],
-                "archive": str(parent),
+                "archive": parent_record["output"],
                 "top_relative": parent_record["top_relative"],
                 "row": row["row"],
                 "logical_size": row["logical_size"],
@@ -918,53 +1301,135 @@ def main() -> int:
                 "chunks": row.get("chunks"),
                 "payload_transform": row.get("payload_transform"),
                 "contents": row.get("contents"),
-                "output": str(output),
+                "output": str(output) if output else None,
+                "sha256": digest,
                 "first8": first8.hex(),
-                "signature_class": classify_signature(first8) if first8 else "not-extracted",
+                "signature_class": classify_signature(first8)
+                if first8
+                else "not-extracted",
+                "duplicate_of": duplicate_of,
                 "extraction": extraction,
             }
             sampler.payload_records.append(record)
             append_jsonl(args.scratch_dir / "payloads.jsonl", record)
-            sampler.log(
-                f"payload type {type_id} row {row['row']} profile={record['signature_class']}"
-            )
+            if extraction["ok"]:
+                sampler.log(
+                    f"payload type {type_id} {sample_key} "
+                    f"profile={record['signature_class']}"
+                    + (" duplicate" if duplicate_of else "")
+                )
+            else:
+                add_gap("payload_extraction_failure")
+
+    for record in payload_stats.values():
+        if record["over_payload_size_cap"]:
+            add_gap("payload_rows_over_size_cap", record["over_payload_size_cap"])
+        if record["rows"] > record["readable"]:
+            add_gap("payload_rows_unreadable", record["rows"] - record["readable"])
+        add_gap(
+            "payload_rows_not_selected_per_type_limit",
+            record["readable_within_limit"] - record["selected"],
+        )
+
+    for item in top_level:
+        unprocessed = item["gaps"]["selected"] - item["nested"]
+        add_gap("top_level_selected_not_extracted", unprocessed)
+
+    unique_rows = 0
+    readable_rows = 0
+    unreadable_rows = 0
+    for record in unique_records:
+        if not record["manifest"].get("ok"):
+            continue
+        for row in record["rows"]:
+            if row.get("kind") != "row":
+                continue
+            unique_rows += 1
+            if is_readable(row):
+                readable_rows += 1
+            else:
+                unreadable_rows += 1
+
+    payload_signatures = aggregate_payloads(
+        sampler.payload_records, payload_stats
+    )["by_signature"]
+    new_signatures = sorted(
+        signature
+        for signature in payload_signatures
+        if signature not in BASELINE_SIGNATURES and signature != "not-extracted"
+    )
+    duplicates = [
+        {
+            "depth": record["depth"],
+            "parent_id": record["parent_id"],
+            "sha256": record["sha256"],
+            "duplicate_of": record["duplicate_of"],
+        }
+        for record in sampler.records
+        if record["duplicate_of"]
+    ]
 
     summary = {
         "selection": selection,
         "manifest_duplicates": manifest_duplicates,
         "top_level": top_level,
-        "nested": sampler.nested_records,
-        "nested_aggregate": aggregate_nested(sampler.nested_records),
-        "depth2": {
-            "candidates": depth2_candidates,
-            "extracted": sum(
-                1 for record in sampler.nested_records if record["depth"] == 2
-            ),
-            "reason": depth2_reason,
-        },
+        "depths": depth_reports,
+        "unique_archives": [public_record(record) for record in unique_records],
+        "duplicates": duplicates,
+        "nested_aggregate": aggregate_nested(unique_records),
         "payloads": sampler.payload_records,
         "payload_aggregate": aggregate_payloads(sampler.payload_records, payload_stats),
+        "payload_types": [payload_stats[key] for key in sorted(payload_stats, key=lambda value: (value is None, value))],
+        "new_payload_signatures": new_signatures,
         "failures": sampler.failures,
+        "failure_summary": failure_summary(sampler.failures),
+        "gaps": gaps,
         "totals": {
-            "nested_archives": len(sampler.nested_records),
-            "nested_bytes": sum(record["logical_size"] for record in sampler.nested_records),
-            "payloads": len(sampler.payload_records),
-            "payload_bytes": sum(
-                record["logical_size"]
-                for record in sampler.payload_records
-                if record["extraction"]["ok"]
+            "top_level_archives": len(manifests),
+            "top_level_rows": sum(item["rows"] for item in top_level),
+            "unique_archives": len(unique_records),
+            "duplicate_archives": len(duplicates),
+            "max_depth_reached": max(
+                (record["depth"] for record in unique_records), default=0
             ),
-            "extracted_bytes": sampler.extracted_bytes,
-            "distinct_hashes": len(digest_first),
+            "unique_rows": unique_rows,
+            "readable_rows": readable_rows,
+            "unreadable_rows": unreadable_rows,
+            "archive_extraction_attempts": len(sampler.records),
+            "archive_extraction_successes": sum(
+                1 for record in sampler.records if record["extraction"]["ok"]
+            ),
+            "archive_extraction_failures": sum(
+                1 for record in sampler.records if not record["extraction"]["ok"]
+            ),
+            "distinct_archive_hashes": len(unique_records),
+            "archive_bytes": sampler.cache.archive_bytes,
+            "payload_attempts": len(sampler.payload_records),
+            "payload_successes": sum(
+                1 for record in sampler.payload_records if record["extraction"]["ok"]
+            ),
+            "payload_failures": sum(
+                1 for record in sampler.payload_records if not record["extraction"]["ok"]
+            ),
+            "unique_payloads": len(payload_duplicates),
+            "duplicate_payloads": len(
+                [record for record in sampler.payload_records if record["duplicate_of"]]
+            ),
+            "distinct_payload_hashes": len(
+                {record["sha256"] for record in sampler.payload_records if record["sha256"]}
+            ),
+            "payload_bytes": sampler.cache.payload_bytes,
+            "extracted_bytes": sampler.cache.archive_bytes + sampler.cache.payload_bytes,
             "elapsed_seconds": round(time.time() - sampler.started, 3),
         },
     }
     write_json(args.scratch_dir / "summary.json", summary)
     write_report(args.scratch_dir / "report.md", summary)
     sampler.log(
-        "done: nested={} payloads={} bytes={}".format(
-            summary["totals"]["nested_archives"],
-            summary["totals"]["payloads"],
+        "done: unique_archives={} unique_rows={} max_depth={} extracted_bytes={}".format(
+            summary["totals"]["unique_archives"],
+            summary["totals"]["unique_rows"],
+            summary["totals"]["max_depth_reached"],
             summary["totals"]["extracted_bytes"],
         )
     )

@@ -1,9 +1,9 @@
 # Recursive inventory sampler
 
 `recursive_inventory.py` builds a deterministic sample of nested RPF9 archives
-from authenticated top-level manifests and records extraction and manifest
-results. It reads archives and the executable read-only and writes only to the
-scratch directory.
+from authenticated top-level manifests. It extracts type-0 rows, manifests the
+nested archives, repeats to a bounded depth, and samples readable payloads per
+type. Inputs are opened read-only.
 
 ## Usage
 
@@ -16,39 +16,75 @@ python tools/inventory/recursive_inventory.py \
   --executable <game-executable>
 ```
 
-`--game-dir` is used only to reject a scratch directory inside the game installation; the sampler never reads archives from it directly, it reads the manifests you pass. All paths are required. The scratch directory MUST NOT lie inside the game or
-manifest directory. Add `--plan-only` to write `plan.json` without extracting.
+All paths are required. The scratch directory MUST NOT lie inside the game or
+manifest directory. Add `--plan-only` to write `plan.json` for the depth-1
+selection without extracting.
 
-## Sample rule
+## Caps
 
-For each top-level archive, the sampler takes the smallest, upper-median
-(`n // 2`) and largest readable type-0 row with logical size at most 8 MiB.
-Rows are ordered by `(logical_size, row)` and duplicate indices are removed.
-One level deeper, each extracted archive contributes its smallest and largest
-qualifying type-0 row. The default caps are 60 nested archives, 512 MiB of
-extracted bytes, 8 MiB per archive, 2 depth-2 archives per parent and 2 payload
-samples per type.
+The defaults are bounded and can be lowered or raised explicitly.
 
-A row counts as extracted only when the CLI exits 0 and the output size equals
-the row's logical size. Reruns reuse outputs that already have the expected
-size.
+| Flag | Default | Meaning |
+| --- | ---: | --- |
+| `--max-depth` | 3 | Maximum archive depth, 1 to 3 |
+| `--max-nested` | 400 | Unique nested archives |
+| `--max-bytes` | 3 GiB | Unique extracted archive and payload bytes |
+| `--max-archive-bytes` | 16 MiB | Largest sampled type-0 row |
+| `--max-payload-bytes` | 1 MiB | Largest sampled payload row |
+| `--samples-depth1` | 24 | Type-0 samples per top-level archive |
+| `--samples-depth2` | 6 | Type-0 samples per depth-1 archive |
+| `--samples-depth3` | 3 | Type-0 samples per depth-2 archive |
+| `--max-payloads-per-type` | 4 | Payload samples per type |
+
+## Selection rule
+
+For each parent, readable type-0 rows at or below the archive size cap are
+ordered by `(logical_size, row)`. Quantile-spaced indices are selected,
+including the smallest and largest. All candidates are selected when their
+count is at or below the per-parent limit. Parents are processed in discovery
+order. The rule depends only on the manifests and the caps.
+
+Payloads are selected per type from unique nested manifests. Readable rows at
+or below the payload size cap are ordered by `(logical_size, archive hash,
+row)` and the first `--max-payloads-per-type` are taken.
+
+## Cache and deduplication
+
+Every extracted artifact is stored by SHA-256:
+
+```text
+<scratch>/cache/archives/<sha256>.rpf
+<scratch>/cache/payloads/<sha256>.bin
+<scratch>/cache/manifests/<sha256>.jsonl
+<scratch>/cache/index.json
+```
+
+A sample key resolves to a hash in `index.json`. A rerun reuses an artifact when
+its size matches, so extraction is resumable and duplicate work is avoided.
+Duplicate archives are recorded with `duplicate_of` and are not expanded again.
+Duplicate payloads are recorded the same way.
 
 ## Output
 
-All files are written to the scratch directory:
-
 | File | Content |
 | --- | --- |
-| `summary.json` | selection rule, per-archive results, type histograms, failures, totals |
-| `nested.jsonl` | one record per extracted nested archive, including SHA-256 and first 8 bytes |
-| `payloads.jsonl` | one record per payload sample, including first 8 bytes |
-| `failures.jsonl` | failed extraction records |
+| `summary.json` | caps, top-level results, depth progress, unique archives, payloads, failures, gaps, totals |
+| `archives.jsonl` | one record per archive extraction attempt, without row lists |
+| `payloads.jsonl` | one record per payload attempt, including signature class |
+| `failures.jsonl` | extraction and manifest failures |
 | `report.md` | aggregate report |
 | `run.log` | progress log |
+| `plan.json` | depth-1 selection with `--plan-only` |
 
-The first 8 bytes and archive paths are scratch data. They are not publication
-material. Payload signature classes are reported as `rpf9-magic`,
-`zlib-container-header`, `zero-prefix` or `unrecognized`.
+Only the first eight extracted bytes are read for classification. Exact
+prefixes, archive paths and archived rows stay in the scratch directory.
+
+## Signature classes
+
+A class is a byte observation, not a format identity. The classifier reports
+the documented magics `9FPR`, `RBF0`, `PSIN`, `SGD5`, `EDUP`, `KB2j`, `KB2n`,
+`RDS5` and `PTFX`, the zlib container header, a full zero prefix, or
+`unrecognized`.
 
 ## Dependencies
 
@@ -61,4 +97,5 @@ material. Payload signature classes are reported as `rpf9-magic`,
 python -m unittest discover -s tools/inventory
 ```
 
-The tests build synthetic rows and do not read game files.
+The tests use synthetic rows, synthetic cache bytes and temporary directories.
+They do not read game files.

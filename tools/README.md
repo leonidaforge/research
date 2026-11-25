@@ -1,8 +1,7 @@
 # Tools
 
-Published tools:
-
-- [inventory](inventory/README.md): deterministic sampler for nested RPF9 archives and payload prefixes.
+- [inventory](inventory/README.md): recursive, content-addressed RPF9
+  inventory sampler.
 
 A tool added here MUST:
 
