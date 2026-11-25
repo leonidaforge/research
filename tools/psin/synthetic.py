@@ -115,7 +115,7 @@ def pmap_document(block_lengths=None, mode: int = 3, extra: int = 0, unaligned: 
         offset = 8 + len(pre_section)
         entries.append((kind, offset, 0, length))
         if kind == 1:
-            block = b"chassis\0wheel_lf\0"
+            block = b"alpha\0beta_gamma\0"
             block = (block + b"\0" * length)[:length]
         else:
             block = bytes([0x40 + index % 26]) * length
