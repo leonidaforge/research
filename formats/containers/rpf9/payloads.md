@@ -197,6 +197,49 @@ The engine finishes a chunk only when it has consumed exactly the compressed siz
 
 The one-shot decoder credits the full logical size of the chunk after any successful decode. It does not compare the number of bytes produced with that size.
 
+### Encoding-2 framing
+
+Encoding 2 is the dominant nested form. A bounded survey read 48,087 encoding-2 rows: 48,086 rows from 1,268 nested archives and the one top-level row (RPF9-F124 to RPF9-F128). The 1,268 archives are the encoding-2 subset of 1,418 nested archives reached from complete parent sets and from every type-0 row up to 1 MiB in the remaining top-level archives. The 2,933 larger type-0 rows outside those parents were not descended, so the counts below are sample counts.
+
+| Property | Observation |
+| --- | --- |
+| Stored prefix | 16 bytes, all zero, in every row |
+| First chunk | Starts 16 bytes after the payload offset |
+| Chunk methods | zlib or copy (see below) |
+| Decoded header, untransformed rows | at least eight zero bytes, then a pointer-shaped `u64` at `+0x08` |
+
+#### Chunk methods
+
+The untransformed rows hold 70,443 zlib chunks and 178 copy chunks (RPF9-F125). Every copy chunk is the last chunk. Their distribution is 157 rows with two chunks and 21 rows with three. A copy chunk's stored length equals the logical length left after the earlier chunks, which is the copy condition in [the chunk rules](#chunk-layout-and-decoding). The chunk method bits were not read, so the copy reading is **Probable**. No other untransformed chunk started a raw DEFLATE stream and no chunk stayed unclassified.
+
+A further 1,010 chunks belong to 747 type-89 rows that carry the payload transform (RPF9-F128). They were not decoded. All transformed rows in the encoding-2 set are type 89: 484 have one chunk and 263 have two. Their prefix is still 16 zero bytes, and their bodies remain unavailable until algorithm `0x11` is reproduced (RPF9-F117).
+
+#### Decoded header classes
+
+In the 47,340 untransformed rows the decoded stream begins with at least eight zero bytes and a pointer-shaped `u64` at `+0x08` (RPF9-F126). The bytes from `+0x10` split by type:
+
+| Bytes at `+0x10` | Rows | Types |
+| --- | --- | --- |
+| `0DRPz` | 24,863 | 11, 73, 74, 87, 108, 111 |
+| other, mostly zero | 22,476 | 2, 3, 4, 5, 6, 15, 16, 17, 67, 69, 70, 72, 77, 78, 86, 88, 99, 101, 102, 103, 109, 110 |
+| printable `2Fu}2` | 1 | 99 |
+
+No row carried `0DRPz` without the pointer. The eight zero bytes are the decoded header; a run longer than eight is the low zero bytes of the pointer. A reader MUST NOT require a wrapper marker at `+0x10`: it is present for only part of the type set. The resource page model in [resources/pages.md](../../resources/pages.md#system-segment) describes the same header from the resource side.
+
+#### Stored parts and page counts
+
+For 47,322 rows the page map is reachable from the decoded header. The chunk count equals the declared system plus graphics page count in 47,317 rows (RPF9-F127). Four rows have more chunks than pages; they are type 5 and are consistent with a page split at 32 MiB. One row has fewer: two chunks against three declared pages, an incomplete resource. Among the 22,124 multi-chunk rows, 22,119 agree.
+
+The number of stored parts therefore tracks the declared page counts. It is not a separate count and it is not implied by the chunk count alone: a split page adds a chunk without adding a page, and a missing page removes one.
+
+#### Open questions
+
+- The meaning of the 16-byte zero prefix is **Unknown**. It is not the decoded payload and it is not a zlib header.
+- How a reader addresses the second and later parts is established only as chunk order after the prefix. Whether the chunk table alone selects a part, or the page counts participate, is not traced.
+- Why 178 last chunks are stored as copies rather than zlib streams is **Unknown**.
+- The body of the 747 transformed type-89 rows requires algorithm `0x11` and is not decoded (RPF9-F117).
+- Whether other builds, or nested archives outside the sample, contain a different encoding-2 layout is **Unknown**.
+
 ### Stored framing survey
 
 A survey of every row in the 22 top-level archives measured the stored forms described above (RPF9-F120 to RPF9-F123). The manifest row records supply the mode, the chunk encoding and the sizes; the archive bytes supply the framing.
@@ -299,6 +342,6 @@ Recovering payloads by scanning has these limits:
 - Data that is stored uncompressed, as raw DEFLATE or with another method is not found as zlib streams.
 - Entries behind the payload transform are found as zlib streams only if the transform leaves the stored bytes in that form, which is not established.
 - Chunk grouping assumes consecutive streams belong together. A gap or an unrelated stream ends a group.
-- The stored framing survey covers the 22 top-level archives only. Nested archives and rows behind the payload transform were not surveyed for framing.
+- The stored framing survey covers the 22 top-level archives only. The separate encoding-2 framing survey covers the bounded nested sample in [Encoding-2 framing](#encoding-2-framing); rows behind the payload transform were not decoded in either survey.
 
 The limits above apply to recovery only. With a compatible local executable, the authenticated table of contents addresses each entry directly (RPF9-F103), so entries are no longer groups of streams guessed from signatures, and stored, chunked and uncompressed rows can be read. Two limits remain: names stay hashes, because the table stores no names, and rows behind the payload transform are identified but refused. The metadata signature still covers no payload bytes. See [Limits of native TOC extraction](README.md#limits-of-native-toc-extraction).
