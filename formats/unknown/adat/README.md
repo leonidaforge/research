@@ -303,9 +303,10 @@ families. Archive placement is provenance; the predicates are header arithmetic.
 | H5: a `0xA3` entry is a seek position | An entry is a 4-byte `u32`. Every `A3` table starts at 0 and is non-decreasing. `FF02`/`FF21`/`FF61` have one entry per 2,048-byte block plus the initial 0 (14,665/14,665); `FF25` has one entry per page (275/275). The unit and the terminal relation to decoded samples are Unknown | 14,940 paired streams | Probable (position table); Unknown (unit) |
 
 The 227 `0x02` streams have no `0xA3` record and are outside the H5 count. They
-occur in 43 `FF21` rows that also carry `0x0B` streams with `0xA3` tables. The
-40 non-48 kHz `0x76` records occur in 14 rows in two depth-1 archives under
-`audio.rpf`; the evidence index lists each record.
+occur in 43 `FF21` rows that carry only `0x02` streams; the `0x0B` streams and
+their `A3` tables are in the other 240 `FF21` rows. The 40 non-48 kHz `0x76`
+records occur in 14 rows in two depth-1 archives under `audio.rpf`; the evidence
+index lists each record.
 
 ## Decode dependency
 
