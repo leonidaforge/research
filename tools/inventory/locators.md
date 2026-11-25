@@ -46,7 +46,9 @@ All 316 rows of `levels.rpf` row 5 reconstruct `complete` with
 `page_reconstruct.py`: 92 type 2 and 224 type 3. The 92 type-2 rows also report
 `complete` with no issues from `drawable_inspect.py`.
 
-Selected type-2 inner rows of `levels.rpf` row 5:
+Selected type-2 inner rows of `levels.rpf` row 5. Every `Measured` digest was
+recomputed with
+`python tools/inventory/locator_digest.py --archive <WORK>/levels5.rpf --manifest <WORK>/levels5.jsonl --row <INNER_ROW>`.
 
 | Inner row | Type | Stored | System | Graphics | LOD slots | Geometries | Shaders | Stored row SHA-256 | Provenance |
 | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- |
@@ -95,7 +97,10 @@ archive row holds only type-5 rows; all 1,365 type-5 rows in the set reconstruct
 
 Selected type-5 inner rows. `Records` is the `u16` at system `+0x28`;
 `Identifiers` counts printable runs of at least three bytes after the page map;
-`Graphics pointers` counts values with selector 6 in the system segment.
+`Graphics pointers` counts values with selector 6 in the system segment. Every
+`Measured` digest was recomputed with
+`python tools/inventory/locator_digest.py --archive <WORK>/texturesN.rpf --manifest <WORK>/texturesN.jsonl --row <INNER_ROW>`,
+where `N` is the top row and `texturesN.rpf` is the extraction of that top row.
 
 | Archive key | Inner row | Stored | System | Graphics | Pages | Records | Identifiers | Graphics ptrs | Stored row SHA-256 | Provenance |
 | --- | ---: | ---: | ---: | ---: | --- | ---: | ---: | ---: | --- | --- |
