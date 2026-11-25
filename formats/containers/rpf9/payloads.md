@@ -186,7 +186,7 @@ In encoding 3 the padding field, bits 16..19, lies inside the field the compress
 
 #### Chunk layout and decoding
 
-Chunks are stored back to back. Chunk `i` starts at the sum of the stored sizes of chunks `0` to `i-1`, relative to the entry's payload offset. Within a chunk, the compressed bytes come first, then the padding (RPF9-F78).
+Chunks are stored back to back. For encodings 3 and 4, chunk `i` starts at the sum of the stored sizes of chunks `0` to `i-1`, relative to the entry's payload offset. Encoding 2 keeps a 16-byte prefix after the payload offset: its first chunk starts at offset 16, and the chunk stored sizes sum to 16 less than the entry's stored size (RPF9-F119). Within a chunk, the compressed bytes come first, then the padding (RPF9-F78).
 
 | Chunk method | Decoding                                                                                                                                 |
 | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
@@ -210,7 +210,8 @@ The native code checks less than a reader can afford to. A reader that decodes e
   - check that the table and its entries lie inside the value pool;
   - reject encodings other than 2, 3 and 4;
   - compute all offsets in 64 bits;
-  - require the stored sizes to sum to at most the entry's stored size and the logical sizes to sum to its logical size.
+  - for encoding 2, start chunk 0 at stored offset 16; for encodings 3 and 4, start at offset 0;
+  - require the prefix and the stored sizes to fit in the entry's stored size, and the logical sizes to sum to its logical size.
 - For each chunk:
   - with method 3, zlib-inflate exactly the compressed bytes, and require end of stream, a valid checksum and output equal to the logical size;
   - with any other method, require the compressed size to equal the logical size and copy;

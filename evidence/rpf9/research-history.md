@@ -198,6 +198,14 @@ Some earlier notes used "A" and "B" for `hdr[0x04]` and `hdr[0x08]`. Those lette
 
 **Still open.** The block generator's round program is not reproduced, so no chunk decodes and the reader keeps refusing transformed rows (RPF9-F117).
 
+## Encoding-2 chunk prefix
+
+**Old assumption.** Chunks are stored back to back from the entry's payload offset for every encoding (RPF9-F78).
+
+**Correction.** Encoding-2 entries keep 16 bytes before the first chunk. The chunk stored sizes sum to 16 less than the entry's stored size, and the first zlib stream starts at offset 16. One row with two chunks and one with a single chunk show it, and 27 encoding-2 rows from a random sample of nested archives extract to their logical sizes once the prefix is skipped (RPF9-F119). Encodings 3 and 4 still start at offset 0.
+
+**Still open.** What the prefix contains or means, and whether another encoding-2 layout exists.
+
 ## Open
 
 - Meaning of descriptor `+0x08`, and any use of `+0x12`.
@@ -206,6 +214,7 @@ Some earlier notes used "A" and "B" for `hdr[0x04]` and `hdr[0x08]`. Those lette
 - The stored state of the secondary area and of archives other than the inspected ones, and how many bytes of the primary area change. One earlier note called the primary regions "post-transform" from the order of initialization alone. The step 4 pass, the archive scan and the verified signature now confirm the primary area is stored transformed in the inspected archives (RPF9-F28, RPF9-F48, RPF9-F102).
 - Whether a second executable build registers the same keys or binds to the same archives. Cipher algorithms 1, 2 and `0x12`, whether the embedded schedule is the standard AES-256 expansion, and the role of the `B` trailer remain open.
 - The block program of the payload transform's algorithm `0x11`: its round structure, table roles and key use, without which no transformed payload can be decoded (RPF9-F117). The descriptor, the algorithm selection and the key state are established (RPF9-F114 to RPF9-F116). Payload bytes are not covered by the metadata signature.
+- The meaning of the 16-byte stored prefix before encoding-2 chunks (RPF9-F119).
 - Directory structure outside the traced paths, and enumeration in the device layer or above.
 - CityHash32 identity of the fingerprint hash, the concrete startup fingerprint and the contents of `B` sub-block 9 in real archives.
 - Path normalization, the physical device implementation, and the mount prefixes the game uses.
