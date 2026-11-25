@@ -47,7 +47,8 @@ identity, engine compatibility or a decoder implementation.
 ## Common header
 
 All 515 rows share a 48-byte header. Multi-byte fields are little-endian.
-Fields at `+0x24`, `+0x26` and `+0x2C` are observed but not explained.
+The flags word at `+0x24` and the field at `+0x2C` are observed but not
+explained.
 
 | Offset  | Size | Observation                                                                 |
 | ------- | ---- | --------------------------------------------------------------------------- |
