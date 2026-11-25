@@ -1,3 +1,4 @@
+import os
 import struct
 import tempfile
 import unittest
@@ -57,7 +58,7 @@ class VideoOnlyTests(unittest.TestCase):
         self.assertTrue(table["monotonic"])
         self.assertTrue(table["first_is_end_plus_one"])
         self.assertTrue(table["last_is_file_size"])
-        self.assertEqual(table["max_interval"], total - 0x49)
+        self.assertEqual(table["max_interval"], total - 0x48)
         self.assertTrue(table["max_interval_within_largest"])
         self.assertTrue(probe._valid(result))
 
@@ -86,6 +87,86 @@ class AudioTests(unittest.TestCase):
         self.assertEqual(track["size_value"], 145920)
         self.assertEqual(result["frame_table"]["start"], 0x3C)
         self.assertTrue(probe._valid(result))
+
+
+class ValidationTests(unittest.TestCase):
+    def test_flags_are_one_u32_with_alpha_bit(self):
+        total = 0x60
+        body = header(b"KB2j", total - 8, 1, 8, 16, 16, 0, 0)
+        body += struct.pack("<III", 0x41, total, 0)
+        body += bytes(total - len(body))
+        with tempfile.TemporaryDirectory() as directory:
+            result = probe.probe_file(write_payload(directory, "sample.bin", body))
+        self.assertEqual(result["flags"], "0x00100012")
+        self.assertEqual(result["flags_low16"], 18)
+        self.assertEqual(result["flags_high16"], 16)
+        self.assertTrue(result["alpha_bit"])
+
+    def test_frame_offsets_use_bit_zero_as_keyframe(self):
+        frames = 3
+        total = 0x60
+        table_end = 0x30 + 4 * (frames + 1)
+        offsets = [table_end + 1, table_end + 8, (table_end + 8) | 1, total]
+        body = header(b"KB2j", total - 8, frames, 32, 16, 16, 0, 0)
+        body += struct.pack(f"<{len(offsets)}I", *offsets)
+        body += bytes(total - len(body))
+        with tempfile.TemporaryDirectory() as directory:
+            result = probe.probe_file(write_payload(directory, "sample.bin", body))
+        table = result["frame_table"]
+        self.assertTrue(table["first_is_end_plus_one"])
+        self.assertTrue(table["first_masked_is_table_end"])
+        self.assertTrue(table["masked_monotonic"])
+        self.assertTrue(table["last_is_file_size"])
+        self.assertTrue(table["last_is_even"])
+        self.assertTrue(result["validation"]["keyframe_entries"] >= 1)
+
+    def test_audio_record_layout(self):
+        frames = 2
+        total = 0x70
+        table_end = 0x48
+        offsets = [table_end + 1, 0x60, total]
+        body = header(b"KB2n", total - 8, frames, 32, 32, 32, 1, 0x87E90500)
+        body += struct.pack("<III", 145920, 0x7000BB80, 0)
+        body += struct.pack(f"<{len(offsets)}I", *offsets)
+        body += struct.pack("<II", 20, 145920) + bytes(16)
+        body += struct.pack("<II", 12, 7680) + bytes(8)
+        self.assertEqual(len(body), total)
+        with tempfile.TemporaryDirectory() as directory:
+            result = probe.probe_file(
+                write_payload(directory, "sample.bin", body), validate_frames=True
+            )
+        audio = result["audio_validation"]
+        self.assertEqual(audio["frames"], 2)
+        self.assertEqual(audio["packets"], 2)
+        self.assertEqual(audio["zero_packets"], 0)
+        self.assertEqual(audio["max_packet"], 20)
+        self.assertEqual(audio["max_decoded"], 145920)
+        self.assertEqual(audio["array1"], 145920)
+        self.assertTrue(audio["array1_is_max_decoded"])
+        self.assertEqual(audio["violations"], [])
+
+    def test_audio_record_past_frame_is_reported(self):
+        frames = 1
+        total = 0x58
+        table_end = 0x44
+        offsets = [table_end + 1, total]
+        body = header(b"KB2n", total - 8, frames, 32, 32, 32, 1, 0x87E90500)
+        body += struct.pack("<III", 145920, 0x7000BB80, 0)
+        body += struct.pack(f"<{len(offsets)}I", *offsets)
+        body += struct.pack("<II", 64, 145920) + bytes(total - len(body) - 8)
+        with tempfile.TemporaryDirectory() as directory:
+            result = probe.probe_file(
+                write_payload(directory, "sample.bin", body), validate_frames=True
+            )
+        kinds = {item["kind"] for item in result["audio_validation"]["violations"]}
+        self.assertIn("record_past_frame", kinds)
+
+    def test_atomic_output(self):
+        with tempfile.TemporaryDirectory() as directory:
+            target = os.path.join(directory, "report.json")
+            probe._write_atomic(target, "content\n")
+            with open(target, encoding="utf-8") as handle:
+                self.assertEqual(handle.read(), "content\n")
 
 
 class RejectionTests(unittest.TestCase):
