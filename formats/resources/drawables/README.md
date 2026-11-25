@@ -118,7 +118,8 @@ of model pointers. Each model points to an array of geometry pointers.
 
 The model `+0x18` pointer targets an array of eight-`f32` records. Each
 record is `minimum.xyz`, `minimum.x`, `maximum.xyz`, `maximum.x`; the fourth
-word of each triple repeats its first word in all 9,579 records read. The array
+word of each triple repeats its first word in the records read. The census
+reports `aabb_records`, `extra_min_equal` and `extra_max_equal`. The array
 holds the aggregate record first, then one record per geometry in
 geometry-array order. A model with one geometry stores only the aggregate
 record. The aggregate equals the union of the per-geometry records within
