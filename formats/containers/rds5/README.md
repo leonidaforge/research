@@ -45,6 +45,7 @@ resource kind, a tile mode and a locator whose low 21 bits are a block's first
 | Document | Content |
 |---|---|
 | [specification.md](specification.md) | Header, records, storage classes, virtual space, ETPF descriptors and keys, reader rules |
+| [textures.md](textures.md) | Candidate texture units, mip checks, rejected candidates and limits |
 
 Evidence: [evidence/rds5/INDEX.md](../../../evidence/rds5/INDEX.md). Corrections and
 transfer history: [research-history.md](../../../evidence/rds5/research-history.md).
@@ -100,7 +101,7 @@ decoded.
 - `.ttpf` and the observed directory names are naming conventions, not evidence
   of the content model.
 - A format id is not a codec name. The sample shows 16 bytes per 4 x 4 tile for
-  one format id, but that does not identify the block encoding.
+  formats 77, 83, 98 and 99, but that does not identify the block encoding.
 
 ## Limits
 
