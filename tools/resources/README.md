@@ -71,12 +71,12 @@ Issue codes: `payload_error`, `not_a_resource`, `map_in_header`, `map_outside`, 
 ## Tests
 
 ```text
-python -m unittest discover -s tools/resources/tests
+python -m unittest discover -s tools/resources -p "test_*.py"
 ```
 
 The 26 `rage_resource` tests build every input with `zlib` and `struct`. They cover a valid one-page-per-segment resource, a map in a later system page, a split 32 MiB page, a page of exactly 32 MiB, missing and extra pages, a page-size violation, an outside pointer, and the negative cases: truncated stream, zero system-page count, map outside the system data, nonzero slot, nonzero prefix, nonzero padding, stream and total caps, and data without a resource header.
 
-The suite also holds 18 `page_reconstruct` tests and 8 `root_tables` tests. All 52 tests pass with the standard library only.
+The suite also holds 18 `page_reconstruct` tests, 8 `root_tables` tests and 21 `texture_dictionary` tests. All 73 tests pass with the standard library only.
 
 ## Limits
 
@@ -125,3 +125,36 @@ root, issues = root_tables.parse_root(system_bytes, graphics_len)
 - `parse_root` requires the zero first qword and the `0DRP` tag, resolves every nonzero root pointer inside the system segment, and returns the four `u16` fields.
 - `walk_records` reads 16-byte records: a 4-byte value at `+0`, a 4-byte value at `+4` and a pointer at `+8`. The `+4` value is used as a length in the boundary check; its meaning is not established. The walk stops at the first record that does not fit. A target outside its selected segment is reported as `record_outside`, not resized.
 - The module has no CLI and does not invoke the application. The tests cover a valid header, an out-of-bounds record table, a target outside its segment, a huge count, an out-of-bounds root pointer, a missing tag and a short buffer.
+
+## texture_dictionary
+
+Reads a texture dictionary: the hash and value arrays, the 0x70-byte records
+and the allocation arithmetic.
+
+```text
+python texture_dictionary.py --file <FILE> --offset <ENTRY> --length <STORED> [--logical-size BYTES] [--check-names] [--json]
+python texture_dictionary.py --file <DECODED> --system-length <BYTES> [--check-names] [--json]
+```
+
+- The first form reconstructs a stored row with `page_reconstruct`, then parses
+  the two segments.
+- The second form reads an already decoded resource whose system length is
+  known.
+- `parse_dictionary(system, graphics_length)` is the library entry point. It
+  raises `TextureDictionaryError` for a short root, a nonzero first qword, a
+  missing page-map pointer, a count above the 65,536-record cap, or an array
+  that leaves the buffer. Per-record problems are issues.
+- The report gives the hash count, value count and record count, every record's
+  name hash, width, height, format id, mip count, allocation offset, allocation
+  size and allocation extent, plus the allocated total, the in-bounds test and
+  the sum test.
+- `--check-names` reports only how many records' hashes equal the one-at-a-time
+  hash of their ASCII name; the text is never printed.
+- The tool does not decode pixels. A format id selects an allocation unit from
+  the observed table; it is not interpreted as a channel layout.
+
+The tests cover a valid two-record dictionary, the empty form, count mismatch,
+unsorted and duplicate hashes, record pointers and records outside the segment,
+allocation outside, overrun, duplicate starts and sum, an unknown format, zero
+dimensions and mip bounds, sparse record tables, the refusal cases, the name
+check, a stored row through `page_reconstruct`, and the JSON CLI.

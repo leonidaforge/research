@@ -60,6 +60,38 @@ The tiling sample is every type 73 row with a declared graphics page and at leas
 | 1773 | 15,467,376  | `73F614269948D6AA654137C4B70B82F9293CEB236E2273B7CFAAD182460F3D29` |
 | 2045 | 9,790,624   | `272FBE26DAEDC833E94B493A302931775D3A0746D323A7544AAFFB670555BED1` |
 
+### Texture dictionary sample
+
+The texture dictionary sample is every type-5 row of the 25 nested archives below. Each archive is a type-0 row of `<GAME_ROOT>/textures.rpf` or `<GAME_ROOT>/data.rpf`. The digests are of the stored top-level row bytes, which are the nested archive. Inner rows are identified by their row index within the nested archive and by their payload offset, stored size and logical size. The sample holds 1,440 dictionaries and 5,484 records; the selection rule is the local CLI type ID 5, and no other type-5 row was found in the scanned archives.
+
+| Top-level archive | Row | Stored size | Type-5 rows | SHA-256                                                            |
+| ----------------- | --: | ----------: | ----------: | ------------------------------------------------------------------ |
+| `textures.rpf`    | 0   |     784,176 |           1 | `264DC0118E50729EB4348516075FFAFE06B9BF0DDCA1604244153B27231C16EF` |
+| `textures.rpf`    | 1   |       4,720 |           1 | `FBE052831C9E2734CCF03C3D30083528988D2766F36E9A7E29C7FA7C293056E8` |
+| `textures.rpf`    | 2   |     274,720 |           1 | `79E374AB174EC4BF967661F970BCFD698F998F101955993B5FBDB1CE17C07236` |
+| `textures.rpf`    | 3   |   1,159,648 |           5 | `7D2F107656111723F0ABC973E00A4B3B958386D14A2A258D06836C11681A229D` |
+| `textures.rpf`    | 4   |     412,848 |           1 | `CDD5284C255D8919A061CC6B63FC7F14C3DDE1BA3FFD451DED2A5E0A69153B37` |
+| `textures.rpf`    | 5   |      28,736 |           1 | `9FB2811D9D7A3EC090B41A231007F5F7D3CB073BA0AF2AA949EC05BA4B14D24D` |
+| `textures.rpf`    | 6   |       6,592 |           1 | `3B61AE08FE0791FBB930D55A731DDCB067D5E5B8991A0D17646346F4E084904E` |
+| `textures.rpf`    | 7   |  13,327,488 |           6 | `D2DFC515461884BE1E45815DDFDD62E15BD8E688F3649442156DE51959060E58` |
+| `textures.rpf`    | 8   |  19,154,192 |           1 | `033840AFA71424F56BCDE82EBDD13D6E63C916F9B4785A165520A9EDF74F9513` |
+| `textures.rpf`    | 9   |  84,967,808 |           9 | `7F6311F368B2E3AE4C65440C97530B1DA84AA335D7D246B8503A092BF207B3E9` |
+| `textures.rpf`    | 10  |      57,472 |           3 | `7E99A2C5D61BC8037E3F6692664D7B19B668989ED79C3A1A6923F9C5BD4116C1` |
+| `textures.rpf`    | 11  |  33,753,360 |           9 | `0AF933A3B5E5322D3617B9B67F28BFDFB298B0752D575D4C166DBD7E43C007C3` |
+| `textures.rpf`    | 12  |   2,728,720 |           1 | `31CFE051783D8B87687FC832A5214B973F0F438DED46582B9849986D01BAB3E6` |
+| `textures.rpf`    | 13  |   2,626,064 |           1 | `ACD879C622651C0586E439073EBD734F74EA56185546CDBB1F21F9D8D2E02CAA` |
+| `textures.rpf`    | 14  |   3,280,944 |           1 | `EB24B2D2C27BF49429F0F2141080C78D6E0CEEFEA585C37A54AB1B2FEE9ABA6D` |
+| `textures.rpf`    | 15  |   1,575,952 |           1 | `63EEF013AF43A456B44E09761AB59BB496D2BF400E7C2435765E9A3C5E8FC0C3` |
+| `textures.rpf`    | 16  |   4,159,856 |           3 | `05CDE8C940297889AFC9FC12A51BA79F004AE9319D0CBD330A97E162ACEF9969` |
+| `textures.rpf`    | 17  |   2,249,840 |           1 | `D164F9A77C6EE0FB24E807C0D5E350E9363188E4F9D3247C1DD513674E96EAEB` |
+| `textures.rpf`    | 18  |  20,926,720 |       1,315 | `DA78B9BB7944815BFA3675C9EE57C2FBF02AC6BB15FCE66FFD123983851F930A` |
+| `textures.rpf`    | 19  |      90,960 |           3 | `1C32832BF4227C0735C9BC6CD11F49F95E940B16C0724D6C0F16741179FD2E35` |
+| `data.rpf`        | 1   |   1,110,576 |           3 | `DDE85B0D4302E5E7E9E43439289CC1BB0A1AB6CA4EE17284969368AF86B862C9` |
+| `data.rpf`        | 3   |     757,888 |           3 | `60C85DADC14BD6620A3D6F15A8A619B7BAFF77A4EF67A78D73E7ED08DB1611EF` |
+| `data.rpf`        | 19  |   2,082,992 |          29 | `E22F1C69CE68F4DA32B039D6702DB238ECAC6B8607F90C332020FB5165FD9D2D` |
+| `data.rpf`        | 33  |  98,215,344 |          38 | `F60C836DB9EA4596C0BB7D843E744A81DD38AF53BC4AA43CAD168C26DB99E3A9` |
+| `data.rpf`        | 39  |   3,153,200 |           2 | `E6C5A55322BEF1EC013A9E75527C4DA4684305CF0AC5F1AC50D3C3D675B78E0D` |
+
 ## Evidence types
 
 Types follow [RESEARCH-POLICY.md](../../RESEARCH-POLICY.md#evidence-types). Each finding records its method and the type that method maps to.
@@ -70,7 +102,7 @@ Types follow [RESEARCH-POLICY.md](../../RESEARCH-POLICY.md#evidence-types). Each
 | `CROSS_SAMPLE` | The same property checked across the sample locators. Each finding states its scope                                      |
 | `SYNTHETIC`    | The tools' fixtures. They validate the tools, not native behavior, and support no finding in this index                  |
 
-"Payload data" and "Archive data" are `BINARY`. A claim checked across several archives or resources is also `CROSS_SAMPLE`. The parser's 26 tests, `page_reconstruct`'s 18 tests and `root_tables`' 8 tests are `SYNTHETIC` and are recorded under [tools/resources](../../tools/resources/README.md), not as evidence for the findings.
+"Payload data" and "Archive data" are `BINARY`. A claim checked across several archives or resources is also `CROSS_SAMPLE`. The parser's 26 tests, `page_reconstruct`'s 18 tests, `root_tables`' 8 tests and `texture_dictionary`'s 21 tests are `SYNTHETIC` and are recorded under [tools/resources](../../tools/resources/README.md), not as evidence for the findings.
 
 ## Findings
 
@@ -108,10 +140,15 @@ Types follow [RESEARCH-POLICY.md](../../RESEARCH-POLICY.md#evidence-types). Each
 | RES-F33 | A 16-byte record whose `+8` pointer selects a segment delimits a byte range inside that segment. A page is not a record and not a stream; one page can contain several such ranges, and a range can equal the page when the page contains one range | Payload bytes (`BINARY`) | Confirmed (samples) | Type 73 mainly; the type 11 and type 74 samples are too few to generalise |
 | RES-F34 | Record ranges are not page-aligned. In the type 74 sample a system range spans `0xBCB0..0x146D0`, across the boundary between its two system pages. The record table cannot be used to derive page boundaries | Payload bytes (`BINARY`) | Confirmed (sample) | One type 74 resource |
 | RES-F35 | Across 4,647 resources from 12 instance-placement nested archives, the corrected rule reconstructs all 4,647 as complete: 9,041 zlib pages and 496 raw pages, no packed page and no missing page. The CLI reports `partial` for many of the same rows | Payload bytes (`BINARY`, `CROSS_SAMPLE`); reconstruction tool (`SYNTHETIC` for its tests) | Confirmed (sample) | The completion test is the tool's page-count arithmetic, not an independent engine check. The raw-page rows are listed above |
+| RES-F36 | A texture dictionary is recognised by arithmetic in the decoded system segment: a zero first qword, a system page-map pointer at `+0x08`, a system hash-array pointer at `+0x20` with `u16` count and capacity at `+0x28`, a system value-array pointer at `+0x30` with `u16` count and capacity at `+0x38`, equal counts, an ascending duplicate-free `u32` hash array, and a value array whose entries are system pointers to 0x70-byte records. All 1,431 non-empty dictionaries pass; the 9 empty dictionaries have zero pointers and zero counts | Payload bytes (`BINARY`, `CROSS_SAMPLE`) | Confirmed (positions and counts, sample); Probable (recognition as a general rule) | 1,440 type-5 resources from 25 nested archives of two top-level archives. No engine code that builds or validates a dictionary was traced |
+| RES-F37 | A texture record is 0x70 bytes: a `u32` allocation unit count at `+0x08`, a graphics allocation pointer at `+0x18`, a system name pointer at `+0x30` with ASCII text at pointer `+8`, `u16` width at `+0x38`, `u16` height at `+0x3A`, a format id at `+0x3F`, and a mip word at `+0x42` whose low 15 bits are the mip count. Width, height, format id and mip count are supported by allocation arithmetic, not by pixel decoding | Payload bytes (`BINARY`, `CROSS_SAMPLE`); arithmetic (`CROSS_SAMPLE`) | Confirmed (positions, 5,484 records); Probable (width, height, format id, mips) | One build. The meanings of the other record fields are **Unknown**. The format id is not decoded to pixels |
+| RES-F38 | For every record, `allocation_units × unit_bytes(format id)` equals the stored allocation size, stays inside the graphics segment, and is at most the gap to the next allocation. The 22 observed format ids each give one consistent unit; the units take the values 1, 2, 4, 8 and 16 bytes. The sizes sum to at most the graphics size in all 1,431 non-empty resources (equality in 1,375, strict inequality in 56); the 9 empty dictionaries have no graphics segment. The 4 KiB-aligned mip-chain size computed from width, height, format unit and mip count is at most the stored size in 5,484 of 5,484 records and equal in 4,901; the other 583 are larger | Payload bytes (`BINARY`, `CROSS_SAMPLE`); allocation arithmetic (`CROSS_SAMPLE`) | Confirmed (bounds, inequality, sample counts); Probable (format id selects the unit) | No allocation overrun or duplicate start was observed. The 583 larger allocations are not explained; padding or additional surfaces are candidates. The unit table is not a pixel decoder |
+| RES-F39 | Each stored 32-bit name hash equals the one-at-a-time (`joaat`) hash of the ASCII text reached from the record's `+0x30` pointer with the text at pointer `+8`; 5,484 of 5,484 records match. The text and the hashes are payload data and are not published | Payload bytes (`BINARY`, `CROSS_SAMPLE`); hash comparison (`CROSS_SAMPLE`) | Confirmed (sample) | One build. The relation is a key namespace, not a recovered filename. A 32-bit match is weaker than a 64-bit one |
+| RES-F40 | The sample holds 1,440 type-5 dictionaries and 5,484 records: 1 to 1,198 records per dictionary, 94 distinct dimension pairs from 4×4 to 4,096×1,024, 22 format ids and 1 to 12 mip levels. Nine dictionaries are empty (96-byte system segment, one system page, no graphics page). One 1,198-record dictionary has a 0x20-byte record-table gap at a `0x10000` boundary, so the table is not required to be contiguous; the 0x70 record width holds | Payload bytes (`BINARY`, `CROSS_SAMPLE`) | Confirmed (sample counts) | A census of the type-5 rows in the 25 nested archives, not of the game. Other archives and builds were not scanned |
 
 ### Not carried
 
-- **RES-F07** read the primary sample as a probable texture dictionary. The name meaning and pixel format were not established, so the reading is speculative and was dropped.
+- **RES-F07** read the primary sample as a probable texture dictionary. The name meaning and pixel format were not established, so the reading is speculative and was dropped. The dictionary grammar and its allocation arithmetic are now established as RES-F36–RES-F40; the pixel format remains undecoded.
 - **RES-F08** stated that one type 5 row carries a RAGE resource payload with two streams. It is folded into RES-F01 and is not kept as a separate claim.
 - **RES-F22** is withdrawn; the sample set behind the earlier pointer totals is not retained.
 
@@ -125,6 +162,10 @@ Types follow [RESEARCH-POLICY.md](../../RESEARCH-POLICY.md#evidence-types). Each
 - **No resource entry lacks the 16-byte zero header.** Rechecked rows agree.
 - **No rechecked resource was stored with compression mode 1 or without a chunk table.**
 - **Pointer-like values outside a segment occur.** Their number, not their position, is what makes them visible.
+- **No texture dictionary had unequal hash and value counts.** 1,431 non-empty dictionaries agree; 9 empty dictionaries have both counts zero.
+- **No texture-dictionary hash array was unsorted or repeated a value.** 1,431 of 1,431 agree.
+- **No texture allocation left the graphics segment, overlapped another start or exceeded its gap.** 5,484 of 5,484 records agree.
+- **No texture record had a zero dimension, a zero mip count or a mip count above the dimension limit.** 5,484 of 5,484 agree.
 - **A wider pointer base was not established.** Values with a pointer-shaped low half and a nonzero upper half were not counted as pointers; whether any is one is unknown.
 - **No engine allocation or validation path was traced.** Page allocation, runtime page slots and engine-side pointer validation remain **Unknown**.
 
@@ -140,7 +181,9 @@ lforge archive resource <WORK>/tile.rpf 0x2EEB010 --json --no-cache
 python tools/resources/rage_resource.py payload --file <WORK>/tex-row1.rpf --offset 0x1000 --length 576 --json
 python tools/resources/rage_resource.py decoded --file <DECODED> --system-length 1888 --json
 python tools/resources/page_reconstruct.py --file <WORK>/tile.rpf --offset 0x2EEB000 --length 47520 --logical-size 74304 --json
-python -m unittest discover -s tools/resources/tests
+lforge archive extract <GAME_ROOT>/textures.rpf --row 18 --output <WORK>/txd18.rpf --executable <EXECUTABLE>
+python tools/resources/texture_dictionary.py --file <WORK>/txd18.rpf --offset 0xE5C000 --length 26096 --logical-size 33168 --json
+python -m unittest discover -s tools/resources -p "test_*.py"
 ```
 
 The byte-level results come from the published parser and `page_reconstruct`, which do not use application code. The local CLI supplied the authenticated metadata and was used as a cross-check: the rechecked rows matched on page-map offset, page counts, segment sizes, page sizes, stream counts and pointer counts. That agreement is consistency, not independent evidence for the format.
@@ -156,6 +199,7 @@ The byte-level results come from the published parser and `page_reconstruct`, wh
 - The ASCII names below the page map are payload text. They are not included in this repository; only their count and record stride are recorded.
 - A raw stored page was observed only in type 6 rows. Its identity as a page is supported by the page count, the logical size and the size pattern, not by engine code.
 - The 0DRP root header and the records behind `+0x38` were read on three resources. The tiling population is type 73 only.
+- The texture dictionary sample is a census of the type-5 rows in 25 nested archives of two top-level archives. The name text and hashes are payload data and are not published. Width, height, format id and mip count are supported by allocation arithmetic, not by pixel decoding.
 - Archives other than `textures.rpf`, `data.rpf` and `levels.rpf` were not scanned for resources. `common.rpf` and `script.rpf` reported none; `shaders.rpf` was not scanned for resources.
 
 ## Next experiments
