@@ -251,15 +251,24 @@ first entry of every observed declaration table, before any other attribute.
 The eight bytes carry four 16-bit lanes. They are the only stored values with a
 per-vertex three-lane structure, and no other attribute has enough lanes.
 
-No dequantization was established. In A-2 (four vertices, a flat quad) the two
-varying lanes span 288 and 256 raw units, while the stored AABB spans are equal
-in the two long axes (`0.996`). A single per-axis linear map therefore cannot
-map both lanes to that AABB, and no field among the vertex-buffer record, the
-layout, or the decoded `0x80` prefix carries a per-axis scale and origin pair
-that reproduces the AABB independently. Fitting a scale to the AABB would be
-circular, so the positions are **not accepted** and no point cloud is
-published. The layout, declaration and AABB are structural; the position
-semantics remain **Unknown**.
+No dequantization was established. These alternatives were checked and rejected:
+
+- two `f32` lanes: NaN in A-2 for three of four vertices;
+- four `f16` lanes: non-finite values;
+- a uniform step of `1/256`: A-2's long axes would span `1.125` and `1.0`
+  world units, and the stored AABB spans are both `0.996`;
+- the prefix `4.0` at `+0x7C` as a numerator with `2^k`, `k = 8..15`: no `k`
+  makes both long axes agree within `1e-3`;
+- the `0x70` f16 halves as per-axis steps: they do not reproduce the AABB;
+- a per-axis affine fitted to the stored AABB: circular, not accepted.
+
+In A-2 the two varying lanes span 288 and 256 raw units, while the stored AABB
+spans are equal in the two long axes (`0.996`). A single per-axis linear map
+therefore cannot map both lanes to that AABB, and no field among the
+vertex-buffer record, the layout, or the decoded `0x80` prefix carries a
+per-axis scale and origin pair that reproduces the AABB independently. The
+positions are **not accepted** and no point cloud is published. The layout,
+declaration and AABB are structural; the position semantics remain **Unknown**.
 
 Discriminating experiment: find a vertex buffer whose declaration byte is a
 float format and read positions directly, or trace the engine decoder for
