@@ -183,6 +183,13 @@ Codec byte counts over the 768 rows:
 The 15,038 `0x0B` descriptors are 14,665 `0x76` records plus 373 `0x48`
 entries. The codec byte is not assigned an identity.
 
+| Candidate | Streams | Disposition |
+| --- | ---: | --- |
+| Codec byte `0x0B` | 14,940 | Framing validated; decode not run (no decoder) |
+| Codec byte `0x02` | 227 | Size relation validated; decode not run (no decoder) |
+| Codec byte `0x05` | 0 | `no-such-codec-byte` |
+| Second named codec hypothesis | 0 | `selector-undefined` |
+
 ## Packet framing
 
 The `0x55` records carry the encoded stream. For every `0x0B` `0x55` record,
@@ -230,8 +237,7 @@ framing rule.
 
 Codec byte `0x02` does not use the length framing. Its `0x55` record size is
 `4 * declared` in 227/227 records, where `declared` is the `0x76` `u32` at
-`+0x00`. The bytes are four-byte values consistent with a float range; no
-decoder was run.
+`+0x00`. The sample type is not established; no decoder was run.
 
 ## FF02 count formula
 
