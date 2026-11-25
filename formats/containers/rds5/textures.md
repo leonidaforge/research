@@ -79,11 +79,14 @@ consequence in this iteration.
 | 77 | B16 | 16 per 4 x 4 tile | total fits | single-plane BC4 candidate mip check passes on a few tile-mode 2 and 3 samples |
 | 80 | B8 | 8 per 4 x 4 tile | total fits | single-plane BC4 candidate mip check passes on a private sample |
 | 83 | B16 | 16 per 4 x 4 tile | total fits | two-plane BC4 candidate mip check passes on a private sample |
-| 98, 99 | B16 | 16 per 4 x 4 tile | total fits; degenerate with 1 byte per texel on dimensions divisible by 4 | none; the earlier layout rejection is withdrawn |
+| 98 | B16 | 16 per 4 x 4 tile | total fits; degenerate with 1 byte per texel on dimensions divisible by 4 | linear 8-bit rejected at tile mode 3 by the F42 mip comparison |
+| 99 | B16 | 16 per 4 x 4 tile | total fits; degenerate with 1 byte per texel on dimensions divisible by 4 | **none**; no equivalent tile-mode-3 linear test was run |
 
 For formats 98 and 99 the total alone cannot separate 16 bytes per 4 x 4 tile
 from 1 byte per texel: with dimensions divisible by 4 both give the same level
-sizes. Neither reading is selected here.
+sizes. The size fit therefore selects neither reading. At format 98 tile mode 3
+the separate F42 mip comparison rejects the linear reading; no equivalent test
+exists for format 99.
 
 ## Mip-check population
 
