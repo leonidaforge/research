@@ -186,3 +186,35 @@ block from virtual `0x1000` to `0x81000`, 524,288 inflated bytes, and
 the element order are not established. A pixel attempt under a documented 16-byte
 4 x 4 endpoint layout is recorded as **Speculative**; no lower mip exists, so the
 box-downsample check is not applicable.
+
+## 2026-11-25: iteration 11 texture candidates and corrections
+
+The texture candidate document and `tools/rds5/textures.py` added size fits,
+block-aligned mip checks and candidate decoders. Several readings published in
+this iteration were then narrowed or withdrawn. They are recorded here rather
+than silently dropped.
+
+- **Fitted unit table.** The first version of the unit table marked formats 54,
+  71 and 72 as Confirmed and spoke of an "established" unit. That was a fit
+  presented as an established identity. The table now records only the unit
+  sizes that reproduce the observed allocation extents, no format id is marked
+  Confirmed, and each format states whether an independent consequence exists.
+  Formats 28, 54 and 99 have none; format 98 has the F42 result below.
+- **Block-first-byte layout argument.** The claim that linear 1 byte per texel
+  was rejected by block-first-byte statistics is withdrawn (RDS5-F41). The
+  comparison of a stride-16 subsample with all bytes has no within-block control,
+  and a lowest-set-bit histogram of byte values is tautological under either
+  layout. The tool still prints the statistics as description only.
+- **Linear-layout scope.** The surviving F42 mip comparison rejects linear 8-bit
+  for format 98 at tile mode 3 only. Linear is untested in every other class.
+  The earlier text treated linear as rejected globally; that was too broad.
+- **Tile-mode coverage.** The earlier text said formats 71, 72, 77, 80 and 83
+  were tested at tile modes 1, 2 and 3. The measured coverage is 71 at 1, 2, 3;
+  72 at 1, 2, 3; 77 at 2, 3; 80 at 1, 2, 3; 83 at 2, 3. The overstated coverage
+  is corrected in the texture document and in RDS5-F40.
+
+The container README's note that 16 bytes per 4 x 4 tile applied to one format
+id was also corrected: the fits cover formats 77, 83, 98 and 99. The control
+sample's dimensions are recorded as Probable because the arrangement inside a
+16-byte block is unknown, and mip selection is not established for its tile
+mode 0.
