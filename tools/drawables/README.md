@@ -164,8 +164,8 @@ the masked count B, and the key counts. Negative cases include a truncated
 header, a nonzero header zero word, an out-of-range geometry pointer, an
 out-of-range graphics pointer, a declared buffer-size mismatch, a truncated
 index buffer, a declaration entry that names no layout attribute and an AABB
-union mismatch. A separate test covers the census aggregation and manifest
-validation. They do not use game files.
+union mismatch. Separate tests cover the AABB and material census aggregations
+and manifest validation. They do not use game files.
 
 ## Limits
 
