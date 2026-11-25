@@ -32,7 +32,7 @@ python tools/psin/pmap_heldout.py --samples <EXTRACTED_PAYLOAD_DIRECTORY> --json
 python tools/psin/pmap_heldout.py --samples <DIRECTORY> --output heldout-record.json
 ```
 
-It applies the no-trailing-pad and pad-after-last rules, records the 52 aligned labels, the ten unaligned labels and a seeded random reproduction split. The 52/10 split is a designed contrast, not a blind hold-out. `heldout-record.json` is the committed record for the 62-payload population. The tool needs the extracted payloads; it has no default path.
+It applies the no-trailing-pad and pad-after-last rules, records the 52 aligned labels, the ten unaligned labels and a seeded random reproduction split. The 52/10 split is a designed contrast, not a blind hold-out. `heldout-record.json` is the committed record for the 62-payload population. The tool needs the extracted payloads; it has no default path and rejects an output path inside the sample directory.
 
 ## Value and block probe
 
@@ -43,7 +43,18 @@ python tools/psin/value_probe.py --samples <DIRECTORY> --json
 python tools/psin/value_probe.py --samples <DIRECTORY> --summary-only --output value-record.json
 ```
 
-`value-record.json` is the committed record for the 62 `PMAP` payloads: 1,170 values and 521 blocks. The probe rejects an output path equal to the sample directory and writes atomically.
+`value-record.json` is the committed record for the 62 `PMAP` payloads: 1,170 values and 521 blocks. The probe rejects an output path inside the sample directory and writes atomically.
+
+## Body and name probe
+
+`body_probe.py` re-runs the `LSCH`/`LENM` body counts and the `PMAP` name and `PSCH` id summaries:
+
+```sh
+python tools/psin/body_probe.py --samples <DIRECTORY> --json
+python tools/psin/body_probe.py --samples <DIRECTORY> --summary-only --output body-record.json
+```
+
+`body-record.json` records 483 `LSCH` payloads, 10,537 marker records, 229 nonempty `LENM` bodies (54 with no extra, 175 with extra), 41 name blocks, 8,342 names (1,385 distinct) and 711 `PSCH` ids unused by any block. The probe rejects an output path inside the sample directory.
 
 ## Tests
 

@@ -169,7 +169,7 @@ Block ids are not uniform.
 | Small (below `0x100`) | 1, 2, 6, 7, 8, 12 | 62 | Do not occur in the `PSCH` id table |
 | Other | all other observed ids | 459 | Every other id occurs in the `PSCH` id table (62 of 62 payloads) |
 
-Id 1 marks a name block in 41 payloads. Its bytes are NUL-terminated printable ASCII in 41 of 41: 8,342 name strings, 1,385 distinct, with repeats across payloads. The names are data, not format semantics. The other block bodies are opaque.
+Id 1 marks a name block in 41 payloads. Its bytes are NUL-terminated printable ASCII in 41 of 41: 8,342 name strings, 1,385 distinct, with repeats across payloads. `tools/psin/body-record.json` records these counts. The names are data, not format semantics. The other block bodies are opaque.
 
 ### `PSCH` section
 
@@ -184,11 +184,11 @@ The `PSCH` body holds a count and a table of `(id, offset)` pairs, followed by o
 
 The table tiles the body exactly in 62 of 62 payloads: the first offset is the table end plus 8, offsets increase, and the last value ends at the body length. The value bytes are opaque. Their internal layout is not decoded.
 
-The `PSCH` id set contains every other `PMAP` block id in 62 of 62 payloads. The reverse does not hold: `PSCH` carries ids that no `PMAP` block uses.
+The `PSCH` id set contains every other `PMAP` block id in 62 of 62 payloads. The reverse does not hold: `tools/psin/body-record.json` records 711 `PSCH` ids that no `PMAP` block uses across the 62 payloads.
 
 ### Negative tests for the values
 
-Fixed record widths 1 to 64 do not consume all 1,170 `PSCH` values: the value common divisors are 1, 2 and 4, which are byte granularities, not records. The classifier records this as `value_common_divisors_1_to_64` in `value-record.json`. No zlib, gzip, bzip2, xz, LZMA, zstd or LZ4 signature occurs at a `PSCH` value or a block start. No value or block yields a complete stream under raw deflate, zlib, gzip, bzip2, LZMA or LZMA-alone. Permissive calls can return partial output; those are not accepted as streams. Unlike the earlier whole-area test, this test isolates each value and block and checks end-of-stream. The value and block internals remain **Unknown**.
+Fixed record widths 1 to 64 do not consume all 1,170 `PSCH` values: the value common divisors are 1, 2 and 4, which are byte granularities, not records. The classifier records this as `value_common_divisors_1_to_64` in `value-record.json`. No zlib, gzip, bzip2, xz, LZMA, zstd or LZ4 signature occurs at a `PSCH` value or a block start. The zstd and LZ4 checks are signature checks only; no zstd or LZ4 decoder was run. No value or block yields a complete stream under raw deflate, zlib, gzip, bzip2, LZMA or LZMA-alone. Permissive calls can return partial output; those are not accepted as streams. Unlike the earlier whole-area test, this test isolates each value and block and checks end-of-stream. The value and block internals remain **Unknown**.
 
 ## `LSCH` and `LENM` section bodies
 
@@ -201,7 +201,7 @@ The body length is a multiple of 16 in 483 of 483 top-level `LSCH` payloads.
 | Body offset | Type | Observation |
 | ----------- | ---- | ----------- |
 | `+0x00` | 8 bytes | Uninterpreted |
-| `+0x08` | `u32` little-endian | Observed 512 (441), 768 (35), 1024 (7). Meaning **Unknown** |
+| `+0x08` | `u32` little-endian | Observed 768 (441), 512 (35), 1024 (7). Meaning **Unknown** |
 | `+0x0C` | 4 bytes | Zero in 483 of 483 |
 | `+0x10` | `M * 32` | Marker records |
 | after the records | bytes | Tail, a multiple of 16 bytes |
@@ -233,7 +233,7 @@ The body is empty in 254 top-level payloads. The 229 nonempty bodies share a `0x
 
 The header is `0x20` bytes, and `length - 0x20` is a multiple of 8 in 229 of 229 nonempty payloads.
 
-`N` does not delimit the body. For `N >= 1`, the chain is `16 * N - 8` bytes (`N` hashes and `N - 1` index words), so `length == 0x20 + (16N - 8) + extra == 0x18 + 16N + extra`. The `extra` term is 0 in 54 of 229 bodies and a positive multiple of 8 in the other 175. The chain and the extra region are **Unknown**; an 8-byte table is possible but not decoded.
+`N` does not delimit the body. For `N >= 1`, the chain is `16 * N - 8` bytes, so `length == 0x20 + (16N - 8) + extra == 0x18 + 16N + extra`. The `extra` term is 0 in 54 of 229 bodies and a positive multiple of 8 in the other 175; `tools/psin/body-record.json` records these counts. The chain and the extra region are **Unknown**; an 8-byte table is possible but not decoded.
 
 The arithmetic is consistent with the header test: `(0x18 + 16N + extra) - 0x20 = 16N - 8 + extra`, which is a multiple of 8 for every `N` and every multiple-of-8 `extra`. The rejected reading `length - 0x14` is not a multiple of 8 for the 54 bodies with `extra = 0`; for example, a 72-byte body with `N = 3` gives 52.
 
@@ -285,11 +285,12 @@ The RPF9 type ID alone is not sufficient.
 python tools/psin/psin_inspect.py <sample> [<sample> ...] [--json]
 ```
 
-`tools/psin/pmap_heldout.py` writes the committed prediction record, and `tools/psin/value_probe.py` writes the committed value and block test record:
+`tools/psin/pmap_heldout.py` writes the committed prediction record, `tools/psin/value_probe.py` writes the committed value and block test record, and `tools/psin/body_probe.py` writes the committed LSCH/LENM body and PMAP name record:
 
 ```text
 python tools/psin/pmap_heldout.py --samples <DIRECTORY> --output heldout-record.json
 python tools/psin/value_probe.py --samples <DIRECTORY> --summary-only --output value-record.json
+python tools/psin/body_probe.py --samples <DIRECTORY> --summary-only --output body-record.json
 ```
 
 `--max-bytes` and `--max-sections` on the classifier bound the read and the section walk. The tools read inputs read-only and have no default pointing at a game installation.
