@@ -43,3 +43,9 @@ Interpretations that were once used for RAGE resources and later corrected. The 
 **Old assumption.** A page was reconstructed from one or more zlib streams. A declared page with no zlib stream was treated as missing, and the reader stopped when the page map became readable and the zlib page count was below the declared count.
 
 **Correction.** A stored chunk can be a raw page. The type 6 representative stores a 65,536-byte zlib first system page and an 8,768-byte raw second page, with the page map at `0xFD60` and a logical system size of 74,304 bytes. The stream-only view reports 65,536 bytes and `partial`; the corrected rule reconstructs both pages (RES-F24, RES-F25, RES-F26). A raw chunk is a page only when the declared page count requires it; otherwise it is trailing data and is not counted. A zlib stream is one page except a split page, and no packed page was observed (RES-F27). The 625,472-byte sample shows pages larger than 64 KiB, so `0x10000` is an allocation multiple, not a fixed page size (RES-F28).
+
+## The 0DRP findings compared beyond their samples
+
+**Committed claim.** RES-F29 ended with the verdict "not all reproduced"; RES-F32 ended with the verdict "not located".
+
+**Correction.** RES-F29 now lists the four `u16` values and the `+0x20` word observed in its type 11, 73 and 74 samples, and states that the field positions are validated while the individual values are not a rule. RES-F32 now states only its sampled population and limits. Both findings state what their samples contain and make no comparison beyond them.

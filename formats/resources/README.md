@@ -66,7 +66,7 @@ Some resources carry the four bytes `0DRP` at system `+0x10` (RES-F21). The cand
 - Every nonzero pointer above resolved inside the system segment in the three samples; no out-of-bounds or cross-page pointer was found (RES-F30). The page-map pointer at `+0x08` is also a system pointer.
 - Across the three families, the tag, the version byte, the zero at `+0x18`, the pointer positions and the four `u16` positions hold. The `+0x20` word and the values of the four `u16` differ between the samples. The 16-byte block width also holds.
 - The four `u16` values were `2/2/2/0` for the type 11 sample, `13/2/5/1` for type 73 and `4/3/5/32` for type 74. The third value equals the number of block entries in each sample. The other three are **Unknown**.
-- The private counts `3/0/3/0`, `13/2/7/1` and `32/4/27/41` were not all reproduced. The field positions are validated; the individual values are not a rule.
+- The field positions are validated on these three resources; the individual values are not a rule.
 - The tag, version and `+0x18` zero are not required by the page model. A reader MUST NOT require `0DRP` to reconstruct pages.
 
 ## Block tables
