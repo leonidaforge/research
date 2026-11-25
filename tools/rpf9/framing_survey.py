@@ -11,6 +11,8 @@ import struct
 import sys
 import zlib
 
+import _output
+
 SCHEMA = "leonida-forge.rpf9-framing-survey/1"
 BLOCK = 1 << 20
 DEFAULT_ROW_BYTES = 64 << 20
@@ -50,9 +52,14 @@ def _zlib_header(head):
 
 
 def _inflate(fileobj, pos, end, limits, full):
-    """Inflate one zlib stream. Returns (status, compressed, prefix_bytes, stored_len)."""
+    """Inflate one zlib stream.
+
+    Returns (status, compressed, prefix_bytes, stored_len, produced). `produced`
+    counts every decoded byte, including bytes beyond the stored prefix.
+    """
     dec = zlib.decompressobj()
     out = bytearray()
+    produced = 0
     fed = 0
     with open(fileobj, "rb") as fh:
         fh.seek(pos)
@@ -62,26 +69,27 @@ def _inflate(fileobj, pos, end, limits, full):
                 break
             fed += len(block)
             if fed > limits.row_bytes:
-                return "truncated", 0, bytes(out), 0
+                return "truncated", 0, bytes(out), 0, produced
             data = block
             while data:
                 room = limits.output - len(out)
                 try:
                     if room > 0:
                         chunk = dec.decompress(data, room)
+                        produced += len(chunk)
                         if chunk:
                             out += chunk
                     elif not full:
-                        return "partial", 0, bytes(out), 0
+                        return "partial", 0, bytes(out), 0, produced
                     else:
-                        dec.decompress(data, BLOCK)
+                        produced += len(dec.decompress(data, BLOCK))
                 except zlib.error:
-                    return "error", 0, bytes(out), 0
+                    return "error", 0, bytes(out), 0, produced
                 if dec.eof:
                     compressed = fed - len(dec.unused_data)
-                    return "eof", compressed, bytes(out), ((compressed + 15) // 16) * 16
+                    return "eof", compressed, bytes(out), ((compressed + 15) // 16) * 16, produced
                 data = dec.unconsumed_tail
-    return "partial", 0, bytes(out), 0
+    return "partial", 0, bytes(out), 0, produced
 
 
 def _decode_row(fileobj, file_size, row, limits):
@@ -99,6 +107,7 @@ def _decode_row(fileobj, file_size, row, limits):
         "prefix_zero": prefix == b"\x00" * PREFIX,
         "count": count,
         "methods": [],
+        "raw_padding": [],
         "pages": None,
         "zero_run": None,
         "pointer8": False,
@@ -120,10 +129,11 @@ def _decode_row(fileobj, file_size, row, limits):
             fh.seek(pos)
             head = fh.read(2)
         if _zlib_header(head):
-            status, compressed, out, stored_len = _inflate(fileobj, pos, end, limits, count > 1)
+            status, compressed, out, stored_len, inflated = _inflate(
+                fileobj, pos, end, limits, count > 1)
             if status == "eof":
                 result["methods"].append("zlib")
-                produced += len(out)
+                produced += inflated
                 if len(decoded) < limits.output:
                     decoded += out[:limits.output - len(decoded)]
                 pos += stored_len
@@ -138,8 +148,10 @@ def _decode_row(fileobj, file_size, row, limits):
         if last:
             stored_len = end - pos
             remaining = logical - produced
-            if stored_len == remaining:
+            padding = stored_len - remaining
+            if 0 <= padding <= 15:
                 result["methods"].append("raw")
+                result["raw_padding"].append(padding)
                 with open(fileobj, "rb") as fh:
                     fh.seek(pos)
                     out = fh.read(min(limits.output, stored_len))
@@ -186,6 +198,8 @@ def survey(archive, manifest, limits=None):
         "chunk_counts": {},
         "methods": {},
         "method_patterns": {},
+        "raw_padding": {},
+        "padded_copy_rows": 0,
         "decoded": {"zero_run": {}, "pointer_at_8": 0, "marker_0DRPz": 0, "other_at_0x10": 0},
         "parts": {"page_counts_known": 0, "equal": 0, "more_chunks": 0, "fewer_chunks": 0},
         "transformed_rows": 0,
@@ -205,6 +219,11 @@ def survey(archive, manifest, limits=None):
         summary["method_patterns"][pattern] = summary["method_patterns"].get(pattern, 0) + 1
         for method in result["methods"]:
             summary["methods"][method] = summary["methods"].get(method, 0) + 1
+        for padding in result["raw_padding"]:
+            key = str(padding)
+            summary["raw_padding"][key] = summary["raw_padding"].get(key, 0) + 1
+            if padding:
+                summary["padded_copy_rows"] += 1
         if result["methods"] and result["methods"][0] == "transformed":
             summary["transformed_rows"] += 1
             continue
@@ -236,14 +255,18 @@ def main(argv=None):
     parser.add_argument("--max-row-bytes", type=int, default=DEFAULT_ROW_BYTES)
     parser.add_argument("--max-output", type=int, default=DEFAULT_OUTPUT)
     args = parser.parse_args(argv)
-    manifest = json.load(open(args.manifest, "r", encoding="utf-8"))
-    summary = survey(args.archive, manifest, Limits(args.max_row_bytes, args.max_output))
-    text = json.dumps(summary, indent=1, sort_keys=True)
-    if args.output:
-        with open(args.output, "w", encoding="utf-8") as fh:
-            fh.write(text + "\n")
-    else:
-        sys.stdout.write(text + "\n")
+    try:
+        _output.guard_output(args.output, [args.archive, args.manifest])
+        manifest = json.load(open(args.manifest, "r", encoding="utf-8"))
+        summary = survey(args.archive, manifest, Limits(args.max_row_bytes, args.max_output))
+        text = json.dumps(summary, indent=1, sort_keys=True) + "\n"
+        if args.output:
+            _output.write_atomic(args.output, text)
+        else:
+            sys.stdout.write(text)
+    except _output.OutputCollisionError as error:
+        sys.stderr.write("error: %s\n" % error)
+        return 1
     return 0
 
 

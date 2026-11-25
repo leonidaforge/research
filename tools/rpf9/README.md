@@ -1,7 +1,9 @@
 # RPF9 framing and header probes
 
 Three bounded, read-only tools for RPF9 research. They read the archive they are given
-and refuse every range outside that file. They do not print payload or trailer bytes.
+and refuse every range outside that file. They refuse an `--output` that names an input
+file, write through a temporary file in the target directory, and replace the
+destination only after the write succeeds. They do not print payload or trailer bytes.
 
 | Tool | Input | Reports |
 | --- | --- | --- |
@@ -27,11 +29,12 @@ row bytes or archive paths.
 Chunk methods are classified structurally:
 
 - `zlib` when the chunk starts with a valid zlib header and inflates;
-- `raw` when the last chunk is not zlib and its stored length equals the remaining
-  logical length;
+- `raw` when the last chunk is not zlib and its stored length minus its padding equals
+  the remaining logical length; padding from 0 to 15 is accepted and reported;
 - `unknown` when neither condition holds or a bound stops the read.
 
-`raw` therefore means the copy condition. The chunk method bits were not read.
+`raw` therefore means the copy condition. The chunk method and padding bits were not
+read.
 
 ## Trailer probe
 
@@ -52,10 +55,14 @@ digests are not printed.
 python tools/rpf9/secondary_probe.py ARCHIVE [ARCHIVE ...]
 ```
 
-The index-store model needs `D * E * F` bytes rounded up to 8 before the pool. The
-direct model stores values of one fixed width in every secondary column, so the
-secondary area must divide by `D * E`. Both are reported as fits or non-fits; neither
-assigns a meaning to the flag at `u8@0x2D`.
+The store starts at `align_F(hdr[0x08])`. The index-store model then needs `D * E * F`
+bytes followed by an 8-aligned pool. The direct model stores values of one fixed width
+in every secondary column, so the area from the store start must divide by `D * E`.
+Both checks are necessary conditions only. They do not choose between the models; a
+direct layout with a different width per column remains possible. The summary reports
+the archives where the two size predictions differ and the archives where an observation
+selects a model; without decoded secondary bytes the second count is zero. Neither
+check assigns a meaning to the flag at `u8@0x2D`.
 
 ## Tests
 
@@ -64,5 +71,6 @@ python -m unittest discover -s tools/rpf9 -p "test_*.py" -v
 ```
 
 The tests build synthetic archives from code. They cover a 16-byte prefix with a zlib
-stream, a raw chunk, a two-part resource with a page map, a truncated row, trailer
-bounds, trailer equality, and both secondary size models.
+stream, a raw chunk, a padded copy chunk, a two-part resource with a page map, a
+truncated row, an output collision against each tool's input, trailer bounds, trailer
+equality, the documented secondary store start, and both necessary size conditions.

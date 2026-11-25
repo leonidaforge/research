@@ -1,12 +1,16 @@
+import contextlib
+import io
 import json
 import os
 import struct
 import sys
 import tempfile
 import unittest
+import unittest.mock
 import zlib
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _output
 import framing_survey
 
 
@@ -60,6 +64,14 @@ class FramingSurveyTest(unittest.TestCase):
         self.assertEqual(summary["methods"], {"raw": 1})
         self.assertEqual(summary["decoded"]["zero_run"], {"0": 1})
 
+    def test_padded_copy_chunk(self):
+        self.place(0x280, b"\x00" * 16 + b"P" * 16)
+        self.manifest["rows"].append(row(0, 0x280, 32, 10))
+        summary = framing_survey.survey(self.archive, self.manifest)
+        self.assertEqual(summary["method_patterns"], {"raw": 1})
+        self.assertEqual(summary["raw_padding"], {"6": 1})
+        self.assertEqual(summary["padded_copy_rows"], 1)
+
     def test_two_part_resource_pages(self):
         first = bytearray(0x40)
         struct.pack_into("<Q", first, 8, 0x50000020)
@@ -110,6 +122,38 @@ class FramingSurveyTest(unittest.TestCase):
                                       "logical_size": 4, "chunks": None})
         summary = framing_survey.survey(self.archive, self.manifest)
         self.assertEqual(summary["rows_encoding2"], 0)
+
+    def test_output_may_not_overwrite_the_archive(self):
+        self.place(0x600, b"\x00" * 16 + b"Q" * 16)
+        self.manifest["rows"].append(row(0, 0x600, 32, 16))
+        manifest_path = os.path.join(self.dir.name, "manifest.json")
+        with open(manifest_path, "w", encoding="utf-8") as fh:
+            json.dump(self.manifest, fh)
+        with open(self.archive, "rb") as fh:
+            original = fh.read()
+        stderr = io.StringIO()
+        with contextlib.redirect_stderr(stderr):
+            code = framing_survey.main(["--archive", self.archive,
+                                        "--manifest", manifest_path,
+                                        "--output", self.archive])
+        self.assertEqual(code, 1)
+        self.assertIn("input file", stderr.getvalue())
+        with self.assertRaises(_output.OutputCollisionError):
+            _output.guard_output(self.archive, [self.archive])
+        with open(self.archive, "rb") as fh:
+            self.assertEqual(fh.read(), original)
+
+    def test_atomic_write_removes_the_temporary_file_on_error(self):
+        target = os.path.join(self.dir.name, "output.json")
+        with open(target, "w", encoding="utf-8") as fh:
+            fh.write("old")
+        with unittest.mock.patch("_output.os.replace", side_effect=OSError("stop")):
+            with self.assertRaises(OSError):
+                _output.write_atomic(target, "new")
+        with open(target, "r", encoding="utf-8") as fh:
+            self.assertEqual(fh.read(), "old")
+        leftovers = [name for name in os.listdir(self.dir.name) if name.startswith(".rpf9-")]
+        self.assertEqual(leftovers, [])
 
 
 if __name__ == "__main__":

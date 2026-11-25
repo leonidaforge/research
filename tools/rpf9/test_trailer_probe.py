@@ -1,3 +1,5 @@
+import contextlib
+import io
 import json
 import os
 import struct
@@ -6,6 +8,7 @@ import tempfile
 import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _output
 import trailer_probe
 
 
@@ -99,6 +102,20 @@ class TrailerProbeTest(unittest.TestCase):
         self.assertNotIn("digest", text.lower())
         self.assertNotIn("sha", text.lower())
         self.assertNotIn("T" * 8, text)
+
+    def test_output_may_not_overwrite_the_input(self):
+        build(self.path, b"T" * 64)
+        with open(self.path, "rb") as fh:
+            original = fh.read()
+        stderr = io.StringIO()
+        with contextlib.redirect_stderr(stderr):
+            code = trailer_probe.main([self.path, "--output", self.path])
+        self.assertEqual(code, 1)
+        self.assertIn("input file", stderr.getvalue())
+        with self.assertRaises(_output.OutputCollisionError):
+            _output.guard_output(self.path, [self.path])
+        with open(self.path, "rb") as fh:
+            self.assertEqual(fh.read(), original)
 
 
 if __name__ == "__main__":

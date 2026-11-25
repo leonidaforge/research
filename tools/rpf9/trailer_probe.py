@@ -11,6 +11,8 @@ import os
 import struct
 import sys
 
+import _output
+
 SCHEMA = "leonida-forge.rpf9-trailer-probe/1"
 MAGIC = 0x52504639
 HEADER = 0x40
@@ -139,19 +141,23 @@ def main(argv=None):
                         help="Manifest for the archive at the same position")
     parser.add_argument("--output")
     args = parser.parse_args(argv)
-    manifests = [json.load(open(path, "r", encoding="utf-8")) for path in args.manifest]
-    if manifests and len(manifests) != len(args.paths):
-        parser.error("--manifest must be given once per path or not at all")
-    if len(args.paths) == 1 and not manifests:
-        result, _ = probe(args.paths[0])
-    else:
-        result = compare(args.paths, manifests or None)
-    text = json.dumps(result, indent=1, sort_keys=True)
-    if args.output:
-        with open(args.output, "w", encoding="utf-8") as fh:
-            fh.write(text + "\n")
-    else:
-        sys.stdout.write(text + "\n")
+    try:
+        _output.guard_output(args.output, args.paths + args.manifest)
+        manifests = [json.load(open(path, "r", encoding="utf-8")) for path in args.manifest]
+        if manifests and len(manifests) != len(args.paths):
+            parser.error("--manifest must be given once per path or not at all")
+        if len(args.paths) == 1 and not manifests:
+            result, _ = probe(args.paths[0])
+        else:
+            result = compare(args.paths, manifests or None)
+        text = json.dumps(result, indent=1, sort_keys=True) + "\n"
+        if args.output:
+            _output.write_atomic(args.output, text)
+        else:
+            sys.stdout.write(text)
+    except _output.OutputCollisionError as error:
+        sys.stderr.write("error: %s\n" % error)
+        return 1
     return 0
 
 
