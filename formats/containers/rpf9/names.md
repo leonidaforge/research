@@ -22,14 +22,15 @@ The row lookup is described [below](#row-lookup).
 
 The archive stores a prefix length and the [folded 64-bit hash](#64-bit-hash) of the prefix. Two operations set them (RPF9-F61):
 
-| Operation | Prefix | Confidence |
-|---|---|---|
-| Construction | Default derived from the archive's own path, see below | Confirmed |
-| Mounting through the archive's mount method | The caller's mount prefix. It replaces the default | Confirmed |
+| Operation                                   | Prefix                                                 | Confidence |
+| ------------------------------------------- | ------------------------------------------------------ | ---------- |
+| Construction                                | Default derived from the archive's own path, see below | Confirmed  |
+| Mounting through the archive's mount method | The caller's mount prefix. It replaces the default     | Confirmed  |
 
 The effective prefix is the mount prefix for a mounted archive. It is the default only for an archive that was never mounted that way, for example a nested archive that is opened but not mounted.
 
 Default prefix at construction:
+
 1. Take the file object's stored path. That is the archive's resolved device path ([engine](../../../engine/README.md#file-objects-and-devices)).
 2. If the path starts with `memory:`, the prefix ends just after the next `:` following `memory:`.
 3. Otherwise the prefix ends just after the last `/` or `\`. Without either, the prefix is empty.
@@ -40,6 +41,7 @@ The empty prefix has length 0 and hash 0.
 Mount prefix: the mount table accepts a prefix only if it is non-empty, ends in `/` or `\` and is at most 253 bytes long ([engine](../../../engine/README.md#mount-table)). The same string becomes the archive's prefix.
 
 Consequences:
+
 - Both prefixes include the trailing separator.
 - With the default prefix, entries are addressed as `<directory of the archive><stem>.<ext>`. With a mount prefix, they are addressed as `<mount prefix><stem>.<ext>`. The archive's own file name is part of neither.
 - The resolver compares only the first `P` bytes of a request by folded hash, so case and separator style do not matter in the prefix.
@@ -94,6 +96,7 @@ Afterwards the loader mounts each archive at a prefix, calls a callback and unmo
 The global index's records match the batch path resolution record in layout. They carry the 16 header bytes from the same column, the stored size and the time. Which code fills the index, and whether it uses batch resolution, is Unknown. Whether loader paths resolve to archive devices, so that the parent copy is used, was not established.
 
 Differences to the regular open:
+
 - The size is the block's size, which batch resolution fills with the stored size, not the logical size.
 - With the parent copy, the nested archive's metadata comes from the parent's value pool, not from the nested archive's payload. Entry payloads are still read through the parent as raw positional reads.
 
@@ -116,6 +119,8 @@ hash64(s) = MurmurHash3_x64_128_h1(fold(s), seed = 0, length_mixed = len(s) & 0x
 
 A null pointer and the empty string both give 0. The engine also has a variant without folding. It is not used for RPF9 paths.
 
+The implementation was checked against the independent `mmh3` 5.3.1 package for MurmurHash3_x64_128, seed 0, first 64-bit word, on eleven inputs below 256 bytes; every result agreed (RPF9-F105). From 256 bytes on no independent implementation of the low-byte length rule exists, so that part rests on the decompiled code (RPF9-F56).
+
 ## 32-bit key
 
 The 32-bit key is Jenkins one-at-a-time ("joaat") over the folded bytes with seed 0 (RPF9-F57):
@@ -127,7 +132,7 @@ h += h << 3; h ^= h >> 11; h += h << 15
 
 If the string starts with `"`, the quote is skipped and hashing stops at the next `"` or at the end. `"a/b"x`, `"a/b` and `a/b` therefore have the same key.
 
-That the archive stores `joaat(stem)` in key `0xB707…` follows from the lookup. It has not been checked against archive data.
+That the archive stores `joaat(stem)` in key `0xB707…` follows from the lookup. It has not been checked against archive data. The implementation follows the published one-at-a-time definition and its reference vectors, but no verified GTA VI name/key pair is available to test the archive side (RPF9-F57, RPF9-F105).
 
 ## Type classes
 
@@ -149,10 +154,10 @@ The tables are not reproduced here.
 
 Two row lookups exist, one per class. Both use the same method, chosen by a per-archive sorted flag (RPF9-F58):
 
-| Sorted flag | Method |
-|---|---|
-| Clear | Scan rows `0 .. E-1`. Return the first row whose key and type ID match |
-| Set | Binary search for the first row not below the key, then scan forward over rows with an equal key until the type ID matches |
+| Sorted flag | Method                                                                                                                     |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Clear       | Scan rows `0 .. E-1`. Return the first row whose key and type ID match                                                     |
+| Set         | Binary search for the first row not below the key, then scan forward over rows with an equal key until the type ID matches |
 
 In sorted archives the comparator puts every row with `0xB707… == 0` first, in ascending unsigned order of the 64-bit name hash. Rows with a nonzero 32-bit key come after them. The forward scan of the 64-bit lookup stops at the first row with a nonzero 32-bit key.
 
@@ -166,10 +171,10 @@ sorted = (u32@0x28 == fingerprint)
 
 The header byte `u8@0x2D` selects the fingerprint:
 
-| `u8@0x2D` bit 3 | Fingerprint |
-|---|---|
-| Clear | A value the engine computes once at startup over all 256 type IDs |
-| Set | Computed over the type IDs listed in `B` sub-block 9 ([metadata.md](metadata.md#a-table-and-b-block)) |
+| `u8@0x2D` bit 3 | Fingerprint                                                                                           |
+| --------------- | ----------------------------------------------------------------------------------------------------- |
+| Clear           | A value the engine computes once at startup over all 256 type IDs                                     |
+| Set             | Computed over the type IDs listed in `B` sub-block 9 ([metadata.md](metadata.md#a-table-and-b-block)) |
 
 Both fingerprints hash a bit mask. Bit `i` is set when the `i`-th type ID uses the 32-bit class. For the startup value the `i`-th type ID is `i`; for sub-block 9 it is the `i`-th listed ID. The mask has `ceil(n / 8)` bytes for `n` type IDs.
 
@@ -182,6 +187,7 @@ The concrete startup fingerprint is not established, because it depends on wheth
 A reader that does not reproduce the fingerprint SHOULD scan linearly, as the engine does when the fingerprints differ.
 
 Collisions and duplicates:
+
 - The first row in scan order that matches both key and type wins.
 - Nothing detects a collision. A second row with the same key and type is unreachable through the resolver.
 - The same stem with different types, i.e. different extensions, is fine.
@@ -191,6 +197,7 @@ Collisions and duplicates:
 The engine keeps hash-to-string dictionaries per namespace, one set for 64-bit keys and one for 32-bit keys (RPF9-F18, RPF9-F60). The mechanism is described in [engine](../../../engine/README.md#hashed-string-dictionary).
 
 What matters for RPF9:
+
 - Strings enter the dictionaries when structured data files that spell them out are loaded. Archives do not fill them.
 - A dictionary string for a row is the string whose hash equals the row's key. Given the resolver, that is the stem: the path relative to the mount prefix, without the last extension. Probable, by hash equality.
 - At initialization, insertion is disabled for all 64-bit namespaces. No direct code that enables it was found. Indirect writers were not excluded, so the dictionaries MUST NOT be assumed to stay empty.
@@ -211,6 +218,7 @@ An empty requested part matches every row that has a string. This lookup depends
 ## Offline consequences
 
 A tool can match entries by hashing candidate paths. It needs:
+
 - the plain metadata, i.e. descriptors, cells and pools;
 - candidate paths from outside the archive;
 - the archive's effective [mount prefix](#mount-prefix): the runtime mount prefix, or the default derived from the archive's resolved path;
@@ -218,16 +226,27 @@ A tool can match entries by hashing candidate paths. It needs:
 
 With those, a candidate matches a row when its stem hash or 32-bit key and its type ID agree. Rows that match no candidate can only be shown by type ID, hash and size.
 
+## Offline resolution limits
+
+The 22 authenticated local archives yielded 6534 rows, 6422 distinct 64-bit name hashes and 2145 distinct 32-bit keys (RPF9-F105). No name was recovered without an external name source, and hashing the local archive file names as candidate paths matched no row. The archives store no name text, so a tool can test candidates but cannot enumerate names from hashes.
+
+A local candidate table MAY hold:
+
+- candidate paths, which are verified by hashing them with the type's class;
+- declared `(class, key)` to name mappings, which MUST be marked unconfirmed unless the normalized name or its stem reproduces the key.
+
+A resolved name is display data. It MUST NOT replace the stored hash, change a row identity, select a payload offset or become an extraction path.
+
 ## Synthetic example
 
 Mount prefix `dev:/synthetic/Packs/`, request `dev:/synthetic/Packs/Sub\Dir/Item.Name.rpf`:
 
-| Step | Value |
-|---|---|
-| Rest | `Sub\Dir/Item.Name.rpf` |
-| Stem, extension | `Sub\Dir/Item.Name`, `rpf` |
-| Type | 0 |
-| Normalized stem | `sub/dir/item.name` |
-| `hash64(stem)` | `0x3FC602FCF22D7472` |
+| Step                         | Value                                                 |
+| ---------------------------- | ----------------------------------------------------- |
+| Rest                         | `Sub\Dir/Item.Name.rpf`                               |
+| Stem, extension              | `Sub\Dir/Item.Name`, `rpf`                            |
+| Type                         | 0                                                     |
+| Normalized stem              | `sub/dir/item.name`                                   |
+| `hash64(stem)`               | `0x3FC602FCF22D7472`                                  |
 | `hash64("alpha/beta/gamma")` | `0x7489FBD94F2A4C86`, the same for `ALPHA\BETA\GAMMA` |
-| `joaat("alpha/beta")` | `0x75438640` |
+| `joaat("alpha/beta")`        | `0x75438640`                                          |
