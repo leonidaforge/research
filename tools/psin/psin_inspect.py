@@ -194,10 +194,13 @@ def _pmap_report(data: bytes, first_offset: int) -> dict:
         "first_block_at_0x10": False,
         "offsets_aligned_16": False,
         "block_offsets_monotone": False,
+        "block_offsets_follow_lengths": False,
         "block_ranges_in_bounds": False,
         "unused_words_zero": False,
         "padding_between_blocks_70": False,
         "formula_matches_first_offset": False,
+        "all_large_ids_in_psch": False,
+        "no_small_ids_in_psch": False,
     }
     formula_total = None
     if len(body) >= PMAP_BODY_HEADER_SIZE:
@@ -215,6 +218,8 @@ def _pmap_report(data: bytes, first_offset: int) -> dict:
         checks["block_ranges_in_bounds"] = True
         previous_end = HEADER_SIZE
         formula_total = 0x10
+        expected_offset = 0x10
+        offsets_follow = True
         offset_ok = True
         all_zero = True
         padding_ok = True
@@ -235,6 +240,8 @@ def _pmap_report(data: bytes, first_offset: int) -> dict:
             )
             if index == 0 and offset == 0x10:
                 checks["first_block_at_0x10"] = True
+            if offset != expected_offset:
+                offsets_follow = False
             if offset % 16:
                 offset_ok = False
             if offset < previous_end or offset + length > first_offset:
@@ -247,9 +254,12 @@ def _pmap_report(data: bytes, first_offset: int) -> dict:
             previous_end = offset + length
             if index + 1 < count:
                 formula_total += _align16(length)
+                expected_offset += _align16(length)
             else:
                 formula_total += length
+                expected_offset += length
         checks["offsets_aligned_16"] = offset_ok
+        checks["block_offsets_follow_lengths"] = offsets_follow
         checks["block_offsets_monotone"] = all(
             blocks[i]["offset"] < blocks[i + 1]["offset"] for i in range(len(blocks) - 1)
         )
@@ -291,6 +301,16 @@ def _pmap_report(data: bytes, first_offset: int) -> dict:
             break
     if section is not None:
         psch = _psch_report(section[2])
+        if psch and psch.get("ids") is not None:
+            psch_ids = set(psch["ids"])
+            large_ids = [block["id"] for block in blocks if block["id"] >= 0x100]
+            small_ids = [block["id"] for block in blocks if block["id"] < 0x100]
+            checks["all_large_ids_in_psch"] = all(
+                identifier in psch_ids for identifier in large_ids
+            )
+            checks["no_small_ids_in_psch"] = all(
+                identifier not in psch_ids for identifier in small_ids
+            )
 
     return {
         "grammar": "pre-section area",
@@ -328,6 +348,7 @@ def _psch_report(body: bytes) -> dict:
         return report
     ids = [_be32(body, 4 + 8 * i) for i in range(count)]
     offsets = [_be32(body, 8 + 8 * i) for i in range(count)]
+    report["ids"] = ids
     report["prefix"] = body[table_bytes:table_bytes + 8].hex()
     report["first_ids"] = [f"0x{value:08x}" for value in ids[:8]]
     if count == 0:
@@ -386,22 +407,28 @@ def _lenm_body_report(body: bytes) -> dict:
     report = {
         "length": len(body),
         "empty": len(body) == 0,
-        "header_size": len(body) >= LENM_HEADER_SIZE,
+        "header_size": LENM_HEADER_SIZE,
+        "body_minus_header_multiple_8": None,
         "marker_ee_at_0x08": len(body) >= 0x10 and body[8:16] == b"\xEE" * 8,
+        "header_tail_zero": len(body) >= 0x20 and body[0x14:0x20] == b"\0" * 12,
         "count": None,
-        "predicted_chain_length": None,
+        "chain_length": None,
+        "predicted_body_length": None,
         "extra_length": None,
         "extra_multiple_8": None,
     }
     if len(body) < LENM_HEADER_SIZE:
         return report
     count = _le32(body, 0x10)
-    predicted = 0x18 + 16 * count
+    chain_length = 16 * count - 8
+    predicted = LENM_HEADER_SIZE + chain_length
     extra = len(body) - predicted
     report.update(
         {
+            "body_minus_header_multiple_8": (len(body) - LENM_HEADER_SIZE) % 8 == 0,
             "count": count,
-            "predicted_chain_length": predicted,
+            "chain_length": chain_length,
+            "predicted_body_length": predicted,
             "extra_length": extra,
             "extra_multiple_8": extra % 8 == 0,
         }
@@ -540,6 +567,14 @@ def inspect_bytes(
         "pmap_block_formula_matches": bool(
             family_data and family_data.get("checks", {}).get("formula_matches_first_offset")
         ),
+        "pmap_offsets_follow_lengths": bool(
+            family_data and family_data.get("checks", {}).get("block_offsets_follow_lengths")
+        ),
+        "pmap_ids_contained": bool(
+            family_data
+            and family_data.get("checks", {}).get("all_large_ids_in_psch")
+            and family_data.get("checks", {}).get("no_small_ids_in_psch")
+        ),
         "lsch_body_marker_at_0x10": bool(
             family_data
             and family_data.get("section_bodies", {})
@@ -609,6 +644,7 @@ def _print_text(report: dict, stream) -> None:
             f" blocks={family_data.get('block_count')}"
             f" mode={header.get('mode')}"
             f" count={header.get('count')}"
+            f" offsets_follow_lengths={family_data.get('checks', {}).get('block_offsets_follow_lengths')}"
             f" formula_matches={family_data.get('checks', {}).get('formula_matches_first_offset')}",
             file=stream,
         )
@@ -627,6 +663,8 @@ def _print_text(report: dict, stream) -> None:
                 "psch:"
                 f" count={psch['count']}"
                 f" tiling_ok={psch['tiling_ok']}"
+                f" large_ids_in_psch={family_data['checks'].get('all_large_ids_in_psch')}"
+                f" small_ids_absent={family_data['checks'].get('no_small_ids_in_psch')}"
                 f" prefix={psch['prefix']}",
                 file=stream,
             )
@@ -647,8 +685,12 @@ def _print_text(report: dict, stream) -> None:
                     "lenm_body:"
                     f" length={body['length']}"
                     f" empty={body['empty']}"
+                    f" header=0x{body['header_size']:x}"
+                    f" body_minus_header_multiple_8={body['body_minus_header_multiple_8']}"
                     f" marker_ee={body['marker_ee_at_0x08']}"
+                    f" header_tail_zero={body['header_tail_zero']}"
                     f" count={body['count']}"
+                    f" chain={body['chain_length']}"
                     f" extra={body['extra_length']}",
                     file=stream,
                 )
@@ -680,6 +722,8 @@ def _print_text(report: dict, stream) -> None:
         f" section_walk_ends_at_file_size={checks['section_walk_ends_at_file_size']}"
         f" descriptor_formula_matches={checks['descriptor_formula_matches']}"
         f" pmap_block_formula_matches={checks['pmap_block_formula_matches']}"
+        f" pmap_offsets_follow_lengths={checks['pmap_offsets_follow_lengths']}"
+        f" pmap_ids_contained={checks['pmap_ids_contained']}"
         f" lsch_body_marker_at_0x10={checks['lsch_body_marker_at_0x10']}"
         f" lsch_body_tail_multiple_16={checks['lsch_body_tail_multiple_16']}"
         f" checksum_ok={checks['checksum_ok']}",

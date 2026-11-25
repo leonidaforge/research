@@ -66,10 +66,17 @@ class InspectTests(unittest.TestCase):
         ])
         report = psin_inspect.inspect_bytes(raw)
         body = report["family_data"]["section_bodies"]["LENM"]
+        self.assertEqual(body["header_size"], 0x20)
         self.assertEqual(body["count"], 3)
-        self.assertEqual(body["predicted_chain_length"], 0x18 + 16 * 3)
+        self.assertEqual(body["chain_length"], 16 * 3 - 8)
+        self.assertEqual(body["predicted_body_length"], 0x20 + 16 * 3 - 8)
         self.assertEqual(body["extra_length"], 0)
+        self.assertTrue(body["body_minus_header_multiple_8"])
         self.assertTrue(body["marker_ee_at_0x08"])
+        self.assertTrue(body["header_tail_zero"])
+        # The rejected reading used length - 0x14; it is not a multiple of 8 here.
+        self.assertEqual(len(lenm) - 0x14, 52)
+        self.assertNotEqual((len(lenm) - 0x14) % 8, 0)
 
     def test_lsch_variant_requires_alignment(self):
         report = psin_inspect.inspect_bytes(synthetic.lsch_document([4, 8, 12]))
@@ -108,8 +115,30 @@ class InspectTests(unittest.TestCase):
         self.assertTrue(data["checks"]["offsets_aligned_16"])
         self.assertTrue(data["checks"]["padding_between_blocks_70"])
         self.assertTrue(data["checks"]["formula_matches_first_offset"])
+        self.assertTrue(data["checks"]["block_offsets_follow_lengths"])
+        self.assertTrue(data["checks"]["all_large_ids_in_psch"])
+        self.assertTrue(data["checks"]["no_small_ids_in_psch"])
         self.assertEqual(data["name_table"]["name_count"], 2)
         self.assertTrue(data["name_table"]["all_names_printable"])
+
+    def test_pmap_block_offsets_must_follow_lengths(self):
+        raw = bytearray(synthetic.pmap_document([17, 16, 24]))
+        section = raw.find(b"PMAP")
+        body = section + 8
+        second_offset = body + 16 + 4
+        struct.pack_into(">I", raw, second_offset, struct.unpack_from(">I", raw, second_offset)[0] + 16)
+        report = psin_inspect.inspect_bytes(bytes(raw))
+        self.assertFalse(report["family_data"]["checks"]["block_offsets_follow_lengths"])
+        self.assertFalse(report["family_data"]["checks"]["padding_between_blocks_70"])
+
+    def test_pmap_psch_id_containment_is_checked(self):
+        raw = bytearray(synthetic.pmap_document([17, 16]))
+        section = raw.find(b"PSCH")
+        body = section + 8
+        # Replace the single PSCH id with one no block uses.
+        struct.pack_into(">I", raw, body + 4, 0xDEADBEEF)
+        report = psin_inspect.inspect_bytes(bytes(raw))
+        self.assertFalse(report["family_data"]["checks"]["all_large_ids_in_psch"])
 
     def test_pmap_psch_table_tiles_the_body(self):
         report = psin_inspect.inspect_bytes(synthetic.pmap_document())

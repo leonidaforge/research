@@ -101,7 +101,7 @@ def lsch_document(lengths, sections=None) -> bytes:
     return with_checksum(prefix, sections)
 
 
-def pmap_document(block_lengths=None, mode: int = 3, extra: int = 0, unaligned: bool = False) -> bytes:
+def pmap_document(block_lengths=None, mode: int = 3, extra: int = 0, unaligned: bool = False, psch_values=None) -> bytes:
     if block_lengths is None:
         block_lengths = [17, 16]
     block_lengths = list(block_lengths)
@@ -130,7 +130,9 @@ def pmap_document(block_lengths=None, mode: int = 3, extra: int = 0, unaligned: 
     )
     psch = psch_body(
         [kind for kind in kinds if kind >= 0x100],
-        [b"\0" * 8 for kind in kinds if kind >= 0x100],
+        psch_values if psch_values is not None else [
+            b"\0" * 8 for kind in kinds if kind >= 0x100
+        ],
     )
     sections = [
         (b"PMAP", pmap),
