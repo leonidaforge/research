@@ -31,3 +31,9 @@ Interpretations that were once used for PSIN and later corrected. The current mo
 **Old assumption.** `CHKS` was recorded as a 20-byte section with a 12-byte body.
 
 **Correction.** The body holds a big-endian total-length word, a big-endian checksum and ASCII `zppp`. The total-length word equals the payload size in 757 of 757 payloads. The checksum is a one-at-a-time hash over signed bytes seeded with `0x3FAC7125`, over the payload with the length and checksum words zeroed; it verifies in 757 of 757 payloads. The seed is unexplained.
+
+## `LSCH` body header-word counts
+
+**Old reading.** The `u32` at body `+0x08` was recorded as 512 in 441 payloads, 768 in 35 payloads, and 1024 in 7 payloads.
+
+**Correction.** The pairing was wrong. The correct counts over the same 483 unique top-level `LSCH` payloads are 768 in 441, 512 in 35, and 1024 in 7. The value set and total are unchanged; only the counts assigned to 512 and 768 were swapped. The correction came from `tools/psin/body_probe.py` and `tools/psin/body-record.json`.
