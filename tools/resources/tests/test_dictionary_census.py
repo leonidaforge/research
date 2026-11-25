@@ -4,6 +4,7 @@ import contextlib
 import io
 import json
 import os
+import struct
 import sys
 import tempfile
 import unittest
@@ -42,19 +43,33 @@ def write_listing(directory, name, type_id):
 
 
 class CensusTests(unittest.TestCase):
+    def test_int_accepts_both_forms(self):
+        self.assertEqual(census._int(16, "x"), 16)
+        self.assertEqual(census._int("16", "x"), 16)
+        self.assertEqual(census._int("0x10", "x"), 16)
+        with self.assertRaises(census.CensusError):
+            census._int("nope", "x")
+
     def test_dictionary_negative_and_control(self):
         dictionary_system = bytes(
             dictionary_tests.make_dictionary([{"name": "alpha", "gfx": 0}])
         )
-        negative_system = bytes(pool_tests.make_drawable())
+        decode_fail_system = bytes(pool_tests.make_drawable())
+        structural = bytearray(
+            dictionary_tests.make_dictionary([{"name": "alpha", "gfx": 0}])
+        )
+        struct.pack_into("<Q", structural, 0x20, 0)
         with tempfile.TemporaryDirectory() as directory:
             dict_archive = write_row(directory, "dict.rpf", dictionary_system)
-            neg_archive = write_row(directory, "neg.rpf", negative_system)
+            fail_archive = write_row(directory, "fail.rpf", decode_fail_system)
+            structural_archive = write_row(directory, "structural.rpf", bytes(structural))
             dict_listing = write_listing(directory, "dict.json", 5)
-            neg_listing = write_listing(directory, "neg.json", 66)
+            fail_listing = write_listing(directory, "fail.json", 66)
+            structural_listing = write_listing(directory, "structural.json", 3)
             # Patch the listing sizes to the stored rows.
             for archive, listing in ((dict_archive, dict_listing),
-                                     (neg_archive, neg_listing)):
+                                     (fail_archive, fail_listing),
+                                     (structural_archive, structural_listing)):
                 size = os.path.getsize(archive)
                 with open(listing, encoding="utf-8") as handle:
                     data = json.load(handle)
@@ -66,23 +81,25 @@ class CensusTests(unittest.TestCase):
             with contextlib.redirect_stdout(output):
                 code = census.main([
                     "--dictionary", dict_archive, dict_listing,
-                    "--negative", neg_archive, neg_listing, "66",
+                    "--negative", fail_archive, fail_listing, "66",
+                    "--negative", structural_archive, structural_listing, "3",
                     "--json",
                 ])
         self.assertEqual(code, 0)
         report = json.loads(output.getvalue())
         self.assertEqual(report["dictionaries"]["stats"]["rows"], 1)
         self.assertEqual(report["dictionaries"]["stats"]["records"], 1)
-        self.assertEqual(report["negatives"]["stats"].get("accepted", 0), 0)
-        self.assertEqual(
-            report["negatives"]["stats"].get("decode_fail", 0)
-            + report["negatives"]["stats"].get("rejected_structural", 0),
-            1,
-        )
+        negatives = report["negatives"]
+        self.assertEqual(negatives["stats"]["accepted"], 0)
+        self.assertEqual(negatives["stats"]["decode_fail"], 1)
+        self.assertEqual(negatives["stats"]["rejected_structural"], 1)
+        self.assertEqual(negatives["by_type"]["66"].get("decode_fail"), 1)
+        self.assertEqual(negatives["by_type"]["3"].get("rejected_structural"), 1)
         self.assertEqual(report["control"]["trials"], 10000)
         self.assertEqual(report["control"]["slot_accepted"], 0)
         self.assertEqual(report["control"]["hash_matched"], 0)
         self.assertEqual(report["control"]["slot_threshold"], 100)
+        self.assertEqual(report["control"]["hash_threshold"], 100)
 
 
 if __name__ == "__main__":

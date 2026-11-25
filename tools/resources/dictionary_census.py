@@ -61,6 +61,16 @@ class Source:
     types: set | None = None
 
 
+def _int(value, what):
+    if isinstance(value, int):
+        return value
+    text = str(value)
+    try:
+        return int(text, 16) if text.lower().startswith("0x") else int(text)
+    except (TypeError, ValueError) as err:
+        raise CensusError(f"{what} is not an integer: {value!r}") from err
+
+
 def rows(source: Source, types=None):
     with open(source.listing, encoding="utf-8") as handle:
         listing = json.load(handle)
@@ -75,20 +85,28 @@ def rows(source: Source, types=None):
 
 
 def decode(source: Source, entry):
-    offset = int(entry["payload_offset"], 16)
-    length = entry["stored_size"]
+    try:
+        offset = _int(entry["payload_offset"], "payload_offset")
+        length = _int(entry["stored_size"], "stored_size")
+        logical = entry.get("logical_size")
+        logical = None if logical is None else _int(logical, "logical_size")
+        row = entry.get("row")
+    except KeyError as err:
+        raise CensusError(f"{source.listing}: row entry lacks {err.args[0]}") from err
     with open(source.archive, "rb") as handle:
         handle.seek(offset)
         buffer = handle.read(length)
-    layout = page_reconstruct.analyze_bytes(
-        buffer, source.archive, logical_size=entry.get("logical_size")
-    )
+    layout = page_reconstruct.analyze_bytes(buffer, source.archive, logical_size=logical)
     if layout.status != "complete" or layout.page_map is None:
         codes = ", ".join(issue.code for issue in layout.issues) or "no page map"
-        raise CensusError(f"{source.archive} row {entry['row']}: {codes}")
+        raise CensusError(f"{source.archive} row {row}: {codes}")
     system_size = sum(page.size for page in layout.pages if page.segment == "system")
     decoded = b"".join(chunk.data for chunk in layout.chunks)
     return decoded[:system_size], decoded[system_size:]
+
+
+def _field_key(value):
+    return f"0x{value:016X}" if value > 0xFFFF else value
 
 
 def dictionary_census(sources):
@@ -99,6 +117,17 @@ def dictionary_census(sources):
     mips = Counter()
     dimensions = set()
     record_counts = []
+    record_fields = {
+        name: Counter()
+        for name in ("field_10", "field_3c", "field_3e", "field_40", "field_48", "field_60")
+    }
+    field_checks = Counter()
+    root_fields = {
+        name: Counter() for name in ("field_18", "field_48", "field_50", "field_58")
+    }
+    empty_lengths = Counter()
+    empty_maps = Counter()
+    gap_records = []
     for source in sources:
         for entry in rows(source, {5}):
             try:
@@ -120,6 +149,34 @@ def dictionary_census(sources):
             )
             stats["in_bounds"] += int(dictionary.allocations_in_bounds)
             stats["sum_ok"] += int(dictionary.allocation_sum_ok)
+            stats["starts_at_zero"] += int(dictionary.starts_at_zero)
+            stats["partition_ok"] += int(dictionary.partition_ok)
+            stats["dense_tables"] += int(dictionary.record_table_dense)
+            stats["sparse_tables"] += int(not dictionary.record_table_dense)
+            stats["value_order_matches"] += int(dictionary.value_order_matches_index)
+            stats["value_order_differs"] += int(not dictionary.value_order_matches_index)
+            if dictionary.record_count:
+                stats["dense_nonempty"] += int(dictionary.record_table_dense)
+                stats["sparse_nonempty"] += int(not dictionary.record_table_dense)
+                stats["order_matches_nonempty"] += int(dictionary.value_order_matches_index)
+                stats["order_differs_nonempty"] += int(not dictionary.value_order_matches_index)
+                if dictionary.record_count > 1:
+                    stats["multi_record"] += 1
+                    stats["order_matches_multi"] += int(dictionary.value_order_matches_index)
+                    stats["order_differs_multi"] += int(not dictionary.value_order_matches_index)
+            else:
+                empty_lengths[len(system)] += 1
+                empty_maps[(dictionary.system_pages, dictionary.graphics_pages)] += 1
+            for name, counter in root_fields.items():
+                counter[getattr(dictionary, name)] += 1
+            if dictionary.record_gaps:
+                gap_records.append(
+                    {
+                        "archive": source.archive,
+                        "row": entry["row"],
+                        "gaps": dictionary.record_gaps,
+                    }
+                )
             checked, matched = texture_dictionary.check_names(system, dictionary)
             stats["names_checked"] += checked
             stats["names_matched"] += matched
@@ -132,9 +189,31 @@ def dictionary_census(sources):
                 formats[record.format_id] += 1
                 mips[record.mip_levels] += 1
                 dimensions.add((record.width, record.height))
+                for name, counter in record_fields.items():
+                    counter[getattr(record, name)] += 1
+                field_checks["field_00_zero"] += int(record.field_00 == 0)
+                field_checks["field_20_zero"] += int(record.field_20 == 0)
+                field_checks["field_44_zero"] += int(record.field_44 == 0)
+                field_checks["field_46_one"] += int(record.field_46 == 1)
+                field_checks["field_48_constant"] += int(record.field_48 == 2 << 32)
+                field_checks["field_50_zero"] += int(record.field_50 == 0)
+                field_checks["field_58_zero"] += int(record.field_58 == 0)
+                field_checks["field_68_zero"] += int(record.field_68 == 0)
+                field_checks["field_28_self_50"] += int(
+                    record.record_offset is not None
+                    and record.field_28
+                    == (texture_dictionary.SYSTEM_BASE | (record.record_offset + 0x50))
+                )
     multiplicities = Counter(len(value) for value in hash_records.values())
     format_values = sorted(formats)
     mip_values = sorted(mips)
+    root_report = {}
+    for name, counter in root_fields.items():
+        top = counter.most_common(5)
+        root_report[name] = {
+            "distinct": len(counter),
+            "top": [[_field_key(value), count] for value, count in top],
+        }
     return {
         "stats": dict(stats),
         "issues": dict(issues),
@@ -153,6 +232,18 @@ def dictionary_census(sources):
         "records_min_nonempty": min((value for value in record_counts if value), default=None),
         "distinct_hashes": len(hash_records),
         "hash_multiplicity": dict(multiplicities),
+        "record_fields": {
+            name: [[_field_key(value), count] for value, count in counter.most_common()]
+            for name, counter in record_fields.items()
+        },
+        "field_checks": dict(field_checks),
+        "root_fields": root_report,
+        "empty_system_lengths": dict(empty_lengths),
+        "empty_page_maps": {
+            f"{system_pages}/{graphics_pages}": count
+            for (system_pages, graphics_pages), count in empty_maps.items()
+        },
+        "record_gaps": gap_records,
     }, hash_records
 
 
@@ -166,6 +257,7 @@ def drawable_census(sources, hash_records):
     matched_multiplicity = Counter()
     drawduplicate = Counter()
     key_halves = Counter()
+    name_variants = Counter()
     for source in sources:
         for entry in rows(source, {2}):
             try:
@@ -194,14 +286,15 @@ def drawable_census(sources, hash_records):
                         continue
                     stats["bound"] += 1
                     bound_here += 1
+                    name_variants[reference.name_variant or "missing"] += 1
                     if reference.key64 is not None:
+                        stats["keys_read"] += 1
                         key = reference.key64
                         key_halves["low_match"] += int(
                             (key & 0xFFFFFFFF) in hash_records
                         )
                         key_halves["high_match"] += int((key >> 32) in hash_records)
                     if reference.name_hash is None:
-                        stats["name_variant_other"] += 1
                         continue
                     stats["name_hash_present"] += 1
                     name_hashes[reference.name_hash] += 1
@@ -233,8 +326,8 @@ def drawable_census(sources, hash_records):
             "other_entries": stats["other_entries"],
             "other_accepted": stats["other_accepted"],
             "bound": stats["bound"],
+            "keys_read": stats["keys_read"],
             "name_hash_present": stats["name_hash_present"],
-            "name_variant_other": stats["name_variant_other"],
             "namespace_matched": stats["namespace_matched"],
             "namespace_unmatched": stats["namespace_unmatched"],
             "drawables_with_match": stats["drawables_with_match"],
@@ -243,6 +336,7 @@ def drawable_census(sources, hash_records):
             "decode_or_parse_fail": stats["decode_or_parse_fail"],
         },
         "states": {key: states[key] for key in ("bound", "null", "class", "index", "bad")},
+        "name_variants": dict(name_variants),
         "distinct_name_hashes": len(name_hashes),
         "distinct_matched_hashes": len(matched),
         "matched_hash_multiplicity": dict(matched_multiplicity),
@@ -264,23 +358,34 @@ def drawable_census(sources, hash_records):
 def negative_census(sources):
     stats = Counter()
     by_type = Counter()
+    by_type_outcome = defaultdict(Counter)
+    by_source_outcome = defaultdict(Counter)
     for source in sources:
         types = source.types
         for entry in rows(source, types):
-            by_type[entry["type_id"]] += 1
+            type_id = entry["type_id"]
+            by_type[type_id] += 1
+            key = (source.archive, source.listing, type_id)
             try:
                 system, graphics = decode(source, entry)
             except CensusError:
                 stats["decode_fail"] += 1
+                by_type_outcome[type_id]["decode_fail"] += 1
+                by_source_outcome[key]["decode_fail"] += 1
                 continue
             try:
                 dictionary = texture_dictionary.parse_dictionary(system, len(graphics))
             except texture_dictionary.TextureDictionaryError:
                 stats["rejected_structural"] += 1
+                by_type_outcome[type_id]["rejected_structural"] += 1
+                by_source_outcome[key]["rejected_structural"] += 1
                 continue
             stats["accepted"] += 1
             stats["accepted_empty"] += int(dictionary.record_count == 0)
             stats["accepted_nonempty"] += int(dictionary.record_count > 0)
+            outcome = "accepted_empty" if dictionary.record_count == 0 else "accepted_nonempty"
+            by_type_outcome[type_id][outcome] += 1
+            by_source_outcome[key][outcome] += 1
     return {
         "stats": {
             "selected": sum(by_type.values()),
@@ -291,6 +396,13 @@ def negative_census(sources):
             "accepted_nonempty": stats["accepted_nonempty"],
         },
         "selected_by_type": dict(by_type),
+        "by_type": {
+            str(type_id): dict(counter) for type_id, counter in by_type_outcome.items()
+        },
+        "by_source": {
+            f"{archive}|{listing}|{type_id}": dict(counter)
+            for (archive, listing, type_id), counter in by_source_outcome.items()
+        },
     }
 
 
