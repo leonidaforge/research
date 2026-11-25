@@ -10,4 +10,5 @@ The index states what supports each finding and where to look in the build. When
 Subjects:
 
 - [RPF9](rpf9/INDEX.md)
+- [RBF0](rbf0/INDEX.md)
 - [Unknown payloads](unknown-payloads/INDEX.md)
