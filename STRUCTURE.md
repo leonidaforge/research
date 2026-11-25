@@ -46,7 +46,7 @@ Archive versions are separate formats with no shared parent directory such as `r
 
 ### Containers and encodings
 
-A container groups or indexes data. An encoding describes how one asset or value is represented. One file can involve several layers. A texture dictionary is a container, it is serialized as a RAGE resource, and its pixels use a texture encoding. Document each layer in its own category and link between them. For example, an RPF9 archive stores RAGE resources. The archive storage belongs in `containers/rpf9/`. The resource page layout belongs in `resources/` once there is code-level evidence for it.
+A container groups or indexes data. An encoding describes how one asset or value is represented. One file can involve several layers. A texture dictionary is a container, it is serialized as a RAGE resource, and its pixels use a texture encoding. Document each layer in its own category and link between them. For example, an RPF9 archive stores RAGE resources. The archive storage belongs in `containers/rpf9/`. The resource page layout belongs in `resources/` when reproducible binary or code-level evidence supports it; the document states which evidence types apply.
 
 ## Adding research
 

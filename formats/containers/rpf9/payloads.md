@@ -286,7 +286,7 @@ Resources in GTA VI data show this page map and pointer layout:
 - Pointers are `u64` values with high nibble 5 (system) or 6 (graphics). The low 28 bits are an offset into that segment's pages.
 - The page map is 16 bytes with the system and graphics page counts at `+8` and `+9`, followed by one zeroed 8-byte slot per page.
 
-Page sizes are not stored in the resource. They come from the stream lengths, so a missing page can be detected but its size cannot. Resource serialization will get its own document under `formats/resources/` once code-level evidence exists.
+Page sizes are not stored in the resource. They come from the stream lengths, so a missing page can be detected but its size cannot. Resource serialization is a separate subject from archive storage, and its document states which evidence types apply.
 
 ## Recovery limits
 

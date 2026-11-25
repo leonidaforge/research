@@ -21,7 +21,7 @@ Every significant claim carries one of these labels.
 | **Rejected**    | Contradicted by reliable evidence                                                                                         |
 | **Unknown**     | Not sufficiently investigated                                                                                             |
 
-A confirmed mechanism can still have field meanings that are only probable. State the level for each part separately.
+A confirmed mechanism can still have field meanings that are only probable. State the level for each part separately. Confidence is not derived from the evidence type defined in [Evidence types](#evidence-types).
 
 Names such as "value pool" or "file-object tag" are descriptive labels chosen by researchers. They are not recovered symbol names unless a document says so with evidence.
 
@@ -32,9 +32,46 @@ Names such as "value pool" or "file-object tag" are descriptive labels chosen by
 - Observations from real data, such as layout arithmetic checked against archives, have to state what was checked and what was not.
 - Similarity to RPF7 or RPF8 is a comparison, not evidence that GTA VI behaves the same way.
 
+## Evidence types
+
+New and revised findings MUST record one or more evidence types from this table. Existing rows MAY keep their method name until the row is next edited, then add the type. Evidence type and confidence are separate axes: a finding can be a direct observation and still leave its meaning unknown.
+
+| Type           | Meaning                                                                                                                                                                  |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `BINARY`       | Direct observation of archive or payload bytes: offsets, widths, counts and structural relations                                                                         |
+| `STATIC_CODE`  | Analysis of the identified executable: disassembly, decompilation, symbolic execution and data read from its image. Observed behavior is separated from inferred purpose |
+| `RUNTIME`      | Observed behavior of a running build. Records the build SHA-256 only                                                                                                     |
+| `CROSS_SAMPLE` | A property validated across distinct samples. The public record states the sample count and the selection rule; exclusions MAY be described without paths                |
+| `HISTORICAL`   | Comparison with an earlier RAGE format or engine version. It generates hypotheses and is not proof of GTA VI behavior                                                    |
+| `SYNTHETIC`    | Independently constructed fixtures. They validate repository tool or model behavior and do not prove native format semantics                                             |
+
+The index `Evidence` column records the specific method, such as "Header data", "Payload data", "Decompilation" or "Byte search". Methods map to types as follows.
+
+| Method                                                                                              | Type                                                            |
+| --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| `header`, `payload`, `archive data`, `scan`, `byte search`, `metadata scan`                           | `BINARY`                                                        |
+| `tool output`, `consistency check`                                                                  | `BINARY` for the bytes observed; `CROSS_SAMPLE` when a property is compared across rows          |
+| `executable data`, `disassembly`, `decompilation`, `symbolic execution`, `read-only implementation` | `STATIC_CODE`                                                   |
+| `data analysis` on one sample                                                                       | `BINARY`                                                        |
+| `data analysis` or `constructive algebra` across samples                                            | `CROSS_SAMPLE`                                                  |
+| `synthetic test`                                                                                    | `SYNTHETIC`, plus the type of every real component it exercises |
+| Observation produced by a script                                                                    | The type of the observation, not the script                     |
+
+Executable image bytes are `STATIC_CODE`, never `BINARY`.
+
+Rules:
+
+- `BINARY` evidence may establish offsets, widths, counts and structural relationships. Repeated binary observations do not establish semantic meaning.
+- `HISTORICAL` similarity MUST be labelled **Speculative** or **Probable** unless supported by GTA VI evidence of another type. Two `HISTORICAL` sources MUST NOT corroborate each other, and an earlier-format document is not independent support for another `HISTORICAL` claim.
+- `SYNTHETIC` fixtures MUST NOT be the only support for a claim about how the game executable behaves. A test that combines synthetic inputs with a real component is recorded as several types, not as `SYNTHETIC` alone.
+- `STATIC_CODE` findings MUST distinguish behavior that was read from purpose that was inferred.
+- A claim that depends on several evidence types lists them in the evidence index.
+
+Synthetic fixtures and synthetic test vectors are permitted research. Tests MUST NOT contain game files or data extracted from them.
+
 ## Build-specific findings
 
-Addresses only apply to the executable they came from. Every build-specific finding records the executable SHA-256, the image base and the RVA. Format documents describe behavior. They cite build catalog entries and do not embed addresses.
+Addresses only apply to the executable they came from. Every finding that depends on a specific code location records the executable SHA-256, the image base and the RVA. `RUNTIME` findings record the executable SHA-256 only and do not invent an RVA. Format documents describe behavior. They cite build catalog entries and do not embed addresses.
 
 ## Uncertain and corrected interpretations
 
