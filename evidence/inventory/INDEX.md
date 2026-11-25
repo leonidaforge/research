@@ -368,9 +368,10 @@ transform. A class is a byte observation, not a format identity.
 | zero-prefix           |     1 | `data.rpf` row 476                                                                            |
 
 `9FPR` is the documented RPF9 container. `PTFX`, zlib and the zero prefix have
-no assigned format. The `formats/unknown` table lists neither `9FPR`, `PTFX`,
-zlib nor the zero prefix, and its `KB2n` count is 505. The census counts 787
-`KB2n` rows across four archives; see INV-F31.
+no assigned format. The `formats/unknown` table lists neither `9FPR`, zlib nor
+the zero prefix; it lists `PTFX` as a text payload and records `KB2n` as 505
+inspected rows plus 787 prefix-counted rows across four archives. The census
+counts 787 `KB2n` rows across those four archives; see INV-F31 and INV-F32.
 
 ## Gaps
 
