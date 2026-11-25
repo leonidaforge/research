@@ -96,6 +96,17 @@ Both regions lie inside the spans that validation step 1 processes (see [cryptog
 
 The secondary index store starts at `hdr[0x08]` rounded up to `F` bytes. The secondary value pool starts at the end of the store, `D * E * F` as a 32-bit product, rounded up to 8 bytes (RPF9-F06). With read mode 1 the secondary area is a separate buffer, and the rounding applies to that buffer's address.
 
+`D` is not fixed at 1. Across 1,440 archives it takes every value from 1 to 8: 1 in 1,066 archives, 2 in 167, 3 in 7, 4 in 68, 5 in 51, 6 in 75, 7 in 4 and 8 in 2 (RPF9-F131). A secondary area therefore holds more than one column in 374 archives.
+
+Two size models fit the observed areas differently (RPF9-F132):
+
+| Model | Prediction | Result |
+| --- | --- | --- |
+| Index store plus pool | area is at least `align8(D * E * F)`, and the remainder is a non-negative pool | Fits all 374 archives with `D > 1` |
+| Direct values, one fixed width in every secondary column | area divides by `D * E` | Fits 140 of 374 and fails 234 |
+
+The index-store model is the one the accessors implement (RPF9-F06, RPF9-F10, RPF9-F11), so it stays the documented layout. Size arithmetic cannot read the stores, and the direct model remains possible only if every column has its own width. What the flag at `u8@0x2D` selects in the secondary area is an open hypothesis.
+
 ## Diagram
 
 ```text
@@ -116,7 +127,7 @@ hdr[0x04] +-------------------------+
 
 ## Consistency with archive data
 
-The region arithmetic matches the plain header fields of real archives. The primary regions end before `hdr[0x08]`, the secondary index store fits before `hdr[0x04]`, and both pools have non-negative size. Observed values are `C` 3 to 7, `D` 1, `E` 2 to 699 and `F` 1 or 2. `F` is 1 for small row counts, up to 22 observed, and 2 for large ones, from 418 observed. These are observations, not format limits.
+The region arithmetic matches the plain header fields of real archives. The primary regions end before `hdr[0x08]`, the secondary index store fits before `hdr[0x04]`, and both pools have non-negative size. Observed values are `C` 3 to 13, `D` 1 to 8, `E` 1 to 2,896 and `F` 1 or 2 (RPF9-F131). `F` is 1 for small row counts and 2 for large ones; the exact boundary is not established. These are observations, not format limits.
 
 This consistency covers offsets and sizes only. It does not confirm the decoded values.
 

@@ -224,6 +224,18 @@ Some earlier notes used "A" and "B" for `hdr[0x04]` and `hdr[0x08]`. Those lette
 
 **Correction.** The metadata table stores hashes rather than names. The trailing region was measured only by length, offset and equality; it has not been examined for text. The statement in [names.md](../../formats/containers/rpf9/names.md) is scoped to the metadata table, and the trailing region is recorded as unexamined (RPF9-F129, RPF9-F130).
 
+## Secondary column count was one
+
+**Old assumption.** The header field `D` was 1 in every observed archive, so the secondary area held one column and its size observations were written for that case.
+
+**Correction.** `D` takes values 1 to 8 in the 1,440-archive sample; 1,066 archives use 1 and 374 use more than one (RPF9-F131). The secondary index store of `D * E * F` bytes rounded up to 8, followed by a non-negative pool, fits all 374 archives with `D > 1`. A direct layout with one fixed value width in every secondary column fits 140 and fails 234 (RPF9-F132). The index-store model stays documented because the accessors implement it; the flag at `u8@0x2D` is still an open hypothesis.
+
+## Bytes at `0x18` were constant
+
+**Old assumption.** The 8 bytes at `0x18` held the same value in every observed archive, consistent with constant `A` and `B` fields inside them.
+
+**Correction.** The `u16` at `0x18` is `0x7A00` in the 1,440-archive sample, but the same 8 bytes contain `A` at `0x1A` and `B` at `0x1C`. `A` takes 4 to 6 and `B` takes several sizes, so the combined value changes between archives (RPF9-F131). The constant-looking earlier sample did not vary those fields. The meaning of `0x18` itself remains Unknown.
+
 ## Open
 
 - Meaning of descriptor `+0x08`, and any use of `+0x12`.
