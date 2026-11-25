@@ -10,9 +10,9 @@ The engine addresses an entry by a 32-bit ID (RPF9-F15):
 entryId = (tag << 16) | rowIndex
 ```
 
-| Bits | Meaning | Confidence |
-|---|---|---|
-| 0 to 15 | Row index, `0 .. E-1` | Confirmed |
+| Bits     | Meaning                                                      | Confidence                                                  |
+| -------- | ------------------------------------------------------------ | ----------------------------------------------------------- |
+| 0 to 15  | Row index, `0 .. E-1`                                        | Confirmed                                                   |
 | 16 to 31 | The `u16` tag stored in the archive's file object at `+0x0C` | Confirmed (read), Probable (identifies the mounted archive) |
 
 The schema accessors keep only the low 16 bits (RPF9-F14). The high half never reaches the schema. Because `0xFFFF` is reserved as the invalid row index, one archive can address at most 65,535 rows, `0` to `0xFFFE`. The substring lookup also reads `E` as a `u16`. `0xFFFF` is the invalid row index, returned by the field-key search and by the row resolver.
@@ -49,44 +49,44 @@ Offsets in the tables are relative to the value pointer.
 
 ### Layout R
 
-| Offset | Type | Use |
-|---|---|---|
-| `+0x00` | `u32` | Logical-size word 0 |
-| `+0x04` | `u32` | Logical-size word 1 |
-| `+0x08` | `u32` | Stored size in 16-byte units |
+| Offset  | Type  | Use                             |
+| ------- | ----- | ------------------------------- |
+| `+0x00` | `u32` | Logical-size word 0             |
+| `+0x04` | `u32` | Logical-size word 1             |
+| `+0x08` | `u32` | Stored size in 16-byte units    |
 | `+0x0C` | `u32` | Payload offset in 16-byte units |
-| `+0x10` | `u8` | Type ID |
-| `+0x11` | `u8` | Compression mode |
+| `+0x10` | `u8`  | Type ID                         |
+| `+0x11` | `u8`  | Compression mode                |
 
 ### Layout F
 
-| Offset | Type | Use |
-|---|---|---|
-| `+0x00` | `u64`, bits 0 to 39 | Payload offset in 16-byte units |
-| `+0x05` | `u8`, bits 40 to 47 of the `u64` at `+0x00` | Type ID |
-| `+0x06` | `u8`, bits 48 to 55 of the `u64` at `+0x00` | Compression mode |
-| `+0x08` | `u64`, bits 0 to 39 | Stored size in 16-byte units |
-| `+0x10` | `u64`, bits 0 to 43 | Logical size in bytes |
+| Offset  | Type                                        | Use                             |
+| ------- | ------------------------------------------- | ------------------------------- |
+| `+0x00` | `u64`, bits 0 to 39                         | Payload offset in 16-byte units |
+| `+0x05` | `u8`, bits 40 to 47 of the `u64` at `+0x00` | Type ID                         |
+| `+0x06` | `u8`, bits 48 to 55 of the `u64` at `+0x00` | Compression mode                |
+| `+0x08` | `u64`, bits 0 to 39                         | Stored size in 16-byte units    |
+| `+0x10` | `u64`, bits 0 to 43                         | Logical size in bytes           |
 
 ### Layout A
 
-| Offset | Type | Use |
-|---|---|---|
-| `+0x00` | `u32` | Stored size in 16-byte units |
-| `+0x04` | `u32` | Payload offset in 16-byte units |
-| `+0x08` | `u64`, bits 0 to 47 | Logical size in bytes |
-| `+0x0E` | `u8`, bits 48 to 55 of the `u64` at `+0x08` | Type ID |
-| `+0x0F` | `u8`, bits 56 to 63 of the `u64` at `+0x08` | Compression mode |
+| Offset  | Type                                        | Use                             |
+| ------- | ------------------------------------------- | ------------------------------- |
+| `+0x00` | `u32`                                       | Stored size in 16-byte units    |
+| `+0x04` | `u32`                                       | Payload offset in 16-byte units |
+| `+0x08` | `u64`, bits 0 to 47                         | Logical size in bytes           |
+| `+0x0E` | `u8`, bits 48 to 55 of the `u64` at `+0x08` | Type ID                         |
+| `+0x0F` | `u8`, bits 56 to 63 of the `u64` at `+0x08` | Compression mode                |
 
 ### Derived values
 
-| Value | R | F | A | Accessor RVA |
-|---|---|---|---|---|
-| Payload offset | `u32@+0x0C << 4` | `(u64@+0x00 & 0xFFFFFFFFFF) << 4` | `u32@+0x04 << 4` | `0xC6950` |
-| Stored size | `u32@+0x08 << 4`, 32-bit result | `(u64@+0x08 & 0xFFFFFFFFFF) << 4` | `u32@+0x00 << 4`, 32-bit result | `0x1330AD0` |
-| Logical size | `(u32@+0x04 & 0xFFFFFFF0) + (u32@+0x00 & 0x7FFFFFF0)` | `u64@+0x10 & 0xFFFFFFFFFFF` | `u64@+0x08 & 0xFFFFFFFFFFFF` | `0x1331670` |
-| Type ID | `u8@+0x10` | `u8@+0x05` | `u8@+0x0E` | `0x56ED70` |
-| Compression mode | `u8@+0x11` | `u8@+0x06` | `u8@+0x0F` | `0xF62E0` |
+| Value            | R                                                     | F                                 | A                               | Accessor RVA |
+| ---------------- | ----------------------------------------------------- | --------------------------------- | ------------------------------- | ------------ |
+| Payload offset   | `u32@+0x0C << 4`                                      | `(u64@+0x00 & 0xFFFFFFFFFF) << 4` | `u32@+0x04 << 4`                | `0xC6950`    |
+| Stored size      | `u32@+0x08 << 4`, 32-bit result                       | `(u64@+0x08 & 0xFFFFFFFFFF) << 4` | `u32@+0x00 << 4`, 32-bit result | `0x1330AD0`  |
+| Logical size     | `(u32@+0x04 & 0xFFFFFFF0) + (u32@+0x00 & 0x7FFFFFF0)` | `u64@+0x10 & 0xFFFFFFFFFFF`       | `u64@+0x08 & 0xFFFFFFFFFFFF`    | `0x1331670`  |
+| Type ID          | `u8@+0x10`                                            | `u8@+0x05`                        | `u8@+0x0E`                      | `0x56ED70`   |
+| Compression mode | `u8@+0x11`                                            | `u8@+0x06`                        | `u8@+0x0F`                      | `0xF62E0`    |
 
 For R and A the accessor shifts the stored-size field in 32-bit arithmetic, so the result wraps above 4 GiB. Offsets are computed in 64 bits. How payload offsets become read addresses is in [payloads.md](payloads.md#payload-address).
 
@@ -102,18 +102,18 @@ Not established:
 
 After the metadata signature verifies, the location records can be read for every row without scanning the data area (RPF9-F103). In the 22 tested archives:
 
-| Observation | Result |
-|---|---|
-| Rows | 6534 |
-| Layout F | 6533 |
-| Layout R | 1 |
-| Layout A | 0 |
-| Read source `main` | 6534 |
-| Compression mode 0 | 6534 |
-| Stored rows | 5150 |
-| Chunked rows decoded | 929 |
-| Rows behind the payload transform | 455 |
-| Type IDs | 0, 11, 14 and 255 |
+| Observation                       | Result            |
+| --------------------------------- | ----------------- |
+| Rows                              | 6534              |
+| Layout F                          | 6533              |
+| Layout R                          | 1                 |
+| Layout A                          | 0                 |
+| Read source `main`                | 6534              |
+| Compression mode 0                | 6534              |
+| Stored rows                       | 5150              |
+| Chunked rows decoded              | 929               |
+| Rows behind the payload transform | 455               |
+| Type IDs                          | 0, 11, 14 and 255 |
 
 The counts are sample observations, not format limits. Type IDs are numeric; their meanings and extension mappings are not established. Layout A and non-main read sources are confirmed by code but were not observed in this sample.
 
@@ -132,11 +132,11 @@ The archive interface has two bulk operations (RPF9-F21):
 
 The batch resolution descriptor:
 
-| Offset | Content | Confidence |
-|---|---|---|
-| `+0x00` | 16 bytes. One code path reads them from the archive at the payload offset. Another copies the 16-byte header at the start of the value of key `0xC26722D233648AE7` | Confirmed (sources), Probable (the entry's RPF9 header) |
-| `+0x10` | Stored size | Confirmed |
-| `+0x18` | The `u64` at file object `+0x30`, the device's second attribute after the size | Confirmed (source), Probable (modification time, RPF9-F65) |
+| Offset  | Content                                                                                                                                                            | Confidence                                                 |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------- |
+| `+0x00` | 16 bytes. One code path reads them from the archive at the payload offset. Another copies the 16-byte header at the start of the value of key `0xC26722D233648AE7` | Confirmed (sources), Probable (the entry's RPF9 header)    |
+| `+0x10` | Stored size                                                                                                                                                        | Confirmed                                                  |
+| `+0x18` | The `u64` at file object `+0x30`, the device's second attribute after the size                                                                                     | Confirmed (source), Probable (modification time, RPF9-F65) |
 
 The descriptor does not hold the archive base offset. Reads add file object `+0x20`, not `+0x30`.
 
