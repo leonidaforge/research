@@ -179,13 +179,14 @@ Codec byte counts over the 768 rows:
 
 | Codec byte | Descriptors | `0x55` records | Rows |
 | --- | ---: | ---: | ---: |
-| `0x0B` | 15,038 | 14,940 | 768 |
+| `0x0B` | 15,038 | 14,940 | 725 |
 | `0x02` | 227 | 227 | 43 |
 | any other | 0 | 0 | 0 |
 
-The 15,038 `0x0B` descriptors are 14,665 `0x76` records plus 373 `0x48`
-entries. All 373 entries carry codec byte `0x0B` and rate 48,000; no record
-mixes codecs or rates. The codec byte is not assigned an identity.
+The 725 `0x0B` rows and 43 `0x02` rows are disjoint; no row carries both
+codec bytes. The 15,038 `0x0B` descriptors are 14,665 `0x76` records plus 373
+`0x48` entries. All 373 entries carry codec byte `0x0B` and rate 48,000; no
+record mixes codecs or rates. The codec byte is not assigned an identity.
 
 | Candidate | Streams | Disposition |
 | --- | ---: | --- |
