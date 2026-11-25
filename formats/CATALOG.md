@@ -9,6 +9,7 @@ Confidence values:
 | Confirmed | Structural claims reproduce across the full observed sample with no counterexample |
 | Confirmed (sample) | Reproduces across a bounded sample; the remainder of the population is unvisited |
 | Confirmed (single sample) | Reproduces within one decoded payload; no second sample was compared |
+| Probable | The reading fits every inspected sample, and the source document records it as the most likely one without confirming it |
 | Supported | Consistent with all inspected samples but rests on a small population |
 | Suspected | One or more signals point at a family; no structure established |
 | Unknown | No identification |
@@ -36,7 +37,7 @@ RDS5 and the resource container are not in the table because their format docume
 | Identifier | Evidence for a family | Missing | Where |
 | --- | --- | --- | --- |
 | PTFX | One printable `PTFX` payload in the stored-byte census (UPL-F01); the decoded-payload scan also records `PTFX` without stating a count (UPL-F14) | Structure, variant spread, total occurrence count | [evidence/unknown-payloads](../evidence/unknown-payloads/INDEX.md) |
-| Resource page serialization | Page map, system and graphics pages, compressed streams and pointer tables observed in extracted resources | Object grammar, pointer semantics, engine allocation path | Pending integration; see below |
+| Resource page serialization | Page map, system and graphics pages, compressed streams and pointer tables reported on an unmerged branch | Object grammar, pointer semantics, engine allocation path | Pending integration; not verified on `main` |
 
 ## Unidentified payload structures
 
@@ -55,7 +56,7 @@ These are not game file formats and MUST NOT be listed as formats.
 
 | Mechanism | Role | Document |
 | --- | --- | --- |
-| RPF9 name hashing | `hash64` and `key32` values derived from paths; resolves names and selects key classes | [names.md](containers/rpf9/names.md), [evidence/shared](../../evidence/shared/INDEX.md) |
+| RPF9 name hashing | `hash64` and `key32` values derived from paths; resolves names and selects key classes | [names.md](containers/rpf9/names.md), [evidence/shared](../evidence/shared/INDEX.md) |
 | Chunked storage | Chunk table plus per-chunk encoding, shared by every chunked row across families | [payloads.md](containers/rpf9/payloads.md) |
 | Payload transform | A stored payload transform the reader rejects; rows behind it are unreadable and their decoded contents unobserved. The algorithm is unknown, so the transform is a storage mechanism of unknown effect, not a format | [payloads.md](containers/rpf9/payloads.md) |
 | Resource page serialization | Page map, segment pages and stream containers used inside resources | Pending integration |
