@@ -13,10 +13,10 @@
 - [kb2j](kb2j/README.md): bounded `KB2j`/`KB2n` header and frame-table
   inspector.
 - [resources](resources/README.md): RAGE resource page and pointer inspector.
-- [GFX* structural sampler](gfx/README.md): reports the observed `GFX*` decoded
-  header, variant bytes, interstitial and trailer.
-- [RDS5 structural parser](rds5/README.md): bounds-checked RDS5/ETPF reader
-  with single-block zlib inflation.
+- [drawables](drawables/README.md): bounded drawable, LOD, geometry and material inspector.
+- [adat](adat/README.md): ADAT header and chunk-table inspector.
+- [GFx container inspector](gfx/README.md): identifies the `GFX` container, checks the internal length and walks the tag stream with a depth bound.
+- [RDS5 structural parser](rds5/README.md): bounds-checked RDS5/ETPF reader for storage classes, descriptor fields and capped block reconstruction.
 
 A tool added here MUST:
 

@@ -4,6 +4,8 @@ A RAGE resource is serialized into two segments. Each segment is reconstructed f
 
 Everything here comes from payload data of the Scarlett build. No engine code path for resource loading, validation or page allocation was traced. Structural facts are sample-verified; segment names follow RAGE convention and are **Probable**, not recovered symbols. Findings are cited as `RES-F01` and listed in [evidence/resources/INDEX.md](../../evidence/resources/INDEX.md).
 
+Object structure read from resources, including drawables and 0DRP tables, is in [drawables](drawables/README.md).
+
 ## Status
 
 | Part                                                                | Status                                                                     |

@@ -10,7 +10,7 @@ Entries here are identified by observable payload bytes only. A signature is not
 | `PTFX`    | 1                                 | `common.rpf`                                   | [ptfx](ptfx/README.md)     |
 | `SGD5`    | 2                                 | `shaders.rpf`                                  | [sgd5](sgd5/README.md)     |
 | none      | 1                                 | `data.rpf`                                     | [type14](type14/README.md) |
-| `PSIN`    | 18 sampled                        | 5 archives                                     | [psin](psin/README.md)     |
+| `PSIN`    | 757 decoded                       | 22 top-level and nested archives                | [psin](psin/README.md)     |
 | `GFX` + `0x2A` | 49                           | 6 depth-1 under `data.rpf`                     | [gfx](gfx/README.md)       |
 | `ADAT`    | 768                               | 65 depth-1 under 4 top-level archives          | [adat](adat/README.md)     |
 

@@ -17,6 +17,7 @@ Subjects:
 - [Type 14](type14/INDEX.md)
 - [Unknown payloads](unknown-payloads/INDEX.md)
 - [RAGE resources](resources/INDEX.md)
+- [Drawables](drawables/INDEX.md)
 - [KB2j and KB2n](kb2j/INDEX.md)
 - [GFX*](gfx/INDEX.md)
 - [ADAT](adat/INDEX.md)
