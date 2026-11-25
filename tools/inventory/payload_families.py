@@ -13,10 +13,8 @@ counts belong in the evidence index.
 import argparse
 import hashlib
 import json
-import os
 import subprocess
 import sys
-import time
 from collections import Counter, defaultdict
 from pathlib import Path
 

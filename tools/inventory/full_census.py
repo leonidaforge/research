@@ -672,7 +672,6 @@ def aggregate(output_dir: Path) -> dict:
     type_readable = Counter()
     type_unreadable = Counter()
     type_encoding = defaultdict(Counter)
-    type_layout = defaultdict(Counter)
     unreadable_states = Counter()
     layout_encoding = Counter()
     depth2_rows = []
