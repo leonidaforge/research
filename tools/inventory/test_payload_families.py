@@ -23,12 +23,22 @@ class ClassifyTests(unittest.TestCase):
         entry = families.classify(wrapper((2, 3)))
         self.assertEqual(entry["class"], "resource-wrapper")
         self.assertEqual(entry["wrapper_tag"], "0DRPz")
+        self.assertTrue(entry["pointer_agrees"])
         self.assertEqual(entry["page_map"], {"offset": 0x20, "system_pages": 2, "graphics_pages": 3})
 
     def test_zero_prefix_without_a_tag_is_not_a_wrapper(self):
         entry = families.classify(b"\0" * 32)
         self.assertEqual(entry["class"], "zero-prefix")
         self.assertIsNone(entry.get("wrapper_tag"))
+
+    def test_zero_drp_without_a_system_pointer_is_not_a_wrapper(self):
+        data = bytearray(64)
+        data[0x10:0x14] = b"0DRP"
+        data[0x14:0x15] = b"z"
+        entry = families.classify(bytes(data))
+        self.assertEqual(entry["class"], "zero-prefix")
+        self.assertFalse(entry["pointer_agrees"])
+        self.assertIn("rejected_wrapper", entry)
 
     def test_known_magic_at_zero(self):
         entry = families.classify(b"PSIN" + b"\0" * 28)
@@ -119,6 +129,12 @@ class SelectionTests(unittest.TestCase):
             root = Path(temporary)
             with self.assertRaises(families.FamilyError):
                 families.ensure_output(root / "out", root)
+
+    def test_input_inside_the_output_directory_is_refused(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            with self.assertRaises(families.FamilyError):
+                families.ensure_output(root, root / "manifests")
 
 
 if __name__ == "__main__":

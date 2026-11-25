@@ -75,10 +75,13 @@ def census(manifest_dir: Path, rows_path: Path, output_dir: Path) -> dict:
     top = {}
     if rows_path.exists():
         with rows_path.open(encoding="utf-8") as handle:
-            for line in handle:
+            for line_number, line in enumerate(handle, 1):
                 if not line.strip():
                     continue
-                record = json.loads(line)
+                try:
+                    record = json.loads(line)
+                except json.JSONDecodeError as error:
+                    raise TransformError(f"{rows_path.name} line {line_number} is not JSON: {error}") from error
                 digest = (record.get("attempt") or {}).get("sha256")
                 if digest:
                     top[digest] = (record.get("relative"), record.get("row"))
@@ -101,13 +104,19 @@ def census(manifest_dir: Path, rows_path: Path, output_dir: Path) -> dict:
                 raise TransformError(f"the manifest set exceeds the {MAX_MANIFESTS}-manifest bound")
             digest = path.stem
             with path.open(encoding="utf-8") as handle:
-                header = json.loads(handle.readline())
+                try:
+                    header = json.loads(handle.readline())
+                except json.JSONDecodeError as error:
+                    raise TransformError(f"{path.name} header is not JSON: {error}") from error
                 if header.get("kind") != "header":
                     raise TransformError(f"{path.name} has no header record")
-                for line in handle:
+                for line_number, line in enumerate(handle, 2):
                     if not line.strip():
                         continue
-                    row = json.loads(line)
+                    try:
+                        row = json.loads(line)
+                    except json.JSONDecodeError as error:
+                        raise TransformError(f"{path.name} line {line_number} is not JSON: {error}") from error
                     if row.get("kind") != "row":
                         continue
                     total += 1

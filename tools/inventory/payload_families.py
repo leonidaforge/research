@@ -62,15 +62,19 @@ def classify(prefix: bytes) -> dict:
         "tag_hex": tag.hex() if tag else None,
         "pointer": f"{pointer:#018x}",
         "pointer_selector": selector,
+        "system_pointer": system_pointer,
+        "pointer_agrees": bool(zero8 and system_pointer and tag == b"0DRP"),
         "page_map": None,
     }
-    if zero8 and tag == b"0DRP":
+    if zero8 and system_pointer and tag == b"0DRP":
         entry["class"] = "resource-wrapper"
         entry["wrapper_tag"] = "0DRPz" if prefix[20:21] == b"z" else "0DRP"
         entry["confidence"] = "Confirmed (bytes); Probable (resource header)"
     elif zero8:
         entry["class"] = "zero-prefix"
         entry["confidence"] = "Confirmed (bytes); Unknown (format identity)"
+        if tag == b"0DRP":
+            entry["rejected_wrapper"] = "0DRP tag without a selector-5 pointer at +0x08"
     elif prefix[:4] in MAGICS:
         entry["class"] = MAGICS[prefix[:4]]
         entry["confidence"] = "Confirmed (bytes); Unknown (format identity)"
@@ -131,6 +135,8 @@ def select(manifest_dir: Path, archive_dir: Path, per_type: int, max_payload_byt
         )
         if len(rows) <= per_type:
             chosen = rows
+        elif per_type == 1:
+            chosen = [rows[len(rows) // 2]]
         else:
             indices = sorted({round(index * (len(rows) - 1) / (per_type - 1)) for index in range(per_type)})
             chosen = [rows[index] for index in indices]
@@ -228,6 +234,11 @@ def run(selected: list[dict], output_dir: Path, runner: Runner) -> dict:
                         page_maps[f"{page_map['system_pages']}/{page_map['graphics_pages']}"] += 1
                     per_type[row.get("type_id")][record["classification"]["class"]] += 1
                     successes += 1
+        except (OSError, subprocess.TimeoutExpired) as error:
+            record["stage"] = "operational limit"
+            record["reason"] = str(error)[:300]
+            stages[record["stage"]] += 1
+            failures += 1
         finally:
             output.unlink(missing_ok=True)
         inventory.append_jsonl(rows_path, record)
@@ -253,6 +264,8 @@ def ensure_output(output: Path, *inputs: Path) -> None:
         source = Path(source).resolve()
         if output == source or source in output.parents:
             raise FamilyError("the output directory MUST NOT lie inside an input directory")
+        if output in source.parents:
+            raise FamilyError("an input directory MUST NOT lie inside the output directory")
 
 
 def sha256_path(path: Path) -> str:
