@@ -141,6 +141,14 @@ the documented magics `9FPR`, `RBF0`, `PSIN`, `SGD5`, `EDUP`, `KB2j`, `KB2n`,
 `RDS5` and `PTFX`, the zlib container header, a full zero prefix, or
 `unrecognized`.
 
+## Recorded sample locators
+
+`locators.md` records the drawable, type-5 dictionary and texture-slot sample
+locators used by the iteration 11 work. Each entry names the top-level archive,
+the row, the extracted size, the structural measurements and the SHA-256 of the
+archive or stored row, plus the command that reaches it. The file is a recorded
+set, not a generator.
+
 ## Dependencies
 
 - Python 3.11 or later, standard library only.
@@ -174,7 +182,9 @@ python tools/inventory/full_census.py \
 Every row is attempted once. `rows.jsonl` holds one record per attempt,
 `manifests/<sha256>.jsonl` the decoded nested manifest, `identity.json` the CLI
 version, binary SHA-256, executable SHA-256 and the optional `--app-revision`,
-and `state.json` the atomically rewritten progress. A rerun resumes from
+and `state.json` the atomically rewritten progress. A row counts as succeeded
+only when extraction, the nested manifest and the archive header all completed;
+`failed_step` names the stage that stopped it. A rerun resumes from
 `rows.jsonl` and refuses a population whose row keys differ from the saved
 state.
 
@@ -184,6 +194,12 @@ manifest `payload_offset` when the location record is a plain stored range
 Any other over-limit row is recorded as `operational limit`. The copy is
 bounds-checked against the parent archive size and written through a temporary
 file.
+
+`--summarize-only` reads `state.json` and refuses to write a summary unless the
+declared, written and committed totals agree and the state is `complete`. Add
+`--allow-partial` to write a diagnostic report instead; it sets
+`population_complete` and `population.publishable` to false and still reports
+declared, attempted, completed and committed separately.
 
 Run `--summarize-only` after a completed or interrupted run to rebuild
 `report.json` without touching an archive. Failures are grouped by the stage
@@ -213,9 +229,10 @@ at or below `--max-payload-bytes`. The classes are `resource-wrapper` (eight
 zero bytes, a system pointer at `+0x08`, `0DRP` at `+0x10`), `zero-prefix`,
 the documented family magics, `zlib-container-header`, `unrecognized` and
 `short`. The classifier reports the `+0x10` tag and follows the `+0x08` pointer
-to the page-map counts when the map lies inside the read window. A class is a
-byte observation; only `resource-wrapper` has a structural reading, and that
-reading is **Probable**.
+to the page-map counts when the map lies inside the read window. A `0DRP` tag
+without a selector-5 pointer at `+0x08` is `zero-prefix`, not a wrapper. A class
+is a byte observation; only `resource-wrapper` has a structural reading, and
+that reading is **Probable**.
 
 ## Transform population
 
