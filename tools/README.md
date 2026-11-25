@@ -5,6 +5,8 @@
 - [SGD5 structural sampler](sgd5/README.md): reports the observed SGD5 header,
   table blocks and data-region prefix.
 - [rbf0](rbf0/README.md): structural inspector for RBF0 payloads.
+- [type14](type14/README.md): header and table inspector for a decoded type 14
+  payload.
 
 A tool added here MUST:
 
