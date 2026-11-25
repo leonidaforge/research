@@ -173,6 +173,16 @@ class ParseTests(unittest.TestCase):
         self.assertFalse(dictionary.record_table_dense)
         self.assertEqual(len(dictionary.record_gaps), 1)
         self.assertEqual(dictionary.record_gaps[0]["delta"], 0xC0)
+        # A gap alone is not an order mismatch: the value order is compared with
+        # the recorded addresses, not with a fixed stride.
+        self.assertTrue(dictionary.value_order_matches_index)
+
+        gapped_permuted = make_dictionary(
+            [{"name": "alpha", "hash": 1}, {"name": "beta", "hash": 2}],
+            record_offsets=[0x40, 0x100], value_permutation=True,
+        )
+        dictionary = td.parse_dictionary(bytes(gapped_permuted), 0x2000)
+        self.assertFalse(dictionary.record_table_dense)
         self.assertFalse(dictionary.value_order_matches_index)
 
         permuted = make_dictionary(

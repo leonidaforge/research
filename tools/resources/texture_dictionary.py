@@ -407,9 +407,9 @@ def parse_dictionary(system: bytes, graphics_length: int, max_records: int = MAX
         )
     dictionary.records = records
 
-    # Record table shape and value order. The value array is expected to be a
-    # permutation of the record table, so its order can differ from the index
-    # order even when the table itself is contiguous.
+    # Record table shape and value order. The value array order is compared with
+    # the record-address order, not with a fixed stride, so a table gap does not
+    # by itself count as an order mismatch.
     record_offsets = sorted(
         record.record_offset for record in records if record.record_offset is not None
     )
@@ -421,9 +421,8 @@ def parse_dictionary(system: bytes, graphics_length: int, max_records: int = MAX
         ]
         dictionary.record_gaps = gaps
         dictionary.record_table_dense = not gaps
-        base = record_offsets[0]
         dictionary.value_order_matches_index = all(
-            record.record_offset == base + index * RECORD_LEN
+            record.record_offset == record_offsets[index]
             for index, record in enumerate(records)
         )
     elif records:
