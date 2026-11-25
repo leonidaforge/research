@@ -8,32 +8,34 @@ Confidence values:
 | --- | --- |
 | Confirmed | Structural claims reproduce across the full observed sample with no counterexample |
 | Confirmed (sample) | Reproduces across a bounded sample; the remainder of the population is unvisited |
+| Confirmed (single sample) | Reproduces within one decoded payload; no second sample was compared |
 | Supported | Consistent with all inspected samples but rests on a small population |
 | Suspected | One or more signals point at a family; no structure established |
 | Unknown | No identification |
 
 ## Identified file formats
 
-| Identifier | Class | Confidence | Signature | Native types | Population | Investigated | Document |
+"Repository category" is where this repository keeps the document. It is not evidence about the payload's role. Two entries below state a role explicitly and the rest do not.
+
+| Identifier | Repository category | Confidence | Signature | Native types | Population | Investigated | Document |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| RPF9 | Container | Confirmed | `9FPR` (`0x52504639`) | Container; carried by type 0 | 22 top-level archives, 6,534 unique rows | All 22 manifests; 782 nested archives extracted | [rpf9](containers/rpf9/README.md) |
-| RBF0 | Metadata encoding | Confirmed (sample) | `RBF0` (`52 42 46 30`) at offset 0 | 11 | 18 payloads, 1 nested archive | 18 of 18 | [rbf0](metadata/rbf0/README.md) |
-| EDUP | Record container | Confirmed (sample) | `EDUP` (`45 44 55 50`) at offset 0 | 255 | 5 rows, 5 archives | 4 distinct payloads | [edup](unknown/edup/README.md) |
-| KB2j / KB2n | Media container family | Confirmed (sample) | `KB2j`, `KB2n` at offset 0 | 255 | 515 rows in `movies.rpf` (505 / 10) | Header, frame index and frame region of all 515 | [kb2j](unknown/kb2j/README.md) |
-| SGD5 | Block table | Supported | `SGD5` (`53 47 44 35`) at offset 0 | 255 | 2 rows, `shaders.rpf` rows 1 and 2 | 2 of 2 | [sgd5](unknown/sgd5/README.md) |
-| PSIN | Tagged section encoding | Confirmed (sample) | `PSIN` (`50 53 49 4E`) at offset 0 | 11, 93, 94 | 103 unique decoded payloads | 103 of 103 | [psin](unknown/psin/README.md) |
-| Type 14 payload | Unnamed document | Confirmed (single sample) | None | 14 | 2 rows, 1 decoded | 1 decoded, 1 behind the payload transform | [type14](unknown/type14/README.md) |
+| RPF9 | Container | Confirmed | `9FPR` (`0x52504639`) | Container; carried by type 0 | 22 top-level archives, 6,534 unique `(archive, row)` pairs | All 22 manifests; 782 nested archives extracted | [rpf9](containers/rpf9/README.md) |
+| RBF0 | Metadata | Confirmed (sample) | `RBF0` (`52 42 46 30`) at offset 0 | 11 | 156 rows in one nested archive | 18 of 156 rows decoded | [rbf0](metadata/rbf0/README.md) |
+| EDUP | Unknown | Confirmed (sample) | `EDUP` (`45 44 55 50`) at offset 0 | 255 | 5 rows, 5 archives | 4 distinct payloads | [edup](unknown/edup/README.md) |
+| KB2j / KB2n | Container family | Confirmed (sample) | `KB2j`, `KB2n` at offset 0 | 255 | 515 rows in `movies.rpf` (505 / 10) | Header, frame index and frame region of all 515 | [kb2j](unknown/kb2j/README.md) |
+| SGD5 | Unknown | Supported | `SGD5` (`53 47 44 35`) at offset 0 | 255 | 2 rows, `shaders.rpf` rows 1 and 2 | 2 of 2 | [sgd5](unknown/sgd5/README.md) |
+| PSIN | Unknown | Confirmed (sample) | `PSIN` (`50 53 49 4E`) at offset 0 | 11, 93, 94 | 103 unique decoded payloads | 103 of 103 | [psin](unknown/psin/README.md) |
+| Type 14 payload | Unknown | Confirmed (single sample) | None | 14 | 2 rows, 1 decoded | 1 decoded, 1 behind the payload transform | [type14](unknown/type14/README.md) |
 | GFX* | Unknown | Supported | `GFX*` (`47 46 58 2A`) at offset 0 of decoded payload | 66 | 49 rows, 6 depth-1 archives under `data.rpf` | Header sample only | [gfx](unknown/gfx/README.md) |
 | ADAT | Unknown | Supported | `ADAT` (`41 44 41 54`) at offset 0 | 255 | 729 rows, 59 of 60 depth-1 `audio.rpf` archives | Two sample groups | [adat](unknown/adat/README.md) |
 
-RDS5 and the resource container are not in the table because their detail is not yet on `main`; see [Pending integration](#pending-integration).
+RDS5 and the resource container are not in the table because their format documents are not yet on `main`. For RDS5 the verification evidence is on `main`, but the format document it verifies is on a branch; see [Pending integration](#pending-integration).
 
 ## Suspected format families
 
 | Identifier | Evidence for a family | Missing | Where |
 | --- | --- | --- | --- |
-| PTFX | One plaintext row whose decoded payload carries `PTFX`; a decoded-payload scan of 356 small rows found exactly one occurrence | Structure, variant spread, second sample | No evidence index is committed; the family is under active research |
-| Row payload transform | A stored payload transform that the reader rejects; rows behind it are unreadable and their contents unobserved | Algorithm, key schedule, whether the output is a known family | [payloads.md](containers/rpf9/payloads.md) |
+| PTFX | One plaintext row whose decoded payload carries `PTFX` (UPL-F01) | Structure, variant spread, second sample | No evidence index is committed; the family is under active research |
 | Resource page serialization | Page map, system and graphics pages, compressed streams and pointer tables observed in extracted resources | Object grammar, pointer semantics, engine allocation path | [Pending integration](#pending-integration) |
 
 ## Unidentified payload structures
@@ -45,7 +47,7 @@ RDS5 and the resource container are not in the table because their detail is not
 | Nested archives outside the sample | 3,188 eligible type-0 rows plus 381 above the 64 MiB cap | Not extracted |
 | Rows whose decoded payload begins with zlib-looking data but is not one of the families above | Unknown | Not investigated |
 
-Type IDs are row labels. The catalog assigns no format to a type ID except where a finding does so, and no type ID in the 40 observed values carries a single payload family.
+Type IDs are row labels. The catalog assigns no format to a type ID except where a finding does so. No type ID observed so far is known to carry a single payload family, and type 11 and type 255 are each known to carry several.
 
 ## Shared serialization mechanisms
 
@@ -55,6 +57,7 @@ These are not game file formats and MUST NOT be listed as formats.
 | --- | --- | --- |
 | RPF9 name hashing | `hash64` and `key32` values derived from paths; resolves names and selects key classes | [names.md](containers/rpf9/names.md), [evidence/shared](../../evidence/shared/INDEX.md) |
 | Chunked storage | Chunk table plus per-chunk encoding, shared by every chunked row across families | [payloads.md](containers/rpf9/payloads.md) |
+| Payload transform | A stored payload transform the reader rejects; rows behind it are unreadable and their decoded contents unobserved. The algorithm is unknown, so the transform is a storage mechanism of unknown effect, not a format | [payloads.md](containers/rpf9/payloads.md) |
 | Resource page serialization | Page map, segment pages and stream containers used inside resources | Pending integration |
 
 ## Research utilities
