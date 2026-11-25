@@ -81,5 +81,6 @@ Unrecognized or malformed payloads always fail.
 python -m unittest discover -s tools/kb2j -p "test_*.py"
 ```
 
-The tests build synthetic headers, frame tables and audio records in temporary
-directories. They do not read game files.
+The tests build synthetic headers, frame tables, audio records and a two-row
+archive with a JSONL manifest in temporary directories. They do not read game
+files.
