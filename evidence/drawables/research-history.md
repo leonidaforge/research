@@ -47,10 +47,11 @@ and maximum: the first six `f32` values, with the remaining words uninterpreted.
 **Correction.** The target is an array of eight-`f32` records. Record 0 is the
 aggregate and records 1..N are the per-geometry AABBs; a one-geometry model
 stores only the aggregate. The aggregate equals the union of the per-geometry
-records in 2,006 of 2,006 sampled models, and the union of all models equals the
-header AABB in 1,932 of 1,990 drawables. The earlier reading described record 0
-of a multi-geometry model and did not identify the per-geometry records
-(DRAW-F22).
+records in 2,006 of 2,006 sampled models: 1,337 models with at least two
+geometries, plus 669 single-geometry models whose check is trivial. The union of
+all models equals the header AABB in 1,932 of 1,990 drawables. The earlier
+reading described record 0 of a multi-geometry model and did not identify the
+per-geometry records (DRAW-F22).
 
 ## The index descriptor `+0x0C` was read as an opaque word
 

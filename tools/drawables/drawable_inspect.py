@@ -844,6 +844,7 @@ class Inspector:
         keys = []
         bound = 0
         null_keys = 0
+        with_key = 0
         slot_limit = 0
         if slots is not None:
             slot_limit = self.array_count(slots.offset, texture_count, 8, what + " slot table")
@@ -890,10 +891,10 @@ class Inspector:
                                 null_keys += 1
                             else:
                                 keys.append(key)
+                                with_key += 1
                     except DrawableError as err:
                         self.add("pointer_read", str(err))
             textures.append(entry)
-        unresolved = bound - null_keys
         return {
             "offset": offset,
             "texture_count": texture_count,
@@ -908,7 +909,7 @@ class Inspector:
                 "bound": bound,
                 "unbound": texture_count - bound,
                 "null_key": null_keys,
-                "bound_with_key": unresolved,
+                "bound_with_key": with_key,
                 "join_attempted": False,
                 "resolved": None,
             },

@@ -123,7 +123,7 @@ reports `aabb_records`, `extra_min_equal` and `extra_max_equal`. The array
 holds the aggregate record first, then one record per geometry in
 geometry-array order. A model with one geometry stores only the aggregate
 record. The aggregate equals the union of the per-geometry records within
-`2e-3`.
+`2e-3` in all 1,337 multi-geometry models of the census.
 
 | Drawable | Models | Records per model | Aggregate equals union |
 | -------- | -----: | ----------------: | ---------------------- |
@@ -153,21 +153,18 @@ separately. The selection rule is the first 6,000 recovery candidates of
 one to four streams. The manifest and decoded files are local inputs; they are
 not published.
 
-The 58 header exceptions have two named causes:
+The 58 header exceptions split by null LOD slot count. The bucket is
+descriptive; it does not establish why the union differs.
 
-- 57 drawables have exactly three null LOD slots. The header is not the union of
-  the present models; its larger extent is consistent with the three absent LOD
-  models, which are not in the resource.
-- One drawable (`0x01066B9010`) has four populated LOD slots and four models,
-  but its aggregate minimum on one axis is `0.1849` below the header minimum.
-  The header is not the union of the four model aggregates there. No cause is
-  established beyond the disagreement.
+- 57 drawables have exactly three null LOD slots. The absent LOD models are not
+  present in the resource; the cause is not verified.
+- One drawable (`0x01066B9010`) has no null LOD slot. Its header-union delta is
+  `0.1849` (the census field `delta`); the cause is not established.
 
 For the named rows A and B, the header union matches.
 
 This corrects the earlier reading that the target "starts with the model
-min/max". The array is a bounds structure, not a decoded vertex stream. The
-fourth word duplicated the first in all 9,579 records read for this check.
+min/max". The array is a bounds structure, not a decoded vertex stream.
 
 | Sample | Populated slots | Models | Geometries | Shader indices |
 | ------ | --------------- | -----: | ---------: | -------------- |
@@ -524,6 +521,10 @@ single occurrence is weaker evidence for a name than a repeated one.
 | `0x739E3D0D` | `SpecularTex2` | 47 | Confirmed (hash match) |
 | `0x0DF47048` | `DiffuseTex2` | 7 | Confirmed (hash match) |
 | `0x2C8D7182`, `0x0CD27763` | unknown | 52 each | Unknown |
+
+Summing the census occurrence counts, the listed hashes account for 302 of the
+348 declared slots. The remaining 46 are 12 other parameter hashes that are not
+named here: ten occur four times and two occur three times.
 
 `joaat("alpha/beta") = 0x75438640` reproduces the published control vector. A
 hash match proves a preimage; it does not prove that the engine's author chose
