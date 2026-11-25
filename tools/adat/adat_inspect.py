@@ -726,6 +726,10 @@ def _summarize(reports):
             "stride_rows": {},
         },
         "rates": {"0x76": {}, "atypical": []},
+        "lengths": {},
+        "length_min": None,
+        "length_max": None,
+        "toc": {},
         "codec02": {"records": 0, "four_bytes_per_sample": 0},
         "violations": 0,
         "exceptions": 0,
@@ -776,6 +780,18 @@ def _summarize(reports):
                     summary["a3"]["unexpected"] += 1
             elif stream["codec"] == "0x0b":
                 summary["a3"]["missing"] += 1
+            for length, count in stream.get("lengths", {}).items():
+                summary["lengths"][str(length)] = (
+                    summary["lengths"].get(str(length), 0) + count
+                )
+            for toc, count in stream.get("toc", {}).items():
+                summary["toc"][str(toc)] = summary["toc"].get(str(toc), 0) + count
+            if stream.get("length_min") is not None:
+                if summary["length_min"] is None or stream["length_min"] < summary["length_min"]:
+                    summary["length_min"] = stream["length_min"]
+            if stream.get("length_max") is not None:
+                if summary["length_max"] is None or stream["length_max"] > summary["length_max"]:
+                    summary["length_max"] = stream["length_max"]
             if stream["codec"] == "0x02":
                 summary["codec02"]["records"] += 1
                 if stream.get("raw_size_check", {}).get("four_bytes_per_sample"):
@@ -848,6 +864,12 @@ def _print_summary(summary, stream):
             f" violations={totals['violations']}",
             file=stream,
         )
+    print(
+        f"length range: {summary['length_min']}..{summary['length_max']};"
+        f" toc: {summary['toc']};"
+        f" top lengths: {sorted(summary['lengths'].items(), key=lambda item: -item[1])[:5]}",
+        file=stream,
+    )
     print(f"a3: {summary['a3']}", file=stream)
     print(f"ff25: {summary['ff25']}", file=stream)
     print(f"rates 0x76: {summary['rates']['0x76']}", file=stream)
