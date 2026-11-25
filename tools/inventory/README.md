@@ -145,9 +145,18 @@ the documented magics `9FPR`, `RBF0`, `PSIN`, `SGD5`, `EDUP`, `KB2j`, `KB2n`,
 
 `locators.md` records the drawable, type-5 dictionary and texture-slot sample
 locators used by the iteration 11 work. Each entry names the top-level archive,
-the row, the extracted size, the structural measurements and the SHA-256 of the
-archive or stored row, plus the command that reaches it. The file is a recorded
-set, not a generator.
+the row, the structural measurements, the stored-row SHA-256 and the command
+that reaches it. The file separates measured digests from the one digest
+attributed to an existing evidence table. `locator_digest.py` recomputes a
+stored-row digest from an archive, manifest and row. Archive-level digests are
+omitted because they duplicate existing evidence tables.
+
+```sh
+python tools/inventory/locator_digest.py \
+  --archive <extracted-archive> \
+  --manifest <archive-manifest.jsonl> \
+  --row <inner-row>
+```
 
 ## Dependencies
 
