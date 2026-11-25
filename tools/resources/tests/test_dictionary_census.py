@@ -77,6 +77,8 @@ class CensusTests(unittest.TestCase):
         self.assertEqual(report["negatives"]["stats"]["rejected"], 1)
         self.assertEqual(report["control"]["trials"], 10000)
         self.assertEqual(report["control"]["slot_accepted"], 0)
+        self.assertEqual(report["control"]["hash_matched"], 0)
+        self.assertEqual(report["control"]["slot_threshold"], 100)
 
 
 if __name__ == "__main__":
