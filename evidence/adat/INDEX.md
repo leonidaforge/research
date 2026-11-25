@@ -11,7 +11,7 @@ the signature from a scratch discovery sample. The GFX* evidence remains there.
 
 | Frame | Scope | ADAT rows | Signature reading |
 | --- | --- | ---: | --- |
-| Top-level stored-byte census (UPL-F01) | 22 top-level archives | 0 | First eight stored bytes of untransformed top-level rows |
+| Top-level stored-byte census (UPL-F01) | 22 top-level archives; 6,079 untransformed rows inspected, 455 transformed rows not inspected | 0 | First eight stored bytes of untransformed top-level rows |
 | Newer scratch inventory, depth 1 | 782 archives | 768 | Stored payload offset 0 of type-255 rows |
 
 The depth-1 frame is the `inventory-expansion` cache. Its summary records 782 of
@@ -19,6 +19,12 @@ The depth-1 frame is the `inventory-expansion` cache. Its summary records 782 of
 archive size cap. The cache contains 849 archive manifests after deduplication
 of repeated `archives.jsonl` entries; 75 archives contain at least one type-255
 row, and 65 contain ADAT rows.
+
+The raw scan holds 923 ADAT rows across 75 archive copies. The population is
+deduplicated by `(parent archive identity, row index)`: repeated copies of the
+same parent archive are collapsed, giving 768 rows in 65 parent archives. The
+payload digest is not the deduplication key. The committed inspector reports
+`samples=768` for an input list built from this deduplicated set.
 
 The ADAT rows are all depth 1:
 
@@ -78,12 +84,12 @@ are retired and are not reused; the findings below start at `ADAT-F06`.
 | ADAT-F19 | A record is a little-endian 64-bit word: type in bits 63..56, size in bits 55..28 and payload-relative offset in bits 27..0. Record type bytes are `0x36`, `0x48`, `0x55`, `0x5C`, `0x76`, `0xA3`, `0xB2` and `0xBD`. `FF25` begins with `0x48` in 275/275 rows; `FF02` begins with `0x36` in 124/124 rows. No type byte is assigned a stream or codec meaning. | `BINARY`, `CROSS_SAMPLE` | Confirmed (fields and byte values) | Type meanings are Unknown |
 | ADAT-F20 | The earlier `FF02` record-width heuristic explains 123 of 124 rows. Width 36 covers 113 `audio.rpf` rows, 44 covers 4 other rows and 60 covers 6 other rows. The remaining other row has mixed chunk counts, an integer width of 39 and no integral width; `ADAT-F12` explains it. | `BINARY`, `CROSS_SAMPLE` | Confirmed (sample) | The width relation holds only when every stream has the same chunk count |
 | ADAT-F21 | `0x76` records carry a codec byte at `+0x1C` and a rate field at `+0x08`. The codec byte is `0x0B` in 15,038 descriptors and `0x02` in 227; no other value occurs. The 15,038 are 14,665 `0x76` records and 373 `0x48` entries. | `BINARY`, `CROSS_SAMPLE` | Confirmed (byte values and positions) | The codec byte is not assigned an identity; no decoder was run |
-| ADAT-F22 | Every `0x0B` `0x55` record is a multiple of 2,048 bytes. Over 14,940 records and 505,723 blocks, 502,373 data blocks parse as `[u16 length][packet]`; a zero length terminates a block, the remainder is zero, and no length crosses the block end. There are 0 framing violations. The FF02, FF21 and FF61 variants have no metadata blocks. | `BINARY`, `CROSS_SAMPLE`, `SYNTHETIC` | Confirmed (framing) | The packets are not decoded; the framing does not identify a codec |
+| ADAT-F22 | Every `0x0B` `0x55` record is a multiple of 2,048 bytes. Over 14,940 records and 505,723 blocks, 502,373 data blocks parse as `[u16 length][packet]`; a zero length terminates a block, the remainder is zero, and no length crosses the block end. There are 0 framing violations and 0 exceptions. The FF02, FF21 and FF61 variants have no metadata blocks. | `BINARY`, `CROSS_SAMPLE`, `SYNTHETIC` | Confirmed (framing) | The packets are not decoded; the framing does not identify a codec |
 | ADAT-F23 | The 4,961,453 `0x0B` packets carry 951,673,715 payload bytes and 66,258,537 padding bytes. Packet lengths range from 3 to 480 bytes; the most common are 320, 80, 50, 160 and 240. The first packet byte has eight values, led by `0xFC` (2,463,483) and `0xF8` (1,276,418). | `BINARY`, `CROSS_SAMPLE` | Confirmed (values) | The first byte is not mapped to a frame duration without a decoder |
-| ADAT-F24 | The `0x48` record is `12 + 16 * count` bytes: `u32` page count, `u32` page stride in bytes, `u32` sub-stream count, then 16-byte entries. The size relation holds in 275/275 records. `FF25` divides its one `0x55` record into pages of that stride: a sentinel block, one or two metadata blocks, data blocks and zero padding. The page count equals the field in 275/275 rows and the 1,768 pages have no unexplained block. | `BINARY`, `CROSS_SAMPLE`, `SYNTHETIC` | Confirmed (layout and counts) | The entry `unknown` and `decoded` fields are not interpreted. A 24-byte entry does not fit the observed sizes |
+| ADAT-F24 | The `0x48` record is `12 + 16 * count` bytes: `u32` page count, `u32` page stride in bytes, `u32` sub-stream count, then 16-byte entries. The size relation holds in 275/275 records. `FF25` divides its one `0x55` record into pages of that stride. The block classes sum to 505,723: 502,373 data, 1,768 sentinel, 26 other metadata and 1,556 zero. The page count equals the field in 275/275 rows. The classifier treats every leading non-data, non-zero block as metadata; a corrupted first data block would be counted as metadata. | `BINARY`, `CROSS_SAMPLE`, `SYNTHETIC` | Confirmed (layout and counts) | The entry `unknown` and `decoded` fields are not interpreted. A 24-byte entry does not fit the observed sizes |
 | ADAT-F25 | The rate field is the low `u16` at `0x76 +0x08`, not the descriptor's lowest `u16`. It is 48,000 in 14,625 records and 12,000 (30), 22,050 (8) or 11,025 (2) in 40 records from 14 rows in two depth-1 archives. `0x48` entries carry the rate in the high `u16` of the third entry word and are 48,000 in 373/373 entries. | `BINARY`, `CROSS_SAMPLE` | Confirmed (field position and values) | The decode rate and the meaning of the 40 non-48 kHz records are Unknown |
 | ADAT-F26 | For codec byte `0x02`, the `0x55` size equals `4 * declared` in 227/227 records in 43 rows, where `declared` is the `0x76` `u32` at `+0x00`. | `BINARY`, `CROSS_SAMPLE` | Confirmed (size relation) | No sample type is established; the data is not decoded |
-| ADAT-F27 | `0xA3` tables start at 0 and are non-decreasing in 14,940/14,940 paired `0x0B` streams. `FF02`, `FF21` and `FF61` have one entry per 2,048-byte block plus the initial 0 (14,665/14,665); `FF25` has one entry per page (275/275). The 43 `FF21` rows that carry codec `0x02` streams have no `0xA3` record. | `BINARY`, `CROSS_SAMPLE`, `SYNTHETIC` | Probable (position table); Confirmed (counts) | The unit and the terminal relation to decoded samples are Unknown |
+| ADAT-F27 | `0xA3` tables start at 0 and are non-decreasing in 14,940/14,940 paired `0x0B` streams. `FF02`, `FF21` and `FF61` have one entry per 2,048-byte block plus the initial 0 (14,665/14,665); `FF25` has one entry per page (275/275). The 227 `0x02` streams have no `0xA3` record; they occur in 43 `FF21` rows that also carry `0x0B` streams with `A3` tables. The entry width is 4 bytes. | `BINARY`, `CROSS_SAMPLE`, `SYNTHETIC` | Probable (position table); Confirmed (counts) | The unit and the terminal relation to decoded samples are Unknown |
 | ADAT-F28 | No descriptor in the 768 rows carries codec byte `0x05` and no rate field is 32,000. The 15,265 codec positions are `0x0B` or `0x02`. No field or codec byte in the observed descriptors selects a stream for the second named codec hypothesis. | `BINARY`, `CROSS_SAMPLE` | Rejected (H2); Unknown (second codec selector) | Absence in this depth-1 sample does not rule out other archives or builds |
 
 ## Variant table detail
@@ -141,6 +147,55 @@ Remaining limitation: the maximum increase of 5 and the minimum jumps are
 empirical bounds from one build. The test finds the table end from the jump, so a genuine
 adjacent increase above 5 would be read as the end of the table. No such row
 occurs in the sample.
+
+## Atypical rate records
+
+The 40 `0x76` records whose rate field is not 48,000 occur in 14 rows in two
+depth-1 archives. Stream index is the zero-based `0x55` record index within the
+row. Every record is codec byte `0x0B`.
+
+| Archive | Row | Stream | Rate | Declared | Size |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| `d1:audio.rpf:72` | 51 | 0 | 11,025 | 158,651 | 14,336 |
+| `d1:audio.rpf:72` | 51 | 1 | 11,025 | 158,484 | 14,336 |
+| `d1:audio.rpf:72` | 51 | 3 | 22,050 | 55,125 | 6,144 |
+| `d1:audio.rpf:72` | 51 | 18 | 22,050 | 54,780 | 6,144 |
+| `d1:audio.rpf:72` | 78 | 0 | 22,050 | 260,460 | 24,576 |
+| `d1:audio.rpf:72` | 78 | 13 | 22,050 | 152,972 | 14,336 |
+| `d1:audio.rpf:72` | 92 | 5 | 22,050 | 97,182 | 8,192 |
+| `d1:audio.rpf:72` | 92 | 35 | 22,050 | 97,182 | 8,192 |
+| `d1:audio.rpf:72` | 95 | 1 | 22,050 | 97,182 | 8,192 |
+| `d1:audio.rpf:72` | 95 | 51 | 22,050 | 97,182 | 8,192 |
+| `d1:audio.rpf:77` | 0 | 0 | 12,000 | 61,537 | 6,144 |
+| `d1:audio.rpf:77` | 1 | 0 | 12,000 | 82,862 | 8,192 |
+| `d1:audio.rpf:77` | 2 | 0 | 12,000 | 76,011 | 8,192 |
+| `d1:audio.rpf:77` | 3 | 0 | 12,000 | 19,514 | 2,048 |
+| `d1:audio.rpf:77` | 3 | 1 | 12,000 | 16,001 | 2,048 |
+| `d1:audio.rpf:77` | 3 | 2 | 12,000 | 21,154 | 4,096 |
+| `d1:audio.rpf:77` | 3 | 3 | 12,000 | 23,202 | 4,096 |
+| `d1:audio.rpf:77` | 3 | 4 | 12,000 | 13,989 | 2,048 |
+| `d1:audio.rpf:77` | 4 | 0 | 12,000 | 74,316 | 8,192 |
+| `d1:audio.rpf:77` | 4 | 1 | 12,000 | 4,139 | 2,048 |
+| `d1:audio.rpf:77` | 5 | 0 | 12,000 | 76,011 | 8,192 |
+| `d1:audio.rpf:77` | 6 | 0 | 12,000 | 3,807 | 2,048 |
+| `d1:audio.rpf:77` | 6 | 1 | 12,000 | 3,807 | 2,048 |
+| `d1:audio.rpf:77` | 6 | 2 | 12,000 | 3,807 | 2,048 |
+| `d1:audio.rpf:77` | 6 | 3 | 12,000 | 3,807 | 2,048 |
+| `d1:audio.rpf:77` | 6 | 4 | 12,000 | 3,807 | 2,048 |
+| `d1:audio.rpf:77` | 6 | 5 | 12,000 | 3,807 | 2,048 |
+| `d1:audio.rpf:77` | 6 | 6 | 12,000 | 3,807 | 2,048 |
+| `d1:audio.rpf:77` | 6 | 7 | 12,000 | 3,807 | 2,048 |
+| `d1:audio.rpf:77` | 6 | 8 | 12,000 | 3,807 | 2,048 |
+| `d1:audio.rpf:77` | 6 | 9 | 12,000 | 3,807 | 2,048 |
+| `d1:audio.rpf:77` | 6 | 10 | 12,000 | 3,807 | 2,048 |
+| `d1:audio.rpf:77` | 6 | 11 | 12,000 | 3,807 | 2,048 |
+| `d1:audio.rpf:77` | 6 | 12 | 12,000 | 3,807 | 2,048 |
+| `d1:audio.rpf:77` | 6 | 13 | 12,000 | 3,807 | 2,048 |
+| `d1:audio.rpf:77` | 6 | 14 | 12,000 | 3,807 | 2,048 |
+| `d1:audio.rpf:77` | 6 | 15 | 12,000 | 3,807 | 2,048 |
+| `d1:audio.rpf:77` | 7 | 0 | 12,000 | 76,011 | 8,192 |
+| `d1:audio.rpf:77` | 8 | 0 | 12,000 | 76,011 | 8,192 |
+| `d1:audio.rpf:77` | 9 | 0 | 12,000 | 40,847 | 4,096 |
 
 ## Data-offset byte boundary
 
@@ -303,9 +358,19 @@ archive. No payload file is committed.
 For the table-end test, read `u16[streams]` at `+0x10` (`FF21`, `FF25`) or
 `+0x14` (`FF61`), compare adjacent entries, and read the next `u16`. For the
 record run, use `tools/adat/adat_inspect.py`. Add `--framing` to walk the
-`0x55` blocks, classify the `FF25` pages and count packets. For the post-table
-gap, subtract the table end from the `+0x0C` offset. For the byte boundary,
-compare the bytes at `offset - 1` and `offset`.
+`0x55` blocks, classify the `FF25` pages and count packets. For the population
+aggregate, write the deduplicated sample paths to an input list and run:
+
+```text
+python tools/adat/adat_inspect.py --input-list <WORK>/adat-inputs.txt --summary --json
+```
+
+The summary reproduces `samples=768`, 14,940 `0x0B` streams, 14,665 `0x76`
+records, 373 `0x48` entries, 227 `0x02` records, 505,723 blocks split into
+502,373 data, 1,768 sentinel, 26 other metadata and 1,556 zero, and the `A3`
+count relations. For the post-table gap, subtract the table end from the
+`+0x0C` offset. For the byte boundary, compare the bytes at `offset - 1` and
+`offset`.
 
 ## Limits
 

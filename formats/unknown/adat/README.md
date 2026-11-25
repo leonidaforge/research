@@ -1,19 +1,22 @@
 # ADAT
 
 `ADAT` (`41 44 41 54`) at offset 0 marks stored payloads of type 255 in depth-1
-archives. The current depth-1 scan finds 768 unique payloads in 65 archives
-under four top-level archives: 729 rows in 59 of the 60 scanned depth-1 archives
+archives. The current depth-1 scan finds 768 rows in 65 parent archives under
+four top-level archives: 729 rows in 59 of the 60 scanned depth-1 archives
 reached from `audio.rpf`, and 39 rows in six depth-1 archives reached from
-`shared_minigame000.rpf`, `story000.rpf` and `story000_restofworld.rpf`.
+`shared_minigame000.rpf`, `story000.rpf` and `story000_restofworld.rpf`. The 768
+rows are the 923 extracted ADAT rows collapsed by `(parent archive identity,
+row index)`; repeated copies of the same parent archive are counted once.
 
 The archive names are provenance, not evidence of purpose. The magic occurs only
 at payload offset 0; the substring inside `METADATA` is not a match.
 
 ## Population
 
-The scan covers depth 1 only. No top-level row carries `ADAT` in the stored-byte
-census of 6,534 untransformed top-level rows, so the population is 0 top-level
-and 768 depth-1 rows.
+The scan covers depth 1 only. No `ADAT` was found at offset 0 in the 6,079
+inspected untransformed top-level rows. The remaining 455 top-level rows behind
+the payload transform were not inspected, so the population is 0 confirmed
+top-level rows and 768 depth-1 rows.
 
 | Family | Rows | Archives | Stored bytes | Variant words |
 | --- | ---: | ---: | --- | --- |
@@ -181,7 +184,8 @@ Codec byte counts over the 768 rows:
 | any other | 0 | 0 | 0 |
 
 The 15,038 `0x0B` descriptors are 14,665 `0x76` records plus 373 `0x48`
-entries. The codec byte is not assigned an identity.
+entries. All 373 entries carry codec byte `0x0B` and rate 48,000; no record
+mixes codecs or rates. The codec byte is not assigned an identity.
 
 | Candidate | Streams | Disposition |
 | --- | ---: | --- |
@@ -200,12 +204,15 @@ blocks. Over the 14,940 `0x0B` records:
 | --- | ---: |
 | Blocks | 505,723 |
 | Data blocks | 502,373 |
-| Metadata blocks | 1,794 |
+| Sentinel blocks | 1,768 |
+| Other metadata blocks | 26 |
 | Zero blocks | 1,556 |
+| Unknown blocks | 0 |
 | Packets | 4,961,453 |
 | Packet payload bytes | 951,673,715 |
 | Padding bytes | 66,258,537 |
 | Framing violations | 0 |
+| Structure exceptions | 0 |
 
 A data block is a sequence of `[u16 length][packet]`. A zero length terminates
 the block and the rest of the block is zero. A block that ends exactly at 2,048
@@ -227,13 +234,16 @@ are 320 (2,233,972 packets), 80 (730,611), 50 (474,247), 160 (249,660) and 240
 
 The `FF02`, `FF21` and `FF61` variants have no metadata blocks. Every one of
 their `0x55` blocks is a data block. `FF25` divides the `0x55` record into pages
-of the `0x48` page stride. A page starts with a sentinel block (`u32`
-`0xFFFFFFFF`) and one metadata block, or two metadata blocks in 26 of the 27
-pages with a 882-block stride. Data blocks follow, then zero blocks to the page
+of the `0x48` page stride. A page starts with one sentinel block (`u32`
+`0xFFFFFFFF`). Twenty-six pages also carry one other metadata block; the other
+1,742 pages carry none. Data blocks follow, then zero blocks to the page
 boundary. The page count equals the `0x48` page-count field in 275/275 rows.
-The 1,768 pages come from 275 rows with strides of 256 blocks (257 rows), 231
-(1 row), 60 (15 rows), 882 (1 row) and 54 (1 row). No page has an unexplained
-block or a data block that fails the framing rule.
+The 1,768 pages come from 275 rows: 257 rows use a 256-block stride, 1 row uses
+231, 15 use 60, 1 uses 882 and 1 uses 54. The four block classes sum to the
+505,723 total: 502,373 data, 1,768 sentinel, 26 other metadata and 1,556 zero.
+The classifier treats every leading non-data, non-zero block as metadata; a
+corrupted first data block would therefore be counted as metadata and is not
+distinguishable by this rule.
 
 Codec byte `0x02` does not use the length framing. Its `0x55` record size is
 `4 * declared` in 227/227 records, where `declared` is the `0x76` `u32` at
@@ -290,18 +300,19 @@ families. Archive placement is provenance; the predicates are header arithmetic.
 | H2: codec byte `0x05` is a 32 kHz mono stream | Rejected for this population: no descriptor carries `0x05` and no rate field is 32,000 | 15,265 descriptor entries | Rejected (absence) |
 | H3: codec byte `0x02` is 4 bytes per declared sample | `size == 4 * declared` in 227/227 records | 227 records in 43 rows | Confirmed (size relation); Unknown (sample type) |
 | H4: low `u16` of the `0x76` descriptor is a source rate | The rate is the low `u16` at `+0x08`, not the descriptor's lowest `u16`. It is 48,000 in 14,625 `0x76` records and 12,000, 22,050 or 11,025 in 40 records. `0x48` entries carry the rate in the high `u16` of their third word. 48 kHz decode is not verified | 14,665 `0x76` records, 373 `0x48` entries | Confirmed (field position and values); Unknown (decode rate) |
-| H5: a `0xA3` entry is a seek position | Every `A3` table starts at 0 and is non-decreasing. `FF02`/`FF21`/`FF61` have one entry per 2,048-byte block plus the initial 0 (14,665/14,665); `FF25` has one entry per page (275/275). The unit and the terminal relation to decoded samples are Unknown | 14,940 paired streams | Probable (position table); Unknown (unit) |
+| H5: a `0xA3` entry is a seek position | An entry is a 4-byte `u32`. Every `A3` table starts at 0 and is non-decreasing. `FF02`/`FF21`/`FF61` have one entry per 2,048-byte block plus the initial 0 (14,665/14,665); `FF25` has one entry per page (275/275). The unit and the terminal relation to decoded samples are Unknown | 14,940 paired streams | Probable (position table); Unknown (unit) |
 
-The 43 `FF21` rows that carry codec `0x02` streams have no `0xA3` record; they
-are outside the H5 count. The 40 non-48 kHz `0x76` records occur in 14 rows in
-two depth-1 archives under `audio.rpf`. They are not a music-only exception and
-are listed in the evidence index.
+The 227 `0x02` streams have no `0xA3` record and are outside the H5 count. They
+occur in 43 `FF21` rows that also carry `0x0B` streams with `0xA3` tables. The
+40 non-48 kHz `0x76` records occur in 14 rows in two depth-1 archives under
+`audio.rpf`; the evidence index lists each record.
 
 ## Decode dependency
 
-No decoder was installed, copied or run. The framing result is a container
-result: it shows that the blocks and packet boundaries are consistent, not that
-the packets decode.
+No decoder was installed, copied or run, and no decoder is authorized for this
+task. The 20-stream decode criterion is therefore unmet. The framing result is a
+container result: it shows that the blocks and packet boundaries are consistent,
+not that the packets decode.
 
 To confirm codec identity and the declared sample count, an authorized decoder
 must decode the `0x0B` packets and compare the decoded sample count with the
