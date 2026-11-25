@@ -1,3 +1,5 @@
+import os
+import tempfile
 import unittest
 
 import pmap_heldout
@@ -46,6 +48,19 @@ class PmapHeldoutTests(unittest.TestCase):
         )
         row["actual_offsets"][1] += 16
         self.assertFalse(pmap_heldout.check(row, False))
+
+    def test_output_inside_sample_directory_is_refused(self):
+        import contextlib
+        import io
+        with tempfile.TemporaryDirectory() as directory:
+            with open(os.path.join(directory, "sample.bin"), "wb") as handle:
+                handle.write(synthetic.pmap_document())
+            with contextlib.redirect_stderr(io.StringIO()):
+                result = pmap_heldout.main([
+                    "--samples", directory,
+                    "--output", os.path.join(directory, "child.json"),
+                ])
+        self.assertEqual(result, 1)
 
 
 if __name__ == "__main__":

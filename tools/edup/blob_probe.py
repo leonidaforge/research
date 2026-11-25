@@ -25,6 +25,12 @@ WIDTH_LIMIT = 64
 MAX_OUTPUT = 4 * 1024 * 1024
 
 
+def path_inside(target: str, directory: str) -> bool:
+    target_path = os.path.realpath(os.path.abspath(target))
+    directory_path = os.path.realpath(os.path.abspath(directory))
+    return target_path == directory_path or target_path.startswith(directory_path + os.sep)
+
+
 def entropy(data: bytes) -> float:
     if not data:
         return 0.0
@@ -238,6 +244,17 @@ def main(argv=None) -> int:
     )
     args = parser.parse_args(argv)
 
+    if args.output:
+        target = os.path.realpath(os.path.abspath(args.output))
+        for directory in args.store_dir:
+            if path_inside(args.output, directory):
+                print("error: output path is inside a store directory", file=sys.stderr)
+                return 1
+        for path in args.samples + args.store:
+            if os.path.realpath(os.path.abspath(path)) == target:
+                print("error: output path equals an input path", file=sys.stderr)
+                return 1
+
     reports = []
     try:
         store_keys = (
@@ -261,10 +278,6 @@ def main(argv=None) -> int:
     rendered = json.dumps(document, indent=2) + "\n"
     if args.output:
         target = os.path.abspath(args.output)
-        for path in args.samples:
-            if os.path.abspath(path) == target:
-                print("error: output path equals an input path", file=sys.stderr)
-                return 1
         directory = os.path.dirname(target) or "."
         handle = tempfile.NamedTemporaryFile("w", delete=False, dir=directory, encoding="utf-8")
         try:

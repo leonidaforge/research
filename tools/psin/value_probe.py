@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import bz2
+import hashlib
 import json
 import lzma
 import os
@@ -25,6 +26,12 @@ MAX_OUTPUT = 4 * 1024 * 1024
 DEFAULT_MAX_BYTES = 2 * 1024 * 1024 * 1024
 
 
+def path_inside(target: str, directory: str) -> bool:
+    target_path = os.path.realpath(os.path.abspath(target))
+    directory_path = os.path.realpath(os.path.abspath(directory))
+    return target_path == directory_path or target_path.startswith(directory_path + os.sep)
+
+
 def section_body(data: bytes, tag: str) -> bytes:
     for section_tag, _, _, body in psin_inspect._walk_sections(data):
         if section_tag == tag:
@@ -33,7 +40,12 @@ def section_body(data: bytes, tag: str) -> bytes:
 
 
 def psch_values(data: bytes) -> list:
-    body = section_body(data, "PSCH")
+    return psch_values_body(section_body(data, "PSCH"))
+
+
+def psch_values_body(body: bytes) -> list:
+    if len(body) < 4:
+        raise psin_inspect.PsinError("PSCH body is shorter than 4 bytes")
     count = struct.unpack_from(">I", body, 0)[0]
     table = 4 + 8 * count
     if table + 8 > len(body):
@@ -220,6 +232,7 @@ def aggregate(reports: list) -> dict:
 
 def load_directory(directory: str, max_bytes: int = DEFAULT_MAX_BYTES) -> list:
     reports = []
+    seen = set()
     for name in sorted(os.listdir(directory)):
         path = os.path.join(directory, name)
         if not os.path.isfile(path) or not name.lower().endswith(".bin"):
@@ -230,6 +243,10 @@ def load_directory(directory: str, max_bytes: int = DEFAULT_MAX_BYTES) -> list:
             data = handle.read()
         if data[:4] != b"PSIN":
             continue
+        digest = hashlib.sha256(data).digest()
+        if digest in seen:
+            continue
+        seen.add(digest)
         try:
             report = psin_inspect.inspect_bytes(data)
         except psin_inspect.PsinError:
@@ -252,8 +269,8 @@ def main(argv=None) -> int:
     )
     args = parser.parse_args(argv)
 
-    if args.output and os.path.abspath(args.samples) == os.path.abspath(args.output):
-        print("error: output path equals the sample directory", file=sys.stderr)
+    if args.output and path_inside(args.output, args.samples):
+        print("error: output path is inside the sample directory", file=sys.stderr)
         return 1
     try:
         reports = load_directory(args.samples, args.max_bytes)

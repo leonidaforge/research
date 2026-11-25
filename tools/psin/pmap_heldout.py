@@ -10,6 +10,7 @@ labels and counts only; it does not print payload bytes.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import random
@@ -22,6 +23,12 @@ import psin_inspect
 SEED = 20261125
 HELD_OUT_COUNT = 10
 DEFAULT_MAX_BYTES = 2 * 1024 * 1024 * 1024
+
+
+def path_inside(target: str, directory: str) -> bool:
+    target_path = os.path.realpath(os.path.abspath(target))
+    directory_path = os.path.realpath(os.path.abspath(directory))
+    return target_path == directory_path or target_path.startswith(directory_path + os.sep)
 
 
 def align16(value: int) -> int:
@@ -113,6 +120,7 @@ def evaluate(rows: list, seed: int = SEED, held_out_count: int = HELD_OUT_COUNT)
 
 def load_directory(directory: str, max_bytes: int = DEFAULT_MAX_BYTES) -> list:
     rows = []
+    seen = set()
     for name in sorted(os.listdir(directory)):
         path = os.path.join(directory, name)
         if not os.path.isfile(path) or not name.lower().endswith(".bin"):
@@ -123,6 +131,10 @@ def load_directory(directory: str, max_bytes: int = DEFAULT_MAX_BYTES) -> list:
             data = handle.read()
         if data[:4] != b"PSIN":
             continue
+        digest = hashlib.sha256(data).digest()
+        if digest in seen:
+            continue
+        seen.add(digest)
         try:
             rows.append(payload_model(data, name[:-4]))
         except psin_inspect.PsinError:
@@ -143,6 +155,9 @@ def main(argv=None) -> int:
     )
     args = parser.parse_args(argv)
 
+    if args.output and path_inside(args.output, args.samples):
+        print("error: output path is inside the sample directory", file=sys.stderr)
+        return 1
     try:
         rows = load_directory(args.samples, args.max_bytes)
     except (OSError, psin_inspect.PsinError) as error:
@@ -156,9 +171,6 @@ def main(argv=None) -> int:
 
     if args.output:
         target = os.path.abspath(args.output)
-        if os.path.abspath(args.samples) == target:
-            print("error: output path equals the sample directory", file=sys.stderr)
-            return 1
         directory = os.path.dirname(target) or "."
         handle = tempfile.NamedTemporaryFile("w", delete=False, dir=directory, encoding="utf-8")
         try:

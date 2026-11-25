@@ -1,6 +1,7 @@
 import contextlib
 import io
 import os
+import tempfile
 import unittest
 import zlib
 
@@ -59,6 +60,21 @@ class BlobProbeTests(unittest.TestCase):
         report = blob_probe.probe_document(data, "none", store_keys={"store": {1, 2, 3}})
         self.assertEqual(report["store_key_hits"], 0)
         self.assertEqual(report["store_key_hits_be"], 0)
+
+    def test_output_inside_store_directory_is_refused(self):
+        with tempfile.TemporaryDirectory() as directory:
+            sample = os.path.join(directory, "sample.bin")
+            with open(sample, "wb") as handle:
+                handle.write(synthetic.edup_document([], b"\0" * 16))
+            store_dir = os.path.join(directory, "stores")
+            os.makedirs(store_dir)
+            with contextlib.redirect_stderr(io.StringIO()):
+                result = blob_probe.main([
+                    sample,
+                    "--store-dir", store_dir,
+                    "--output", os.path.join(store_dir, "child.json"),
+                ])
+        self.assertEqual(result, 1)
 
     def test_output_refuses_an_input_path(self):
         path = "blob-input.tmp"
