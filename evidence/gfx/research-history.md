@@ -22,15 +22,15 @@ Decoding all 49 type-66 rows in the population changes those readings:
 - The payload has a fixed ten-byte trailer shared by all 49 rows. The first
   document recorded only the prefix and did not inspect the end.
 
-The corrections supersede the two-form reading in GFX-F03 of the earlier index.
+The corrections supersede the two-form reading in the previous revision of GFX-F03.
 The stored zlib observation, the type-66 association and the six parent archives
 remain valid. Field meanings and format identity remain **Unknown**.
 
 The findings in [INDEX.md](INDEX.md) use a new GFX-F01 to GFX-F10 numbering. The
-earlier combined index used GFX-F01 to GFX-F04 for different claim boundaries,
+previous combined index used GFX-F01 to GFX-F04 for different claim boundaries,
 so its IDs are not reused.
 
-The population recount also differs from the earlier frame: the cache contains
+The population recount also differs from the previous frame: the cache contains
 849 unique depth-1 manifests and 183,144 row records, while the run summary
 records 782 archives and 169,523 rows. The extra cached archives contain no
 additional type-66 row, so the 49-row count is unchanged.
@@ -47,7 +47,7 @@ cached manifests at different stages:
 - 49 type-66 rows and 37 type-5 rows in the six GFX archives were also decoded.
 - 182,235 readable rows were checked only at the stored prefix.
 
-The figures did not come from different runs, selections or a defect. The earlier
+The figures did not come from different runs, selections or a defect. The previous
 arithmetic removed the 49 and 37 rows from the 183,144 total, but they belong to
 the 182,321 readable population.
 
@@ -62,12 +62,14 @@ evidence types.
 
 ## 2026-11-25: the GFx container and its tags replace the unidentified-signature reading
 
-The earlier document called `GFX*` an unidentified decoded-payload signature.
-It read `+0x08` and `+0x0A` as five variant byte pairs, treated the bytes after
-the second printable run as an opaque body, and recorded the last four bytes as
-a little-endian `u32` 64 inside a ten-byte trailer.
+The previous revision of this index recorded GFX-F03 as "five observed pairs"
+at `+0x08` and `+0x0A` whose pairs were "observable variants", GFX-F06 as a
+ten-byte trailer containing "the little-endian `u32` 64", and GFX-F07 with the
+limit "The body was not parsed". Those were committed claims in this repository.
+The previous format document also called the family unidentified. This revision
+replaces those claims with GFX-F03, GFX-F04, GFX-F06, GFX-F08 and GFX-F10.
 
-The 49 decoded payloads show the documented GFx container header:
+Measurements from the 49 decoded type-66 payloads in this worktree:
 
 - `GFX` at `+0x00`, version `0x2A` at `+0x03`, and a little-endian `u32` length
   at `+0x04` that equals the payload length in 49/49 rows.
@@ -77,23 +79,25 @@ The 49 decoded payloads show the documented GFx container header:
   patterns, not payload variants.
 - The region after the second printable run is a tag stream. The walk reaches
   the payload end in 49/49 rows and has 0 failures.
-- The earlier printable-run grammar is a raw-byte reading that crosses a tag
-  boundary. The first tag contains the first run; the 15-byte group after it
-  spans the end of that tag and the next tag, and the second run starts 13 bytes
-  after the first tag ends.
+- The printable-run grammar in the previous revision is a raw-byte reading that
+  crosses a tag boundary. The first tag contains the first run; the 15-byte
+  group after it spans the end of that tag and the next tag, and the second run
+  starts 13 bytes after the first tag ends.
 - The last four bytes are two zero-length tag headers, ShowFrame and End, not a
   `u32` field. The ten-byte suffix ends with those headers.
+- Tag code 39 is the only code whose body the walker also reads. Its body begins
+  with two `u16` values (four bytes) followed by a record stream; the values are
+  not interpreted. The sample has 1,025 tag 39 records and 102,306 nested
+  records, with a maximum nesting depth of 1. Including nested records raises
+  the total from 12,167 to 114,473 records.
+- In this sample, three payloads have 11, 28 and 261 top-level tags. Including
+  records nested in tag 39, the same three have 13, 5,616 and 4,227 records.
+- The frame rate is 30.0 in 48 rows and 24.0 in one. The rate is not uniform
+  across the sample.
 
-The earlier three tag counts of 11, 28 and 261 are top-level counts. Sprite
-bodies add nested records; the same three payloads have 13, 5,616 and 4,227
-tags when nested records are included. The maximum nesting depth is 1.
-
-The frame rate is 30.0 in 48 rows and 24.0 in one. The earlier uniform 30.0
-reading is corrected.
-
-The current tree contains no three-byte-only prefix comparison. The earlier
-predicate used four bytes. This history records that the fourth byte is the
-version, so a three-byte comparison would be insufficient.
+The current tree contains no three-byte-only prefix comparison. The previous
+revision used a four-byte predicate. This history records that the fourth byte
+is the version, so a three-byte comparison would be insufficient.
 
 The family name GFx rests on the header shape; no executable path or loader was
 traced. Tag contents, ActionScript, playback and rendering remain **Unknown**.

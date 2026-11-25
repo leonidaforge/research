@@ -58,16 +58,34 @@ class InspectTests(unittest.TestCase):
         self.assertEqual(report["tags"]["first_length"], 70)
         self.assertEqual(report["tags"]["count"], 3)
 
-    def test_tracks_sprite_nesting(self):
+    def test_tracks_tag39_nesting(self):
         nested = struct.pack("<HH", 1, 1)
         nested += encode_tag(2, b"x") + encode_tag(1) + encode_tag(0)
         raw = build_gfx(tags=[(39, nested), (1, b""), (0, b"")])
         report = gfx_inspect.inspect_bytes(raw)
         self.assertEqual(report["tags"]["count"], 3)
-        self.assertEqual(report["tags"]["sprite_count"], 1)
+        self.assertEqual(report["tags"]["tag39_count"], 1)
         self.assertEqual(report["tags"]["nested_tag_count"], 3)
         self.assertEqual(report["tags"]["total_tags"], 6)
-        self.assertEqual(report["tags"]["max_depth"], 1)
+        self.assertEqual(report["tags"]["max_nesting_depth"], 1)
+
+    def test_rejects_unsupported_nesting_depth(self):
+        inner = encode_tag(0)
+        for _ in range(gfx_inspect.MAX_NESTING_DEPTH + 2):
+            inner = encode_tag(39, struct.pack("<HH", 0, 0) + inner)
+        body = struct.pack("<HH", 0, 0) + inner
+        raw = build_gfx(tags=[(39, body), (1, b""), (0, b"")])
+        with self.assertRaises(gfx_inspect.GfxError) as raised:
+            gfx_inspect.inspect_bytes(raw)
+        self.assertIn("unsupported nesting depth", str(raised.exception))
+        self.assertIn("0x", str(raised.exception))
+
+    def test_rejects_hostile_extended_length(self):
+        body = struct.pack("<H", (2 << 6) | 0x3F)
+        body += struct.pack("<I", 0xFFFFFFF0) + b"\x00" * 8
+        with self.assertRaises(gfx_inspect.GfxError) as raised:
+            gfx_inspect.inspect_bytes(build_raw(body))
+        self.assertIn("overruns", str(raised.exception))
 
     def test_rejects_truncated_tag(self):
         body = struct.pack("<H", (2 << 6) | 10) + b"abcd"

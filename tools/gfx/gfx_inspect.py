@@ -19,8 +19,9 @@ import sys
 
 MAGIC = b"GFX"
 VERSION = 0x2A
-SPRITE_TAG = 39
+NESTED_TAG = 39
 END_TAG = 0
+MAX_NESTING_DEPTH = 8
 DEFAULT_MAX_BYTES = 64 * 1024 * 1024
 
 
@@ -59,7 +60,7 @@ def _read_tag_header(data, offset, limit):
     return code, length, offset
 
 
-def _walk(data, start, end, depth, stats):
+def _walk(data, start, end, depth, stats, label):
     """Walk tag records in [start, end). Return (count, reaches_end, last_code)."""
     position = start
     count = 0
@@ -68,21 +69,28 @@ def _walk(data, start, end, depth, stats):
         code, length, body = _read_tag_header(data, position, end)
         if body + length > end:
             raise GfxError(
-                f"tag {code} at 0x{position:x} overruns its region"
+                f"{label}: tag {code} at 0x{position:x} overruns its region"
                 f" (body 0x{body:x} + {length} > 0x{end:x})"
             )
         count += 1
         last_code = code
-        if code == SPRITE_TAG and length >= 4:
-            stats["sprite_count"] += 1
-            nested_start = body + 4
-            nested_count, nested_end, _ = _walk(
-                data, nested_start, body + length, depth + 1, stats
-            )
-            if not nested_end:
-                raise GfxError(f"sprite at 0x{position:x} does not end at its boundary")
-            stats["nested_tag_count"] += nested_count
-            stats["max_depth"] = max(stats["max_depth"], depth + 1)
+        if code == NESTED_TAG:
+            stats["tag39_count"] += 1
+            if length >= 4:
+                if depth + 1 > MAX_NESTING_DEPTH:
+                    raise GfxError(
+                        f"{label}: unsupported nesting depth at tag offset 0x{position:x}"
+                    )
+                nested_start = body + 4
+                nested_count, nested_end, _ = _walk(
+                    data, nested_start, body + length, depth + 1, stats, label
+                )
+                if not nested_end:
+                    raise GfxError(
+                        f"{label}: tag 39 body at 0x{position:x} does not end at its boundary"
+                    )
+                stats["nested_tag_count"] += nested_count
+                stats["max_depth"] = max(stats["max_depth"], depth + 1)
         position = body + length
         if code == END_TAG:
             break
@@ -115,8 +123,10 @@ def inspect_bytes(data: bytes, label: str = "<memory>") -> dict:
     if first_tag_offset > size:
         raise GfxError(f"{label}: first tag offset is past the file end")
 
-    stats = {"sprite_count": 0, "nested_tag_count": 0, "max_depth": 0}
-    tag_count, reaches_end, last_code = _walk(data, first_tag_offset, size, 0, stats)
+    stats = {"tag39_count": 0, "nested_tag_count": 0, "max_depth": 0}
+    tag_count, reaches_end, last_code = _walk(
+        data, first_tag_offset, size, 0, stats, label
+    )
     if not reaches_end:
         raise GfxError(f"{label}: tag walk did not reach the file end")
     if last_code != END_TAG:
@@ -155,8 +165,8 @@ def inspect_bytes(data: bytes, label: str = "<memory>") -> dict:
         },
         "tags": {
             "count": tag_count,
-            "max_depth": stats["max_depth"],
-            "sprite_count": stats["sprite_count"],
+            "max_nesting_depth": stats["max_depth"],
+            "tag39_count": stats["tag39_count"],
             "nested_tag_count": stats["nested_tag_count"],
             "total_tags": tag_count + stats["nested_tag_count"],
             "first_code": first_code,
@@ -195,8 +205,8 @@ def _print_text(report: dict, stream) -> None:
     )
     print(
         f"tags: count={tags['count']}"
-        f" max_depth={tags['max_depth']}"
-        f" sprite_count={tags['sprite_count']}"
+        f" max_nesting_depth={tags['max_nesting_depth']}"
+        f" tag39_count={tags['tag39_count']}"
         f" nested_tag_count={tags['nested_tag_count']}"
         f" total_tags={tags['total_tags']}"
         f" first_code={tags['first_code']}"
@@ -235,11 +245,12 @@ def main(argv=None) -> int:
     reports = []
     try:
         for path in args.samples:
+            label = os.path.basename(path)
             if os.path.getsize(path) > args.max_bytes:
-                raise GfxError(f"{path}: larger than the {args.max_bytes}-byte cap")
+                raise GfxError(f"{label}: larger than the {args.max_bytes}-byte cap")
             with open(path, "rb") as handle:
                 data = handle.read()
-            reports.append(inspect_bytes(data, label=path))
+            reports.append(inspect_bytes(data, label=label))
     except (OSError, GfxError) as error:
         print(f"error: {error}", file=sys.stderr)
         return 1

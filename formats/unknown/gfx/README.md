@@ -35,8 +35,9 @@ only at the stored prefix.
 | Family name | GFx container, from the signature and header shape | 49/49 header shape; no executable path traced | Confirmed (header shape) |
 
 No payload has a version other than 42 and no payload has a length mismatch.
-The earlier document called the family unidentified. It is identified by the
-container header and tag framing; the contents of the tags remain uninterpreted.
+The previous revision of this document called the family unidentified. It is
+identified by the container header and tag framing; the contents of the tags
+remain uninterpreted.
 
 ## Header
 
@@ -62,9 +63,10 @@ RECT sizes and first tag offsets:
 | 16 | 9 | `+0x15` | 28 |
 | 17 | 10 | `+0x16` | 17 |
 
-The earlier document read `+0x08` and `+0x0A` as five variant byte pairs and
-`+0x09` as a zero. Both bytes are inside the RECT. The five pairs are RECT byte
-patterns, not payload variants, and the byte at `+0x0A` is not a selector.
+The previous revision of this document read `+0x08` and `+0x0A` as five variant
+byte pairs and `+0x09` as a zero. Both bytes are inside the RECT. The five pairs
+are RECT byte patterns, not payload variants, and the byte at `+0x0A` is not a
+selector.
 
 ## Tag grammar
 
@@ -76,15 +78,18 @@ After the frame header, the payload is a stream of tag records:
   `u16` header.
 - The body follows and is `length` bytes long.
 - Code 1 is ShowFrame and code 0 is End; both are zero-length in this sample.
-- Code 39 is a sprite. Its body starts with a `u16` sprite ID and a `u16` frame
-  count, followed by nested tag records. The walker uses this to track nesting.
+- Tag code 39 is the only code whose body the walker also reads. In this sample
+  its body begins with two `u16` values (four bytes) followed by a record
+  stream. The values are not interpreted. The walker treats this as a structural
+  reuse and bounds the nesting depth. This is not a claim about the tag's
+  meaning.
 
 The final four bytes are two adjacent zero-length tag headers, not a `u32`
 field. The first header is ShowFrame (`0x40 0x00`) and the second is End
-(`0x00 0x00`), so the four bytes are `40 00 00 00`. The earlier document
-recorded this as a little-endian `u32` value 64 and as a ten-byte trailer with a
-printable run. The ten-byte suffix still exists, but its last four bytes are the
-two tag headers.
+(`0x00 0x00`), so the four bytes are `40 00 00 00`. The previous revision of
+this document recorded this as a little-endian `u32` value 64 and as a ten-byte
+trailer with a printable run. The ten-byte suffix still exists, but its last
+four bytes are the two tag headers.
 
 ## Tag walk results
 
@@ -98,29 +103,28 @@ reaches the payload end. A partial parse is a failure.
 | Failed | 0 |
 | Top-level tag count range | 8 to 2,839 |
 | Top-level tags, total | 12,167 |
-| Payloads containing sprites | 41 |
-| Sprite tags, total | 1,025 |
-| Nested tags, total | 102,306 |
-| Maximum nesting | 1 |
-| Total tags including nested | 114,473 |
+| Payloads containing tag 39 | 41 |
+| Tag 39 records, total | 1,025 |
+| Nested records, total | 102,306 |
+| Maximum nesting depth | 1 |
+| Total records including nested | 114,473 |
 
 There are no failures, so there is no first failing offset or tag code to
 report. The first tag is code 1000 in 49/49 payloads and its length ranges from
 15 to 42 bytes. The last two top-level codes are 1 and 0 in 49/49.
 
-Three payloads in the sample have 11, 28 and 261 top-level tags. Those counts
-reproduce the earlier report. The counts that include sprite bodies are larger;
-for the same three payloads they are 13, 5,616 and 4,227. The difference is the
-nested tags inside sprite bodies, so a tag count MUST state whether it includes
-nested records.
+In this 49-payload sample, three payloads have 11, 28 and 261 top-level tags.
+Including records nested in tag 39, the same three have 13, 5,616 and 4,227
+records. A tag count MUST state whether it includes nested records.
 
 The frame rate is 30.0 in 48 payloads and 24.0 in one. The frame count is 1 in
-all 49. The single 24.0 payload is a counterexample to a uniform 30.0 reading.
+all 49. The frame rate is therefore not uniform.
 
 ## First tag contents
 
-The earlier document recorded a printable-run grammar over the raw byte stream.
-Tag parsing shows that only the first run lies inside the first tag.
+The previous revision of this document recorded a printable-run grammar over the
+raw byte stream. Tag parsing shows that only the first run lies inside the first
+tag.
 
 - The first tag body is a ten-byte prefix, a printable run of 3 to 30 bytes and
   two further bytes. The run is preceded by a big-endian `u16` length that equals
@@ -132,11 +136,12 @@ Tag parsing shows that only the first run lies inside the first tag.
 - A second printable run starts 13 bytes after the first tag ends, in the
   following tag stream. It contains the first run, ends in a constant five-byte
   suffix and is followed by a zero byte.
-- The remaining bytes of the payload are further tag records. The earlier
-  document stopped at the second run and called the rest an opaque body.
+- The remaining bytes of the payload are further tag records. The previous
+  revision stopped at the second run and called the rest an opaque body.
 
-The earlier raw-byte grammar therefore crosses a tag boundary. It is not a
-single tag layout. The payload strings and class names are not reproduced.
+The raw-byte grammar in the previous revision therefore crosses a tag boundary.
+It is not a single tag layout. The payload strings and class names are not
+reproduced.
 
 ## Limits
 
