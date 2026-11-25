@@ -138,6 +138,11 @@ def _probe_handle(handle, payload_offset: int, payload_size: int, label: str,
 
     handle.seek(payload_offset)
     header = handle.read(HEADER_SIZE)
+    if len(header) != HEADER_SIZE:
+        raise Kb2Error(
+            f"short header at 0x{payload_offset:x}: read {len(header)}"
+            f" of {HEADER_SIZE} bytes"
+        )
     signature = header[:4]
     if signature not in SUPPORTED_SIGNATURES:
         raise Kb2Error(f"signature at 0x{payload_offset:x} is {signature!r}")
@@ -178,8 +183,18 @@ def _probe_handle(handle, payload_offset: int, payload_size: int, label: str,
 
     handle.seek(payload_offset + HEADER_SIZE)
     descriptors = handle.read(descriptor_size)
+    if len(descriptors) != descriptor_size:
+        raise Kb2Error(
+            f"short audio descriptors at 0x{payload_offset + HEADER_SIZE:x}:"
+            f" read {len(descriptors)} of {descriptor_size} bytes"
+        )
     handle.seek(payload_offset + table_start)
     table = handle.read(table_size)
+    if len(table) != table_size:
+        raise Kb2Error(
+            f"short frame table at 0x{payload_offset + table_start:x}:"
+            f" read {len(table)} of {table_size} bytes"
+        )
 
     audio_tracks = []
     for index in range(audio_count):
@@ -298,31 +313,83 @@ def probe_file(path: str, max_table_bytes: int = DEFAULT_MAX_TABLE_BYTES,
 def _read_manifest(path):
     rows = []
     with open(path, encoding="utf-8") as handle:
-        for line in handle:
+        for number, line in enumerate(handle, 1):
             value = line.strip()
             if not value or value.startswith("#"):
                 continue
-            row = json.loads(value)
-            if row.get("kind") == "row":
-                rows.append(row)
+            try:
+                row = json.loads(value)
+            except json.JSONDecodeError as error:
+                raise Kb2Error(f"manifest line {number}: invalid JSON: {error}") from error
+            if not isinstance(row, dict):
+                raise Kb2Error(f"manifest line {number}: not a JSON object")
+            if row.get("kind") != "row":
+                continue
+            for field in ("payload_offset", "logical_size", "row"):
+                if field not in row:
+                    raise Kb2Error(
+                        f"manifest line {number}: missing field {field!r}"
+                    )
+            raw_offset = row["payload_offset"]
+            try:
+                offset = int(raw_offset, 16) if isinstance(raw_offset, str) else int(raw_offset)
+            except (TypeError, ValueError) as error:
+                raise Kb2Error(
+                    f"manifest line {number}: payload_offset {raw_offset!r}"
+                    f" is not an integer or hex string"
+                ) from error
+            try:
+                size = int(row["logical_size"])
+            except (TypeError, ValueError) as error:
+                raise Kb2Error(
+                    f"manifest line {number}: logical_size {row['logical_size']!r}"
+                    f" is not an integer"
+                ) from error
+            if offset < 0 or size < 0:
+                raise Kb2Error(
+                    f"manifest line {number}: negative payload range"
+                    f" {offset}..{offset + size}"
+                )
+            row = dict(row)
+            row["payload_offset_int"] = offset
+            row["logical_size_int"] = size
+            rows.append(row)
     return rows
 
 
 def probe_manifest(archive_path, manifest_path, max_table_bytes=DEFAULT_MAX_TABLE_BYTES,
                    validate_frames=False, max_frames=DEFAULT_MAX_FRAMES):
-    rows = _read_manifest(manifest_path)
+    try:
+        rows = _read_manifest(manifest_path)
+    except OSError as error:
+        raise Kb2Error(f"manifest {manifest_path}: {error}") from error
     results = []
     label_root = os.path.basename(archive_path)
-    with open(archive_path, "rb") as handle:
+    try:
+        archive_size = os.path.getsize(archive_path)
+    except OSError as error:
+        raise Kb2Error(f"archive {archive_path}: {error}") from error
+    try:
+        handle = open(archive_path, "rb")
+    except OSError as error:
+        raise Kb2Error(f"archive {archive_path}: {error}") from error
+    with handle:
         for row in rows:
-            offset = int(row["payload_offset"], 16)
-            size = row["logical_size"]
+            offset = row["payload_offset_int"]
+            size = row["logical_size_int"]
             label = f"{label_root}:row{row['row']}"
+            if offset + size > archive_size:
+                raise Kb2Error(
+                    f"{label}: payload range 0x{offset:x}..0x{offset + size:x}"
+                    f" exceeds archive size 0x{archive_size:x}"
+                )
             try:
                 result = _probe_handle(handle, offset, size, label, max_table_bytes,
                                        validate_frames, max_frames)
-            except (Kb2Error, OSError) as error:
-                result = {"path": label, "error": str(error), "row": row.get("row")}
+            except Kb2Error as error:
+                raise Kb2Error(f"{label}: {error}") from error
+            except OSError as error:
+                raise Kb2Error(f"{label}: {error}") from error
             results.append(result)
     return results
 

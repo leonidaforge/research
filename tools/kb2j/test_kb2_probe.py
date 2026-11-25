@@ -1,3 +1,4 @@
+import io
 import json
 import os
 import struct
@@ -234,6 +235,38 @@ class ValidationTests(unittest.TestCase):
         self.assertEqual(summary["frames"], 2)
         self.assertEqual(summary["packets"], 2)
         self.assertEqual(summary["array1_is_max_decoded"], 1)
+
+    def test_truncated_archive_manifest_error_is_typed(self):
+        with tempfile.TemporaryDirectory() as directory:
+            archive = os.path.join(directory, "archive.bin")
+            with open(archive, "wb") as handle:
+                handle.write(b"KB2j" + bytes(16))
+            manifest = os.path.join(directory, "rows.jsonl")
+            with open(manifest, "w", encoding="utf-8", newline="\n") as handle:
+                handle.write(json.dumps({
+                    "kind": "row", "row": 0, "payload_offset": "0x0",
+                    "logical_size": 0x50,
+                }) + "\n")
+            with self.assertRaises(probe.Kb2Error):
+                probe.probe_manifest(archive, manifest)
+
+    def test_short_header_read_is_typed(self):
+        with self.assertRaises(probe.Kb2Error):
+            probe._probe_handle(io.BytesIO(b"KB2j" + bytes(16)), 0, 0x50, "short")
+
+    def test_malformed_manifest_error_is_typed(self):
+        with tempfile.TemporaryDirectory() as directory:
+            archive = os.path.join(directory, "archive.bin")
+            with open(archive, "wb") as handle:
+                handle.write(bytes(0x50))
+            manifest = os.path.join(directory, "rows.jsonl")
+            with open(manifest, "w", encoding="utf-8", newline="\n") as handle:
+                handle.write(json.dumps({
+                    "kind": "row", "row": 0, "payload_offset": "zz",
+                    "logical_size": 0x10,
+                }) + "\n")
+            with self.assertRaises(probe.Kb2Error):
+                probe.probe_manifest(archive, manifest)
 
     def test_atomic_output(self):
         with tempfile.TemporaryDirectory() as directory:
