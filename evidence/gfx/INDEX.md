@@ -115,3 +115,16 @@ The manifest predicate is `type_id == 66`; the decoded predicate is
   kinds or stored properties?
 - Does the `u32` 64 in the trailer have a structural role, or is it a constant?
 - What marks the end of the body, and does the body have a record grammar?
+
+## Six sample rows carried over
+
+The six rows below were recorded before this index existed. They are kept because they are the only per-row stored and logical sizes in the record; every claim they support is restated with the full 49-row population in GFX-F01 to GFX-F10.
+
+| Source | Nested row | Stored bytes | Logical bytes | First eight decoded bytes |
+| --- | ---: | ---: | ---: | --- |
+| `data.rpf` row 20 | 0 | 1,632 | 2,688 | `47 46 58 2A 80 0A 00 00` |
+| `data.rpf` row 1 | 4 | 6,288 | 12,107 | `47 46 58 2A 4B 2F 00 00` |
+| `data.rpf` row 1 | 6 | 1,408 | 2,251 | `47 46 58 2A CB 08 00 00` |
+| `data.rpf` row 1 | 7 | 3,072 | 6,250 | `47 46 58 2A 6A 18 00 00` |
+| `data.rpf` row 19 | 45 | 2,432 | 5,345 | `47 46 58 2A E1 14 00 00` |
+| `data.rpf` row 19 | 48 | 2,816 | 5,463 | `47 46 58 2A 57 15 00 00` |

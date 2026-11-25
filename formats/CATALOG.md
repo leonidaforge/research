@@ -27,7 +27,7 @@ Confidence values:
 | SGD5 | Unknown | Unknown | Supported | `SGD5` (`53 47 44 35`) at offset 0 | 255 | 2 rows, `shaders.rpf` rows 1 and 2 | 2 of 2 | [sgd5](unknown/sgd5/README.md) |
 | PSIN | Unknown | Unknown | Confirmed (sample) | `PSIN` (`50 53 49 4E`) at offset 0 | 11, 93, 94 | 103 unique decoded payloads | 103 of 103 | [psin](unknown/psin/README.md) |
 | Type 14 payload | Unknown | Unknown | Confirmed (single sample) | None | 14 | 2 rows, 1 decoded | 1 decoded, 1 behind the payload transform | [type14](unknown/type14/README.md) |
-| GFX* | Unknown | Unknown | Supported | `GFX*` (`47 46 58 2A`) at offset 0 of decoded payload | 66 | 49 rows, 6 depth-1 archives under `data.rpf` | Header sample only | [gfx](unknown/gfx/README.md) |
+| GFX* | Unknown | Unknown | Supported | `GFX*` (`47 46 58 2A`) at offset 0 of decoded payload | 66 | 49 rows, 6 depth-1 archives under `data.rpf` | All 49 rows decoded; header, variant bytes and trailer described | [gfx](unknown/gfx/README.md) |
 | ADAT | Unknown | Unknown | Supported | `ADAT` (`41 44 41 54`) at offset 0 | 255 | 768 rows, 65 depth-1 archives under 4 top-level archives | Header structure and two sample groups | [adat](unknown/adat/README.md) |
 | `PTFX` | Unknown | Unknown | Confirmed (single sample) | `PTFX` (`50 54 46 58`) at offset 0 | 255 | 1 row, `common.rpf` | 1 of 1 | [ptfx](unknown/ptfx/README.md) |
 
@@ -83,7 +83,7 @@ Two workstreams were transferred from unmerged branches. Their unique findings a
 ## Dependencies between entries
 
 - PSIN samples come from type 11, 93 and 94 rows; type 11 also carries RBF0. No type ID identifies PSIN.
-- GFX* and ADAT are only visible after chunk decoding, so their populations depend on RPF9 chunk handling.
+- GFX* is only visible after chunk decoding, so its population depends on RPF9 chunk handling. ADAT rows are stored, not chunked.
 - Every family above except RPF9 is reached through an RPF9 row. Extraction capability limits all of them.
 - KB2j, KB2n and EDUP populations were reconciled once already; a census over a differently selected manifest is not comparable and MUST be reported with its predicate.
 
@@ -93,4 +93,3 @@ Two workstreams were transferred from unmerged branches. Their unique findings a
 2. Establish GFX* and ADAT headers beyond the first sample group.
 3. Test the PSIN `+0x08` and `+0x0C` integer hypotheses against the full 103-payload sample with counterexamples.
 4. Decode one payload-transform row, which unblocks every family whose only remaining sample sits behind it.
-5. Transfer the resource and RDS5 findings once re-verified.
