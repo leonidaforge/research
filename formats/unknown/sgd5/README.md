@@ -9,7 +9,7 @@ The archive name is provenance, not evidence of purpose. Nothing about the paylo
 | Part                                       | Status                              |
 | ------------------------------------------ | ----------------------------------- |
 | Magic and occurrence                       | Confirmed (2 rows, one archive)     |
-| Header fields at `+0x0C` and `+0x10`       | Confirmed (2 samples)               |
+| Block count and first-block length        | Confirmed (2 samples)               |
 | Block and entry layout                     | Confirmed (36 table blocks)         |
 | Data-region record prefix                  | Confirmed (observation, 2 samples)  |
 | Field meanings, purpose, data encoding     | Unknown                             |
@@ -24,7 +24,7 @@ The archive name is provenance, not evidence of purpose. Nothing about the paylo
 
 The stored size exceeds the decoded size by 5 and 13 bytes. The difference is not explained. `shaders.rpf` has one other row; it decodes to 275,540,780 bytes, does not begin with `SGD5` and is outside this subject.
 
-## Header (SGD5-F03)
+## Header and first-block fields (SGD5-F03)
 
 | Offset  | Size | Observation                                                            | Status                              |
 | ------- | ---: | ---------------------------------------------------------------------- | ----------------------------------- |
@@ -65,6 +65,8 @@ The block length equals `24 + 8n` in all 36 table blocks. The `index` runs from 
 | Row 1  |               3 | 28, 197, 261 |
 | Row 2  |              33 | 261, 2, 104, 28, 197, 126, 185, 42, 71, 74, 72, 11, 17, 138, 183, 17, 2, 17, 117, 4, 37, 126, 97, 27, 6, 26, 12, 13, 19, 136, 153, 80, 23 |
 
+### Entry census (SGD5-F05)
+
 Fifteen distinct `u16` kind values occur. The most frequent are `0x0102` and `0x0405`. No kind was assigned a meaning.
 
 The `u32` value is not a file offset or a size. The largest value in the sample is `0xFF18999D`, which exceeds both payload sizes. 299 of the 486 values in row 1 and 488 of the 2,423 values in row 2 are distinct.
@@ -100,11 +102,11 @@ The first two words are identical in every counted record. The `u16` at `+0x0A` 
 
 At the next record the 24-byte stride no longer holds. A NUL-terminated printable ASCII run appears within the following bytes. The run is not reproduced. The rest of the data region contains high-entropy bytes and further printable runs. No internal section boundary was established, and no record meaning was assigned.
 
-Neither payload contains a second `SGD5` sequence or an `RPF9`, `RBF0`, `PSIN`, `EDUP`, `KB2j` or `KB2n` signature. The two-byte sequences `0x78 0x9C` and `0x78 0xDA` occur; they are not evidence of a compressed stream without a valid stream parse.
+Neither payload contains a second `SGD5` sequence or an `RPF9`, `RBF0`, `PSIN`, `EDUP`, `KB2j` or `KB2n` signature (SGD5-F08). The two-byte sequences `0x78 0x9C` and `0x78 0xDA` occur; they are not evidence of a compressed stream without a valid stream parse.
 
-## Identification (SGD5-F08)
+## Identification
 
-Identification MUST use the payload bytes. Type ID 255 also carries unrelated payloads, so the type ID is not an identifier.
+Identification MUST use the payload bytes. Type ID 255 also carries unrelated payloads (UPL-F09), so the type ID is not an identifier.
 
 ## Limits
 

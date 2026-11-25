@@ -20,12 +20,17 @@ The hashes identify derived samples and carry no asset text.
 | Item | Value |
 | ---- | ----- |
 | Manifests | 23 top-level manifest files covering 22 unique archives, and 44 nested-archive manifests |
-| Row records scanned | 10,505: 6,534 unique top-level rows, 3,553 nested rows, and one duplicated top-level manifest |
-| Method | read the first four stored bytes at each row's `payload_offset`; skip rows with `payload_transform` |
-| Skipped | 622 row records with `payload_transform`; chunked rows contribute their stored compressed bytes, not decoded bytes |
+| Top-level manifest records | 6,952: 6,534 unique rows and the 418 `common.rpf` rows read a second time from its repeated manifest |
+| Nested rows | 3,553 |
+| Row records searched | 10,505 (6,952 top-level + 3,553 nested) |
+| Unique rows | 10,087 (6,534 top-level + 3,553 nested) |
+| Duplicate row records | 418 |
+| Row records with a stored-byte prefix read | 9,883 |
+| Row records skipped | 622 (`payload_transform`) |
+| Method | read the first four stored bytes at each row's `payload_offset` |
 | Result | `SGD5` at offset 0 in the two rows above and in no other row record |
 
-The nested set is a 44-archive sample reached from type-0 rows of the top-level archives. It is not every nested archive.
+The nested set is a 44-archive sample reached from type-0 rows of the top-level archives. It is not every nested archive. Chunked rows contribute their stored compressed bytes, not decoded bytes.
 
 ## Evidence types
 
@@ -41,7 +46,7 @@ The nested set is a 44-archive sample reached from type-0 rows of the top-level 
 | ID       | Claim | Evidence | Confidence | Limits |
 | -------- | ----- | -------- | ---------- | ------ |
 | SGD5-F01 | `shaders.rpf` rows 1 and 2 decode to payloads that start with ASCII `SGD5` (`53 47 44 35`) at offset 0. Sizes and SHA-256 are in the sample table. The third row does not start with `SGD5` | Payload data, tool output | Confirmed | Two rows, one archive |
-| SGD5-F02 | A scan of 10,505 row records across the 22 top-level archives and the 44 nested archives in the inventory sample found `SGD5` at offset 0 only in the two rows above | Manifest scan | Confirmed (sample) | Stored-byte prefixes; 622 transformed rows skipped; chunked rows not decoded; nested sample not exhaustive |
+| SGD5-F02 | A scan of 10,505 row records (6,952 top-level, including 418 duplicate `common.rpf` rows, and 3,553 nested) across the 22 top-level archives and the 44 nested archives in the inventory sample found `SGD5` at offset 0 only in the two rows above | Manifest scan | Confirmed (sample) | Stored-byte prefixes; 622 transformed rows skipped; chunked rows not decoded; nested sample not exhaustive |
 | SGD5-F03 | The header has `u32` values at `+0x04`, `+0x08`, `+0x0C` and `+0x10`, a 20-byte descriptor at `+0x14` and a zero `u32` at `+0x28`. `+0x0C` equals the number of table blocks (3, 33) and `+0x10` equals the first block length (248, 2112). No tested header field equals a payload size or the data-region offset | Payload data, consistency check | Confirmed (observation); Unknown (meaning) | Two samples |
 | SGD5-F04 | The first table block starts at `+0x10`, where its length field sits; the header fields end at `+0x0C`. It and each later block are shaped `u32 length`, 20-byte descriptor, `u32 zero`, payload. A table payload holds 8-byte entries `{u32 value, u16 kind, u16 index}`. `length = 24 + 8n` in all 36 table blocks and `index` runs 0 to `n - 1` in all 36 | Payload data, consistency check | Confirmed | Two samples; 36 blocks |
 | SGD5-F05 | The entry `u32` value is not a file offset or a size: the maximum `0xFF18999D` exceeds both payloads and no value equals a payload size. 299 of 486 values in row 1 and 488 of 2,423 in row 2 are distinct. Fifteen `u16` kinds occur. The 28-, 197- and 261-entry table payloads and their descriptors are byte-identical across the two samples | Payload data, consistency check | Confirmed (bytes); Unknown (meaning) | Two samples |
