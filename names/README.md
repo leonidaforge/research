@@ -78,7 +78,25 @@ The published files hold 2250 `hash64` records and 233 `key32` records. Of the
 `key32` keys, 106 address type 255 rows and 127 address type 11 rows; 211 keys
 over 228 payload-matched rows came from payload text and 22 keys over 31 rows
 from the executable, with no key from both sources. Applied to the 22
-authenticated local archives, the pair\nresolves 2525 of 6534 rows with no ambiguous row under the strict type matching\ndescribed above: 2266 type-0 rows, 125 type-255 rows and 134 type-11 rows. The\nremaining 4009 rows have no published candidate. A re-hash audit found no\nunverified record, no key with more than one normalized name, no duplicate\nspelling and no path-unsafe name. These counts are observations from one build\nand one local sample, not limits of the format; the harvest run was truncated\nby its explicit byte, string and match limits.
+authenticated local archives, the pair resolves 2525 of 6534 rows with no
+ambiguous row under the strict type matching described above: 2266 type-0
+rows, 125 type-255 rows and 134 type-11 rows. The remaining 4009 rows have no
+published candidate. A re-hash audit found no unverified record, no key with
+more than one normalized name, no duplicate spelling and no path-unsafe name.
+These counts are observations from one build and one local sample, not limits
+of the format; the harvest run was truncated by its explicit byte, string and
+match limits.
+
+The type-255 numbers count different things and are not expected to agree. The
+harvest matched 177 type-255 rows, the published `key32` table holds 106
+type-255 keys, and the final table resolves 125 type-255 rows. A match record
+is one occurrence of a candidate string whose hash equals a stored key; the
+distinct keys are the unique hashes among those records; the matched rows are
+all rows whose class-authoritative key is one of those hashes, so several rows
+can share one key and the row count exceeds the key count. The resolved rows
+are those whose class-authoritative key survives validation and publication.
+Rows that matched only through the other class's column, or through an unknown
+class, are rejected by the type-class rule and are not counted as resolved.
 
 ## Contributing
 
