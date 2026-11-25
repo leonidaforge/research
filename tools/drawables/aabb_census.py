@@ -71,6 +71,9 @@ def census(manifest: str):
         "models": 0,
         "models_one_geometry": 0,
         "models_multi_geometry": 0,
+        "aabb_records": 0,
+        "extra_min_equal": 0,
+        "extra_max_equal": 0,
         "model_union_pass": 0,
         "model_union_fail": 0,
         "multi_geometry_union_pass": 0,
@@ -93,6 +96,12 @@ def census(manifest: str):
                     summary["models_one_geometry"] += 1
                 elif model["geometry_count"] > 1:
                     summary["models_multi_geometry"] += 1
+                for record in model.get("aabb_records") or []:
+                    summary["aabb_records"] += 1
+                    if abs(record["min_extra"] - record["minimum"][0]) <= 2e-6:
+                        summary["extra_min_equal"] += 1
+                    if abs(record["max_extra"] - record["maximum"][0]) <= 2e-6:
+                        summary["extra_max_equal"] += 1
                 if model["aabb_union_matches"] is True:
                     summary["model_union_pass"] += 1
                     if model["geometry_count"] > 1:
@@ -135,6 +144,9 @@ def print_text(summary):
     print(f"models:                  {summary['models']}")
     print(f"  one geometry:          {summary['models_one_geometry']}")
     print(f"  at least two:          {summary['models_multi_geometry']}")
+    print(f"AABB records:            {summary['aabb_records']}")
+    print(f"  min extra == min.x:    {summary['extra_min_equal']}")
+    print(f"  max extra == max.x:    {summary['extra_max_equal']}")
     print(f"model union pass:        {summary['model_union_pass']}")
     print(f"model union fail:        {summary['model_union_fail']}")
     print(f"multi-geometry pass:     {summary['multi_geometry_union_pass']}")
