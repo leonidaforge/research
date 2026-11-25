@@ -6,7 +6,7 @@ The cipher used by the observed archives is CBC-mode decryption with a 16-byte b
 
 The authenticated layer is metadata. Parsed entry semantics and payload contents are outside the signature. See [What is authenticated](#what-is-authenticated).
 
-Payloads of some entries go through the same 16-byte CBC engine when they are read, through a separate per-stream cipher object whose key state is unresolved. See [Payload transform](#payload-transform).
+Payloads of some entries pass through a separate per-stream cipher object of the same class. Its descriptor selects algorithm `0x11`, a counter-mode keystream rather than the metadata CBC. The sampled descriptors bind to a provider-2 state, while the algorithm-`0x11` block program is not reproduced (RPF9-F114 to RPF9-F117). See [Payload transform](#payload-transform).
 
 Three kinds of statement appear below and must not be mixed:
 
