@@ -44,6 +44,25 @@ any lawful copy of the same sample.
 | 7. Version differences | Reproduced: 39 and 18 samples, same structural rules | RDS5V-F04 |
 | 8. Boundary conditions | Reproduced on synthetic files | RDS5V-F15 |
 
+### Superseded model
+
+This index verifies the transferred branch as it stood. Later measurements on the
+same 57 stores supersede three interpretations, while the byte-level observations
+behind them remain valid:
+
+- the two-bit selector `(high_byte >> 2) & 3` and the 82-block exception
+  (RDS5V-F08, RDS5V-F09, RDS5V-F10) are replaced by the four- or six-bit storage
+  class and the split into 77 class-`0x10` and 5 class-`0x00` blocks;
+- the `version` reading of the `+0x0C` word (RDS5V-F04) is replaced by the
+  payload-size bit 32; the 39/18 split is reproduced but no longer called a
+  version split;
+- the block-record second word (RDS5V-F11) is a 20-bit counter plus a 12-bit
+  padding count, not one unknown 16-bit value.
+
+The current specification and the iteration 10 findings are in
+[evidence/rds5/INDEX.md](../rds5/INDEX.md).
+
+
 ## Findings
 
 | ID | Claim | Evidence | Confidence | Limits |

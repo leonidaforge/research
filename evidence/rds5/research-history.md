@@ -54,6 +54,11 @@ measurements, which the verification on `main` re-read.
 | Block records' `hi[16:32]` is `crc32` or `adler32` of the stored or unpacked block | Checked on 5 blocks; no match |
 | Non-zlib blocks are stored uncompressed | Their stored range is smaller than the uncompressed size derived from the counter |
 | The first block follows the ETPF content at the next `0x100` boundary | The first block sits at a `0x1000` boundary measured from the chunk start in 55 samples, and two carry an extra `0x100` or `0x200` |
+| Block storage is a two-bit selector `(high_byte >> 2) & 3` | The mask covers bits 26..27 only. Class ids also use bits 28..29; the eight observed ids are `0x00`, `0x04`, `0x0C`, `0x10`, `0x14`, `0x18`, `0x1C` and `0x20` |
+| The 82 selector-0 blocks without a zlib header are an unexplained storage form | They are 77 class-`0x10` and 5 class-`0x00` blocks. The five class-`0x00` blocks satisfy the stored length identity |
+| `virtual = 0x1000 + counter*0x4000 + page_term*0x1000` | The `+0x1000` constant is not present. In the platform sample the first block has counter 0 and page term 1 and starts at `0x1000`, not `0x2000` |
+| The word at `+0x0C` is a version | Bit 0 equals bit 32 of the virtual payload size in 57 of 57 stores. The upper bits are constant at `0x16000000`, but their meaning is unknown |
+| Block records' `hi[16:32]` is one unknown 16-bit hash | Bits 16..19 are counter bits and bits 20..31 are the padding count, which explains the observed value set |
 
 ## 2026-11-25: selector 2 added
 
@@ -96,3 +101,79 @@ No counterexample was found. The vfx application report shows 751,046,656 decode
 bytes against the declared 766,107,648; the difference comes from 193 blocks with
 unidentified selectors that are not decoded. That limits the `uncompressed_total`
 check on that file but does not contradict the layout relation.
+
+## 2026-11-25: storage classes replace the two-bit selector
+
+The specification treated the block storage form as a two-bit selector
+`(high_byte >> 2) & 3`, with value 0 selecting zlib and 82 blocks as an unexplained
+exception. That model cannot separate the observed classes: the mask covers bits
+26..27 and ignores bits 28 and 29, which are part of the class id.
+
+The current measurement over the same 57 stores reads bits 24..29 of the first
+record word and obtains eight ids: `0x20` 918,223; `0x04` 102,725; `0x0C` 35;
+`0x10` 77; `0x14` 333; `0x18` 268; `0x1C` 5,167; `0x00` 5. Bits 24 and 25 are
+zero in all 1,026,947 records, so a six-bit class field in bits 24..29 with a
+24-bit offset and a four-bit class field in bits 26..29 with a 26-bit offset
+describe the same bytes. The population cannot discriminate them because no
+store reaches 4 GiB. A store at or above 4 GiB would.
+
+The 82 former exceptions are 77 class-`0x10` and 5 class-`0x00` blocks. The five
+class-`0x00` blocks satisfy `span - padding = virtual length`. The anomaly class
+is deleted from the specification.
+
+Class `0x20` remains zlib: all 918,223 class-`0x20` blocks start `0x78 0xDA`, and
+6,357 sampled blocks inflate to end-of-stream with the checksum verified and
+`consumed = span - padding`. Class `0x00` is stored bytes. The six remaining
+classes are storage classes whose payloads are not decoded.
+
+## 2026-11-25: virtual position, padding and the payload size
+
+The candidate relation `virtual = 0x1000 + (hi & 0xFFFFF) * 0x4000 +
+page_term * 0x1000` does not fit. The `+0x1000` constant is absent: the platform
+sample's first block has counter 0 and page term 1 and starts at `0x1000`, while
+the candidate places it at `0x2000`. The validated relation is
+
+```text
+virtual = (hi & 0xFFFFF) * 0x4000 + ((lo >> 30) & 3) * 0x1000
+padding = hi >> 20
+length  = span - padding
+```
+
+For 6,357 sampled zlib blocks, `virtual[next] - virtual[this]` equals the inflated
+byte count. For the five class-`0x00` blocks, `span - padding` equals the same
+difference. The padding field takes all 4,096 values, and the trailing padding
+bytes were zero in 5,754 blocks sampled across all eight classes.
+
+The `hi[0:16]` counter reading is extended to 20 bits. Bits 16..19 are counter
+bits, not part of an unknown hash. The earlier `hi[16:32]` value set is explained
+by the counter and padding fields.
+
+The word at `+0x0C` was called a version. Its bit 0 equals bit 32 of the virtual
+payload size in all 57 stores: 39 stores need only `size_low`, and 18 set bit 32.
+The end record's virtual position equals the payload size in 57 of 57. The upper
+bits stay `0x16000000` and their meaning is unknown. The version reading is
+superseded.
+
+## 2026-11-25: descriptor model and the first byte-level texture
+
+The 16-byte ETPF items are descriptors: `w0` holds `width - 1`, `height - 1` and
+a mip field; `w1` holds flags, format id, an array field, kind and tile mode; a
+64-bit locator's low 21 bits are the first 4 KiB page. Across 357,115 descriptors
+the observed field ranges are recorded in RDS5-F31. Descriptor count is a texture
+count, not a block count.
+
+The first `8N` bytes after the descriptor table are sorted little-endian 64-bit
+keys in all 56 stores with at least two descriptors. The remaining `8N + M` bytes
+are opaque. Key values are not published.
+
+Every locator page is a block start in 357,115 of 357,115 descriptors, and
+descriptor 0 matches the first block in 57 of 57. This gives an observational
+descriptor-to-block-range map.
+
+One byte-level chain is established for the single descriptor of the platform
+sample: 1,024 x 512, format id 98, mip 0, kind 2, tile mode 0, one class-`0x20`
+block from virtual `0x1000` to `0x81000`, 524,288 inflated bytes, and
+`inflated = width * height * 1`. The block encoding, the tile-mode meaning and
+the element order are not established. A pixel attempt under a documented 16-byte
+4 x 4 endpoint layout is recorded as **Speculative**; no lower mip exists, so the
+box-downsample check is not applicable.
