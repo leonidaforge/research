@@ -251,7 +251,7 @@ selection rule is the type ID in those listings.
 - One build. The positive sample is a census of the type-5 rows in 25 nested
   archives of two top-level archives; the negative sample is 469 rows of four
   other type IDs. This is not a game-wide census.
-- The record grammar is established from payload bytes and arithmetic. No
+- The record grammar is established from payload bytes and structural checks. No
   engine code that builds, validates or uploads a dictionary was traced.
 - Width, height, format id and mip count are exposed at confirmed positions but
   their meanings are not independently established. No pixel format is claimed.
