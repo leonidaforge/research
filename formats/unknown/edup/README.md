@@ -57,7 +57,7 @@ The second field was tested against the 64-bit key tables of the local RDS5/ETPF
 
 In the 17,431-entry table every first-field key is absent from every store key table and every second-field key is present. The second field is therefore the stored texture key in that table. The mapping direction is first-field key to stored key, not stored key to first-field key. The first field is a separate key space that no sampled store indexes; the table does not show where that key is referenced.
 
-The match uses the little-endian reading. The big-endian reading of the same 16 bytes matches 0 of 17,431 second-field keys, which confirms the entry-field endianness for this table.
+The match uses the little-endian reading. The big-endian reading of the same 16 bytes matches 0 of 17,431 second-field keys, which confirms the entry-field endianness for this table. The first field's byte order is not independently confirmed; its counts and disjointness do not depend on it.
 
 The table maps 17,431 first-field keys to 6,845 distinct stored keys; 1,176 of those stored keys have more than one first-field key, and the largest group is 723.
 
