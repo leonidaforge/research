@@ -854,6 +854,9 @@ def _summarize(reports):
         for exception in framing["exceptions"]:
             if exception.get("kind") == "size_not_multiple_of_block":
                 summary["block_size_violations"] += 1
+    summary["rates"]["atypical_rows"] = len(
+        {item["label"] for item in summary["rates"]["atypical"]}
+    )
     return summary
 
 
@@ -889,7 +892,11 @@ def _print_summary(summary, stream):
     print(f"violations: {summary['violations']}; exceptions: {summary['exceptions']}", file=stream)
     print(f"exception kinds: {summary['exception_kinds']}", file=stream)
     if summary["rates"]["atypical"]:
-        print(f"atypical rate records: {len(summary['rates']['atypical'])}", file=stream)
+        print(
+            f"atypical rate records: {len(summary['rates']['atypical'])}"
+            f" in {summary['rates']['atypical_rows']} samples",
+            file=stream,
+        )
         for item in summary["rates"]["atypical"]:
             print(f"  {item}", file=stream)
 
