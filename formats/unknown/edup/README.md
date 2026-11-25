@@ -69,7 +69,7 @@ The blob is length-delimited and opaque. Every blob length is a multiple of 16 b
 
 Tested record widths 1 to 64 on each blob. No single width fits all four. Two blobs have a width whose record count equals a table count: the 160-byte blob at width 40 gives 4 records, equal to that table's entry count and distinct second-field count; the 1,008-byte blob at width 48 gives 21 records, equal to its distinct second-field count. The 687,056-byte blob has no width 1 to 64 with either equality. These are possible per-table widths, not a common stride, and the record contents are not decoded. The 16-byte records are all distinct in every blob. No 8-byte word matches a store key.
 
-Tested decoders on the complete blob: zlib, raw deflate, gzip, bzip2, xz and LZMA-alone. All fail; no blob reaches end-of-stream with zero unused input. No zstd or LZ4 frame signature occurs at the blob start. Entropy is 3.9, 6.8, 7.8 and 8.0 bits/byte for the four blobs.
+Tested decoders on the complete blob: zlib, raw deflate, gzip, bzip2, xz and LZMA-alone. All fail; no blob reaches end-of-stream with zero unused input. No zstd or LZ4 frame signature occurs at the blob start; these are signature checks only, and no zstd or LZ4 decoder was run. Entropy is 3.9, 6.8, 7.8 and 8.0 bits/byte for the four blobs.
 
 The count-0 payload has a 16-byte blob, constant across the two byte-identical rows. It does not match the first or last 16 bytes of MD5, SHA-1, SHA-256, SHA-512 or BLAKE2 digests of the five payloads, and the byte at `+0x06` does not take a standard UUID version nibble. Its identity remains Unknown. The blob is kept opaque: content, a digest table, compressed data and encrypted data are all consistent with the negative tests.
 

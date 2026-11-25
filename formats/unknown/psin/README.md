@@ -111,7 +111,7 @@ The earlier whole-area negatives remain valid and are not replaced by the block 
 | ---- | ------- |
 | Constant bytes | Negative. The 62 areas have 62 distinct SHA-256 values; only the first eight bytes are constant |
 | Fixed-stride table | Negative. The number of `0x70` runs ranges from 1 to 41 and their positions vary |
-| Compressed data | Negative for the tested signatures and decoders. No zlib, gzip, xz, bzip2, LZ4 or zstd signature occurs at `+0x10`; zlib, gzip, bzip2 and LZMA produced no non-empty output |
+| Compressed data | Negative for the tested signatures and decoders. No zlib, gzip, xz, bzip2, LZ4 or zstd signature occurs at `+0x10`; zlib, gzip, bzip2 and LZMA produced no non-empty output. LZ4 and zstd are signature checks only; no LZ4 or zstd decoder was run |
 | Embedded payload | Negative. No `PSIN`, `RBF0` or section tag occurs inside the pre-section area |
 | Length pattern | In 52 of 62 payloads `(pre_section_length - 8) mod 16` is 0; nine have remainder 8 and one has remainder 4 |
 
