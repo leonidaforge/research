@@ -47,7 +47,7 @@ def make_dictionary(records, graphics_length=0x2000, system_length=0x400):
         )
         if record.get("skip_record"):
             continue
-        struct.pack_into("<I", data, at + 0x08, record.get("units", 0x100))
+        struct.pack_into("<I", data, at + 0x08, record.get("allocation_units", 0x100))
         struct.pack_into(
             "<Q", data, at + 0x18,
             _pointer("graphics", record.get("gfx", index * 0x1000)),
@@ -62,7 +62,7 @@ def make_dictionary(records, graphics_length=0x2000, system_length=0x400):
             record.get("width", 128)
             | (record.get("height", 128) << 16)
             | (record.get("field_3c", 1) << 32)
-            | (record.get("depth", 1) << 48)
+            | (record.get("field_3e", 1) << 48)
             | (record.get("format", 98) << 56)
         )
         packed_40 = (
@@ -86,9 +86,9 @@ class ParseTests(unittest.TestCase):
     def test_reads_every_record_field(self):
         system = make_dictionary(
             [
-                {"name": "alpha", "hash": 1, "units": 0x100, "gfx": 0, "format": 71,
+                {"name": "alpha", "hash": 1, "allocation_units": 0x100, "gfx": 0, "format": 71,
                  "width": 10, "height": 20, "mips": 3, "mip_flag": 0x8000},
-                {"name": "beta", "hash": 2, "units": 0x80, "gfx": 0x1000, "format": 98,
+                {"name": "beta", "hash": 2, "allocation_units": 0x80, "gfx": 0x1000, "format": 98,
                  "width": 30, "height": 40, "mips": 1},
             ]
         )
@@ -169,7 +169,7 @@ class ParseTests(unittest.TestCase):
         self.assertIn("allocation_duplicate", [issue.code for issue in dictionary.issues])
 
     def test_format_is_raw_and_size_is_the_extent(self):
-        system = make_dictionary([{"name": "alpha", "hash": 1, "format": 200, "units": 4, "gfx": 0},
+        system = make_dictionary([{"name": "alpha", "hash": 1, "format": 200, "allocation_units": 4, "gfx": 0},
                                   {"name": "beta", "hash": 2, "gfx": 0x1000}])
         dictionary = td.parse_dictionary(bytes(system), 0x2000)
         record = dictionary.records[0]
