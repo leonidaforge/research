@@ -1,9 +1,9 @@
 # ADAT
 
 `ADAT` (`41 44 41 54`) at offset 0 marks stored payloads of type 255 in depth-1
-archives. The current depth-1 scan finds 768 such rows in 65 archives under four
-top-level archives: 729 rows in 59 of the 60 scanned depth-1 archives reached
-from `audio.rpf`, and 39 rows in six depth-1 archives reached from
+archives. The current depth-1 scan finds 768 unique payloads in 65 archives
+under four top-level archives: 729 rows in 59 of the 60 scanned depth-1 archives
+reached from `audio.rpf`, and 39 rows in six depth-1 archives reached from
 `shared_minigame000.rpf`, `story000.rpf` and `story000_restofworld.rpf`.
 
 The archive names are provenance, not evidence of purpose. The magic occurs only
@@ -15,7 +15,7 @@ The scan covers depth 1 only. No top-level row carries `ADAT` in the stored-byte
 census of 6,534 untransformed top-level rows, so the population is 0 top-level
 and 768 depth-1 rows.
 
-| Family | Rows | Archives | Stored bytes | Variant words at `+0x06` |
+| Family | Rows | Archives | Stored bytes | Variant words |
 | --- | ---: | ---: | --- | --- |
 | Depth-1 under `audio.rpf` | 729 | 59 | 4,224 to 51,693,440 | all four |
 | Depth-1 under three other top-level archives | 39 | 6 | 41,728 to 6,187,200 | all four |
@@ -51,93 +51,146 @@ bytes form a common header; field support is counted over all 768 rows.
 | Offset | Width | Observation | Support | Status |
 | --- | --- | --- | ---: | --- |
 | `+0x00` | 4 | `41 44 41 54` | 768/768 | Confirmed |
-| `+0x04` | `u16` | version, always 1 | 768/768 | Confirmed |
-| `+0x06` | `u16` | variant word, one of `FF02`, `FF21`, `FF25`, `FF61` | 768/768 | Confirmed; meaning Unknown |
-| `+0x08` | `u32` | count from 1 to 674 | 768/768 | Confirmed as a count; unit is variant-specific |
-| `+0x0C` | `u32` | data offset from 46 to 27,484 | 768/768 | Confirmed as a payload-relative byte offset |
+| `+0x04` | `u32` | flags: low 16 bits are version 1; high 16 bits are the variant word | 768/768 | Confirmed (packing); variant meaning Unknown |
+| `+0x08` | `u32` | stream count, 1 to 674 | 768/768 | Confirmed as the per-stream table count |
+| `+0x0C` | `u32` | chunk-table end and data offset, 46 to 27,484 | 768/768 | Confirmed |
 
-The offset at `+0x0C` is even in all 768 rows and lies after the variant table
-and before the stored size. The byte immediately before the offset is `A3` in
-608 rows, `BD` in 117 and `76` in 43. The byte at the offset takes 158 values;
-`00` accounts for 367 rows and `A0` for 115. Over the same 768 rows, the
-one-byte distributions immediately before and at the offset have a total
-variation distance of 0.997. Bytes at the offset begin the encoded stream.
+The packing is `flags == variant << 16 | 1` in every row. The earlier document
+split `+0x04` and `+0x06` into a `u16` version and a `u16` variant; the bytes are
+the same, read as one `u32`.
 
-Variant counts:
+| Flags | Variant | Rows | Streams | Data offset | Record count |
+| --- | --- | ---: | ---: | ---: | ---: |
+| `0xFF020001` | `FF02` | 124 | 1 to 144 | 52 to 5,200 | 4 to 576 |
+| `0xFF210001` | `FF21` | 283 | 1 to 231 | 46 to 9,690 | 2 to 920 |
+| `0xFF250001` | `FF25` | 275 | 2 to 9 | 64 to 134 | 3 to 5 |
+| `0xFF610001` | `FF61` | 86 | 6 to 674 | 228 to 27,484 | 18 to 2,590 |
 
-| Variant word | Rows | Family split | Stored size | Count range | Data offset |
-| --- | ---: | --- | --- | ---: | ---: |
-| `FF02` | 124 | 113 / 11 | 12,464 to 6,043,264 | 1 to 144 | 52 to 5,200 |
-| `FF21` | 283 | 276 / 7 | 4,224 to 3,262,464 | 1 to 231 | 46 to 9,690 |
-| `FF25` | 275 | 256 / 19 | 34,912 to 51,693,440 | 2 to 9 | 64 to 134 |
-| `FF61` | 86 | 84 / 2 | 12,768 to 4,016,320 | 6 to 674 | 228 to 27,484 |
+The data offset is even in all 768 rows and lies after the variant tables and
+before the stored size. The byte immediately before the offset is the last
+chunk record's type byte: `A3` in 608 rows, `BD` in 117 and `76` in 43. The byte
+at the offset begins the encoded stream.
 
-The family split is `audio.rpf` depth-1 rows / other depth-1 rows.
+## Per-stream tables
 
-## Variant headers
+The common header is followed by a per-stream table selected by the variant.
 
-The common header is followed by a variant-specific table. The count at `+0x08`
-predicts the table length; the offset at `+0x0C` follows the table.
+| Variant | Per-stream table | Record run start | Support |
+| --- | --- | ---: | ---: |
+| `FF02` | `u32[streams]` at `+0x10` | `+0x10 + 4 * streams` | 124/124 |
+| `FF21` | `u16[streams]` at `+0x10`, then an `8 * streams + 4`-byte region | `+0x14 + 10 * streams` | 283/283 |
+| `FF25` | `u16[streams]` at `+0x10`, then an `8 * streams + 4`-byte region | `+0x14 + 10 * streams` | 275/275 |
+| `FF61` | `u32` second offset at `+0x10`, `u16[streams]` at `+0x14`, then an `8 * streams + 4`-byte region | `+0x18 + 10 * streams` | 86/86 |
 
-| Variant | Table layout | Support | Counterexamples |
-| --- | --- | ---: | --- |
-| `FF21` | non-decreasing `u16[count]` at `+0x10` | 283/283 | none |
-| `FF25` | non-decreasing `u16[count]` at `+0x10` | 275/275 | none |
-| `FF61` | `u32` second offset at `+0x10`; non-decreasing `u16[count]` at `+0x14` | 86/86 | none |
-| `FF02` | `u16[count]` table is absent; a record region of `count` fixed-width records follows `+0x10` | 123/124 use a fixed width | one row at 138,736 bytes |
+For `FF21`, `FF25` and `FF61`, the bytes between the `u16` table and the record
+run are `8 * streams + 4` bytes. Their content and meaning are Unknown. The
+`u16` table is non-decreasing in the 644 rows that carry it; no adjacent
+increase exceeds 5 and the first post-table `u16` is far above the last entry
+(`ADAT-F16`).
 
-For `FF21`, `FF25` and `FF61`, the table length test uses the increment between
-adjacent entries across all 644 rows. In the sample, no adjacent increase
-exceeds 5 (5 in `FF21`, 3 in `FF25`, 5 in `FF61`). The `u16` after the table is
-at least 2,045 (`FF21`), 381 (`FF25`) and 5,700 (`FF61`) above the last entry.
-`FF25` has equal adjacent entries in 36 rows and 87 equal pairs; `FF21` and
-`FF61` have no equal adjacent pairs. `FF21` has 26 single-entry rows, where the
-adjacent-entry test is vacuous. `ADAT-F16` records the population and the
-absence of counterexamples.
+For `FF02`, each `u32` at `+0x10` has two fields: an identifier in the low 29
+bits and a chunk count in the high 3 bits. The record run then holds
+`sum(chunk_counts)` records. This gives the count formula below.
 
 For `FF61`, the `u32` at `+0x10` is a second payload-relative offset. It is
-greater than the `+0x0C` offset and smaller than the stored size in all 86 rows.
-The byte before it is `00` in all 86 rows, and its target begins a second
-encoded region. Its role is Probable; no field name is assigned.
+greater than the data offset and smaller than the stored size in 86/86 rows. The
+byte before it is `00` in all 86 rows, and its target begins a second encoded
+region. Its role is Probable; no field name is assigned.
 
-For `FF02`, the record width is explicit in 123 of 124 rows:
+## Chunk records
 
-| Record width | Rows | Family |
-| ---: | ---: | --- |
-| 36 bytes | 113 | all `audio.rpf` depth-1 rows |
-| 44 bytes | 4 | other depth-1 rows |
-| 60 bytes | 6 | other depth-1 rows |
-| not integral | 1 | other depth-1 rows |
+The trailing part of the table is a run of 8-byte records ending exactly at the
+data offset. Each record is a little-endian 64-bit word:
 
-In the fixed-width rows, `u32@+0x0C = 0x10 + width * u32@+0x08`. The single
-non-integral row still has a valid data offset; only the fixed-width relation
-fails.
+| Bits | Field | Observation |
+| --- | --- | --- |
+| 63 to 56 | type byte | one of the values in the table below |
+| 55 to 28 | size | nonzero in all records |
+| 27 to 0 | payload-relative offset | at or after the data offset |
+
+The byte immediately before `+0x0C` is the last record's type byte. The record
+run is aligned to the data offset: `(data_offset - record_start) % 8 == 0`.
+
+Record-run checks over all 768 rows:
+
+| Check | Result |
+| --- | --- |
+| Record run ends exactly at `+0x0C` | 768/768 |
+| Remainder after the last record | 0 bytes, 768/768 |
+| Records with size zero | 0 |
+| Records with `offset + size` past the payload | 0 |
+| Records pointing before the data offset | 0 |
+| Last record type equals the byte before `+0x0C` | 768/768 |
+
+The extent check uses the stored payload length. Record type bytes by variant:
+
+| Variant | Type bytes (record count) |
+| --- | --- |
+| `FF02` | `0x36` 2,464; `0x55` 2,464; `0x76` 2,464; `0xA3` 2,464; `0x5C` 161; `0xB2` 21; `0xBD` 21 |
+| `FF21` | `0x36` 6,073; `0x55` 8,396; `0x76` 8,396; `0xA3` 8,169; `0x5C` 6; `0xBD` 14 |
+| `FF25` | `0x48` 275; `0x55` 275; `0xA3` 275; `0xBD` 111 |
+| `FF61` | `0x36` 3,755; `0x55` 4,032; `0x76` 4,032; `0xA3` 4,032; `0x5C` 17; `0xBD` 23 |
+
+First and last record types:
+
+| Variant | First type | Last type |
+| --- | --- | --- |
+| `FF02` | `0x36` 124/124 | `0xA3` 118, `0xBD` 6 |
+| `FF21` | `0x36` 240, `0x55` 43 | `0x76` 43, `0xA3` 238, `0xBD` 2 |
+| `FF25` | `0x48` 275/275 | `0xA3` 167, `0xBD` 108 |
+| `FF61` | `0x36` 84, `0x55` 2 | `0xA3` 85, `0xBD` 1 |
+
+The type bytes are structural observations. No type byte is assigned a stream,
+chunk or codec meaning.
+
+## FF02 count formula
+
+For `FF02`, let `streams` be the `u32` at `+0x08` and `chunks[i]` the high three
+bits of the `i`-th `u32` at `+0x10`. Then:
+
+```text
+data_offset = 0x10 + 4 * streams + 8 * sum(chunks)
+```
+
+The formula holds in 124/124 `FF02` rows. The earlier reading used a fixed
+record width and the relation `data_offset = 0x10 + width * streams`:
+
+| Recorded width | Rows | Chunk counts | Width relation | Count formula |
+| ---: | ---: | --- | --- | --- |
+| 36 | 113 | 4 per stream | holds | holds |
+| 44 | 4 | 5 per stream | holds | holds |
+| 60 | 6 | 7 per stream | holds | holds |
+| non-integral | 1 | mixed | fails | holds |
+
+The width relation explains 123 of the 124 rows. The remaining row has mixed
+chunk counts, so no single width exists; its integer width is 39 and its byte
+count is not divisible by the stream count. The count formula explains that row
+and all 123 fixed-width rows. The 113 width-36 rows are the `audio.rpf` family;
+the 44 and 60 widths and the mixed row are in the other family.
+
+The `u32` at `+0x08` is a stream count, not a record count. In `FF02` the record
+count is `sum(chunks)`, which ranges from 4 to 576 while `streams` ranges from 1
+to 144. In `FF21`, `FF25` and `FF61` the record count is not the `u16` table
+length either: `FF25` has 2 to 9 streams but 3 to 5 records. The count at
+`+0x08` indexes the per-stream table; it does not count chunk records.
 
 ## One format or several
 
 The 768 rows share the magic, the version, the 16-byte header layout and the
-count/offset semantics. The four values at `+0x06` select table layouts, not
-independent signatures, so the evidence supports one format family with four
-header variants. It does not support four unrelated formats.
+count/offset semantics. The four values in the high half of `+0x04` select table
+layouts, not independent signatures, so the evidence supports one format family
+with four header variants. It does not support four unrelated formats.
 
-Archive family changes only one observed header relation:
-
-- `FF02` rows with `u32@+0x0C = 0x10 + 36 * u32@+0x08`: 113/113 `audio.rpf`
-  rows, 0/11 other rows.
-- `FF02` rows with a different record width: 0/113 `audio.rpf` rows, 10/11 other
-  rows, plus one non-integral row.
-
-No other family-correlated header difference was found. `FF21`, `FF25` and
-`FF61` use the same table positions and count relation in both families. Archive
-placement is provenance, so the predicate is stated over header arithmetic only.
-The sample cannot decide whether the `FF02` split is a payload subvariant or a
-placement-correlated selection.
+Archive family changes only one observed relation: the `FF02` width-36 rows are
+`audio.rpf` depth-1 rows, while the wider and mixed rows are in the other
+family. `FF21`, `FF25` and `FF61` use the same positions and formulas in both
+families. Archive placement is provenance; the predicates are header arithmetic.
 
 ## Identification
 
 Identification MUST use the payload bytes. `ADAT` at offset 0 identifies the
-signature; the type ID and archive name do not. The variant word at `+0x06` MUST
-be recorded with the signature, because it selects the table layout.
+signature; the type ID and archive name do not. The `u32` flags at `+0x04` MUST
+be recorded with the signature, because the high half selects the table layout.
 
 ## Limits
 
@@ -147,12 +200,20 @@ be recorded with the signature, because it selects the table layout.
   complete census of the build.
 - The 18 zlib type-255 rows in one `audio.rpf` archive were not decoded, so
   whether they also begin `ADAT` is Unknown.
-- The table-end bounds in `ADAT-F16` are empirical over 644 rows. A genuine
-  adjacent increase above 5 would fail the table-length test; no such row
-  occurs in the sample.
-- The region between the variant table and the data offset is not interpreted
-  beyond its boundaries and the `FF61` second offset.
-- No executable path was traced. Field roles beyond count and offset are
-  Unknown, and no codec identity is assigned.
+- The `8 * streams + 4`-byte region between the `u16` table and the record run is
+  uninterpreted.
+- The record type bytes and the second `FF61` offset have no established
+  meaning.
+- No executable path was traced. No audio codec, AWC identity or packet framing
+  is assigned.
+
+## Open questions
+
+- What do the record type bytes select?
+- What are the `8 * streams + 4` bytes before the record run?
+- What is the second `FF61` offset pointing to?
+- Does the encoded stream after `+0x0C` use one codec for all four variants?
+- Why do 18 type-255 rows in one `audio.rpf` archive begin a zlib stream instead
+  of `ADAT`?
 
 Evidence: [evidence/adat/INDEX.md](../../../evidence/adat/INDEX.md).
