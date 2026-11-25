@@ -103,6 +103,28 @@ Published material MUST NOT contain:
 
 If it is unclear whether something is safe to publish, leave it out and raise it in the pull request.
 
+## Name and hash mappings
+
+A factual mapping between a format's documented name hash and a candidate
+filename is not a payload copy. Publishing such mappings supports
+interoperability and is permitted when each record is:
+
+- hash-validated with the published algorithm and namespace;
+- accompanied by its provenance at the level required for the finding;
+- marked as a candidate unless the original name is independently established;
+- free of private paths, user names, credentials and cryptographic material.
+
+The public LUT files under `names/` are mapping data only. They MUST NOT be used
+to publish bulk extracted strings, readable payload text, executable byte
+ranges or unrelated embedded data. A 32-bit match is weaker than a 64-bit one
+and MUST NOT be presented as proof of original identity. Different names for
+one hash stay separate and ambiguous; the format does not pick a winner.
+
+When a discovered mapping's provenance raises a licensing or publication
+concern, keep it in local analysis and report the concern instead of publishing
+it. A mapping that is safe to publish does not make the payload it came from
+safe to publish.
+
 ## Tools and fixtures
 
 Tools in `tools/` are original work under the repository license. They read inputs read-only, take paths as arguments and write outputs outside the input directories. Tests use synthetic data built by the tests or committed as small authored fixtures.
