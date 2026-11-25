@@ -3,8 +3,9 @@
 `KB2j` (`4B 42 32 6A`) and `KB2n` (`4B 42 32 6E`) appear at offset 0 of 515
 rows in the local `movies.rpf`, all type ID 255, stored without chunks and
 without the payload transform. The local archive contains 505 `KB2n` rows and
-10 `KB2j` rows. An earlier census reported 787 `KB2n` rows; the local
-re-manifest does not reproduce that count (KB2-F01).
+10 `KB2j` rows. An earlier census reported 787 `KB2n` rows over a different
+797-row `movies.rpf` population; its manifest is not preserved (KB2-F01,
+KB2-F12).
 
 | Signature | Rows | Logical size range            | Audio tracks |
 | --------- | ---- | ----------------------------- | ------------ |
@@ -18,19 +19,20 @@ variants. All 515 rows share the same header prefix, little-endian frame index
 table and frame-data region. The fourth signature byte selects a variant; what
 it selects is **Unknown**.
 
-The family is a Bink 2 container candidate. FFmpeg 7.1.1 detects `KB2j` as
-format `bink`, parses the header and demuxes packets, then stops with `Bink 2
-video is not implemented`. The local `Bink2Scarlett.dll` contains one signature
-comparison sequence for `KB2f` through `KB2n`, including both signatures. This
-supports the family identification but does not establish engine compatibility
-or a decoder implementation.
+A similarity to the Bink 2 container family is **Speculative**. FFmpeg 7.1.1
+detects `KB2j` as format `bink`, parses the header and demuxes packets, then
+stops with `Bink 2 video is not implemented`. The local `Bink2Scarlett.dll`
+contains one signature comparison sequence for `KB2f` through `KB2n`, including
+both signatures. Both observations are external-tool names and local strings,
+not decoded frames or an engine call path. They do not establish container
+identity, engine compatibility or a decoder implementation.
 
 | Part                              | Status                                  |
 | --------------------------------- | --------------------------------------- |
 | Magic and occurrence              | Confirmed (515 rows, one archive)       |
 | Common header and frame table     | Confirmed (515 rows)                    |
 | One family, two variants          | Probable                                |
-| Bink 2 container family           | Probable (local tooling)                |
+| Bink 2 similarity                 | Speculative (external tooling names)    |
 | Meaning of the fourth magic byte  | Unknown                                 |
 | Frame encoding and decode         | Unknown                                 |
 
@@ -85,14 +87,11 @@ these `12n` bytes.
 | `+0x30+8n`| Small integer, usually in `0..n-1` but not always ordered. Meaning **Unknown** |
 
 FFmpeg reports one audio stream for the one-track sample after its signature
-is substituted (KB2-F04). Mutating the flag half shows that bit `0x1000`
-selects the DCT audio variant, bit `0x2000` selects two channels, and the
-remaining observed bits do not change the reported stream.
+is substituted (KB2-F04). The high 16 bits are observed flags; the meaning of
+each flag bit is **Unknown**.
 
-The exact packet framing when audio is present is **Unknown**. In the
-one-track sample FFmpeg emits interleaved audio and video packets; their
-positions fall inside the intervals bounded by the frame index table, but do
-not always coincide with the table entries.
+The exact packet framing when audio is present is **Unknown**. No mapping from
+the descriptor arrays to audio packets is established.
 
 ## Frame index table
 
@@ -132,17 +131,20 @@ and reduce to four unique payloads; three of those payloads occur three times
 each.
 
 The local `Bink2Scarlett.dll` signature comparison sequence lists `KB2f`
-through `KB2n` as one contiguous range. Within that range FFmpeg accepts `KB2i`,
-`KB2j` and `KB2k` for a `KB2j` sample, and rejects the others. What the fourth
-byte encodes, and why the engine stores both `KB2j` and `KB2n`, is **Unknown**.
+through `KB2n` as one contiguous range. What the fourth byte encodes, and why
+the engine stores both `KB2j` and `KB2n`, is **Unknown**.
 
 ## Limits
 
 - One archive and one build. No `KB2j` or `KB2n` payload was found outside
   `movies.rpf`.
-- The earlier count of 787 `KB2n` rows is not reproduced by the local archive.
+- The earlier 787 `KB2n` count covers a different `movies.rpf` population whose
+  manifest is not preserved. The current 505 count covers the 515-row manifest;
+  the figures are not interchangeable (KB2-F12).
+- The Bink 2 similarity rests on FFmpeg format naming and local DLL strings. No
+  decoded frame or engine call path confirms it.
 - No frame was decoded and no payload was played back. FFmpeg demuxes `KB2j`
-  without a decoder for the Bink 2 video bitstream.
+  without a decoder for the video bitstream.
 - The meanings of `+0x24`, `+0x26`, `+0x2C`, the audio size array and the
   audio packet framing are not established.
 - No decoder call path was traced. The local executable and DLL were inspected
