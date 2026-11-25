@@ -107,5 +107,5 @@ Unreadable rows, which were excluded from payload sampling:
 - No payload format is identified. A type ID, a magic or an 8-byte prefix alone does not establish a format.
 - No extension or original filename is assigned to any nested type ID.
 - The 8-byte prefix sample is too short to distinguish resource headers, container headers or compressed streams.
-- Encoding 4 and non-chunked raw DEFLATE mode 1 are still unobserved in real data.
+- Encoding 4 is absent from this sample. Non-chunked raw DEFLATE mode 1 is absent from the 22 top-level archives; it is recorded for a nested archive in RPF9-F118.
 - Depth-2 absence is a property of this sample, not evidence that nested archives never contain archives.
