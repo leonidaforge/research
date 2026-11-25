@@ -16,7 +16,7 @@ All findings below are **Private-evidence supported**: the sampler and its selec
 
 ## Sample frame
 
-- Input: 22 unique authenticated top-level archives from 23 manifest files. One duplicate manifest path was ignored. 17 archives contain type-0 rows; 5 contain none.
+- Input: 22 unique top-level archives from 23 manifest files. Each manifest header reports a verified metadata signature; the sampler does not re-check it, so authentication here is inherited from the manifest record. One duplicate manifest path was ignored. 17 archives contain type-0 rows; 5 contain none.
 - Rule: per archive, order readable type-0 rows with logical size at most 8 MiB by `(logical size, row)` and take indices `0`, `n // 2` and `n - 1`; remove duplicate rows. The tool is [tools/inventory](../../tools/inventory/README.md).
 - Result: 44 nested archives. 12 top-level archives contributed 3 samples, 3 contributed 2 and 2 contributed 1.
 - Caps: depth 2, 60 nested archives, 512 MiB extracted, 8 MiB per archive, 2 payloads per type at or below 1 MiB. Used: 44 archives, 101,949,270 bytes in total, 8,384,080 bytes for the largest archive and 39 payload samples.
