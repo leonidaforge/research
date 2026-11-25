@@ -197,6 +197,23 @@ The engine finishes a chunk only when it has consumed exactly the compressed siz
 
 The one-shot decoder credits the full logical size of the chunk after any successful decode. It does not compare the number of bytes produced with that size.
 
+### Stored framing survey
+
+A survey of every row in the 22 top-level archives measured the stored forms described above (RPF9-F120 to RPF9-F123). The manifest row records supply the mode, the chunk encoding and the sizes; the archive bytes supply the framing.
+
+| Stored form | Rows | Observation |
+| --- | --- | --- |
+| Mode 0, no chunk table, no transform | 5,150 | 4,549 stored exactly the logical size. 601 stored 4, 8, 12 or 13 extra bytes, all zero, after the logical end. No row stored less than its logical size |
+| Chunked, encoding 3, no transform | 928 | 650 have one chunk. Of those, 646 begin `78 DA` and inflate to exactly the logical size. The other four store plaintext whose stored length minus padding equals the logical size |
+| Chunked, encoding 3, transformed | 455 | Stored bytes are behind the payload transform and were not decoded |
+| Chunked, encoding 2, no transform | 1 | 16 zero bytes, one zlib stream, then zero padding to a 16-byte boundary |
+
+The encoding-2 row is `data.rpf` row 476: 7,462,544 stored bytes, 14,876,672 logical bytes, one chunk. The 16-byte prefix is the exception recorded in RPF9-F119: chunk 0 starts 16 bytes after the payload offset. The measured row agrees. Its one chunk stores 7,462,517 compressed bytes and 11 bytes of padding, which sum to the stored size minus 16 exactly. The stored range is 16 zero bytes, a 7,462,517-byte zlib stream that inflates to exactly the logical size, and 11 zero bytes of padding. The prefix, the stream and the padding together are a multiple of 16. The prefix lies outside chunk 0, so the chunk's stored size is the entry total minus 16; the chunk table itself was not read for this row.
+
+Four encoding-3 rows do not carry a zlib stream: three store `EDUP` payloads and one stores a printable `PTFX` payload. Their stored length minus padding equals the logical size, which is the requirement the engine places on a copy chunk. That these four chunks use the copy method is **Probable**: the method bits were not read from the chunk table. The entry encoding therefore does not determine the chunk method, and a reader MUST read the method bits per chunk.
+
+The survey counted 6,952 row records across 23 manifest files. The manifests repeat 418 `(archive, row)` pairs, so the figures above use 6,534 unique rows.
+
 ### Reader requirements
 
 The native code checks less than a reader can afford to. A reader that decodes entries without the payload transform SHOULD follow these rules (RPF9-F80):
@@ -280,5 +297,6 @@ Recovering payloads by scanning has these limits:
 - Data that is stored uncompressed, as raw DEFLATE or with another method is not found as zlib streams.
 - Entries behind the payload transform are found as zlib streams only if the transform leaves the stored bytes in that form, which is not established.
 - Chunk grouping assumes consecutive streams belong together. A gap or an unrelated stream ends a group.
+- The stored framing survey covers the 22 top-level archives only. Nested archives and rows behind the payload transform were not surveyed for framing.
 
 The limits above apply to recovery only. With a compatible local executable, the authenticated table of contents addresses each entry directly (RPF9-F103), so entries are no longer groups of streams guessed from signatures, and stored, chunked and uncompressed rows can be read. Two limits remain: names stay hashes, because the table stores no names, and rows behind the payload transform are identified but refused. The metadata signature still covers no payload bytes. See [Limits of native TOC extraction](README.md#limits-of-native-toc-extraction).
