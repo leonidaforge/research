@@ -284,6 +284,17 @@ class ValidationTests(unittest.TestCase):
             with self.assertRaises(probe.Kb2Error):
                 probe.probe_manifest(archive, manifest)
 
+    def test_manifest_deeply_nested_json_is_typed(self):
+        with tempfile.TemporaryDirectory() as directory:
+            archive = os.path.join(directory, "archive.bin")
+            with open(archive, "wb") as handle:
+                handle.write(bytes(0x50))
+            manifest = os.path.join(directory, "rows.jsonl")
+            with open(manifest, "w", encoding="utf-8", newline="\n") as handle:
+                handle.write("[" * 100000 + "]" * 100000 + "\n")
+            with self.assertRaises(probe.Kb2Error):
+                probe.probe_manifest(archive, manifest)
+
     def test_manifest_non_finite_number_is_typed(self):
         with tempfile.TemporaryDirectory() as directory:
             archive = os.path.join(directory, "archive.bin")

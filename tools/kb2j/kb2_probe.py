@@ -332,7 +332,7 @@ def _read_manifest(path):
                 continue
             try:
                 row = json.loads(value)
-            except json.JSONDecodeError as error:
+            except (json.JSONDecodeError, RecursionError) as error:
                 raise Kb2Error(f"manifest line {number}: invalid JSON: {error}") from error
             if not isinstance(row, dict):
                 raise Kb2Error(f"manifest line {number}: not a JSON object")
