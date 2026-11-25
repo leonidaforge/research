@@ -626,6 +626,13 @@ def aggregate(output_dir: Path) -> dict:
     rows_path = output_dir / "rows.jsonl"
     if not rows_path.exists():
         raise CensusError("rows.jsonl is absent")
+    identity = None
+    identity_path = output_dir / "identity.json"
+    if identity_path.exists():
+        try:
+            identity = json.loads(identity_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            identity = None
     records = []
     with rows_path.open("r", encoding="utf-8") as handle:
         for line in handle:
@@ -719,6 +726,7 @@ def aggregate(output_dir: Path) -> dict:
     ]
     summary = {
         "schema": SCHEMA,
+        "identity": identity,
         "declared_total": len(records),
         "attempted": len(records),
         "succeeded": sum(1 for record in records if record["attempt"].get("ok")),
@@ -753,6 +761,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--lforge", type=Path)
     parser.add_argument("--executable", type=Path)
+    parser.add_argument("--app-revision")
     parser.add_argument("--batch-size", type=int, default=50)
     parser.add_argument("--timeout", type=int, default=3600)
     parser.add_argument("--keep-archives", action="store_true")
@@ -769,6 +778,15 @@ def main() -> int:
         return 0
     if args.lforge is None or args.executable is None:
         raise CensusError("--lforge and --executable are required unless --summarize-only is set")
+    identity = {
+        "lforge_version": subprocess.run(
+            [str(args.lforge), "--version"], capture_output=True, text=True, check=False
+        ).stdout.strip(),
+        "lforge_sha256": sha256_file(args.lforge),
+        "executable_sha256": sha256_file(args.executable),
+        "application_revision": args.app_revision,
+    }
+    inventory.write_json(args.output_dir / "identity.json", identity)
     manifests, duplicates = inventory.discover_manifests(args.inventory_dir)
     census = Census(
         manifests,

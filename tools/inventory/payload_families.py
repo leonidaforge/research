@@ -257,6 +257,17 @@ def ensure_output(output: Path, *inputs: Path) -> None:
             raise FamilyError("the output directory MUST NOT lie inside an input directory")
 
 
+def sha256_path(path: Path) -> str:
+    digest = hashlib.sha256()
+    with Path(path).open("rb") as handle:
+        while True:
+            block = handle.read(8 * 1024 * 1024)
+            if not block:
+                break
+            digest.update(block)
+    return digest.hexdigest()
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--manifest-dir", type=Path, required=True)
@@ -266,6 +277,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--executable", type=Path, required=True)
     parser.add_argument("--per-type", type=int, default=8)
     parser.add_argument("--max-payload-bytes", type=int, default=1024 * 1024)
+    parser.add_argument("--app-revision")
     parser.add_argument("--timeout", type=int, default=600)
     return parser
 
@@ -276,8 +288,18 @@ def main() -> int:
         raise FamilyError("--per-type MUST be at least 1")
     ensure_output(args.output_dir, args.manifest_dir, args.archive_dir)
     selected, frame = select(args.manifest_dir, args.archive_dir, args.per_type, args.max_payload_bytes)
+    identity = {
+        "lforge_version": subprocess.run(
+            [str(args.lforge), "--version"], capture_output=True, text=True, check=False
+        ).stdout.strip(),
+        "lforge_sha256": sha256_path(args.lforge),
+        "executable_sha256": sha256_path(args.executable),
+        "application_revision": args.app_revision,
+    }
     summary = run(selected, args.output_dir, Runner(args.lforge, args.executable, args.timeout))
     summary["frame"] = frame
+    summary["identity"] = identity
+    inventory.write_json(args.output_dir / "identity.json", identity)
     inventory.write_json(args.output_dir / "summary.json", summary)
     print(json.dumps({"selected": summary["selected"], "successes": summary["successes"], "classes": summary["classes"]}))
     return 0
