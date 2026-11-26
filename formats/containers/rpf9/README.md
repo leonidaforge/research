@@ -16,7 +16,8 @@ All integers are little-endian. Offsets are relative to the start of the archive
 | [entries.md](entries.md)                                  | Entry IDs, location records, batch operations, enumeration and hierarchy limits |
 | [names.md](names.md)                                      | Path resolution, name hashes, type classes, extensions, runtime dictionary      |
 | [payloads.md](payloads.md)                                | Payload addressing, reads, decoding, chunk tables, observed storage layout      |
-| [entry-classification.md](entry-classification.md)        | Identifying what an entry holds, confidence, extensions, capability             |
+| [entry-classification.md](entry-classification.md)        | Identifying what an entry holds, claims, extensions, capability               |
+| [type-registry.md](type-registry.md)                      | The engine's native type-to-extension table and its reverse lookup              |
 | [entry-matrix.md](entry-matrix.md)                        | Every observed combination of type, identification, storage and capability      |
 | [identification-backlog.md](identification-backlog.md)    | Work the classification leaves open, ordered by what it unlocks                  |
 | [cryptography/rpf9](../../../cryptography/rpf9/README.md) | Validation chain, metadata cipher spans, signature check, payload transform     |

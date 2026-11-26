@@ -1,9 +1,14 @@
 """Run a bounded entry census over every root archive and merge the summaries.
 
-`lforge archive census` writes one summary per run. This driver gives every root
-archive of an installation the same entry budget, so the sample covers every
-root instead of the first one, then merges the summaries into one record that
-`entry_matrix.py` turns into the published matrix.
+`lforge archive census` writes one summary per run. This driver:
+
+- discovers root archives recursively, keeping installation-relative paths so
+  archives with the same basename in different folders stay distinct;
+- deletes the target before each run and refuses a file without a complete
+  summary, so a stale result is never read as a current scan;
+- records every failed root in the merged summary and marks the run incomplete,
+  so a partial scan is never described as exhaustive;
+- merges with exact archive occurrence counts.
 
 A complete census of a large installation is not affordable today: classifying
 one entry decodes a chunk, not only a head.
@@ -18,18 +23,33 @@ import json
 import os
 import subprocess
 import sys
+import uuid
 
 CENSUS = os.environ.get('LFORGE', 'lforge')
 
 
-def census(root, executable, entries, directory):
-    """One census run, as its summary record."""
-    target = os.path.join(directory, os.path.basename(root) + '.jsonl')
+def discover(install):
+    """Every `.rpf` under `install`, as (relative path, path), sorted."""
+    roots = []
+    for path in glob.glob(os.path.join(install, '**', '*.rpf'), recursive=True):
+        relative = os.path.relpath(path, install).replace('\\', '/')
+        roots.append((relative, path))
+    roots.sort()
+    return roots
+
+
+def census(relative, path, executable, entries, directory):
+    """One census run. Returns (summary, error); never a stale summary."""
+    name = relative.replace('/', '__') + '.jsonl'
+    target = os.path.join(directory, name)
+    if os.path.exists(target):
+        os.remove(target)
+    token = uuid.uuid4().hex
     command = [
         CENSUS,
         'archive',
         'census',
-        root,
+        path,
         '--executable',
         executable,
         '--recursive',
@@ -49,50 +69,62 @@ def census(root, executable, entries, directory):
         target,
         '--overwrite',
     ]
-    result = subprocess.run(command, capture_output=True, text=True)
-    if result.returncode != 0 and not os.path.exists(target):
-        return None, result.stderr.strip()
-    with io.open(target, encoding='utf-8') as handle:
-        for line in handle:
-            record = json.loads(line)
-            if record.get('record') == 'summary':
-                return record, None
-    return None, 'no summary'
+    try:
+        result = subprocess.run(command, capture_output=True, text=True)
+    except OSError as failure:
+        return None, 'cannot run {}: {}'.format(CENSUS, failure)
+    summary = None
+    error = result.stderr.strip().splitlines()[-1] if result.stderr.strip() else ''
+    if os.path.exists(target):
+        try:
+            with io.open(target, encoding='utf-8') as handle:
+                for line in handle:
+                    record = json.loads(line)
+                    if record.get('record') == 'summary':
+                        summary = record
+        except (OSError, ValueError) as failure:
+            error = error or 'unreadable output: {}'.format(failure)
+    if summary is None:
+        return None, error or 'no summary record'
+    summary['relative'] = relative
+    summary['token'] = token
+    return summary, None
 
 
 def key(combination):
     return (
         combination['type'],
         combination['identification'],
+        combination.get('variant'),
         combination['storage'],
         combination['transform'],
         combination['payload'],
-        combination['confidence'],
+        combination.get('structure'),
         combination['capability'],
         combination['extension'],
     )
 
 
-def merge(summaries):
+def merge(summaries, failures, discovered):
     combinations = {}
     types = {}
-    failures = []
     archives = 0
     entries = 0
     spooled = 0
-    roots = []
     stopped = {}
+    coverage = {}
     for summary in summaries:
         archives += summary['archives']
         entries += summary['entries']
         spooled += summary['spooled_bytes']
-        roots.append(summary['root'])
         if summary['stopped']:
-            stopped[summary['root']] = summary['stopped']
+            stopped[summary['relative']] = summary['stopped']
+        for name, value in summary.get('coverage', {}).items():
+            if name in ('roots_discovered', 'roots_opened'):
+                continue
+            coverage[name] = coverage.get(name, 0) + value
         for item in summary['types']:
             types[item['type']] = types.get(item['type'], 0) + item['entries']
-        for failure in summary['failures']:
-            failures.append(failure)
         for combination in summary['combinations']:
             existing = combinations.get(key(combination))
             if existing is None:
@@ -103,27 +135,39 @@ def merge(summaries):
                 }
                 continue
             existing['entries'] += combination['entries']
+            existing['archive_count'] = existing.get('archive_count', 0) + combination.get(
+                'archive_count', 0
+            )
             for archive in combination['archives']:
                 if archive not in existing['archives'] and len(existing['archives']) < 8:
                     existing['archives'].append(archive)
             for sample in combination['samples']:
-                if len(existing['samples']) < 6:
+                if len(existing['samples']) < 24:
                     existing['samples'].append(dict(sample))
+    coverage['roots_discovered'] = discovered
+    coverage['roots_opened'] = len(summaries)
+    coverage['failed_roots'] = len(failures)
     return {
         'record': 'summary',
-        'schema': 'leonida-forge.rpf9-census-merged/1',
+        'schema': 'leonida-forge.rpf9-census-merged/2',
         'root': None,
-        'roots': len(roots),
-        'archive_roots': roots,
+        'roots': len(summaries),
+        'archive_roots': [summary['relative'] for summary in summaries],
         'archives': archives,
         'entries': entries,
         'spooled_bytes': spooled,
         'stopped': stopped,
+        'complete': not stopped and not failures and len(summaries) == discovered,
+        'coverage': coverage,
         'types': [
             {'type': entry_type, 'entries': count}
-            for entry_type, count in sorted(types.items(), key=lambda item: (item[0] is None, item[0]))
+            for entry_type, count in sorted(
+                types.items(), key=lambda item: (item[0] is None, item[0])
+            )
         ],
-        'combinations': sorted(combinations.values(), key=lambda combination: -combination['entries']),
+        'combinations': sorted(
+            combinations.values(), key=lambda combination: -combination['entries']
+        ),
         'failures': failures,
     }
 
@@ -136,29 +180,41 @@ def main():
     os.makedirs(directory, exist_ok=True)
     runs = os.path.join(directory, 'runs')
     os.makedirs(runs, exist_ok=True)
-    roots = sorted(glob.glob(os.path.join(install, '*.rpf')))
+    roots = discover(install)
+    print('{} root archives discovered'.format(len(roots)), flush=True)
     summaries = []
-    for root in roots:
-        summary, error = census(root, executable, entries, runs)
+    failures = []
+    for relative, path in roots:
+        summary, error = census(relative, path, executable, entries, runs)
         if summary is None:
-            print('{}: {}'.format(os.path.basename(root), error), flush=True)
-        else:
-            print(
-                '{}: {} archives, {} entries{}'.format(
-                    os.path.basename(root),
-                    summary['archives'],
-                    summary['entries'],
-                    '' if not summary['stopped'] else ' (stopped: {})'.format(summary['stopped']),
-                ),
-                flush=True,
-            )
-            summaries.append(summary)
-    merged = merge(summaries)
+            print('{}: FAILED {}'.format(relative, error), flush=True)
+            failures.append({'archive': relative, 'error': error})
+            continue
+        print(
+            '{}: {} archives, {} entries{}'.format(
+                relative,
+                summary['archives'],
+                summary['entries'],
+                '' if not summary['stopped'] else ' (stopped: {})'.format(summary['stopped']),
+            ),
+            flush=True,
+        )
+        summaries.append(summary)
+    merged = merge(summaries, failures, len(roots))
     target = os.path.join(directory, 'census-merged.jsonl')
     with io.open(target, 'w', encoding='utf-8', newline='\n') as handle:
-        handle.write(json.dumps({'record': 'header', 'schema': merged['schema'], 'roots': merged['archive_roots']}) + '\n')
+        handle.write(
+            json.dumps(
+                {'record': 'header', 'schema': merged['schema'], 'roots': merged['archive_roots']}
+            )
+            + '\n'
+        )
         handle.write(json.dumps(merged) + '\n')
-    print('merged: {} entries in {} archives -> {}'.format(merged['entries'], merged['archives'], target))
+    print(
+        'merged: {} entries in {} archives, complete={} -> {}'.format(
+            merged['entries'], merged['archives'], merged['complete'], target
+        )
+    )
 
 
 if __name__ == '__main__':

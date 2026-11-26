@@ -19,23 +19,34 @@ A classification reads bounded evidence and records which part of it decided:
 | Payload      | The decoded payload's first 64 bytes                     | One decoded chunk in the worst case                       |
 | Document     | A decoded document up to 4 MiB, when the head looks XML  | One document                                              |
 | Structure    | Nothing extra: recognisers that walk framing do it on the head | Included in the head read                           |
+| Extension    | The engine's [type registry](type-registry.md)           | Metadata only                                             |
+
+The classification reads at most 64 decoded bytes. The matrix publishes the first 32 of them with every sample, which is a sample of the head, not the whole head.
 
 The classification never reads a payload in full, never guesses an extension it cannot establish, and never lets the type decide the format.
 
 ## Confidence
 
-| Level       | Meaning                                                                                  |
-| ----------- | ---------------------------------------------------------------------------------------- |
-| `verified`  | Repeated tests of real data and structural evidence agree                                 |
-| `probable`  | Several observations agree, but the evidence that would settle it is missing              |
-| `tentative` | A plausible hypothesis that independent checks do not confirm                             |
-| `unknown`   | The available evidence establishes nothing useful                                         |
+A classification makes separate claims, each with its own level. A verified signature is not a verified format, and a verified container shape is not a verified asset class.
 
-A recognised format is `verified` when its recogniser walks the payload's own framing from the head, and `probable` when the recogniser matches an identifier only. The RPF9 magic is such an identifier: the head proves the magic, and the archive parser proves the structure when a caller opens it.
+| Claim | Established by |
+| ----- | -------------- |
+| `signature` | The bytes matched a signature, or the first bytes look like XML. Nothing about structure. |
+| `structure` | The recogniser walked the payload's own framing from the head, or the whole document parsed. |
+| `asset` | The engine's type registry has an extension for the type id. |
 
-A validated XML document is `verified`: the whole document parsed and its root element is known. Bytes that only begin like XML are `tentative`.
+| Level | Meaning |
+| ----- | ------- |
+| `verified` | Repeated tests of real data and structural evidence agree |
+| `probable` | Several observations agree, but the evidence that would settle it is missing |
+| `tentative` | A plausible hypothesis that independent checks do not confirm |
+| `unknown` | The available evidence establishes nothing useful |
 
-A resource header is `probable`. Its shape is established from real rows, but which resource it holds is not.
+A recogniser that walks framing from the head claims `verified` structure. The RPF9 recogniser matches the magic only, so its structure is `probable` until a caller opens the archive. A resource header is a verified signature with `unknown` structure: the page map it points at is not read. A named signature such as `MHIU` is a verified signature with unknown structure, format and asset class.
+
+The asset claim comes from the registry alone. It is `verified` because the extension is a fact about the build, not because anything about the payload was understood.
+
+Reading the first 64 decoded bytes never establishes the whole entry. Every claim is about the head, except a validated document, which is about the whole document.
 
 ## Storage
 
@@ -95,16 +106,20 @@ Four signatures are named without claiming a format, because the bytes are disti
 
 ## Extension
 
-An extension is applied only when the classification establishes it. The order is:
+An extension is applied only when something establishes it. The precedence is fixed, and the provenance is kept:
 
-1. The archive's own name, if the entry resolved to one. It is kept exactly as found, including case and a leading dot.
-2. `rpf` when the payload is an RPF9 archive.
-3. `xml` when the payload is a validated XML document.
+1. The archive's own resolved name, kept exactly as found, including case and a leading dot.
+2. The engine's native extension for the type id, from the [type registry](type-registry.md).
+3. A payload-derived extension: `xml` when the whole document parsed.
 4. Nothing, with a reason.
 
-A recognised format without an established extension stays unresolved with the reason "the format is recognised but no extension is established" rather than borrowing the extension from a type table or a neighbouring file. The same applies to a resource container ("the asset class is not identified"), to a named signature, to a payload that is transformed and was not decoded ("the payload is transformed and was not decoded"), and to an entry typed as an archive whose payload is not one.
+A native extension and a payload-derived extension are different properties. The engine's extension names the asset class the loader assigns to the type; the payload-derived extension names the container the bytes actually are. When the two disagree — a type whose registry extension is `zmt` holding a validated XML document — the native extension is applied, because that is the name the game would use, and the disagreement is reported in `conflict` instead of being silently dropped.
 
-Two consequences follow. A listing cannot show an extension for most rows, because most payloads are resource containers. And no caller needs to invent a fallback: `extension` is present or absent, and `extension_verified` says whether it may be applied without a fallback.
+The only payload-derived extension this model applies is `xml`. A recognised format such as `PSIN` has no established extension and stays unresolved with that reason; the type's native extension is what a caller sees.
+
+Where a resource header appears under a type the registry does not cover, the reason is "a resource container with no registered engine type".
+
+Two consequences follow. Almost every observed type now has an extension without reading any payload, and no caller needs a fallback: `extension` is present or absent, and `extension_verified` says whether it may be applied without one.
 
 ## Capability
 
@@ -154,7 +169,7 @@ Twelve root archives, 69 archives opened, 8,138 entries classified. Eight roots 
 | RPF9 | 57 |
 | GFx | 5 |
 
-Every resource container is segment 5. Of the 399 XML payloads, 397 parse, under 164 distinct root elements; the other two begin like XML and are reported as tentative.
+Every resource container is segment 5. The validated documents parse under many distinct root elements, and a small number of payloads begin like XML without parsing; the matrix records those as `xml:unvalidated` and gives no extension. The exact figures are in [entry-matrix.md](entry-matrix.md), which is regenerated with every run.
 
 | Capability | Entries | Share |
 | ---------- | ------: | ----: |
@@ -171,6 +186,8 @@ Every resource container is segment 5. Of the 399 XML payloads, 397 parse, under
 | `xml` | 397 |
 | `rpf` | 57 |
 
+Those figures are from the bounded run that also filled the first version of the matrix; the current matrix in this directory is regenerated from the run described under "How the sample was taken". A run replaces the figures, which is why the matrix, not this table, is the record.
+
 | Confidence | Entries |
 | ---------- | ------: |
 | probable | 5,197 |
@@ -182,7 +199,7 @@ Every resource container is segment 5. Of the 399 XML payloads, 397 parse, under
 
 ### What the type does and does not say
 
-Twenty types appear in the sample. Thirteen of them hold only resource containers: 2, 3, 5, 6, 67, 70, 74, 79, 87, 95, 102, 111 and 114. Five hold only a supported format: 0 (RPF9), 11 (`PSIN` and `RBF0`), 66 (GFx), 93 and 94. Two hold nothing identifiable: 89 and 96, one entry each.
+Twenty-one types appear in the sample. Thirteen of them hold only resource containers: 2, 3, 5, 6, 67, 70, 74, 79, 87, 95, 102, 111 and 114. Five hold only a supported format: 0 (RPF9), 11 (`PSIN` and `RBF0`), 66 (GFx), 93 and 94. Two hold nothing identifiable: 89 and 96, one entry each. Type 255 is the unregistered catch-all.
 
 Type 255 holds all of it: `ADAT` (887), `KB2` (515), 399 XML documents under 164 roots, 17 payloads that match nothing, the five named signatures, and two `PSIN` payloads. Type 11 holds two formats, `PSIN` (897) and `RBF0` (156). Type 0 holds RPF9 archives throughout the sample; a synthetic fixture in the test suite also shows a type-0 row holding `PSIN`, which is why the type never decides the format in the code either.
 
