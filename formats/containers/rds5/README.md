@@ -68,25 +68,30 @@ same stores:
 | ETPF `d1` bits 24..27 | tile mode: 0 = `SW_64KB_D`, 1..3 = `SW_4KB_S` |
 | ETPF locator low 21 bits | virtual page; `page * 0x1000 + 0x1000` |
 
-- Mips are stored smallest first. The viewer computes the mip-0 byte range from
-  the Gfx10 2D layout and reads only that range from the chunk table, so it does
-  not inflate unrelated mips.
-- Chunk classes `0x00` (stored) and `0x20` (zlib) decode. A mip whose range
-  includes another class is skipped; the viewer falls back to the largest lower
-  mip whose range is fully decodable and records the fallback in the texture
-  source string.
-- The Gfx10 4 KiB and 64 KiB element-bit orders used here are the public
-  addrlib equations. They were validated by decoding BC1, BC3, BC4, BC5 and BC7
-  surfaces from actual stores and rendering the resulting drawables.
+- Mips are stored smallest first and the descriptor range is right-aligned, so
+  level 0 occupies `encoded_len - level0_len` bytes at the end of the range.
+  The viewer exposes level 0 and does not descend to lower mips.
+- Chunk classes `0x00` (stored) and `0x20` (zlib) decode. A level whose range
+  includes another class is reported as unsupported instead of being decoded by
+  guesswork.
+- Tile modes 1..3 mark a 4 KiB tiled allocation. The viewer reorders the tile
+  grid with the observed element-bit orders for RGBA8, R16, BC1/BC4 and
+  BC3/BC5/BC7, drops the padding tiles, and then decodes. Tile mode 0 is read
+  in the stored order. The tiled result was validated by decoding BC1, BC3,
+  BC4, BC5 and BC7 surfaces from actual stores and rendering the resulting
+  drawables.
 - The 64-bit ETPF key is the same key a drawable's texture name record carries.
   In the two named drawable rows, 12 distinct keys matched one store descriptor
   each and the remaining key was a texture embedded in the drawable itself.
-- A scan of `<GAME_ROOT>/data/ttdb` in the Scarlett install found 46 stores and
-  351,922 descriptors. Keys are matched exactly; a key present in more than one
-  store or descriptor is reported as ambiguous, not resolved by preference.
+- A scan of `<GAME_ROOT>/data/ttdb` in the Scarlett install found 46 stores.
+  Keys are matched exactly; a key present in more than one store or descriptor
+  is reported as ambiguous, not resolved by preference. The sampled RDS5
+  store holds 912 descriptors: 886 have a supported simple-2D layout and 872
+  reconstruct at level 0; the remaining levels use an undecoded storage class
+  or an unsupported kind.
 
 The viewer does not decode the six undecoded storage classes, BCPack payloads,
-cube faces, 3D textures, or mip levels below the largest decodable one.
+cube faces, 3D textures or array layers.
 
 ## Status
 
@@ -103,7 +108,7 @@ cube faces, 3D textures, or mip levels below the largest decodable one.
 | Key table | Sorted 64-bit keys confirmed in 56 of 56 stores with at least two descriptors. Key values are not published |
 | Descriptor first page | Every locator page is a block start in 357,115 of 357,115 descriptors |
 | Block size accounting | End record equals the 33-bit payload size in 57 of 57 stores |
-| Texture decoding | Mip 0 of zlib/stored blocks decoded for BC1, BC3, BC4, BC5 and BC7 and several uncompressed DXGI formats through the Gfx10 layout. The six other storage classes and BCPack payloads are not decoded. One byte-level chain is also established for one texture |
+| Texture decoding | Level 0 of zlib/stored blocks decoded for BC1, BC3, BC4, BC5 and BC7 and several uncompressed DXGI formats through the tiled native layout. The six other storage classes and BCPack payloads are not decoded. One byte-level chain is also established for one texture |
 | Reconstruction of undecoded classes | Not supported |
 
 ## Boundaries
