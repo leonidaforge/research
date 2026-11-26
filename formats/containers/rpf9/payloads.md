@@ -296,7 +296,7 @@ The cipher descriptor is the value of the entry's transform field itself, not an
 
 The block program of algorithm `0x11` was recovered from `0x1456437C0` (RPF9-F130). It runs a stage pass over sixteen affine tables, thirteen table rounds, and a substitution-only final round through sixteen key-dependent tables with the AES shift-rows byte permutation. The earlier transcription (RPF9-F117) alternated two round forms and indexed one round table by the wrong byte; correcting both turns real chunks into valid zlib streams.
 
-The transform is applied to the first 2048 bytes of a stream and to the first 1024 bytes of each later 9216-byte buffer; the remaining stored bytes are plaintext (RPF9-F131). In one archive all 149 transformed rows decoded to their declared sizes and their XML parsed. Five large or multi-chunk rows in another archive still fail, so the segmentation for those shapes is not settled.
+The transform is partial. It covers the first 2048 bytes of a stream, the first 1024 bytes of the buffer at offset 9216, and the first 1024 bytes of every 8192 bytes after that; the remaining stored bytes are plaintext (RPF9-F131). All 455 transformed rows of the seven top-level archives that contain them decoded to their declared sizes, and their XML parsed or their PSIN header was coherent.
 
 ## Relation between code and data
 
