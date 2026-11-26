@@ -350,6 +350,13 @@ no stored names, so the viewer's `Texture N` labels are synthesized. They are
 not registered as a numbered finding; the row indices, counts and image checks
 are the evidence.
 
+Format 78 is a 16-byte block format. A sampled 512 x 128 record decoded as BC3
+to a coherent ornament strip on a white background, and its 98,304-byte
+descriptor range matches a BC3 level-0 size of 65,536 bytes plus one lower
+level. Format 77 and 78 therefore form the BC3 linear/sRGB pair by layout and
+numbering. The BC3 layout is **Probable** and the sRGB interpretation is
+**Probable**; neither is traced from engine code.
+
 ## Limits
 
 - One build. The positive sample is a census of the type-5 rows in 25 nested

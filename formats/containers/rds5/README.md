@@ -74,12 +74,17 @@ same stores:
 - Chunk classes `0x00` (stored) and `0x20` (zlib) decode. A level whose range
   includes another class is reported as unsupported instead of being decoded by
   guesswork.
-- Tile modes 1..3 mark a 4 KiB tiled allocation. The viewer reorders the tile
-  grid with the observed element-bit orders for RGBA8, R16, BC1/BC4 and
-  BC3/BC5/BC7, drops the padding tiles, and then decodes. Tile mode 0 is read
-  in the stored order. The tiled result was validated by decoding BC1, BC3,
-  BC4, BC5 and BC7 surfaces from actual stores and rendering the resulting
-  drawables.
+- Tile mode 0 uses the 64 KiB Gfx10 layout; tile modes 1 through 3 use the
+  4 KiB layout. The viewer reads level 0 from `encoded_len - level0_len`, so a
+  multi-level allocation is right-aligned. The 64 KiB path was checked against
+  the original model viewer on six sampled tile-0 textures: the reconstructed
+  level-0 bytes are identical. The corrected 4 KiB placement produced complete
+  images for multi-level samples where the earlier mip layout returned only
+  partial content.
+- The 4 KiB reorder uses the observed element-bit orders for RGBA8, R16,
+  BC1/BC4 and BC3/BC5/BC7 and drops the padding tiles. The tiled result was
+  validated by decoding BC1, BC3, BC4, BC5 and BC7 surfaces from actual stores
+  and rendering the resulting drawables.
 - The 64-bit ETPF key is the same key a drawable's texture name record carries.
   In the two named drawable rows, 12 distinct keys matched one store descriptor
   each and the remaining key was a texture embedded in the drawable itself.
