@@ -294,7 +294,7 @@ The same flag disables the chunk fast path. A transformed compressed entry is tr
 
 The cipher descriptor is the value of the entry's transform field itself, not an archive descriptor (RPF9-F114): `u32` key identifier, `u16` cipher type, 16-byte parameter. The type selects the algorithm through the engine's own type table, and the descriptor is therefore per entry. In the sampled rows the type is `0x11`, which selects algorithm `0x11`: a counter-mode keystream over the encoded block generator (RPF9-F115). The counter starts at the 16-byte parameter plus the block index of a payload-relative stored position and advances by one per 16-byte block, and each block is XORed into the stored bytes. The key identifier resolves through the static key registry to one key state for the selected provider (RPF9-F97, RPF9-F116).
 
-The block program of algorithm `0x11` is not reproduced yet, so the transform cannot be inverted and transformed entries stay unsupported (RPF9-F117). The negative results of the first probe came from reading the archive descriptor with the metadata cipher instead (RPF9-F113).
+The block program of algorithm `0x11` is not reproduced yet, so the transform cannot be inverted and transformed entries stay unsupported (RPF9-F117). The negative results of the first probe came from reading the archive descriptor with the metadata cipher instead (RPF9-F113); a later probe used one transformed entry's own descriptor key identifier and parameter and also produced no valid zlib stream, so the descriptor is not the remaining gap.
 
 ## Relation between code and data
 
