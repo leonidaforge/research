@@ -148,60 +148,59 @@ lforge archive census <root>.rpf --executable <game executable> --recursive \
     --max-nested-bytes 268435456 --max-spool-bytes 4294967296
 ```
 
-Twelve root archives, 69 archives opened, 8,138 entries classified. Eight roots stopped at their entry budget; `appdata0.rpf` (2), `common.rpf` (418), `movies.rpf` (515) and `shaders.rpf` (3) ended because the archive and its nested archives were exhausted. No archive failed to open. Nothing was copied to temporary storage: every nested archive in the sample had all-copy chunks and was read where it lies.
+Every root archive under the installation, found recursively: 22 discovered, 22 opened, 126 archives opened (104 of them nested), 11,283 entries classified, no archive failed to open. Seventeen roots stopped at their per-root entry budget, so the run is a sample and the matrix records `complete: false`. Nothing was copied to temporary storage: every nested archive in the sample had all-copy chunks and was read where it lies.
 
 ### What the sample holds
 
 | Identification | Entries | Share |
 | -------------- | ------: | ----: |
-| resource container | 5,140 | 63.2% |
-| supported format | 2,575 | 31.6% |
-| validated XML document | 399 | 4.9% |
-| nothing | 19 | 0.2% |
-| named signature | 5 | 0.1% |
+| resource container | 7,189 | 63.7% |
+| supported format | 3,634 | 32.2% |
+| validated XML document | 421 | 3.7% |
+| nothing, or a named signature | 39 | 0.3% |
 
 | Format | Entries |
 | ------ | ------: |
-| `PSIN` | 955 |
-| `ADAT` | 887 |
-| `KB2` | 515 |
+| `PSIN` | 1,442 |
+| `ADAT` | 1,410 |
+| `KB2` | 522 |
 | `RBF0` | 156 |
-| RPF9 | 57 |
+| RPF9 | 104 |
 | GFx | 5 |
 
-Every resource container is segment 5. The validated documents parse under many distinct root elements, and a small number of payloads begin like XML without parsing; the matrix records those as `xml:unvalidated` and gives no extension. The exact figures are in [entry-matrix.md](entry-matrix.md), which is regenerated with every run.
+Every resource container is segment 5. The matrix records the documents' distinct roots and the two payloads that begin like XML without parsing as `xml:unvalidated`.
 
 | Capability | Entries | Share |
 | ---------- | ------: | ----: |
-| resource | 5,140 | 63.2% |
-| structural | 2,518 | 30.9% |
-| text | 399 | 4.9% |
-| archive | 57 | 0.7% |
-| bytes | 23 | 0.3% |
+| resource | 7,189 | 63.7% |
+| structural | 3,536 | 31.3% |
+| text | 423 | 3.7% |
+| archive | 104 | 0.9% |
+| bytes | 30 | 0.3% |
 | unavailable | 1 | 0.0% |
 
 | Extension | Entries |
 | --------- | ------: |
-| none | 7,684 |
-| `xml` | 397 |
-| `rpf` | 57 |
+| native | 9,317 |
+| `xml` | 421 |
+| none | 1,545 |
 
-Those figures are from the bounded run that also filled the first version of the matrix; the current matrix in this directory is regenerated from the run described under "How the sample was taken". A run replaces the figures, which is why the matrix, not this table, is the record.
-
-| Confidence | Entries |
-| ---------- | ------: |
-| probable | 5,197 |
-| verified | 2,920 |
-| unknown | 19 |
+| Structure claim | Entries |
+| --------------- | ------: |
+| verified | 3,957 |
+| probable | 104 |
 | tentative | 2 |
+| unknown | 7,220 |
 
-152 entries (1.9%) carry the payload transform. The executable's key state was available for them, and 151 decoded; one type-89 entry did not verify and is reported as `transform-failed` rather than identified.
+154 entries carry the payload transform. The executable's key state was available for them, and 153 decoded; one entry did not verify and is reported as `transform-failed` rather than identified.
 
 ### What the type does and does not say
 
-Twenty-one types appear in the sample. Thirteen of them hold only resource containers: 2, 3, 5, 6, 67, 70, 74, 79, 87, 95, 102, 111 and 114. Five hold only a supported format: 0 (RPF9), 11 (`PSIN` and `RBF0`), 66 (GFx), 93 and 94. Two hold nothing identifiable: 89 and 96, one entry each. Type 255 is the unregistered catch-all.
+Twenty-eight types appear in the sample, against twenty-one in the earlier twelve-root run. Nine of them were never reached before, because ten root archives under `pack/` were missed by a non-recursive glob: 4, 15, 16, 17, 72, 73, 78, 88 and 108. Types 93 and 94, which the tighter budget had reached before, are not in this sample.
 
-Type 255 holds all of it: `ADAT` (887), `KB2` (515), 399 XML documents under 164 roots, 17 payloads that match nothing, the five named signatures, and two `PSIN` payloads. Type 11 holds two formats, `PSIN` (897) and `RBF0` (156). Type 0 holds RPF9 archives throughout the sample; a synthetic fixture in the test suite also shows a type-0 row holding `PSIN`, which is why the type never decides the format in the code either.
+The thirteen resource-only types of the earlier sample (2, 3, 5, 6, 67, 70, 74, 79, 87, 95, 102, 111, 114) still hold only resource containers, and every type except 255 has a registered native extension. Type 255 is the unregistered catch-all and holds `ADAT`, `KB2`, documents, named signatures and payloads that match nothing.
+
+Eleven types the earlier investigation recorded remain unobserved in both runs: 14, 64, 69, 77, 86, 99, 101, 103, 109, 110 and 115. They are unobserved, not disproved; the per-root entry budgets are the first thing to raise, and no scan has yet reached the archives that hold them.
 
 That is why the type cannot decide the format. A type that holds one identification in the sample is a type whose rows happened to share one; it is not a promise about the next row.
 
