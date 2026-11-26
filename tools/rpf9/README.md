@@ -1,6 +1,6 @@
 # RPF9 framing and header probes
 
-Three bounded, read-only tools for RPF9 research. They read the archive they are given
+Three bounded, read-only probes and one verification harness for RPF9 research. They read the archive they are given
 and refuse every range outside that file. They refuse an `--output` that names an input
 file, write through a temporary file in the target directory, and replace the
 destination only after the write succeeds. They do not print payload or trailer bytes.
@@ -10,6 +10,7 @@ destination only after the write succeeds. They do not print payload or trailer 
 | `framing_survey.py` | one archive and a native row manifest | encoding-2 prefix classes, chunk methods, decoded header classes, chunk count against declared page counts |
 | `trailer_probe.py` | one or more archives, optionally with manifests | `hdr[0x0C]` as a trailing length, the payload boundary, four bound checks, and trailer equality classes |
 | `secondary_probe.py` | one or more archives | `C`, `D`, `E`, `F`, the secondary-area size, and two size-model checks |
+| `random_transform_tests.py` | a compatible Leonida Forge CLI, a game directory and an executable | random transformed rows per archive, each decoded and compared with its declared logical size |
 
 Python 3 standard library only.
 
@@ -63,6 +64,21 @@ direct layout with a different width per column remains possible. The summary re
 the archives where the two size predictions differ and the archives where an observation
 selects a model; without decoded secondary bytes the second count is zero. Neither
 check assigns a meaning to the flag at `u8@0x2D`.
+
+## Payload-transform verification
+
+```text
+python tools/rpf9/random_transform_tests.py LFORGE GAME_DIR EXECUTABLE [SEED]
+```
+
+The harness lists the transformed rows of every top-level `.rpf` with the
+application's `archive search --transformed true`, samples them at random with a
+fixed seed, extracts each with `archive extract`, and requires the output size to
+equal the row's declared logical size. It reports only archive names, row
+numbers, sizes and a pass count. It needs a compatible Leonida Forge CLI and the
+matching executable; it does not read key material itself. `PER_ARCHIVE` sets
+the sample size (default 5). This harness is separate from the synthetic unit
+tests below because it needs the application and a local installation.
 
 ## Tests
 
