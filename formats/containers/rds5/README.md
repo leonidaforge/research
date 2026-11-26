@@ -81,6 +81,12 @@ same stores:
   level-0 bytes are identical. The corrected 4 KiB placement produced complete
   images for multi-level samples where the earlier mip layout returned only
   partial content.
+- A full `.ttpf` census over the 46 stores below `data/ttdb` selected 38,542
+  simple 2D, supported-format tile-0 descriptors. 38,303 have an encoded range
+  equal to the 64 KiB mip-chain total, and all 38,542 fit within it. The
+  reproducible probe is the `tile_zero_64k_corpus_census` test in the
+  application's texture crate. The earlier 37,175/37,413 figures are not
+  reproducible with the recorded selection and are superseded by this census.
 - The 4 KiB reorder uses the observed element-bit orders for RGBA8, R16,
   BC1/BC4 and BC3/BC5/BC7 and drops the padding tiles. The tiled result was
   validated by decoding BC1, BC3, BC4, BC5 and BC7 surfaces from actual stores
