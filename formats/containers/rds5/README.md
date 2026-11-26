@@ -51,6 +51,43 @@ Evidence: [evidence/rds5/INDEX.md](../../../evidence/rds5/INDEX.md). Corrections
 transfer history: [research-history.md](../../../evidence/rds5/research-history.md).
 Independent verification: [evidence/rds5-verification/INDEX.md](../../../evidence/rds5-verification/INDEX.md).
 
+## Viewer decoding
+
+The Leonida Forge viewer reads the store directly and decodes mip 0 of the
+textures a drawable references. The fields it relies on were checked on the
+same stores:
+
+| Field | Reading |
+| --- | --- |
+| ETPF `d0` bits 0..13 | `width - 1` |
+| ETPF `d0` bits 14..27 | `height - 1` |
+| ETPF `d0` bits 28..31 | mip count minus one; tile mode 1 with field 1 is one mip |
+| ETPF `d1` bits 3..9 | DXGI format |
+| ETPF `d1` bits 10..19 | array size minus one |
+| ETPF `d1` bits 20..23 | kind: 2 = 2D, 10 = 2D array; 4 (cube) and 6 (3D) are not decoded |
+| ETPF `d1` bits 24..27 | tile mode: 0 = `SW_64KB_D`, 1..3 = `SW_4KB_S` |
+| ETPF locator low 21 bits | virtual page; `page * 0x1000 + 0x1000` |
+
+- Mips are stored smallest first. The viewer computes the mip-0 byte range from
+  the Gfx10 2D layout and reads only that range from the chunk table, so it does
+  not inflate unrelated mips.
+- Chunk classes `0x00` (stored) and `0x20` (zlib) decode. A mip whose range
+  includes another class is skipped; the viewer falls back to the largest lower
+  mip whose range is fully decodable and records the fallback in the texture
+  source string.
+- The Gfx10 4 KiB and 64 KiB element-bit orders used here are the public
+  addrlib equations. They were validated by decoding BC1, BC3, BC4, BC5 and BC7
+  surfaces from actual stores and rendering the resulting drawables.
+- The 64-bit ETPF key is the same key a drawable's texture name record carries.
+  In the two named drawable rows, 12 distinct keys matched one store descriptor
+  each and the remaining key was a texture embedded in the drawable itself.
+- A scan of `<GAME_ROOT>/data/ttdb` in the Scarlett install found 46 stores and
+  351,922 descriptors. Keys are matched exactly; a key present in more than one
+  store or descriptor is reported as ambiguous, not resolved by preference.
+
+The viewer does not decode the six undecoded storage classes, BCPack payloads,
+cube faces, 3D textures, or mip levels below the largest decodable one.
+
 ## Status
 
 | Part | Status |
@@ -66,7 +103,7 @@ Independent verification: [evidence/rds5-verification/INDEX.md](../../../evidenc
 | Key table | Sorted 64-bit keys confirmed in 56 of 56 stores with at least two descriptors. Key values are not published |
 | Descriptor first page | Every locator page is a block start in 357,115 of 357,115 descriptors |
 | Block size accounting | End record equals the 33-bit payload size in 57 of 57 stores |
-| Texture decoding | One byte-level chain reconstructed for one texture. No pixel format or codec identity is established |
+| Texture decoding | Mip 0 of zlib/stored blocks decoded for BC1, BC3, BC4, BC5 and BC7 and several uncompressed DXGI formats through the Gfx10 layout. The six other storage classes and BCPack payloads are not decoded. One byte-level chain is also established for one texture |
 | Reconstruction of undecoded classes | Not supported |
 
 ## Boundaries

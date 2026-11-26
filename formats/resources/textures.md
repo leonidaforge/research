@@ -276,6 +276,14 @@ fields are repeated here.
 | Texture name record | `u32` at record `+0x18` when the `u64` at `+0x10` is `6` | a 32-bit value that shares the dictionary name-hash namespace | Probable (namespace match, see below) |
 | Texture name record | `u64` at record `+0x08` | a separate 64-bit key; neither 32-bit half is a dictionary hash | Rejected as a dictionary reference |
 
+The 64-bit key is not a dictionary hash, but it is the key the `.ttpf` stores
+use. A store index built from `<GAME_ROOT>/data/ttdb` matched the distinct keys
+of the two named drawable rows exactly: 12 keys matched one ETPF descriptor each
+and the remaining key was a texture embedded in the drawable. A key found in
+more than one store or descriptor is reported as ambiguous. The 32-bit hash at
+record `+0x18` remains a dictionary-namespace value and is not used to select a
+store.
+
 The sample is the 92 type-2 drawables of the nested archive at
 `<GAME_ROOT>/levels.rpf` row 5 (SHA-256
 `450B6A5A95578A31133F686AE5D1D8151B4C7A38197F039895311D44742DBC96`). It holds

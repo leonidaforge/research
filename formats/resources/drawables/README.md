@@ -548,13 +548,56 @@ with at least two shaders, the census reports 8 drawables, 52 shaders, 348
 declared texture slots, 278 bound, 70 unbound and 0 null keys. All 278 bound
 slots carry a nonzero key. The manifest and decoded files are local inputs.
 
-No store join was attempted. The resolved count is left unset rather than zero,
-because a direct-store or EDUP match cannot be counted without a texture store.
-No key was resolved.
+The key is the same 64-bit key the `.ttpf` ETPF descriptor table carries. A
+store index built from `<GAME_ROOT>/data/ttdb` resolved the distinct keys of
+rows 5 and 10 exactly: 12 keys matched one ETPF descriptor each, and the
+remaining key was the name record of a texture embedded in the drawable
+(133x1 RGBA8 in row 5). No key needed a name or hash approximation. A duplicate
+key in more than one store or descriptor is reported as ambiguous and is not
+resolved by choosing one.
 
-No local texture store was reached from these samples. Resolving a key depends
-on a resource-side texture dictionary or store reference path that was not
-found. That dependency is **Unknown**.
+## Decoded geometry
+
+The viewer decodes the mesh blob and meshlet index buffer from the same rows.
+The following rules are **Confirmed** on samples A and B and were checked by
+reconstructing the stored bounds and rendering the result:
+
+- The vertex-buffer graphics target starts with the stream table. Word `k` at
+  `+4k` is `byte offset / 2 << 8 | format`; a zero word ends the table. Slot 0
+  is the position stream at `0x80` with format `0x42`, or at `0x60` with format
+  `0x63` for the float-position variant.
+- The quantised position is one `u64` per vertex. With `q` little-endian:
+  `x = (((q >> 16) & 0xFFFF) << 8 | (q & 0xFF))`, and the same construction
+  for `y` from bits 32..47 and 8..15. `z` is `q >> 48`. The result is affine:
+  `slot * step + base` with the three `f32` base values at `+0x60` and step
+  values at `+0x70`.
+- The `u32` at `+0x6C` says which model axis the 16-bit `z` slot holds. `2`
+  is identity; `1` stores slots `(z, x, y)`, so model space is
+  `(slot_y, slot_z, slot_x)`; `0` stores `(z, y, x)`, so model space is
+  `(slot_z, slot_y, slot_x)`. The decoded positions of rows 5 and 10 reproduce
+  their per-geometry AABBs within quantisation error with this mapping.
+- Stream 2 (`0x21`) is an octahedral normal: `x` in bits 0..9, `y` in bits
+  10..19, `z = 1 - |x| - |y|` with the standard unfold. Bit 31 is set on a
+  populated normal. Streams 1 (`0x26`) and 3/4 (`0x28` or `0x42`) are RGBA8
+  and two-component UVs; 11 (`0x27`) is an R10G10B10A2 tangent.
+- The index bytes start with `u16 meshlet count`, `u16`, `u32 triangle count`,
+  `u32 remap count`. Sixteen-byte meshlet descriptors start at `+0x0C`; the
+  descriptor's `u16` at `+0x04` is the remap start. Triangles follow, each a
+  `u32` with three 7-bit local indices in bits 0..20 and the meshlet number in
+  bits 21+. The `u16` remap table follows. The remap start wraps at 65,535 and
+  MUST be unwrapped along meshlet order. The two counts are 32-bit.
+- A triangle is kept only when all three remapped vertices are in range and
+  distinct. Winding is compared with the stored vertex normals; a triangle
+  whose face normal opposes the average stored normal has its second and third
+  indices swapped. Vertices without a usable normal word are rebuilt from the
+  faces that use them.
+- LOD 0 is used when populated; otherwise the lowest populated LOD slot is.
+  Vertices are in model space and the bind pose, so no skinning matrix is
+  applied. The decoded rows produced 16 and 2 triangles for A's two geometries
+  and 1,472 triangles for B, all indices in range.
+
+The geometry above is sample-verified on two rows. Other type IDs, fragments,
+drawable dictionaries and other builds were not established by this decode.
 
 ## Optional and version-dependent fields
 
@@ -577,12 +620,13 @@ size is published.
 
 | Sample | Reconstruction state | Verified chain elements | Not established | Remaining dependencies |
 | ------ | -------------------- | ----------------------- | --------------- | ---------------------- |
-| A (row 5; recovery `0x10112BE010`) | Decoded payload; page map system/graphics 1/1; 2 chunks; split `0x16F0`/`0x7B0` derived | Header, one LOD slot, one model, two geometries, both vertex buffers, declaration tables, layout entries, buffer sizes, graphics base, 3 AABB records with union match, index header and descriptor counts, shader group and two parameter tables | Position dequantization, attribute semantics, declaration format bytes, index cluster grammar, texture keys | Texture store/key resolution; engine record meanings; independent re-inflation |
-| B (row 10; recovery `0x1010FBD010`) | Decoded payload; page map system/graphics 1/2; 3 chunks; split `0x40F0`/`0x12110` derived | Header, four LOD slots, four models, eight geometries, eight vertex buffers, declaration tables, layout entries, buffer sizes, graphics base, 3 AABB records per model with union match, index header and descriptor counts, shader group and two parameter tables | Same as A | Same as A |
+| A (row 5; recovery `0x10112BE010`) | Decoded payload; page map system/graphics 1/1; 2 chunks; split `0x16F0`/`0x7B0` derived | Header, one LOD slot, one model, two geometries, both vertex buffers, declaration tables, layout entries, buffer sizes, graphics base, 3 AABB records with union match, index header and descriptor counts, shader group and two parameter tables; decoded positions, normals, UVs, meshlet triangles and six texture references | Attribute semantics, declaration format bytes, shader semantic meanings, engine record meanings | Fragment/dictionary transforms; BCPack chunks; independent engine tracing |
+| B (row 10; recovery `0x1010FBD010`) | Decoded payload; page map system/graphics 1/2; 3 chunks; split `0x40F0`/`0x12110` derived | Header, four LOD slots, four models, eight geometries, eight vertex buffers, declaration tables, layout entries, buffer sizes, graphics base, 3 AABB records per model with union match, index header and descriptor counts, shader group and two parameter tables; 1,472 meshlet triangles decoded | Same as A | Same as A |
 
 The drawable is **not** reconstructed in the engine sense. The decoded payload
-is split into two segments at an inferred boundary. No texture is resolved and
-no vertex position was accepted.
+is split into two segments at an inferred boundary. The geometry and texture
+references are decoded by the Leonida Forge viewer; the engine's shader
+semantics and the remaining unknown fields are not.
 
 "Verified" in the status table means the bytes, pointer targets and counts were
 checked. It does not mean the field meanings are known; the "Not established"
@@ -592,18 +636,18 @@ column lists what remains uninterpreted.
 
 - The meaning of the 52-entry semantic indices and the `u8` layout format codes.
 - The declaration format byte (for example `0x42` for the 8-byte first entry)
-  and the per-axis position dequantization. The four 16-bit lanes are not
-  accepted as positions.
+  beyond the position stream.
 - The `42 40 00 00` vertex-buffer marker, the `0x00001601` vertex-buffer word and
   the `0x00020000` model word.
 - The model flags at `+0x30`, the geometry `+0x30` word and the
   `0xFFFFFFFFFFFF0214` constant.
-- The index cluster layout, the meaning of the two descriptor counts beyond
-  their header agreement, and how the clustered local runs form triangles.
-- The parameter-table `+0x00` and `+0x06` words, the shader `+0x08` pointer, the
-  name-record `+0x10`/`+0x18` fields and the 64-bit key namespace.
+- The shader record's `+0x38..+0x40` flag bytes are read as a render bucket by
+  the public material census; the exact per-shader meaning is not established.
+- The parameter-table `+0x00` and `+0x06` words and the shader `+0x08` pointer.
 - The header `+0xB0` list and the header `+0x80` flag words.
 - The LOD distance sentinel and the `+0x70` values in A.
+- Fragment child transforms, drawable-dictionary member selection and the
+  placement of embedded parts.
 - Whether any of these layouts change with another type ID, archive family or
   build. The AABB and material checks cover recovered `levels.rpf` resources in
   one build, not other archives.
