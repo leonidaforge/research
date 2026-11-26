@@ -1,0 +1,4968 @@
+{
+ "schema": "leonida-forge.rpf9-entry-matrix/1",
+ "census": "leonida-forge.rpf9-census-merged/1",
+ "root": null,
+ "archive_roots": [
+  "anim.rpf",
+  "appdata0.rpf",
+  "audio.rpf",
+  "common.rpf",
+  "data.rpf",
+  "levels.rpf",
+  "movies.rpf",
+  "navmeshes.rpf",
+  "packs.rpf",
+  "script.rpf",
+  "shaders.rpf",
+  "textures.rpf"
+ ],
+ "archives": 69,
+ "entries": 8138,
+ "stopped": {
+  "anim.rpf": "max_entries",
+  "audio.rpf": "max_entries",
+  "data.rpf": "max_entries",
+  "levels.rpf": "max_entries",
+  "navmeshes.rpf": "max_entries",
+  "packs.rpf": "max_entries",
+  "script.rpf": "max_entries",
+  "textures.rpf": "max_entries"
+ },
+ "types": [
+  {
+   "type": 0,
+   "entries": 57
+  },
+  {
+   "type": 2,
+   "entries": 367
+  },
+  {
+   "type": 3,
+   "entries": 224
+  },
+  {
+   "type": 5,
+   "entries": 884
+  },
+  {
+   "type": 6,
+   "entries": 292
+  },
+  {
+   "type": 11,
+   "entries": 1053
+  },
+  {
+   "type": 66,
+   "entries": 5
+  },
+  {
+   "type": 67,
+   "entries": 735
+  },
+  {
+   "type": 70,
+   "entries": 26
+  },
+  {
+   "type": 74,
+   "entries": 6
+  },
+  {
+   "type": 79,
+   "entries": 899
+  },
+  {
+   "type": 87,
+   "entries": 132
+  },
+  {
+   "type": 89,
+   "entries": 1
+  },
+  {
+   "type": 93,
+   "entries": 37
+  },
+  {
+   "type": 94,
+   "entries": 19
+  },
+  {
+   "type": 95,
+   "entries": 421
+  },
+  {
+   "type": 96,
+   "entries": 1
+  },
+  {
+   "type": 102,
+   "entries": 1
+  },
+  {
+   "type": 111,
+   "entries": 732
+  },
+  {
+   "type": 114,
+   "entries": 421
+  },
+  {
+   "type": 255,
+   "entries": 1825
+  }
+ ],
+ "combinations": [
+  {
+   "archives": [
+    "anim.rpf",
+    "audio.rpf",
+    "data.rpf",
+    "levels.rpf",
+    "navmeshes.rpf",
+    "packs.rpf",
+    "script.rpf",
+    "textures.rpf"
+   ],
+   "capability": "archive",
+   "confidence": "probable",
+   "entries": 57,
+   "extension": "rpf",
+   "identification": "format:rpf9",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "anim.rpf",
+     "chain": "anim.rpf!0",
+     "head": "39465052c00200009002000010010000eea950ee299baea7007a040050010000",
+     "size": 6912
+    },
+    {
+     "archive": "anim.rpf",
+     "chain": "anim.rpf!1",
+     "head": "39465052800d0000000c0000300a000049e5e4d63ebd6f79007a040050010000",
+     "size": 858672
+    },
+    {
+     "archive": "anim.rpf",
+     "chain": "anim.rpf!2",
+     "head": "39465052200b000080070000502e00003fec8c787656199b007a040050010000",
+     "size": 151120
+    },
+    {
+     "archive": "audio.rpf",
+     "chain": "audio.rpf!0",
+     "head": "39465052400f0000c00c0000e00800005b25daca02127b1d007a040050010000",
+     "size": 143174144
+    },
+    {
+     "archive": "audio.rpf",
+     "chain": "audio.rpf!1",
+     "head": "3946505240040000d0030000e00000004266f4a1dd304898007a040050010000",
+     "size": 24091424
+    },
+    {
+     "archive": "audio.rpf",
+     "chain": "audio.rpf!2",
+     "head": "39465052702a0000e0220000e01300002866a00d7c7c82c9007a040050010000",
+     "size": 149246944
+    }
+   ],
+   "storage": "stored",
+   "transform": false,
+   "type": 0
+  },
+  {
+   "archives": [
+    "levels.rpf!10",
+    "levels.rpf!2",
+    "levels.rpf!4",
+    "levels.rpf!5",
+    "levels.rpf!6",
+    "levels.rpf!8",
+    "levels.rpf!9"
+   ],
+   "capability": "resource",
+   "confidence": "probable",
+   "entries": 367,
+   "extension": "-",
+   "identification": "resource:segment-5",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "levels.rpf!2",
+     "chain": "levels.rpf!2!0",
+     "head": "0000000000000000c070045000000000005a0450000000000000000000000000",
+     "size": 1603856
+    },
+    {
+     "archive": "levels.rpf!2",
+     "chain": "levels.rpf!2!2",
+     "head": "0000000000000000307600500000000080740050000000000000000000000000",
+     "size": 354048
+    },
+    {
+     "archive": "levels.rpf!2",
+     "chain": "levels.rpf!2!3",
+     "head": "000000000000000090da01500000000010d50150000000000000000000000000",
+     "size": 945120
+    }
+   ],
+   "storage": "chunked-2",
+   "transform": false,
+   "type": 2
+  },
+  {
+   "archives": [
+    "levels.rpf!5"
+   ],
+   "capability": "resource",
+   "confidence": "probable",
+   "entries": 224,
+   "extension": "-",
+   "identification": "resource:segment-5",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "levels.rpf!5",
+     "chain": "levels.rpf!5!0",
+     "head": "0000000000000000d017005000000000e00a005000000000b006005000000000",
+     "size": 11456
+    },
+    {
+     "archive": "levels.rpf!5",
+     "chain": "levels.rpf!5!1",
+     "head": "00000000000000005039005000000000901f0050000000009018005000000000",
+     "size": 75344
+    },
+    {
+     "archive": "levels.rpf!5",
+     "chain": "levels.rpf!5!2",
+     "head": "00000000000000001044005000000000c022005000000000901e005000000000",
+     "size": 69776
+    }
+   ],
+   "storage": "chunked-2",
+   "transform": false,
+   "type": 3
+  },
+  {
+   "archives": [
+    "data.rpf!1",
+    "textures.rpf!0",
+    "textures.rpf!1",
+    "textures.rpf!2",
+    "textures.rpf!3",
+    "textures.rpf!4",
+    "textures.rpf!5",
+    "textures.rpf!6"
+   ],
+   "capability": "resource",
+   "confidence": "probable",
+   "entries": 884,
+   "extension": "-",
+   "identification": "resource:segment-5",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "data.rpf!1",
+     "chain": "data.rpf!1!0",
+     "head": "0000000000000000700200500000000000000000000000000100000000000000",
+     "size": 95104
+    },
+    {
+     "archive": "data.rpf!1",
+     "chain": "data.rpf!1!1",
+     "head": "0000000000000000100700500000000000000000000000000100000000000000",
+     "size": 84224
+    },
+    {
+     "archive": "data.rpf!1",
+     "chain": "data.rpf!1!2",
+     "head": "0000000000000000200100500000000000000000000000000100000000000000",
+     "size": 197008
+    },
+    {
+     "archive": "textures.rpf!0",
+     "chain": "textures.rpf!0!0",
+     "head": "0000000000000000900300500000000000000000000000000100000000000000",
+     "size": 2557072
+    },
+    {
+     "archive": "textures.rpf!1",
+     "chain": "textures.rpf!1!0",
+     "head": "0000000000000000100600500000000000000000000000000100000000000000",
+     "size": 51040
+    },
+    {
+     "archive": "textures.rpf!2",
+     "chain": "textures.rpf!2!0",
+     "head": "0000000000000000b00000500000000000000000000000000100000000000000",
+     "size": 721152
+    }
+   ],
+   "storage": "chunked-2",
+   "transform": false,
+   "type": 5
+  },
+  {
+   "archives": [
+    "levels.rpf!10",
+    "levels.rpf!2",
+    "levels.rpf!4",
+    "levels.rpf!6",
+    "levels.rpf!9"
+   ],
+   "capability": "resource",
+   "confidence": "probable",
+   "entries": 292,
+   "extension": "-",
+   "identification": "resource:segment-5",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "levels.rpf!2",
+     "chain": "levels.rpf!2!1",
+     "head": "000000000000000060fa005000000000060100000ea742420000000000000000",
+     "size": 73872
+    },
+    {
+     "archive": "levels.rpf!2",
+     "chain": "levels.rpf!2!5",
+     "head": "0000000000000000a07b005000000000060100004a0a80420000000000000000",
+     "size": 31840
+    },
+    {
+     "archive": "levels.rpf!2",
+     "chain": "levels.rpf!2!10",
+     "head": "0000000000000000304102500000000006010000105e44420000000000000000",
+     "size": 147824
+    }
+   ],
+   "storage": "chunked-2",
+   "transform": false,
+   "type": 6
+  },
+  {
+   "archives": [
+    "data.rpf!2",
+    "script.rpf!1"
+   ],
+   "capability": "structural",
+   "confidence": "verified",
+   "entries": 897,
+   "extension": "-",
+   "identification": "format:psin",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "data.rpf!2",
+     "chain": "data.rpf!2!321",
+     "head": "5053494e000007f0808637b730000000aaaaaaaaaaaaaaaa4a00000090070000",
+     "size": 7176
+    },
+    {
+     "archive": "script.rpf!1",
+     "chain": "script.rpf!1!0",
+     "head": "5053494e000005f016000000b0000000aaaaaaaaaaaaaaaad823b6ae54000000",
+     "size": 3520
+    },
+    {
+     "archive": "script.rpf!1",
+     "chain": "script.rpf!1!1",
+     "head": "5053494e0001913016000000c8060000aaaaaaaaaaaaaaaad823b6aec80a0000",
+     "size": 119296
+    },
+    {
+     "archive": "script.rpf!1",
+     "chain": "script.rpf!1!2",
+     "head": "5053494e000003a01600000058000000aaaaaaaaaaaaaaaad823b6ae18000000",
+     "size": 2336
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 11
+  },
+  {
+   "archives": [
+    "data.rpf!0"
+   ],
+   "capability": "structural",
+   "confidence": "verified",
+   "entries": 156,
+   "extension": "-",
+   "identification": "format:rbf0",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "data.rpf!0",
+     "chain": "data.rpf!0!0",
+     "head": "52424630fbff0100000011007569437265646974735061676544617461000000",
+     "size": 12324
+    },
+    {
+     "archive": "data.rpf!0",
+     "chain": "data.rpf!0!1",
+     "head": "52424630fbff0100000011007569437265646974735061676544617461000000",
+     "size": 285
+    },
+    {
+     "archive": "data.rpf!0",
+     "chain": "data.rpf!0!2",
+     "head": "52424630fbff0100000011007569437265646974735061676544617461000000",
+     "size": 3883
+    }
+   ],
+   "storage": "raw-deflate",
+   "transform": false,
+   "type": 11
+  },
+  {
+   "archives": [
+    "data.rpf!1"
+   ],
+   "capability": "structural",
+   "confidence": "verified",
+   "entries": 5,
+   "extension": "-",
+   "identification": "format:gfx",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "data.rpf!1",
+     "chain": "data.rpf!1!3",
+     "head": "4746582a8d52000070000b540000b540001e01001bfa0104000000000e00000f",
+     "size": 21133
+    },
+    {
+     "archive": "data.rpf!1",
+     "chain": "data.rpf!1!4",
+     "head": "4746582a4b2f00008000026d4000018600001e010013fa0104000000000e0000",
+     "size": 12107
+    },
+    {
+     "archive": "data.rpf!1",
+     "chain": "data.rpf!1!5",
+     "head": "4746582ad10d15008800012c0000002a3000001e010011fa0104000000000e00",
+     "size": 1379793
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 66
+  },
+  {
+   "archives": [
+    "anim.rpf!5"
+   ],
+   "capability": "resource",
+   "confidence": "probable",
+   "entries": 735,
+   "extension": "-",
+   "identification": "resource:segment-5",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "anim.rpf!5",
+     "chain": "anim.rpf!5!0",
+     "head": "0000000000000000f01d01500000000000000000000000000000000000000000",
+     "size": 73424
+    },
+    {
+     "archive": "anim.rpf!5",
+     "chain": "anim.rpf!5!1",
+     "head": "0000000000000000e06d06500000000000000000000000000000000000000000",
+     "size": 421776
+    },
+    {
+     "archive": "anim.rpf!5",
+     "chain": "anim.rpf!5!2",
+     "head": "0000000000000000903400500000000000000000000000000000000000000000",
+     "size": 13696
+    }
+   ],
+   "storage": "chunked-2",
+   "transform": false,
+   "type": 67
+  },
+  {
+   "archives": [
+    "anim.rpf!0",
+    "anim.rpf!2"
+   ],
+   "capability": "resource",
+   "confidence": "probable",
+   "entries": 26,
+   "extension": "-",
+   "identification": "resource:segment-5",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "anim.rpf!0",
+     "chain": "anim.rpf!0!0",
+     "head": "0000000000000000d03800500000000000000000000000000000000000000000",
+     "size": 16368
+    },
+    {
+     "archive": "anim.rpf!2",
+     "chain": "anim.rpf!2!0",
+     "head": "0000000000000000701800500000000000000000000000000000000000000000",
+     "size": 6576
+    },
+    {
+     "archive": "anim.rpf!2",
+     "chain": "anim.rpf!2!1",
+     "head": "0000000000000000b02c00500000000000000000000000000000000000000000",
+     "size": 12064
+    }
+   ],
+   "storage": "chunked-2",
+   "transform": false,
+   "type": 70
+  },
+  {
+   "archives": [
+    "levels.rpf!0",
+    "levels.rpf!1",
+    "levels.rpf!3",
+    "levels.rpf!7"
+   ],
+   "capability": "resource",
+   "confidence": "probable",
+   "entries": 6,
+   "extension": "-",
+   "identification": "resource:segment-5",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "levels.rpf!0",
+     "chain": "levels.rpf!0!0",
+     "head": "00000000000000005085025000000000304452507a0000000000000000000000",
+     "size": 189440
+    },
+    {
+     "archive": "levels.rpf!0",
+     "chain": "levels.rpf!0!1",
+     "head": "00000000000000007064025000000000304452507a0000000000000000000000",
+     "size": 177456
+    },
+    {
+     "archive": "levels.rpf!0",
+     "chain": "levels.rpf!0!2",
+     "head": "0000000000000000207e015000000000304452507a0000000000000000000000",
+     "size": 131072
+    }
+   ],
+   "storage": "chunked-2",
+   "transform": false,
+   "type": 74
+  },
+  {
+   "archives": [
+    "navmeshes.rpf!0"
+   ],
+   "capability": "resource",
+   "confidence": "probable",
+   "entries": 899,
+   "extension": "-",
+   "identification": "resource:segment-5",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "navmeshes.rpf!0",
+     "chain": "navmeshes.rpf!0!0",
+     "head": "0000000000000000702602500000000009000000150001000000000000000000",
+     "size": 141040
+    },
+    {
+     "archive": "navmeshes.rpf!0",
+     "chain": "navmeshes.rpf!0!1",
+     "head": "000000000000000080f405500000000003000000150001000000000000000000",
+     "size": 393216
+    },
+    {
+     "archive": "navmeshes.rpf!0",
+     "chain": "navmeshes.rpf!0!2",
+     "head": "0000000000000000d01502500000000009000000150001000000000000000000",
+     "size": 136784
+    }
+   ],
+   "storage": "chunked-2",
+   "transform": false,
+   "type": 79
+  },
+  {
+   "archives": [
+    "anim.rpf!1",
+    "anim.rpf!4"
+   ],
+   "capability": "resource",
+   "confidence": "probable",
+   "entries": 132,
+   "extension": "-",
+   "identification": "resource:segment-5",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "anim.rpf!1",
+     "chain": "anim.rpf!1!0",
+     "head": "0000000000000000506d035000000000304452507a0000000000000000000000",
+     "size": 255200
+    },
+    {
+     "archive": "anim.rpf!1",
+     "chain": "anim.rpf!1!1",
+     "head": "000000000000000070be025000000000304452507a0000000000000000000000",
+     "size": 203120
+    },
+    {
+     "archive": "anim.rpf!1",
+     "chain": "anim.rpf!1!2",
+     "head": "0000000000000000403a035000000000304452507a0000000000000000000000",
+     "size": 241920
+    }
+   ],
+   "storage": "chunked-2",
+   "transform": false,
+   "type": 87
+  },
+  {
+   "archives": [
+    "script.rpf!0"
+   ],
+   "capability": "unavailable",
+   "confidence": "unknown",
+   "entries": 1,
+   "extension": "-",
+   "identification": "none",
+   "payload": "transform-failed",
+   "samples": [
+    {
+     "archive": "script.rpf!0",
+     "chain": "script.rpf!0!0",
+     "head": "",
+     "size": null
+    }
+   ],
+   "storage": "chunked-2",
+   "transform": true,
+   "type": 89
+  },
+  {
+   "archives": [
+    "packs.rpf!1"
+   ],
+   "capability": "structural",
+   "confidence": "verified",
+   "entries": 37,
+   "extension": "-",
+   "identification": "format:psin",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "packs.rpf!1",
+     "chain": "packs.rpf!1!0",
+     "head": "5053494e000000b0176b1c0590000000aaaaaaaaaaaaaaaa7070707070707070",
+     "size": 776
+    },
+    {
+     "archive": "packs.rpf!1",
+     "chain": "packs.rpf!1!1",
+     "head": "5053494e000000b0176b1c0590000000aaaaaaaaaaaaaaaa7070707070707070",
+     "size": 776
+    },
+    {
+     "archive": "packs.rpf!1",
+     "chain": "packs.rpf!1!5",
+     "head": "5053494e000000b0176b1c0590000000aaaaaaaaaaaaaaaa7070707070707070",
+     "size": 776
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 93
+  },
+  {
+   "archives": [
+    "packs.rpf!1"
+   ],
+   "capability": "structural",
+   "confidence": "verified",
+   "entries": 19,
+   "extension": "-",
+   "identification": "format:psin",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "packs.rpf!1",
+     "chain": "packs.rpf!1!2",
+     "head": "5053494e00000030607b6ed90c000000aaaaaaaaaaaaaaaa7070707070707070",
+     "size": 344
+    },
+    {
+     "archive": "packs.rpf!1",
+     "chain": "packs.rpf!1!3",
+     "head": "5053494e00000030607b6ed90c000000aaaaaaaaaaaaaaaa7070707070707070",
+     "size": 360
+    },
+    {
+     "archive": "packs.rpf!1",
+     "chain": "packs.rpf!1!4",
+     "head": "5053494e00000030607b6ed90c000000aaaaaaaaaaaaaaaa7070707070707070",
+     "size": 360
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 94
+  },
+  {
+   "archives": [
+    "packs.rpf!0"
+   ],
+   "capability": "resource",
+   "confidence": "probable",
+   "entries": 421,
+   "extension": "-",
+   "identification": "resource:segment-5",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "packs.rpf!0",
+     "chain": "packs.rpf!0!0",
+     "head": "0000000000000000602f005000000000fc2e0000fc2e00006000005000000000",
+     "size": 12160
+    },
+    {
+     "archive": "packs.rpf!0",
+     "chain": "packs.rpf!0!2",
+     "head": "0000000000000000602f005000000000fc2e0000fc2e00006000005000000000",
+     "size": 12160
+    },
+    {
+     "archive": "packs.rpf!0",
+     "chain": "packs.rpf!0!4",
+     "head": "0000000000000000602f005000000000fc2e0000fc2e00006000005000000000",
+     "size": 12160
+    }
+   ],
+   "storage": "chunked-2",
+   "transform": false,
+   "type": 95
+  },
+  {
+   "archives": [
+    "script.rpf!0"
+   ],
+   "capability": "bytes",
+   "confidence": "unknown",
+   "entries": 1,
+   "extension": "-",
+   "identification": "none",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "script.rpf!0",
+     "chain": "script.rpf!0!1",
+     "head": "0000000000000000000000000000000000000000db7700000000000000000000",
+     "size": 2702384
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 96
+  },
+  {
+   "archives": [
+    "anim.rpf!3"
+   ],
+   "capability": "resource",
+   "confidence": "probable",
+   "entries": 1,
+   "extension": "-",
+   "identification": "resource:segment-5",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "anim.rpf!3",
+     "chain": "anim.rpf!3!0",
+     "head": "0000000000000000707000500000000000000000000000000000000000000000",
+     "size": 29648
+    }
+   ],
+   "storage": "chunked-2",
+   "transform": false,
+   "type": 102
+  },
+  {
+   "archives": [
+    "data.rpf!2"
+   ],
+   "capability": "resource",
+   "confidence": "probable",
+   "entries": 732,
+   "extension": "-",
+   "identification": "resource:segment-5",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "data.rpf!2",
+     "chain": "data.rpf!2!0",
+     "head": "0000000000000000e005005000000000304452507a0000000000000000000000",
+     "size": 1840
+    },
+    {
+     "archive": "data.rpf!2",
+     "chain": "data.rpf!2!1",
+     "head": "00000000000000001066005000000000304452507a0000000000000000000000",
+     "size": 26464
+    },
+    {
+     "archive": "data.rpf!2",
+     "chain": "data.rpf!2!2",
+     "head": "00000000000000003069005000000000304452507a0000000000000000000000",
+     "size": 27264
+    }
+   ],
+   "storage": "chunked-2",
+   "transform": false,
+   "type": 111
+  },
+  {
+   "archives": [
+    "packs.rpf!0"
+   ],
+   "capability": "resource",
+   "confidence": "probable",
+   "entries": 421,
+   "extension": "-",
+   "identification": "resource:segment-5",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "packs.rpf!0",
+     "chain": "packs.rpf!0!1",
+     "head": "0000000000000000900000500000000030000050000000000000000000000000",
+     "size": 1114288
+    },
+    {
+     "archive": "packs.rpf!0",
+     "chain": "packs.rpf!0!3",
+     "head": "0000000000000000900000500000000030000050000000000000000000000000",
+     "size": 4849840
+    },
+    {
+     "archive": "packs.rpf!0",
+     "chain": "packs.rpf!0!5",
+     "head": "0000000000000000900000500000000030000050000000000000000000000000",
+     "size": 1114288
+    }
+   ],
+   "storage": "chunked-2",
+   "transform": false,
+   "type": 114
+  },
+  {
+   "archives": [
+    "audio.rpf!0",
+    "audio.rpf!1",
+    "audio.rpf!2",
+    "audio.rpf!3",
+    "audio.rpf!4",
+    "audio.rpf!5",
+    "audio.rpf!6",
+    "audio.rpf!7"
+   ],
+   "capability": "structural",
+   "confidence": "verified",
+   "entries": 887,
+   "extension": "-",
+   "identification": "format:adat",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "audio.rpf!0",
+     "chain": "audio.rpf!0!0",
+     "head": "41444154010025ff020000004000000000000300a54329040000000018811d53",
+     "size": 315488
+    },
+    {
+     "archive": "audio.rpf!0",
+     "chain": "audio.rpf!0!1",
+     "head": "41444154010025ff020000004000000000000300a54329040000000028c8b652",
+     "size": 102496
+    },
+    {
+     "archive": "audio.rpf!0",
+     "chain": "audio.rpf!0!2",
+     "head": "41444154010025ff020000004000000000000300a5432904000000009340d4d4",
+     "size": 92256
+    }
+   ],
+   "storage": "stored",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "movies.rpf"
+   ],
+   "capability": "structural",
+   "confidence": "verified",
+   "entries": 515,
+   "extension": "-",
+   "identification": "format:kb2",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "movies.rpf",
+     "chain": "movies.rpf!0",
+     "head": "4b42326e4c7c1c008c000000244b00008c00000000050000d00200001e000000",
+     "size": 1866836
+    },
+    {
+     "archive": "movies.rpf",
+     "chain": "movies.rpf!1",
+     "head": "4b42326e343b2e002c010000f0e000002c010000d0020000000500001e000000",
+     "size": 3029820
+    },
+    {
+     "archive": "movies.rpf",
+     "chain": "movies.rpf!2",
+     "head": "4b42326e30ca2100a60000001c5a0000a600000000050000d00200001e000000",
+     "size": 2214456
+    }
+   ],
+   "storage": "stored",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 49,
+   "extension": "xml",
+   "identification": "xml:timecycle_modifier_data",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!20",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 46064
+    },
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!26",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 113019
+    },
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!30",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 19545
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 36,
+   "extension": "xml",
+   "identification": "xml:rage__bgCrackType",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!48",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 4624
+    },
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!52",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 4609
+    },
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!54",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 1398
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 32,
+   "extension": "xml",
+   "identification": "xml:CVehiclePoints",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!18",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 370
+    },
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!25",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 592
+    },
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!43",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 1907
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 27,
+   "extension": "xml",
+   "identification": "xml:timecycle_keyframe_data",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!13",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 170803
+    },
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!15",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 391626
+    },
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!22",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 391706
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 24,
+   "extension": "xml",
+   "identification": "xml:CTuningFile",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!0",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 2935
+    },
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!10",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 3843
+    },
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!28",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 40674
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 23,
+   "extension": "xml",
+   "identification": "xml:CDataFileMgr__ContentChangeSetDef",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!4",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 74268
+    },
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!6",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 1243
+    },
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!8",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d227574",
+     "size": 648
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 21,
+   "extension": "xml",
+   "identification": "xml:CDataFileMgr__ContentChangeSetDef",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!2",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d227574",
+     "size": 694
+    },
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!12",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d227574",
+     "size": 7269
+    },
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!14",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d227574",
+     "size": 1274
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 10,
+   "extension": "xml",
+   "identification": "xml:CTuningFile",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!41",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 1727
+    },
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!76",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 709
+    },
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!108",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 266
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "bytes",
+   "confidence": "unknown",
+   "entries": 9,
+   "extension": "-",
+   "identification": "none",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!45",
+     "head": "3233330d0a330d0a3232372e36313633093230382e373139380d0a3232392e35",
+     "size": 23668
+    },
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!204",
+     "head": "3230300d0a360d0a31302e38353439093436322e343938340d0a302e30303030",
+     "size": 26704
+    },
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!208",
+     "head": "3335300d0a370d0a3233332e30393434093235382e313930350d0a3231382e33",
+     "size": 45781
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf",
+    "shaders.rpf"
+   ],
+   "capability": "bytes",
+   "confidence": "unknown",
+   "entries": 8,
+   "extension": "-",
+   "identification": "none",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!111",
+     "head": "000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0",
+     "size": 3274036
+    },
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!117",
+     "head": "636c6f7564732e737472617475732e6e6f6973655f776569676874732e6d6564",
+     "size": 117176
+    },
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!151",
+     "head": "505446585f4149525f524553495354414e434520312e300d0a47454e5f574154",
+     "size": 47
+    },
+    {
+     "archive": "shaders.rpf",
+     "chain": "shaders.rpf!0",
+     "head": "5053000930783635463431454444000000000000000000000000000000000000",
+     "size": 275540780
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 6,
+   "extension": "xml",
+   "identification": "xml:WaveData",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!17",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 747
+    },
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!169",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 957
+    },
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!271",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 6855
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 5,
+   "extension": "xml",
+   "identification": "xml:CDamageDataManager",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!148",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 12498
+    },
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!216",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 104082
+    },
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!236",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 257008
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 4,
+   "extension": "xml",
+   "identification": "xml:GridAtlasInfo",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!23",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 1040
+    },
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!40",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 1044
+    },
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!183",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 1078
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 3,
+   "extension": "xml",
+   "identification": "xml:CCoverProcessorTuning",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!16",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 11554
+    },
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!74",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 11422
+    },
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!242",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 11404
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "appdata0.rpf"
+   ],
+   "capability": "structural",
+   "confidence": "verified",
+   "entries": 2,
+   "extension": "-",
+   "identification": "format:psin",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "appdata0.rpf",
+     "chain": "appdata0.rpf!0",
+     "head": "5053494e000000c0100000002c000000aaaaaaaaaaaaaaaa98a6318c58000000",
+     "size": 976
+    },
+    {
+     "archive": "appdata0.rpf",
+     "chain": "appdata0.rpf!1",
+     "head": "5053494e00003cd0b4121b23f0030000aaaaaaaaaaaaaaaa65878f2480000000",
+     "size": 19392
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "bytes",
+   "confidence": "verified",
+   "entries": 2,
+   "extension": "-",
+   "identification": "signature:Observed(\"mhiu\")",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!243",
+     "head": "4d484955010000080008000000204bc600a00cc6000048c200c0da4500e02b46",
+     "size": 1189171
+    },
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!316",
+     "head": "4d484955010000080008000000204bc600a00cc6000048c200c0da4500e02b46",
+     "size": 1210476
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "shaders.rpf"
+   ],
+   "capability": "bytes",
+   "confidence": "verified",
+   "entries": 2,
+   "extension": "-",
+   "identification": "signature:Observed(\"sgd5\")",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "shaders.rpf",
+     "chain": "shaders.rpf!1",
+     "head": "53474435d63efb3edcf25d0903000000f800000010d13697d046ab5e1c00001a",
+     "size": 3086891
+    },
+    {
+     "archive": "shaders.rpf",
+     "chain": "shaders.rpf!2",
+     "head": "53474435b3728ba0c25d55602100000040080000f0898472ebf2c1c6050100eb",
+     "size": 271048467
+    }
+   ],
+   "storage": "stored",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 2,
+   "extension": "xml",
+   "identification": "xml:CDataFileMgr__ContentDef",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!211",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 9399
+    },
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!321",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 4827
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 2,
+   "extension": "xml",
+   "identification": "xml:CVehiclePerformanceMaps",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!129",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 16040
+    },
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!391",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 117808
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 2,
+   "extension": "xml",
+   "identification": "xml:VehicleControlsInfo",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!145",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 52854
+    },
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!286",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 26632
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "tentative",
+   "entries": 2,
+   "extension": "-",
+   "identification": "xml:unvalidated",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!314",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 14262150
+    },
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!385",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 4283195
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "bytes",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "-",
+   "identification": "signature:Observed(\"sps1\")",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!78",
+     "head": "535053315a0300001b315374727563747572652f62655f7374616e646172642e",
+     "size": 43791
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:ActionCoordinator__ActionCoordinatorData",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!382",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 33008
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:BoatHullBlackList",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!223",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 297
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CAimUpperBodyDataBlock",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!136",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 67349
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CAnimSceneAttachSlotSetManager",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!340",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 10632
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CAnimalAnimationContexts",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!160",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 10013
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CAnimalAttackBehaviours",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!397",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 55388
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CAttachmentSlotData",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!339",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 11475
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CBaitingInfo",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!203",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 2717
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CBodyAnimConstraintInfoStateSetManager",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!410",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 44462
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CBreakableVehicleDoorLockManagerData",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!88",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 10478
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CClimbTuneMgr",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!402",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 54137
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CCombatInfoMgr",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!220",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d227574",
+     "size": 237621
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CContentsOfWeatherXmlFile",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!144",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 212258
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CConversationDictionary",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!304",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 179493
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CConversationList",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!19",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 70507
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CDiscoverableCollection",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!59",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d227574",
+     "size": 64852
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CDoorInteractionDataList",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!259",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 404957
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CDrivingStyleCollection",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!32",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 82329
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CDynamicScenarioManager",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!270",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 10533
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CEnergyConfigInfos",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!42",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 160706
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CEntityComponentLodManagerData",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!180",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 5007
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CFallenSnowData",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!57",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 5278
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CFiringPatternInfoManager",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!356",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 273776
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CFleeDecisionMakerData",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!161",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 17561
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CFluidVesselManager",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!80",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 13325
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CGarageInitDataList",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!112",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 102
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CGraphicsDefinitionsData",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!5",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 121460
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CHazardNodes",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!176",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 23517
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CHeadbobConditionManager",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!292",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 16610
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CHealthConfigInfo",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!195",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d227574",
+     "size": 1308
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CIdlePreferenceManager",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!247",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 1005
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CLadderMetadataManager",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!406",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 6996
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CLadderRailsMetadataManager",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!158",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 1086
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CLassoDataManager",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!91",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 126639
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CMissions",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!267",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d227574",
+     "size": 33563
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CMoodConditionManager",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!331",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 122
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CMovieQualityVariationMap",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!99",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 394
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CObjectComponentSetManager",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!351",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 319
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CPairedPedDataBlock",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!237",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 10011
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CParkingSplines",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!103",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 21009
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CPedAccuracyManager",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!261",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 8347
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CPedArmourMetaData",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!162",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 7006
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CPedBreathingTypes",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!346",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 5005
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CPedComponentSetManager",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!130",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 33770
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CPedDensityScoringConfigMap",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!375",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 1473
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CPedFormationInfoManager",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!246",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 18748
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CPedHeadbobSettingsManager",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!306",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 88190
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CPedInventoryLoadOutManager",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!307",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d227574",
+     "size": 411101
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CPedMoodConditionTreesManager",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!97",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d227574",
+     "size": 209
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CPedMoodSettingsManager",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!348",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 266
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CPedMotivationInfoManager",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!330",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 32388
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CPedScheduleInfoManager",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!413",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 784294
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CPedSpeedDataBlock",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!318",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 86390
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CPedTimeWarpSettingsManager",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!293",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 6160
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CPedVariationBodyTypeManager",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!263",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 77462
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CPersonaEnumValuesMap",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!33",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 1900
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CPlayerDiscoverableDataCollection",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!73",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d227574",
+     "size": 35897
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CProceduralInfo",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!381",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 20701
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CScatteringTransmittance__FogVolumeListData",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!333",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 28820
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CScenarioPropDataManager",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!287",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 12330
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CSceneTerrainAnalyzerMgrDataInstance",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!55",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 110723
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CScenicViewManager",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!157",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 7327
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CSearchPointOfInterestRuleSet",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!167",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 34987
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CSnowTrackData",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!46",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 36522
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CStandardPosesManager",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!11",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 16161
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CTVPlaylistContainer",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!118",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 537
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CTacticalAnalysisDistributionStore",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!266",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 22913
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CTaskDataInfoManager",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!335",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 192988
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CTaskMoveLocalMovement__Tunables",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!84",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 64494
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CTrainConfigs",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!89",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 125494
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CTyreDataSet",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!226",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 76685
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CUpperBodyIdleConditionManager",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!366",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 13435
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CUpperBodyIdleSettingsManager",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!380",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 3439
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CVehicleAIHandlingEntry",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!127",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 9749
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CVehicleBaseRatingsAndEstimatesMap",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!139",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 352136
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CVehicleBoneOffsetsArray",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!359",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 20688
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CVehicleComponentSetManager",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!159",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 15562
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CVehicleDistantLightData",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!1",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 410897
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CVehiclePointsMeta",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!265",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d227574",
+     "size": 2555
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CWeaponActionHashToIndexMappings",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!70",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 39789
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:Clock__Filter__Presets",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!94",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 12086
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:Combat__GoalData__Store",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!225",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 4550
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:Combat__Settings__ActionStore",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!152",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 10172
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:Confront__StyleCollection",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!258",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 59107
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CoverShadowTunables",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!107",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 828
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:CustomClouds",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!278",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 396586
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:DiffractionProfiles",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!65",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 6447
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:EnvironmentalWaterDisturbManager",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!62",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e67203d2022",
+     "size": 148
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:FogVolumeProfileList",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!154",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 18887
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:GameShape__Data__LocationNameLoopkup",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!178",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d227574",
+     "size": 671393
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:GameShape__Data__ManagerSettings",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!44",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 9898
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:GlintsProfiles",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!405",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 9237
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:InteractionFoam_Tunables",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!29",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 687
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:InteriorGroups",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!3",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 13677
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:LUTColorblindnessVariationMap",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!213",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 126
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:LandingPageVideos",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!92",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d227574",
+     "size": 644
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:LightAnimationPresets",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!219",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 231
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:LostTargetSearch__Tunables",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!69",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 848
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:MainWaterTune",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!164",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 865
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:MapState__Data__Templates",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!319",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 131
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:MaterialDataList",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!371",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 395211
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:Mindset__CMindsetDictionary",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!96",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 42015
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:ModelTagMappings",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!324",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d227574",
+     "size": 248855
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:ModelTags",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!241",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 7276
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:Modular__SM__AIBehaviour__LockControllerConfig",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!61",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 547
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:Modular__SM__AmbientCompanion__Profile__CBuddyMindsetProfileDictionary",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!50",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 9945
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:OceanSimPresets",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!7",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 12430
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:OceanWaveCalmingCurves",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!250",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 1030
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:PatchConstants",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!409",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 17574
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:PathingStyleData",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!72",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 5993
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:PedMotion__PedMotionData",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!363",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d227574",
+     "size": 1182
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:PostFXSpline__Store",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!312",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 87
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:PromptInternal__PromptTunables",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!194",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 3199
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:RegionTintMap",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!395",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 676
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:Relationships__GroupsData",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!370",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 35555
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:Respawn__MetaData",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!249",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 13231
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:RumbleProfileList",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!123",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 7830
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:SMandatoryPacksData",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!21",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 100
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:SSetupData",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!295",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 2912
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:STPedMotionPredictionSetContainer",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!155",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 50327
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:STPedNavigationPredictiontPresetContainer",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!274",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 92999
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:STS_Config",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!79",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 7689
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:ShoreWavePlacementData",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!373",
+     "head": "3c3f786d6c2076657273696f6e3d27312e302720656e636f64696e673d277574",
+     "size": 2369981
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:SoftBoundTuningList",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!146",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 3867
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:SpecialAbilityTagTargetsSettings",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!285",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 588
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:Sprinklers__RootData",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!378",
+     "head": "3c537072696e6b6c6572735f5f526f6f74446174613e0d0a093c54797065733e",
+     "size": 12534
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:StudioConfigurationData",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!137",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 5913
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:Tactical__PointValidation__DataStore",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!147",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 14892
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:TargetScoring__ProfileDataStore_t_PedAccuracy__ScoringFactor__Enum",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!399",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 41460
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:TargetScoring__ProfileDataStore_t_PedTargetScoring__ScoringFactor__Enum",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!56",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 17555
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:TextureGridInfo",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!296",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 409
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:TyreProfileList",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!387",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 6790
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:VehicleFragImpulseFunction",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!119",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 1506
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:WalkAndTalkProfileData",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!207",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 15441
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:WaterTessellationSettings__AllAllowancesAndThresholds",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!85",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d227574",
+     "size": 17147
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:WeaponAnimations__ConfigData",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!218",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 1733
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:WeaponAnimations__FullbodyControllerData",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!187",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 21281
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:Witnesses__Informations",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!386",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 144572
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:aiNavIMapGroupData",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!282",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 5838
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:hrsSimTuneMgr",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!276",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 1811
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:naSpeechEventTypeBatchRequestParams",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!51",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 12143
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:rage__MediaDecoderSettings",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!408",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 417
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:rage__bgConfig",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!149",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 3463
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:rage__crRetarget__SolversTunables",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!352",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 19991
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:rage__fragTuneStruct",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!364",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 224062
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:rage__fwRetargetCoordinatorConfig",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!227",
+     "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
+     "size": 680
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:rage__phMBS_MaterialParamsDatabase_Def",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!199",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 31204
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": true,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:sCollisionEventScannerTuning",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!66",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 10400
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:sPedDamageModifiers",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!166",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 2717
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:sPedDistractionModifiers",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!105",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 3473
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  },
+  {
+   "archives": [
+    "common.rpf"
+   ],
+   "capability": "text",
+   "confidence": "verified",
+   "entries": 1,
+   "extension": "xml",
+   "identification": "xml:time_data",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!303",
+     "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
+     "size": 1370
+    }
+   ],
+   "storage": "chunked-3",
+   "transform": false,
+   "type": 255
+  }
+ ],
+ "failures": []
+}

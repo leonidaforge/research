@@ -248,6 +248,24 @@ Some earlier notes used "A" and "B" for `hdr[0x04]` and `hdr[0x08]`. Those lette
 
 **Correction.** The thirty 720-byte archives are a size subset of one header-shape group; that full group also contains other sizes with different trailers, so it is not single-class. The four single-class groups are other header shapes and all have a 544-byte trailer. The figures are not two readings of the same group (RPF9-F130).
 
+## The entry type was treated as the file's kind
+
+**Old assumption.** An entry's numeric type said what the file was: a type-0 row was an archive, a type-5 row a texture dictionary, and a listing that showed a name and a type had nothing else to establish.
+
+**Correction.** The type is one property, not the format. In a bounded census of every root archive, type 255 holds `ADAT`, `KB2`, validated XML documents, named signatures and payloads that match nothing; type 11 holds `PSIN` and `RBF0`; type 0 holds archives and `PSIN`. The classification now records the type, the format identified from a bounded decoded head, and what the application can do with the bytes as three separate properties, and the texture viewer no longer opens a row because of its type (RPF9-F140).
+
+## An extension was shown where none was established
+
+**Old assumption.** A recognisable payload, or a known type, was enough to show a file extension.
+
+**Correction.** An extension is now applied only when the classification establishes it: the archive's own name, `rpf` for an RPF9 payload, `xml` for a validated document. Everything else is reported as unresolved with a reason, including a recognised format with no established extension and a resource container whose asset class is not identified. The sample's largest group is unresolved for exactly that reason (RPF9-F140, RPF9-F141).
+
+## A head read was assumed to be cheap
+
+**Old assumption.** Reading the first bytes of an entry costs a few bytes.
+
+**Correction.** The payload decoder decodes a chunk before handing out its first byte, so classifying one entry can cost a whole chunk. A complete census of a large install is therefore not affordable today, and every measurement taken this way is bounded by an entry budget per root archive rather than complete. A bounded head read is the first item in the identification backlog (RPF9-F142).
+
 ## Open
 
 - Meaning of descriptor `+0x08`, and any use of `+0x12`.

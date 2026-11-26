@@ -11,8 +11,25 @@ destination only after the write succeeds. They do not print payload or trailer 
 | `trailer_probe.py` | one or more archives, optionally with manifests | `hdr[0x0C]` as a trailing length, the payload boundary, four bound checks, and trailer equality classes |
 | `secondary_probe.py` | one or more archives | `C`, `D`, `E`, `F`, the secondary-area size, and two size-model checks |
 | `random_transform_tests.py` | a compatible Leonida Forge CLI, a game directory and an executable | random transformed rows per archive, each decoded and compared with its declared logical size |
+| `census_all.py` | a compatible Leonida Forge CLI, an installation directory and an executable | one bounded entry census per root archive, and the merged summary |
+| `entry_matrix.py` | the merged census from `census_all.py` | the published [entry matrix](../../formats/containers/rpf9/entry-matrix.md) and its JSON |
 
 Python 3 standard library only.
+
+## Entry census
+
+```text
+LFORGE=/path/to/lforge python tools/rpf9/census_all.py INSTALL_DIR EXECUTABLE OUTPUT_DIR [ENTRIES_PER_ROOT]
+python tools/rpf9/entry_matrix.py OUTPUT_DIR/census-merged.jsonl OUTPUT_DIR
+```
+
+Every root archive gets the same entry budget, so the sample covers all roots rather
+than the first archive. `census_all.py` reports how many archives and entries each run
+covered and whether it stopped at a budget. `entry_matrix.py` writes `entry-matrix.md`
+and `entry-matrix.json`: one row per combination of entry type, identification, storage,
+transform, payload state, confidence, extension and capability, with the number of
+entries, the archives it was seen in and samples that name the row and show the first
+bytes of its decoded head.
 
 ## Framing survey
 
