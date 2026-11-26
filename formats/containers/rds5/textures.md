@@ -145,9 +145,9 @@ the decoded bytes; it does not identify a codec from engine evidence.
 | 71, 72 | 46, 10 | BC1, 8-byte 4 x 4 blocks, row-major | a 256 × 256 format-72 descriptor decodes a coherent rock surface; a 1024 × 1024 format-71 descriptor decodes a normal-map-like surface. The F40 mip check already supports a BC1 row-major candidate. |
 | 80 | 41 | BC4, 8-byte 4 x 4 blocks, row-major | single-channel detail masks decode to coherent images. |
 | 83 | 4 | two-plane BC4, 16-byte 4 x 4 blocks, row-major | the sampled descriptors are kind 10 arrays, not simple 2D images; no image was validated. |
-| 54 | 1 | two bytes per texel | neither RGB565 nor RGBA4444 produced a coherent image in the single sampled descriptor. Unsupported. |
-| 77 | 2 | 16 bytes per 4 x 4 block | no simple-2D sample; the block split remains ambiguous. Unsupported. |
-| 98, 99 | 23, 8 | not decoded | `data/ttdb/ui/platform.ttpf` is one format-98 descriptor. The 8+8 endpoint attempt in RDS5-F36 is a consistency observation, not a validated image. Unsupported. |
+| 54 | 1 | two bytes per texel | neither RGB565 nor RGBA4444 produced a coherent image in the single sampled descriptor, which is kind 6. A candidate R16_FLOAT reading is used by the viewer but has no simple-2D sample. Unsupported/candidate. |
+| 77 | 2 | 16 bytes per 4 x 4 block | one of the two descriptors is a simple 2D 32 x 64 texture; decoding it as BC3 gives a white glyph on a transparent alpha background. The other is not simple 2D. Probable, not Confirmed. |
+| 98, 99 | 23, 8 | 16 bytes per 4 x 4 block | format 99 decodes 8/8 decodable descriptors; format 98 decodes 12/23, with 11 blocked by undecoded storage classes or a non-2D kind. The single `data/ttdb/ui/platform.ttpf` format-98 descriptor decodes to a UI strip. Probable, not Confirmed. |
 
 The sampled UI and map stores use storage classes `0x04`, `0x0c` and others
 that this decoder does not inflate; their descriptors are reported as
@@ -159,6 +159,12 @@ They remain **Probable**, not Confirmed: one store, no engine code traced, and
 a coherent image does not by itself prove the codec identity. They are not
 registered as a numbered finding; the counts and the image checks are the
 evidence.
+
+Reading level 0 at the right-aligned offset (`total - size(0)`) makes short
+format-28 rows with a page prelude decode as coherent UI elements. Reading at
+offset 0 decodes the prelude instead. This supports the right-aligned level
+model on the sampled rows; it does not establish the level count or the
+descriptor `mip` field.
 
 ## Control sample
 

@@ -148,7 +148,7 @@ records.
 | `+0x3C` | 2    | `1` in 5,307 records; other small values; not interpreted      | Bytes confirmed; meaning **Unknown** |
 | `+0x3E` | 1    | `1` in 5,363 records, `3` in 120, `2` in 1; not interpreted    | Bytes confirmed; meaning **Unknown** |
 | `+0x3F` | 1    | format id; not mapped to an enum                              | Bytes confirmed; meaning **Unknown** |
-| `+0x40` | 2    | `5` in every record; not interpreted                          | Bytes confirmed; meaning **Unknown** |
+| `+0x40` | 1    | swizzle id: `0` is row-major, `5` in every sampled record is 4 KiB tiled | Confirmed (sample) |
 | `+0x42` | 2    | candidate mip count in bits 0..14; bit 15 is set in some records | Probable (position) |
 | `+0x44` | 2    | zero                                                          | Confirmed (sample) |
 | `+0x46` | 2    | `1`                                                           | Confirmed (sample) |
@@ -163,6 +163,46 @@ require the parser to expose. Their positions are confirmed; their meanings are
 `bit_length(max(width, height))` in 5,484 of 5,484 records, which is weak
 because most records declare one mip level. No independent support for the four
 meanings is claimed.
+
+## Swizzled allocations
+
+The byte at `+0x40` selects the graphics layout. Zero is row-major. A non-zero
+value (`5` in every sampled record) stores the level as a grid of 4 KiB tiles
+with a bit-interleaved element order.
+
+One element is one 4 x 4 block for a block format and one texel for a linear
+format. The tile holds:
+
+| Element size | Tile elements | Pixels for a block format |
+| ------------ | ------------- | ------------------------- |
+| 16 bytes     | 16 x 16       | 64 x 64                   |
+| 8 bytes      | 32 x 16       | 128 x 64                  |
+| 4 bytes      | 32 x 32       | 32 x 32                   |
+| 2 bytes      | 64 x 32       | 64 x 32                   |
+| 1 byte       | 64 x 64       | 64 x 64                   |
+
+The allocation is padded to whole tiles, so the stored size can exceed
+`width x height x element size`. The element at local (x, y) is at the tile
+offset given by this bit order, least significant bit first:
+
+| Element size | Order |
+| ------------ | ----- |
+| 16 bytes     | y0 y1 x0 x1 y2 x2 y3 x3 |
+| 8 bytes      | x0 y0 y1 x1 x2 y2 x3 y3 x4 |
+| 4 bytes      | x0 x1 y0 y1 x2 y2 y3 x3 y4 x4 |
+| 2 bytes      | x0 x1 x2 y0 y1 y2 x3 y3 x4 y4 x5 |
+| 1 byte       | y0 y1 y2 x1 x0 x2 y3 x3 x4 y4 x5 y5 |
+
+The 16-byte order is confirmed on two format-98 records: the row-major
+reading fragments both, and the tile reorder yields a 1,920 x 1,080
+photograph and a 1,024 x 512 UI layout. The 8-, 4-, 2- and 1-byte orders are
+the same mapping at other element sizes; no simple-2D sample was checked, so
+they are **Probable**.
+
+When the mip count is above one, level 0 sits at the end of the allocation:
+`allocation_start + allocation_extent - padded_level0_size`. Every sampled
+record declares one mip, so the right-aligned multi-level placement is
+**Probable**, not confirmed.
 
 ## Allocation bounds
 
@@ -274,6 +314,34 @@ The `tools/resources/dictionary_census.py` script produces every count in this
 section from caller-supplied archives and `lforge archive ls` listings. The
 selection rule is the type ID in those listings.
 
+## Pixel observations
+
+The type-5 rows in the nested archive at row 7 of `textures.rpf` were read
+through the same page reconstruction as the structural samples. Inner row 2
+(68 records, 1,024 x 512, format 98) decoded as BC7 to a UI layout (outlined
+boxes, a star row and a weapon icon) after the 4 KiB tile reorder; the
+row-major reading scatters the elements. A 1,920 x 1,080 format-98 record
+decoded the same way to a photograph. Inner row 1 (16 records, formats 71 and
+77) decoded format 77 as BC3 to white glyphs on a transparent alpha
+background. Inner row 0 (2 records, 64 x 64 and 512 x 512, format 77) decoded
+as BC3. Inner row 3 holds 43 format-98 records. Inner row 5 holds four
+records, two decodable format 77 and two format 95 records whose pixel layout
+is unsupported. Inner row 4 is an empty dictionary with a 96-byte system
+segment and no graphics bytes.
+
+The page map of inner row 2 declares one system page and one graphics page. The
+graphics page is stored as a 32 MiB chunk and a remainder, and the chunk table
+gives a system segment of 11,840 bytes. Parsing the system segment at 0x2f00
+also succeeds because the extra bytes are zero padding, but 11,840 is the page
+boundary. This is a page-reconstruction observation, not a dictionary field.
+
+These are image-consistency observations. They support BC3 for format 77 and
+BC7 for format 98 in native dictionaries; they do not establish either codec
+from engine code. The mapping remains **Probable**. The sampled records carry
+no stored names, so the viewer's `Texture N` labels are synthesized. They are
+not registered as a numbered finding; the row indices, counts and image checks
+are the evidence.
+
 ## Limits
 
 - One build. The positive sample is a census of the type-5 rows in 25 nested
@@ -281,12 +349,16 @@ selection rule is the type ID in those listings.
   other type IDs. This is not a game-wide census.
 - The record grammar is established from payload bytes and structural checks. No
   engine code that builds, validates or uploads a dictionary was traced.
-- Width, height, format id and mip count are exposed at confirmed positions but
-  their meanings are not independently established. No pixel format is claimed.
+- Width, height, format id and mip count are exposed at confirmed positions.
+  The pixel readings above are Probable image-consistency observations, not
+  codec identities traced from engine code.
 - The byte scale of the allocation unit count is **Unknown**. The reported
   allocation size is the extent upper bound.
-- The meanings of `+0x08`, `+0x0C`, `+0x10`, `+0x3C`, `+0x3E`, `+0x40`, `+0x48`,
+- The meanings of `+0x08`, `+0x0C`, `+0x10`, `+0x3C`, `+0x3E`, `+0x48`,
   `+0x60` and the root `+0x18`/`+0x48`/`+0x50`/`+0x58` are **Unknown**.
+- The 4 KiB tile geometry is confirmed for 16-byte elements only. The 8-, 4-,
+  2- and 1-byte geometries and the right-aligned multi-level placement are
+  **Probable**.
 - The name text is payload data. It is read for the hash check only and is not
   published.
 - The drawable reference sample is one nested archive of `levels.rpf`. The 414
