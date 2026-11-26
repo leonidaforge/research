@@ -125,11 +125,12 @@ These layers are separate and MUST NOT be conflated:
    offsets, counts and descriptors, not payload content.
 2. **Class dispatch** decodes a block only when its class id is `0x20` (zlib) or
    `0x00` (stored). Any other class is reported by id and not guessed.
-3. **Texture decoding** would interpret the inflated bytes as an image. One
-   byte-level chain is established for a single texture; the pixel layout and
-   the meaning of the tile mode are not.
+3. **Texture decoding** interprets inflated bytes as an image for the supported
+   formats and tile modes. The pixel mapping is image-consistency evidence, not
+   an engine codec trace.
 4. **Reconstruction** maps a descriptor to a virtual block range with the
-   locator page. This is shown for one texture and is observational.
+   locator page. This is established for zlib and stored blocks across the
+   sampled stores.
 
 The storage class is not a codec identity. Class `0x20` is zlib and class `0x00`
 is stored bytes; the other six classes are storage classes whose payloads are not
@@ -162,6 +163,7 @@ decoded.
 - The six undecoded classes cannot be extracted. The tool fails explicitly for
   them.
 - The meaning of the upper bits of `+0x0C`, the first-block flag and the
-  descriptor's tile mode remains **Unknown**.
+  descriptor's tile modes outside 0..3 remains **Unknown**. Modes 0 and 1..3
+  map to the observed 64 KiB and 4 KiB native layouts.
 - The payload size reaches 6,556,999,680 bytes in one store even though no file
   reaches 4 GiB. Virtual space is not the file offset space.
