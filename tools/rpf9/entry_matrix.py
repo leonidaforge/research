@@ -50,11 +50,13 @@ def json_document(summary, combinations):
         'entries': summary['entries'],
         'stopped': summary['stopped'],
         'complete': summary.get('complete'),
+        'completion': summary.get('completion'),
         'coverage': summary.get('coverage'),
         'outcomes': summary.get('outcomes'),
         'types': summary['types'],
-        'type_summary': type_summary(combinations),
+        'type_summary': type_summary(combinations, summary),
         'combinations': combinations,
+        'rejections': summary.get('rejections'),
         'failures': summary['failures'],
     }
 
@@ -77,6 +79,7 @@ COVERAGE_ORDER = (
     'nested_archives_opened',
     'archives_resumed',
     'failed_archives',
+    'rejected_archive_candidates',
     'entries_enumerated',
     'entries_probed',
     'entries_decoded',
@@ -86,6 +89,42 @@ COVERAGE_ORDER = (
     'declared_asset_classes',
     'unresolved_formats',
 )
+
+
+def completion_table(summary):
+    completion = summary.get('completion') or {}
+    checks = completion.get('checks') or {}
+    lines = [
+        '## Completion',
+        '',
+        '| Check | Value |',
+        '| ----- | ----- |',
+        '| complete | {} |'.format(cell(completion.get('complete', summary.get('complete')))),
+        '| reasons | {} |'.format(', '.join(completion.get('reasons') or []) or 'none'),
+        '| pending traversal | {} |'.format(cell(completion.get('pending_traversal'))),
+    ]
+    for name in sorted(checks):
+        lines.append('| {} | {} |'.format(name, cell(checks[name])))
+    lines.append('')
+    return lines
+
+
+def outcomes_table(summary):
+    outcomes = summary.get('outcomes') or {}
+    if not outcomes:
+        return []
+    lines = [
+        '## Outcomes',
+        '',
+        'Every entry has exactly one, so the counts add up to the entry count.',
+        '',
+        '| Outcome | Entries |',
+        '| ------- | ------: |',
+    ]
+    for name, entries in sorted(outcomes.items(), key=lambda item: -item[1]):
+        lines.append('| {} | {} |'.format(cell(name), cell(entries)))
+    lines.append('')
+    return lines
 
 
 def roots_table(summary):
@@ -131,13 +170,21 @@ def tally(target, value, entries):
     target[value] = target.get(value, 0) + entries
 
 
-def type_summary(combinations):
+def type_summary(combinations, summary=None):
     """One row per entry type: what the type declared and what its rows were.
 
     The declared extensions come from the registry (the type's own property);
     the payload extensions come from the bytes. Keeping them apart is what stops
     a registry entry from being reported as a verified asset class.
+
+    The archive count is the exact number of archives that hold an entry of the
+    type, which only the census can know: a combination keeps a bounded
+    representative list of archive names, and the largest such list is not the
+    number of archives.
     """
+    archives = {}
+    for item in (summary or {}).get('types') or []:
+        archives[item['type']] = item.get('archives')
     types = {}
     for combination in combinations:
         row = types.setdefault(
@@ -155,7 +202,6 @@ def type_summary(combinations):
         entries = combination['entries']
         row['entries'] += entries
         row['archives'] = max(row['archives'], combination.get('archive_count') or 0)
-        tally(row['identifications'], combination['identification'], entries)
         tally(row['outcomes'], combination.get('outcome'), entries)
         provenance = combination.get('extension_provenance')
         extension = combination['extension']
@@ -163,23 +209,27 @@ def type_summary(combinations):
             tally(row['declared'], extension, entries)
         if provenance == 'payload' and extension != '-':
             tally(row['payload'], extension, entries)
+    for row in types.values():
+        if archives.get(row['type']) is not None:
+            row['archives'] = archives[row['type']]
     return sorted(types.values(), key=lambda row: (row['type'] is None, row['type']))
 
 
-def type_table(combinations):
-    summary = type_summary(combinations)
-    if not summary:
+def type_table(combinations, summary=None):
+    rows = type_summary(combinations, summary)
+    if not rows:
         return []
     lines = [
         '## Type summary',
         '',
         'Sorted by type id. `declared` is the extension the engine registers for the type;',
-        '`from payload` is an extension the bytes themselves established.',
+        '`from payload` is an extension the bytes themselves established. `archives` is the',
+        'exact number of archives that hold an entry of the type.',
         '',
-        '| Type | Entries | Declared | From payload | Outcomes |',
-        '| ---- | ------: | -------- | ------------ | -------- |',
+        '| Type | Entries | Archives | Declared | From payload | Outcomes |',
+        '| ---- | ------: | -------: | -------- | ------------ | -------- |',
     ]
-    for row in summary:
+    for row in rows:
         declared = ', '.join(
             '`{}` {}'.format(name, cell(entries))
             for name, entries in sorted(row['declared'].items())
@@ -193,9 +243,10 @@ def type_table(combinations):
             for name, entries in sorted(row['outcomes'].items())
         )
         lines.append(
-            '| {} | {} | {} | {} | {} |'.format(
+            '| {} | {} | {} | {} | {} | {} |'.format(
                 cell(row['type']),
                 cell(row['entries']),
+                cell(row['archives']),
                 declared or '-',
                 payload or '-',
                 outcomes or '-',
@@ -210,7 +261,9 @@ def distribution_tables(combinations):
         ('Identification kind', lambda item: kind(item['identification'])),
         ('Format', lambda item: item['identification']),
         ('Capability', lambda item: item['capability']),
+        ('Outcome', lambda item: item.get('outcome')),
         ('Extension', lambda item: item['extension']),
+        ('Extension provenance', lambda item: item.get('extension_provenance')),
         ('Structure claim', lambda item: item.get('structure')),
         ('Payload state', lambda item: item['payload']),
         ('Storage', lambda item: item['storage']),
@@ -314,7 +367,9 @@ def document(summary, combinations, title='RPF9 entry matrix'):
         ]
     )
     parts.extend(roots_table(summary))
-    parts.extend(type_table(combinations))
+    parts.extend(completion_table(summary))
+    parts.extend(outcomes_table(summary))
+    parts.extend(type_table(combinations, summary))
     parts.extend(distribution_tables(combinations))
     parts.extend(
         [

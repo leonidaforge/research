@@ -11,7 +11,8 @@ destination only after the write succeeds. They do not print payload or trailer 
 | `trailer_probe.py`          | one or more archives, optionally with manifests                             | `hdr[0x0C]` as a trailing length, the payload boundary, four bound checks, and trailer equality classes    |
 | `secondary_probe.py`        | one or more archives                                                        | `C`, `D`, `E`, `F`, the secondary-area size, and two size-model checks                                     |
 | `random_transform_tests.py` | a compatible Leonida Forge CLI, a game directory and an executable          | random transformed rows per archive, each decoded and compared with its declared logical size              |
-| `census_all.py`             | a compatible Leonida Forge CLI, an installation directory and an executable | one bounded entry census per root archive, and the merged summary                                          |
+| `census_all.py`             | a compatible Leonida Forge CLI, an installation directory and an executable | one entry census per root archive, and the merged summary                                                  |
+| `census_breakdown.py`       | the merged payload census                                                   | the five follow-up breakdowns: encoding 4, transform failures, resource variants, type 255, new types      |
 | `entry_matrix.py`           | the merged census from `census_all.py`                                      | the published [entry matrix](../../formats/containers/rpf9/entry-matrix.md) and its JSON                   |
 | `census_facts.py`           | the merged census, optionally the type registry                             | the few counts a document quotes, so none is copied by hand                                                |
 
@@ -22,11 +23,16 @@ Python 3 standard library only.
 ```text
 LFORGE=/path/to/lforge python tools/rpf9/census_all.py INSTALL_DIR EXECUTABLE OUTPUT_DIR [ENTRIES_PER_ROOT]
 python tools/rpf9/entry_matrix.py OUTPUT_DIR/census-merged.jsonl OUTPUT_DIR [NAME]
+python tools/rpf9/census_breakdown.py OUTPUT_DIR/census-merged.jsonl
 ```
 
 `census_all.py` reports how many archives and entries each root covered and whether it
-stopped at a budget. `entry_matrix.py` writes `<NAME>.md` and `<NAME>.json` (default
-`entry-matrix`):
+stopped at a budget. It fails — non-zero exit, no merged summary — when a census run
+exits non-zero, when a root fails to open, when a nested archive the payload proves to
+be an archive cannot be opened, or when the merged counts do not reconcile with the
+per-root lines. A type-0 row that the payload does not confirm as an archive is not a
+failure: it is counted as a rejected candidate with a reason. `entry_matrix.py` writes
+`<NAME>.md` and `<NAME>.json` (default `entry-matrix`):
 one row per combination of entry type, identification, storage, transform, payload
 state, structure claim, extension, extension provenance and capability, with the number
 of entries, the archives it was seen in and samples that name the row and show the first
@@ -42,21 +48,25 @@ archive N resumes at archive N instead of starting over.
 
 A line is reused only when all of these match:
 
-| Field      | Meaning                                                        |
-| ---------- | -------------------------------------------------------------- |
-| `schema`   | the merged-summary schema the driver writes                    |
-| `rules`    | the classification rule set                                    |
-| `registry` | the executable build the native type registry came from        |
-| `mode`     | `metadata-only` or `payload`: different investigations         |
-| `limits`   | depth, archive, entry, nested-byte and spool-byte limits       |
-| `build`    | SHA-256 of the game executable the driver was given            |
-| identity   | SHA-256 of the above plus the root's size and modification time |
+| Field      | Meaning                                                                      |
+| ---------- | ---------------------------------------------------------------------------- |
+| `schema`   | the merged-summary schema the driver writes                                  |
+| `header_schema` | the journal-line schema the census writes                               |
+| `rules`    | the classification rule set                                                  |
+| `registry` | the executable build the native type registry came from                      |
+| `mode`     | `metadata-only` or `payload`: different investigations                       |
+| `limits`   | depth, archive, entry, nested-byte and spool-byte limits                     |
+| `build`    | SHA-256 of the game executable the driver was given                          |
+| `scanner`  | SHA-256 of the census binary itself                                          |
+| `fingerprint` | the root's size, modification time and 1 MiB head and tail digests        |
+| `summary`  | the path, byte count and SHA-256 of the summary the line's counters came from |
 
-The census gives each line an opaque `--journal-identity`, which is that last SHA-256.
-A record cut short by a limit carries `complete: false` and is walked again; a record
-from another identity is ignored. `journal.jsonl` in the output directory holds one
-line per completed root, and a root is only reused from it when its identity matches
-and it did not stop at a limit.
+The census gives each line an opaque `--journal-identity`, which is the SHA-256 of the
+fields above. A record cut short by an interruption is repaired at the next append; a
+record from another identity is ignored. `journal.jsonl` in the output directory holds
+one line per completed root, and a root is only reused from it when its identity
+matches, the summary it came from is present with the recorded digest, and it did not
+stop at a limit.
 
 ## Framing survey
 
