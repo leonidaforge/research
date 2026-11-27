@@ -1,0 +1,48 @@
+{
+ "build": "scarlett-e95020b2",
+ "decoder": "lforge archive verify, release build of feat/rpf9-transform-remaining",
+ "entries": 1398,
+ "decoded": 1398,
+ "failed": 0,
+ "logical_bytes": 298916159,
+ "by_storage": {
+  "chunked-2": 746,
+  "chunked-3": 648,
+  "raw-deflate": 4
+ },
+ "by_type": {
+  "11": 500,
+  "14": 1,
+  "255": 151,
+  "89": 746
+ },
+ "by_storage_type": {
+  "chunked-2:89": 746,
+  "chunked-3:11": 496,
+  "chunked-3:14": 1,
+  "chunked-3:255": 151,
+  "raw-deflate:11": 4
+ },
+ "chunk_methods": {
+  "zlib_only": 1347,
+  "with_copy_chunk": 47,
+  "no_chunk_table": 4,
+  "max_chunks": 152
+ },
+ "digest_of_digests": "1f6ab07dfef771cfb6ffdb86be8f51851ee82c7616b0676081822ae12061830f",
+ "baseline_chunked_3": {
+  "entries": 648,
+  "identical": 648,
+  "changed": 0,
+  "digest_of_digests": "8a5d85cb346e08231399b426dabb725390baae4c1e6df89d6ede7e6a24c33f54"
+ },
+ "encoding_4": {
+  "entries": 14488,
+  "identical": 14488,
+  "changed": 0,
+  "accepted_digest": "80c4ec5b0c49fd17235b93ac2568f62e467515abab70d891ac071a8bf7a76cb9",
+  "computed_digest": "80c4ec5b0c49fd17235b93ac2568f62e467515abab70d891ac071a8bf7a76cb9",
+  "digest_matches_accepted": true
+ },
+ "note": "The digest of digests is the SHA-256 of the per-entry decoded SHA-256 values in archive-selector order. It is a reproducible fingerprint, not an authentication value. No payload bytes, keys, key states or tables are published."
+}

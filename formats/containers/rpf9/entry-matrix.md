@@ -17,17 +17,16 @@ classification allowed and where that extension came from.
 | failed_roots | 0 |
 | archives_opened | 4,373 |
 | nested_archives_opened | 4,351 |
-| archives_resumed | 0 |
 | failed_archives | 0 |
 | rejected_archive_candidates | 0 |
 | entries_enumerated | 1,255,039 |
 | entries_probed | 1,255,039 |
-| entries_decoded | 1,254,289 |
-| entries_undecoded | 750 |
-| structures_verified | 93,627 |
-| containers_identified | 1,152,814 |
+| entries_decoded | 1,255,039 |
+| entries_undecoded | 0 |
+| structures_verified | 93,631 |
+| containers_identified | 1,153,560 |
 | declared_asset_classes | 1,181,971 |
-| unresolved_formats | 3,797 |
+| unresolved_formats | 3,047 |
 | stopped early | nothing |
 | complete | True |
 
@@ -67,12 +66,7 @@ discovered root and no stopped scan is a count of the installation.
 | ----- | ----- |
 | complete | 1 |
 | reasons | none |
-| pending traversal | 0 |
-| reconciles | 1 |
-| roots_discovered | 22 |
-| roots_failed | 0 |
-| roots_opened | 22 |
-| roots_stopped | 0 |
+| pending traversal | - |
 
 ## Outcomes
 
@@ -80,10 +74,9 @@ Every entry has exactly one, so the counts add up to the entry count.
 
 | Outcome | Entries |
 | ------- | ------: |
-| partially-identified | 1,157,615 |
-| identified | 93,627 |
+| partially-identified | 1,158,361 |
+| identified | 93,631 |
 | unresolved | 3,047 |
-| blocked | 750 |
 
 ## Type summary
 
@@ -99,7 +92,7 @@ exact number of archives that hold an entry of the type.
 | 4 | 48,584 | 179 | `zdd` 48,584 | - | partially-identified 48,584 |
 | 5 | 2,612 | 33 | `ztd` 2,612 | - | partially-identified 2,612 |
 | 6 | 92,199 | 970 | `zbn` 92,199 | - | partially-identified 92,199 |
-| 11 | 48,612 | 422 | `zmt` 48,612 | - | blocked 4, identified 20,280, partially-identified 28,328 |
+| 11 | 48,612 | 422 | `zmt` 48,612 | - | identified 20,284, partially-identified 28,328 |
 | 14 | 2 | 2 | `zdatb` 2 | - | unresolved 2 |
 | 15 | 250,434 | 1,204 | `zbdr` 250,434 | - | partially-identified 250,434 |
 | 16 | 22,382 | 132 | `zbdd` 22,382 | - | partially-identified 22,382 |
@@ -119,7 +112,7 @@ exact number of archives that hold an entry of the type.
 | 86 | 11 | 1 | `zfd` 11 | - | partially-identified 11 |
 | 87 | 15,067 | 185 | `zas` 15,067 | - | partially-identified 15,067 |
 | 88 | 40,019 | 5 | `zsm` 40,019 | - | partially-identified 40,019 |
-| 89 | 746 | 2 | `zscript` 746 | - | blocked 746 |
+| 89 | 746 | 2 | `zscript` 746 | - | partially-identified 746 |
 | 93 | 211 | 1 | `zfc` 211 | - | identified 211 |
 | 94 | 80 | 1 | `zlfc` 80 | - | identified 80 |
 | 95 | 518 | 2 | `zcg` 518 | - | partially-identified 518 |
@@ -146,9 +139,9 @@ exact number of archives that hold an entry of the type.
 
 | Value | Entries |
 | ----- | ------: |
-| resource | 1,152,814 |
-| format | 97,489 |
-| none | 3,797 |
+| resource | 1,153,560 |
+| format | 97,493 |
+| none | 3,047 |
 | xml | 491 |
 | signature | 448 |
 
@@ -156,11 +149,11 @@ exact number of archives that hold an entry of the type.
 
 | Value | Entries |
 | ----- | ------: |
-| resource:segment-5 | 1,152,814 |
+| resource:segment-5 | 1,153,560 |
 | format:adat | 71,676 |
-| format:psin | 19,080 |
+| format:psin | 19,084 |
 | format:rpf9 | 4,351 |
-| none | 3,797 |
+| none | 3,047 |
 | format:rbf0 | 1,493 |
 | format:kb2 | 797 |
 | signature:Observed("move") | 443 |
@@ -339,21 +332,19 @@ exact number of archives that hold an entry of the type.
 
 | Value | Entries |
 | ----- | ------: |
-| resource | 1,152,814 |
-| structural | 93,138 |
+| resource | 1,153,560 |
+| structural | 93,142 |
 | archive | 4,351 |
 | bytes | 3,495 |
-| unavailable | 750 |
 | text | 491 |
 
 ### Outcome
 
 | Value | Entries |
 | ----- | ------: |
-| partially-identified | 1,157,615 |
-| identified | 93,627 |
+| partially-identified | 1,158,361 |
+| identified | 93,631 |
 | unresolved | 3,047 |
-| blocked | 750 |
 
 ### Extension
 
@@ -419,8 +410,8 @@ exact number of archives that hold an entry of the type.
 
 | Value | Entries |
 | ----- | ------: |
-| unknown | 1,157,059 |
-| verified | 93,627 |
+| unknown | 1,157,055 |
+| verified | 93,631 |
 | probable | 4,351 |
 | tentative | 2 |
 
@@ -428,8 +419,7 @@ exact number of archives that hold an entry of the type.
 
 | Value | Entries |
 | ----- | ------: |
-| decoded | 1,254,289 |
-| transform-failed | 750 |
+| decoded | 1,255,039 |
 
 ### Storage
 
@@ -497,12 +487,9 @@ exact number of archives that hold an entry of the type.
 | Type | Identification | Variant | Storage | Transform | Payload | Structure | Capability | Extension | Entries | Archives |
 | ---- | -------------- | ------- | ------- | --------- | ------- | --------- | ---------- | --------- | ------: | -------: |
 | 0 | format:rpf9 | format:rpf9 | stored | no | decoded | probable | archive | rpf | 4351 | 17 |
-| 2 | resource:segment-5 | resource:s5:ptr:seg5+zero | chunked-2 | no | decoded | unknown | resource | zdr | 154704 | 1275 |
-| 2 | resource:segment-5 | resource:s5:ptr:seg5+ptr:seg5 | chunked-2 | no | decoded | unknown | resource | zdr | 9997 | 257 |
-| 2 | resource:segment-5 | resource:s5:ptr:seg5+zero | chunked-4 | no | decoded | unknown | resource | zdr | 3017 | 2 |
-| 2 | resource:segment-5 | resource:s5:ptr:seg5+ptr:seg5 | chunked-4 | no | decoded | unknown | resource | zdr | 179 | 1 |
-| 3 | resource:segment-5 | resource:s5:ptr:seg5+ptr:seg5 | chunked-2 | no | decoded | unknown | resource | zft | 45390 | 259 |
-| 3 | resource:segment-5 | resource:s5:zero+ptr:seg5 | chunked-2 | no | decoded | unknown | resource | zft | 10098 | 61 |
+| 2 | resource:segment-5 | resource:s5:ptr:seg5+ptr:seg5 | chunked-2 | no | decoded | unknown | resource | zdr | 164701 | 1532 |
+| 2 | resource:segment-5 | resource:s5:ptr:seg5+ptr:seg5 | chunked-4 | no | decoded | unknown | resource | zdr | 3196 | 3 |
+| 3 | resource:segment-5 | resource:s5:ptr:seg5+ptr:seg5 | chunked-2 | no | decoded | unknown | resource | zft | 55488 | 320 |
 | 4 | resource:segment-5 | resource:s5:zero+small | chunked-2 | no | decoded | unknown | resource | zdd | 48328 | 178 |
 | 4 | resource:segment-5 | resource:s5:zero+small | chunked-4 | no | decoded | unknown | resource | zdd | 256 | 1 |
 | 5 | resource:segment-5 | resource:s5:zero+small | chunked-2 | no | decoded | unknown | resource | ztd | 2612 | 33 |
@@ -516,7 +503,7 @@ exact number of archives that hold an entry of the type.
 | 11 | format:rbf0 | format:rbf0 | chunked-3 | yes | decoded | verified | structural | zmt | 59 | 5 |
 | 11 | format:psin | format:psin | chunked-4 | no | decoded | verified | structural | zmt | 55 | 1 |
 | 11 | resource:segment-5 | resource:s5:ptr:seg5+zero | chunked-4 | no | decoded | unknown | resource | zmt | 33 | 1 |
-| 11 | none | empty | raw-deflate | yes | transform-failed | unknown | unavailable | zmt | 4 | 4 |
+| 11 | format:psin | format:psin | raw-deflate | yes | decoded | verified | structural | zmt | 4 | 4 |
 | 11 | format:psin | format:psin | raw-deflate | no | decoded | verified | structural | zmt | 1 | 1 |
 | 14 | none | binary:30030100 | chunked-3 | no | decoded | unknown | bytes | zdatb | 1 | 1 |
 | 14 | none | binary:58340400 | chunked-3 | yes | decoded | unknown | bytes | zdatb | 1 | 1 |
@@ -525,23 +512,14 @@ exact number of archives that hold an entry of the type.
 | 16 | resource:segment-5 | resource:s5:zero+small | chunked-2 | no | decoded | unknown | resource | zbdd | 22126 | 131 |
 | 16 | resource:segment-5 | resource:s5:zero+small | chunked-4 | no | decoded | unknown | resource | zbdd | 256 | 1 |
 | 17 | resource:segment-5 | resource:s5:small+ptr:seg5 | chunked-2 | no | decoded | unknown | resource | zbft | 22440 | 263 |
-| 18 | resource:segment-5 | resource:s5:ptr:seg5+other | chunked-2 | no | decoded | unknown | resource | zvert | 596 | 2 |
-| 18 | resource:segment-5 | resource:s5:other+other | chunked-2 | no | decoded | unknown | resource | zvert | 15 | 2 |
+| 18 | resource:segment-5 | resource:s5:other+other | chunked-2 | no | decoded | unknown | resource | zvert | 611 | 4 |
 | 64 | signature:Observed("move") | signature:Observed("move") | chunked-3 | no | decoded | unknown | bytes | mrf | 443 | 2 |
 | 66 | format:gfx | format:gfx | chunked-3 | no | decoded | verified | structural | gfx | 87 | 7 |
 | 67 | resource:segment-5 | resource:s5:zero+zero | chunked-2 | no | decoded | unknown | resource | zcd | 62375 | 383 |
 | 67 | resource:segment-5 | resource:s5:zero+zero | chunked-4 | no | decoded | unknown | resource | zcd | 9 | 1 |
 | 69 | resource:segment-5 | resource:s5:zero+zero | chunked-2 | no | decoded | unknown | resource | zpmd | 1 | 1 |
 | 70 | resource:segment-5 | resource:s5:zero+zero | chunked-2 | no | decoded | unknown | resource | zpm | 8443 | 67 |
-| 72 | resource:segment-5 | resource:s5:other+zero | chunked-2 | no | decoded | unknown | resource | zpt | 144 | 3 |
-| 72 | resource:segment-5 | resource:s5:ptr:seg5+zero | chunked-2 | no | decoded | unknown | resource | zpt | 75 | 3 |
-| 72 | resource:segment-5 | resource:s5:tag:(f+zero | chunked-2 | no | decoded | unknown | resource | zpt | 1 | 1 |
-| 72 | resource:segment-5 | resource:s5:tag:8$+zero | chunked-2 | no | decoded | unknown | resource | zpt | 1 | 1 |
-| 72 | resource:segment-5 | resource:s5:tag:D=+zero | chunked-2 | no | decoded | unknown | resource | zpt | 1 | 1 |
-| 72 | resource:segment-5 | resource:s5:tag:Ha+zero | chunked-2 | no | decoded | unknown | resource | zpt | 1 | 1 |
-| 72 | resource:segment-5 | resource:s5:tag:Xs+zero | chunked-2 | no | decoded | unknown | resource | zpt | 1 | 1 |
-| 72 | resource:segment-5 | resource:s5:tag:hm+zero | chunked-2 | no | decoded | unknown | resource | zpt | 1 | 1 |
-| 72 | resource:segment-5 | resource:s5:tag:x?+zero | chunked-2 | no | decoded | unknown | resource | zpt | 1 | 1 |
+| 72 | resource:segment-5 | resource:s5:other+zero | chunked-2 | no | decoded | unknown | resource | zpt | 226 | 13 |
 | 73 | resource:segment-5 | resource:s5:ptr:seg5+zero | chunked-2 | no | decoded | unknown | resource | zmap | 161985 | 312 |
 | 73 | resource:segment-5 | resource:s5:ptr:seg5+zero | chunked-4 | no | decoded | unknown | resource | zmap | 4087 | 4 |
 | 74 | resource:segment-5 | resource:s5:ptr:seg5+zero | chunked-2 | no | decoded | unknown | resource | ztyp | 6135 | 589 |
@@ -551,19 +529,13 @@ exact number of archives that hold an entry of the type.
 | 79 | resource:segment-5 | resource:s5:small+zero | chunked-2 | no | decoded | unknown | resource | znv | 27644 | 12 |
 | 86 | resource:segment-5 | resource:s5:zero+small | chunked-2 | no | decoded | unknown | resource | zfd | 11 | 1 |
 | 87 | resource:segment-5 | resource:s5:ptr:seg5+zero | chunked-2 | no | decoded | unknown | resource | zas | 15067 | 185 |
-| 88 | resource:segment-5 | resource:s5:zero+other | chunked-2 | no | decoded | unknown | resource | zsm | 38279 | 5 |
-| 88 | resource:segment-5 | resource:s5:ptr:seg5+other | chunked-2 | no | decoded | unknown | resource | zsm | 1587 | 2 |
-| 88 | resource:segment-5 | resource:s5:zero+ptr:seg6 | chunked-2 | no | decoded | unknown | resource | zsm | 85 | 2 |
-| 88 | resource:segment-5 | resource:s5:zero+ptr:seg5 | chunked-2 | no | decoded | unknown | resource | zsm | 68 | 1 |
-| 89 | none | empty | chunked-2 | yes | transform-failed | unknown | unavailable | zscript | 746 | 2 |
+| 88 | resource:segment-5 | resource:s5:zero+other | chunked-2 | no | decoded | unknown | resource | zsm | 40019 | 10 |
+| 89 | resource:segment-5 | resource:s5:other+small | chunked-2 | yes | decoded | unknown | resource | zscript | 746 | 11 |
 | 93 | format:psin | format:psin | chunked-3 | no | decoded | verified | structural | zfc | 211 | 1 |
 | 94 | format:psin | format:psin | chunked-3 | no | decoded | verified | structural | zlfc | 80 | 1 |
 | 95 | resource:segment-5 | resource:s5:small+ptr:seg5 | chunked-2 | no | decoded | unknown | resource | zcg | 518 | 2 |
 | 96 | none | zeros | chunked-3 | no | decoded | unknown | bytes | zasd | 1 | 1 |
-| 99 | resource:segment-5 | resource:s5:other+small | chunked-2 | no | decoded | unknown | resource | zcps | 94 | 1 |
-| 99 | resource:segment-5 | resource:s5:ptr:seg5+small | chunked-2 | no | decoded | unknown | resource | zcps | 2 | 1 |
-| 99 | resource:segment-5 | resource:s5:ptr:seg6+small | chunked-2 | no | decoded | unknown | resource | zcps | 1 | 1 |
-| 99 | resource:segment-5 | resource:s5:tag:2Fu}+small | chunked-2 | no | decoded | unknown | resource | zcps | 1 | 1 |
+| 99 | resource:segment-5 | resource:s5:other+small | chunked-2 | no | decoded | unknown | resource | zcps | 98 | 4 |
 | 100 | resource:segment-5 | resource:s5:small+ptr:seg5 | chunked-2 | no | decoded | unknown | resource | zsp | 27482 | 11 |
 | 101 | resource:segment-5 | resource:s5:ptr:seg5+zero | chunked-2 | no | decoded | unknown | resource | ztsl | 5 | 1 |
 | 102 | resource:segment-5 | resource:s5:zero+zero | chunked-2 | no | decoded | unknown | resource | zmmd | 142 | 13 |
@@ -575,14 +547,13 @@ exact number of archives that hold an entry of the type.
 | 110 | resource:segment-5 | resource:s5:small+ptr:seg5 | chunked-2 | no | decoded | unknown | resource | zsmam | 5 | 5 |
 | 111 | resource:segment-5 | resource:s5:ptr:seg5+zero | chunked-2 | no | decoded | unknown | resource | zldbmt | 30511 | 39 |
 | 113 | resource:segment-5 | resource:s5:ptr:seg5+zero | chunked-2 | no | decoded | unknown | resource | zkit | 2715 | 1 |
-| 114 | resource:segment-5 | resource:s5:ptr:seg5+zero | chunked-2 | no | decoded | unknown | resource | zcgc | 490 | 2 |
-| 114 | resource:segment-5 | resource:s5:zero+ptr:seg5 | chunked-2 | no | decoded | unknown | resource | zcgc | 28 | 1 |
+| 114 | resource:segment-5 | resource:s5:ptr:seg5+zero | chunked-2 | no | decoded | unknown | resource | zcgc | 518 | 3 |
 | 115 | resource:segment-5 | resource:s5:ptr:seg5+zero | chunked-2 | no | decoded | unknown | resource | zcov | 8415 | 4 |
 | 255 | format:adat | format:adat | stored | no | decoded | verified | structural | - | 71676 | 122 |
 | 255 | format:kb2 | format:kb2 | stored | no | decoded | verified | structural | - | 797 | 4 |
 | 255 | xml:CDataFileMgr__ContentChangeSetDef | xml:CDataFileMgr__ContentChangeSetDef | chunked-3 | no | decoded | verified | text | xml | 96 | 10 |
+| 255 | none | binary:12000000 | chunked-3 | no | decoded | unknown | bytes | - | 82 | 67 |
 | 255 | xml:timecycle_modifier_data | xml:timecycle_modifier_data | chunked-3 | no | decoded | verified | text | xml | 49 | 1 |
-| 255 | none | text | chunked-3 | no | decoded | unknown | bytes | - | 44 | 35 |
 | 255 | xml:rage__bgCrackType | xml:rage__bgCrackType | chunked-3 | yes | decoded | verified | text | xml | 36 | 1 |
 | 255 | xml:CVehiclePoints | xml:CVehiclePoints | chunked-3 | no | decoded | verified | text | xml | 32 | 1 |
 | 255 | xml:timecycle_keyframe_data | xml:timecycle_keyframe_data | chunked-3 | no | decoded | verified | text | xml | 27 | 1 |
@@ -592,18 +563,10 @@ exact number of archives that hold an entry of the type.
 | 255 | xml:CTuningFile | xml:CTuningFile | chunked-3 | no | decoded | verified | text | xml | 10 | 1 |
 | 255 | xml:SSetupData | xml:SSetupData | chunked-3 | no | decoded | verified | text | xml | 10 | 10 |
 | 255 | none | text | chunked-3 | yes | decoded | unknown | bytes | - | 9 | 1 |
-| 255 | none | binary:12000000 | chunked-3 | no | decoded | unknown | bytes | - | 7 | 4 |
-| 255 | none | binary:a6000000 | chunked-3 | no | decoded | unknown | bytes | - | 6 | 5 |
 | 255 | xml:WaveData | xml:WaveData | chunked-3 | yes | decoded | verified | text | xml | 6 | 1 |
 | 255 | format:edup | format:edup | chunked-3 | no | decoded | verified | structural | - | 5 | 5 |
-| 255 | none | binary:1a000000 | chunked-3 | no | decoded | unknown | bytes | - | 5 | 3 |
 | 255 | xml:CDamageDataManager | xml:CDamageDataManager | chunked-3 | no | decoded | verified | text | xml | 5 | 1 |
 | 255 | xml:GridAtlasInfo | xml:GridAtlasInfo | chunked-3 | no | decoded | verified | text | xml | 4 | 1 |
-| 255 | none | binary:14000000 | chunked-3 | no | decoded | unknown | bytes | - | 3 | 3 |
-| 255 | none | binary:19000000 | chunked-3 | no | decoded | unknown | bytes | - | 3 | 3 |
-| 255 | none | binary:3d000000 | chunked-3 | no | decoded | unknown | bytes | - | 3 | 3 |
-| 255 | none | binary:45020000 | chunked-3 | no | decoded | unknown | bytes | - | 3 | 3 |
-| 255 | none | binary:56000000 | chunked-3 | no | decoded | unknown | bytes | - | 3 | 3 |
 | 255 | xml:CCoverProcessorTuning | xml:CCoverProcessorTuning | chunked-3 | no | decoded | verified | text | xml | 3 | 1 |
 | 255 | format:psin | format:psin | chunked-3 | yes | decoded | verified | structural | - | 2 | 1 |
 | 255 | signature:Observed("mhiu") | signature:Observed("mhiu") | chunked-3 | no | decoded | unknown | bytes | - | 2 | 1 |
@@ -612,11 +575,6 @@ exact number of archives that hold an entry of the type.
 | 255 | xml:ShoreWavePlacementData | xml:ShoreWavePlacementData | chunked-3 | no | decoded | verified | text | xml | 2 | 2 |
 | 255 | xml:VehicleControlsInfo | xml:VehicleControlsInfo | chunked-3 | yes | decoded | verified | text | xml | 2 | 1 |
 | 255 | xml:unvalidated | xml:unvalidated | chunked-3 | no | decoded | tentative | text | - | 2 | 1 |
-| 255 | none | binary:000000c0 | chunked-3 | no | decoded | unknown | bytes | - | 1 | 1 |
-| 255 | none | binary:21030000 | chunked-3 | no | decoded | unknown | bytes | - | 1 | 1 |
-| 255 | none | binary:29000000 | chunked-3 | no | decoded | unknown | bytes | - | 1 | 1 |
-| 255 | none | binary:50414d48 | chunked-3 | no | decoded | unknown | bytes | - | 1 | 1 |
-| 255 | none | binary:50530009 | chunked-3 | no | decoded | unknown | bytes | - | 1 | 1 |
 | 255 | none | text | chunked-4 | no | decoded | unknown | bytes | - | 1 | 1 |
 | 255 | signature:Observed("sps1") | signature:Observed("sps1") | chunked-3 | no | decoded | unknown | bytes | - | 1 | 1 |
 | 255 | xml:ActionCoordinator__ActionCoordinatorData | xml:ActionCoordinator__ActionCoordinatorData | chunked-3 | yes | decoded | verified | text | xml | 1 | 1 |
@@ -807,58 +765,48 @@ Samples of type 0 as `format:rpf9`:
 
 | Type | Identification | Variant | Storage | Transform | Payload | Structure | Capability | Extension | Entries | Archives |
 | ---- | -------------- | ------- | ------- | --------- | ------- | --------- | ---------- | --------- | ------: | -------: |
-| 2 | resource:segment-5 | resource:s5:ptr:seg5+zero | chunked-2 | no | decoded | unknown | resource | zdr | 154704 | 1275 |
-| 2 | resource:segment-5 | resource:s5:ptr:seg5+ptr:seg5 | chunked-2 | no | decoded | unknown | resource | zdr | 9997 | 257 |
-| 2 | resource:segment-5 | resource:s5:ptr:seg5+zero | chunked-4 | no | decoded | unknown | resource | zdr | 3017 | 2 |
-| 2 | resource:segment-5 | resource:s5:ptr:seg5+ptr:seg5 | chunked-4 | no | decoded | unknown | resource | zdr | 179 | 1 |
-
-Samples of type 2 as `resource:s5:ptr:seg5+zero`:
-- `data.rpf!14!0`: 42,752 bytes, head `0000000000000000b080005000000000c07c0050000000000000000000000000`
-- `data.rpf!14!1`: 822,080 bytes, head `0000000000000000e08809500000000030870950000000000000000000000000`
-- `data.rpf!14!2`: 543,408 bytes, head `0000000000000000e02b07500000000030280750000000000000000000000000`
-- `levels.rpf!2!0`: 1,603,856 bytes, head `0000000000000000c070045000000000005a0450000000000000000000000000`
-- `levels.rpf!2!2`: 354,048 bytes, head `0000000000000000307600500000000080740050000000000000000000000000`
-- `levels.rpf!2!3`: 945,120 bytes, head `000000000000000090da01500000000010d50150000000000000000000000000`
-- `pack/core_restofworld/core_restofworld.rpf!8!0`: 11,040 bytes, head `0000000000000000a01a005000000000b0170050000000000000000000000000`
-- `pack/core_restofworld/core_restofworld.rpf!8!2`: 2,981,792 bytes, head `000000000000000080b900500000000040b50050000000000000000000000000`
-- `pack/core_restofworld/core_restofworld.rpf!8!6`: 68,816 bytes, head `00000000000000004033005000000000f02e0050000000000000000000000000`
-- `pack/shared_minigame000/shared_minigame000.rpf!3!2`: 18,976 bytes, head `0000000000000000b02f005000000000802d0050000000000000000000000000`
-- `pack/shared_minigame000/shared_minigame000.rpf!3!3`: 2,816 bytes, head `0000000000000000500800500000000030070050000000000000000000000000`
-- `pack/shared_minigame000/shared_minigame000.rpf!3!4`: 407,376 bytes, head `0000000000000000d0ff005000000000c0620150000000000000000000000000`
-- `pack/story000/story000.rpf!6!0`: 266,752 bytes, head `0000000000000000c09400500000000080930050000000000000000000000000`
-- `pack/story000/story000.rpf!6!1`: 224,048 bytes, head `000000000000000030bb005000000000b0b90050000000000000000000000000`
-- `pack/story000/story000.rpf!6!4`: 312,496 bytes, head `000000000000000080c400500000000040c30050000000000000000000000000`
+| 2 | resource:segment-5 | resource:s5:ptr:seg5+ptr:seg5 | chunked-2 | no | decoded | unknown | resource | zdr | 164701 | 1532 |
+| 2 | resource:segment-5 | resource:s5:ptr:seg5+ptr:seg5 | chunked-4 | no | decoded | unknown | resource | zdr | 3196 | 3 |
 
 Samples of type 2 as `resource:s5:ptr:seg5+ptr:seg5`:
 - `data.rpf!26!2`: 7,984 bytes, head `00000000000000005014005000000000d012005000000000800e005000000000`
 - `data.rpf!26!3`: 62,464 bytes, head `0000000000000000600e005000000000d00c0050000000008007005000000000`
 - `data.rpf!26!6`: 36,688 bytes, head `0000000000000000d0140050000000009012005000000000c00c005000000000`
+- `data.rpf!14!0`: 42,752 bytes, head `0000000000000000b080005000000000c07c0050000000000000000000000000`
+- `data.rpf!14!1`: 822,080 bytes, head `0000000000000000e08809500000000030870950000000000000000000000000`
+- `data.rpf!14!2`: 543,408 bytes, head `0000000000000000e02b07500000000030280750000000000000000000000000`
 - `levels.rpf!5!6`: 221,296 bytes, head `00000000000000008036005000000000a033005000000000f01d005000000000`
 - `levels.rpf!5!70`: 36,416 bytes, head `0000000000000000501c005000000000e019005000000000b012005000000000`
 - `levels.rpf!5!72`: 84,592 bytes, head `0000000000000000d03600500000000050340050000000001022005000000000`
+- `levels.rpf!2!0`: 1,603,856 bytes, head `0000000000000000c070045000000000005a0450000000000000000000000000`
+- `levels.rpf!2!2`: 354,048 bytes, head `0000000000000000307600500000000080740050000000000000000000000000`
+- `levels.rpf!2!3`: 945,120 bytes, head `000000000000000090da01500000000010d50150000000000000000000000000`
 - `pack/core_restofworld/core_restofworld.rpf!8!33`: 40,720 bytes, head `0000000000000000b02a00500000000040260050000000007016005000000000`
 - `pack/core_restofworld/core_restofworld.rpf!8!43`: 42,880 bytes, head `0000000000000000e029005000000000a025005000000000901a005000000000`
 - `pack/core_restofworld/core_restofworld.rpf!8!82`: 55,696 bytes, head `0000000000000000301a0050000000006016005000000000100d005000000000`
+- `pack/core_restofworld/core_restofworld.rpf!8!0`: 11,040 bytes, head `0000000000000000a01a005000000000b0170050000000000000000000000000`
+- `pack/core_restofworld/core_restofworld.rpf!8!2`: 2,981,792 bytes, head `000000000000000080b900500000000040b50050000000000000000000000000`
+- `pack/core_restofworld/core_restofworld.rpf!8!6`: 68,816 bytes, head `00000000000000004033005000000000f02e0050000000000000000000000000`
 - `pack/shared_minigame000/shared_minigame000.rpf!29!111`: 82,256 bytes, head `0000000000000000000d005000000000100c005000000000b007005000000000`
 - `pack/shared_minigame000/shared_minigame000.rpf!29!174`: 1,019,168 bytes, head `0000000000000000008a0050000000000087005000000000207c005000000000`
 - `pack/shared_minigame000/shared_minigame000.rpf!29!179`: 314,624 bytes, head `00000000000000004015005000000000d013005000000000c00a005000000000`
-
-Samples of type 2 as `resource:s5:ptr:seg5+zero`:
-- `levels.rpf!1719!4`: 54,928 bytes, head `00000000000000006055005000000000b04f0050000000000000000000000000`
-- `levels.rpf!1719!5`: 5,376 bytes, head `0000000000000000b00d005000000000900c0050000000000000000000000000`
-- `levels.rpf!1719!6`: 4,992 bytes, head `0000000000000000000e005000000000e00c0050000000000000000000000000`
+- `pack/shared_minigame000/shared_minigame000.rpf!3!2`: 18,976 bytes, head `0000000000000000b02f005000000000802d0050000000000000000000000000`
+- `pack/shared_minigame000/shared_minigame000.rpf!3!3`: 2,816 bytes, head `0000000000000000500800500000000030070050000000000000000000000000`
+- `pack/shared_minigame000/shared_minigame000.rpf!3!4`: 407,376 bytes, head `0000000000000000d0ff005000000000c0620150000000000000000000000000`
 
 Samples of type 2 as `resource:s5:ptr:seg5+ptr:seg5`:
 - `levels.rpf!1719!31`: 24,272 bytes, head `0000000000000000e00f005000000000d00d0050000000004008005000000000`
 - `levels.rpf!1719!90`: 62,704 bytes, head `0000000000000000d015005000000000f012005000000000300c005000000000`
 - `levels.rpf!1719!107`: 21,472 bytes, head `0000000000000000e00f005000000000d00d0050000000004008005000000000`
+- `levels.rpf!1719!4`: 54,928 bytes, head `00000000000000006055005000000000b04f0050000000000000000000000000`
+- `levels.rpf!1719!5`: 5,376 bytes, head `0000000000000000b00d005000000000900c0050000000000000000000000000`
+- `levels.rpf!1719!6`: 4,992 bytes, head `0000000000000000000e005000000000e00c0050000000000000000000000000`
 
 ### Type 3: 55488 entries
 
 | Type | Identification | Variant | Storage | Transform | Payload | Structure | Capability | Extension | Entries | Archives |
 | ---- | -------------- | ------- | ------- | --------- | ------- | --------- | ---------- | --------- | ------: | -------: |
-| 3 | resource:segment-5 | resource:s5:ptr:seg5+ptr:seg5 | chunked-2 | no | decoded | unknown | resource | zft | 45390 | 259 |
-| 3 | resource:segment-5 | resource:s5:zero+ptr:seg5 | chunked-2 | no | decoded | unknown | resource | zft | 10098 | 61 |
+| 3 | resource:segment-5 | resource:s5:ptr:seg5+ptr:seg5 | chunked-2 | no | decoded | unknown | resource | zft | 55488 | 320 |
 
 Samples of type 3 as `resource:s5:ptr:seg5+ptr:seg5`:
 - `data.rpf!26!0`: 55,712 bytes, head `0000000000000000001400500000000050080050000000005002005000000000`
@@ -867,21 +815,19 @@ Samples of type 3 as `resource:s5:ptr:seg5+ptr:seg5`:
 - `levels.rpf!5!0`: 11,456 bytes, head `0000000000000000d017005000000000e00a005000000000b006005000000000`
 - `levels.rpf!5!1`: 75,344 bytes, head `00000000000000005039005000000000901f0050000000009018005000000000`
 - `levels.rpf!5!2`: 69,776 bytes, head `00000000000000001044005000000000c022005000000000901e005000000000`
+- `levels.rpf!12!8`: 63,616 bytes, head `0000000000000000a0240050000000000000000000000000500e005000000000`
+- `levels.rpf!12!9`: 9,072 bytes, head `0000000000000000a0150050000000000000000000000000b007005000000000`
+- `levels.rpf!12!20`: 137,296 bytes, head `000000000000000020150050000000000000000000000000b007005000000000`
 - `pack/core_restofworld/core_restofworld.rpf!8!1`: 2,164,624 bytes, head `000000000000000080770050000000003050005000000000003d005000000000`
 - `pack/core_restofworld/core_restofworld.rpf!8!3`: 161,248 bytes, head `0000000000000000e036005000000000a02c005000000000c027005000000000`
 - `pack/core_restofworld/core_restofworld.rpf!8!4`: 51,328 bytes, head `0000000000000000702b005000000000a0150050000000007011005000000000`
 - `pack/shared_minigame000/shared_minigame000.rpf!33!10`: 9,840 bytes, head `00000000000000006019005000000000800e0050000000008007005000000000`
 - `pack/shared_minigame000/shared_minigame000.rpf!33!32`: 350,528 bytes, head `0000000000000000b096005000000000f05c005000000000f055005000000000`
 - `pack/shared_minigame000/shared_minigame000.rpf!33!45`: 324,800 bytes, head `000000000000000050ab005000000000e06a005000000000e063005000000000`
+- `pack/shared_minigame000/shared_minigame000.rpf!33!94`: 192,720 bytes, head `0000000000000000601d0050000000000000000000000000d00e005000000000`
 - `packs.rpf!18!0`: 23,120 bytes, head `0000000000000000a054005000000000b03f005000000000a03d005000000000`
 - `packs.rpf!18!1`: 10,464 bytes, head `0000000000000000b023005000000000e018005000000000c014005000000000`
 - `packs.rpf!18!2`: 25,200 bytes, head `0000000000000000d05c00500000000090470050000000006041005000000000`
-
-Samples of type 3 as `resource:s5:zero+ptr:seg5`:
-- `levels.rpf!12!8`: 63,616 bytes, head `0000000000000000a0240050000000000000000000000000500e005000000000`
-- `levels.rpf!12!9`: 9,072 bytes, head `0000000000000000a0150050000000000000000000000000b007005000000000`
-- `levels.rpf!12!20`: 137,296 bytes, head `000000000000000020150050000000000000000000000000b007005000000000`
-- `pack/shared_minigame000/shared_minigame000.rpf!33!94`: 192,720 bytes, head `0000000000000000601d0050000000000000000000000000d00e005000000000`
 
 ### Type 4: 48584 entries
 
@@ -974,7 +920,7 @@ Samples of type 6 as `resource:s5:small+zero`:
 | 11 | format:rbf0 | format:rbf0 | chunked-3 | yes | decoded | verified | structural | zmt | 59 | 5 |
 | 11 | format:psin | format:psin | chunked-4 | no | decoded | verified | structural | zmt | 55 | 1 |
 | 11 | resource:segment-5 | resource:s5:ptr:seg5+zero | chunked-4 | no | decoded | unknown | resource | zmt | 33 | 1 |
-| 11 | none | empty | raw-deflate | yes | transform-failed | unknown | unavailable | zmt | 4 | 4 |
+| 11 | format:psin | format:psin | raw-deflate | yes | decoded | verified | structural | zmt | 4 | 4 |
 | 11 | format:psin | format:psin | raw-deflate | no | decoded | verified | structural | zmt | 1 | 1 |
 
 Samples of type 11 as `resource:s5:ptr:seg5+zero`:
@@ -1083,10 +1029,10 @@ Samples of type 11 as `resource:s5:ptr:seg5+zero`:
 - `levels.rpf!1029!4074`: 11,104 bytes, head `0000000000000000b028005000000000304452507a0000000000000000000000`
 - `levels.rpf!1029!4085`: 5,296 bytes, head `00000000000000000012005000000000304452507a0000000000000000000000`
 
-Samples of type 11 as `empty`:
-- `pack/story000/story000.rpf!90!0`: - bytes, head ``
-- `pack/story000/story000.rpf!407!0`: - bytes, head ``
-- `pack/story000/story000.rpf!410!0`: - bytes, head ``
+Samples of type 11 as `format:psin`:
+- `pack/story000/story000.rpf!90!0`: 1,073,528 bytes, head `5053494e000a16e08b3eafcb40000000aaaaaaaaaaaaaaaaf654382a804a0500`
+- `pack/story000/story000.rpf!407!0`: 13,315,952 bytes, head `5053494e0085ff500501000060000000aaaaaaaaaaaaaaaa64cc75a8680d0000`
+- `pack/story000/story000.rpf!410!0`: 3,731,576 bytes, head `5053494e002572e081d7b11030810000aaaaaaaaaaaaaaaa84887a04c0010000`
 
 Samples of type 11 as `format:psin`:
 - `levels.rpf!1645!0`: 2,646,032 bytes, head `5053494e002803600001000000050000aaaaaaaaaaaaaaaa2523056600a60e00`
@@ -1162,18 +1108,15 @@ Samples of type 17 as `resource:s5:small+ptr:seg5`:
 
 | Type | Identification | Variant | Storage | Transform | Payload | Structure | Capability | Extension | Entries | Archives |
 | ---- | -------------- | ------- | ------- | --------- | ------- | --------- | ---------- | --------- | ------: | -------: |
-| 18 | resource:segment-5 | resource:s5:ptr:seg5+other | chunked-2 | no | decoded | unknown | resource | zvert | 596 | 2 |
-| 18 | resource:segment-5 | resource:s5:other+other | chunked-2 | no | decoded | unknown | resource | zvert | 15 | 2 |
-
-Samples of type 18 as `resource:s5:ptr:seg5+other`:
-- `levels.rpf!1644!0`: 89,296 bytes, head `0000000000000000f01400500000000070100050000000000d000d0000000000`
-- `levels.rpf!1644!1`: 132,480 bytes, head `0000000000000000400500500000000060050050000000000300030000000000`
-- `levels.rpf!1644!2`: 145,472 bytes, head `0000000000000000900e005000000000400e0050000000000900090000000000`
+| 18 | resource:segment-5 | resource:s5:other+other | chunked-2 | no | decoded | unknown | resource | zvert | 611 | 4 |
 
 Samples of type 18 as `resource:s5:other+other`:
 - `levels.rpf!1644!89`: 127,696 bytes, head `0000000000000000000800500000000028080050000000000500050000000000`
 - `levels.rpf!1644!179`: 101,744 bytes, head `0000000000000000000800500000000028080050000000000500050000000000`
 - `levels.rpf!1644!324`: 78,608 bytes, head `0000000000000000000800500000000028080050000000000500050000000000`
+- `levels.rpf!1644!0`: 89,296 bytes, head `0000000000000000f01400500000000070100050000000000d000d0000000000`
+- `levels.rpf!1644!1`: 132,480 bytes, head `0000000000000000400500500000000060050050000000000300030000000000`
+- `levels.rpf!1644!2`: 145,472 bytes, head `0000000000000000900e005000000000400e0050000000000900090000000000`
 
 ### Type 64: 443 entries
 
@@ -1259,54 +1202,30 @@ Samples of type 70 as `resource:s5:zero+zero`:
 
 | Type | Identification | Variant | Storage | Transform | Payload | Structure | Capability | Extension | Entries | Archives |
 | ---- | -------------- | ------- | ------- | --------- | ------- | --------- | ---------- | --------- | ------: | -------: |
-| 72 | resource:segment-5 | resource:s5:other+zero | chunked-2 | no | decoded | unknown | resource | zpt | 144 | 3 |
-| 72 | resource:segment-5 | resource:s5:ptr:seg5+zero | chunked-2 | no | decoded | unknown | resource | zpt | 75 | 3 |
-| 72 | resource:segment-5 | resource:s5:tag:(f+zero | chunked-2 | no | decoded | unknown | resource | zpt | 1 | 1 |
-| 72 | resource:segment-5 | resource:s5:tag:8$+zero | chunked-2 | no | decoded | unknown | resource | zpt | 1 | 1 |
-| 72 | resource:segment-5 | resource:s5:tag:D=+zero | chunked-2 | no | decoded | unknown | resource | zpt | 1 | 1 |
-| 72 | resource:segment-5 | resource:s5:tag:Ha+zero | chunked-2 | no | decoded | unknown | resource | zpt | 1 | 1 |
-| 72 | resource:segment-5 | resource:s5:tag:Xs+zero | chunked-2 | no | decoded | unknown | resource | zpt | 1 | 1 |
-| 72 | resource:segment-5 | resource:s5:tag:hm+zero | chunked-2 | no | decoded | unknown | resource | zpt | 1 | 1 |
-| 72 | resource:segment-5 | resource:s5:tag:x?+zero | chunked-2 | no | decoded | unknown | resource | zpt | 1 | 1 |
+| 72 | resource:segment-5 | resource:s5:other+zero | chunked-2 | no | decoded | unknown | resource | zpt | 226 | 13 |
 
 Samples of type 72 as `resource:s5:other+zero`:
 - `data.rpf!29!0`: 92,336 bytes, head `000000000000000040f600500000000008fc0050000000000000000000000000`
 - `data.rpf!29!2`: 201,808 bytes, head `000000000000000000ec015000000000883d0250000000000000000000000000`
 - `data.rpf!29!3`: 477,824 bytes, head `0000000000000000e0f7045000000000e8d40550000000000000000000000000`
+- `data.rpf!29!6`: 54,528 bytes, head `0000000000000000009a005000000000209c0050000000000000000000000000`
+- `data.rpf!29!8`: 20,112 bytes, head `0000000000000000804400500000000080450050000000000000000000000000`
+- `data.rpf!29!9`: 485,904 bytes, head `0000000000000000800805500000000010000650000000000000000000000000`
+- `data.rpf!29!132`: 28,576 bytes, head `0000000000000000406500500000000028660050000000000000000000000000`
+- `data.rpf!29!103`: 18,048 bytes, head `0000000000000000003c005000000000443d0050000000000000000000000000`
+- `data.rpf!29!42`: 34,304 bytes, head `0000000000000000607100500000000058730050000000000000000000000000`
+- `data.rpf!29!121`: 36,192 bytes, head `0000000000000000606c005000000000686d0050000000000000000000000000`
+- `data.rpf!29!1`: 18,672 bytes, head `0000000000000000c03e005000000000783f0050000000000000000000000000`
 - `pack/core_restofworld/core_restofworld.rpf!5!0`: 695,696 bytes, head `000000000000000030890750000000002a4d0950000000000000000000000000`
 - `pack/story000/story000.rpf!295!3`: 127,184 bytes, head `0000000000000000704d015000000000fc7f0150000000000000000000000000`
 - `pack/story000/story000.rpf!295!8`: 262,880 bytes, head `0000000000000000e010035000000000886d0350000000000000000000000000`
 - `pack/story000/story000.rpf!295!11`: 281,600 bytes, head `0000000000000000f091025000000000f4120350000000000000000000000000`
-
-Samples of type 72 as `resource:s5:ptr:seg5+zero`:
-- `data.rpf!29!6`: 54,528 bytes, head `0000000000000000009a005000000000209c0050000000000000000000000000`
-- `data.rpf!29!8`: 20,112 bytes, head `0000000000000000804400500000000080450050000000000000000000000000`
-- `data.rpf!29!9`: 485,904 bytes, head `0000000000000000800805500000000010000650000000000000000000000000`
 - `pack/story000/story000.rpf!295!0`: 91,152 bytes, head `0000000000000000b0fc00500000000040170150000000000000000000000000`
 - `pack/story000/story000.rpf!295!1`: 84,592 bytes, head `000000000000000000ef005000000000800d0150000000000000000000000000`
 - `pack/story000/story000.rpf!295!2`: 19,360 bytes, head `0000000000000000b04100500000000000420050000000000000000000000000`
-- `pack/story000_restofworld/story000_restofworld.rpf!12!0`: 417,328 bytes, head `0000000000000000807704500000000060400550000000000000000000000000`
-
-Samples of type 72 as `resource:s5:tag:(f+zero`:
-- `data.rpf!29!132`: 28,576 bytes, head `0000000000000000406500500000000028660050000000000000000000000000`
-
-Samples of type 72 as `resource:s5:tag:8$+zero`:
 - `pack/story000/story000.rpf!295!47`: 10,528 bytes, head `0000000000000000002400500000000038240050000000000000000000000000`
-
-Samples of type 72 as `resource:s5:tag:D=+zero`:
-- `data.rpf!29!103`: 18,048 bytes, head `0000000000000000003c005000000000443d0050000000000000000000000000`
-
-Samples of type 72 as `resource:s5:tag:Ha+zero`:
 - `pack/story000/story000.rpf!295!56`: 28,528 bytes, head `0000000000000000e05f00500000000048610050000000000000000000000000`
-
-Samples of type 72 as `resource:s5:tag:Xs+zero`:
-- `data.rpf!29!42`: 34,304 bytes, head `0000000000000000607100500000000058730050000000000000000000000000`
-
-Samples of type 72 as `resource:s5:tag:hm+zero`:
-- `data.rpf!29!121`: 36,192 bytes, head `0000000000000000606c005000000000686d0050000000000000000000000000`
-
-Samples of type 72 as `resource:s5:tag:x?+zero`:
-- `data.rpf!29!1`: 18,672 bytes, head `0000000000000000c03e005000000000783f0050000000000000000000000000`
+- `pack/story000_restofworld/story000_restofworld.rpf!12!0`: 417,328 bytes, head `0000000000000000807704500000000060400550000000000000000000000000`
 
 ### Type 73: 166072 entries
 
@@ -1425,10 +1344,7 @@ Samples of type 87 as `resource:s5:ptr:seg5+zero`:
 
 | Type | Identification | Variant | Storage | Transform | Payload | Structure | Capability | Extension | Entries | Archives |
 | ---- | -------------- | ------- | ------- | --------- | ------- | --------- | ---------- | --------- | ------: | -------: |
-| 88 | resource:segment-5 | resource:s5:zero+other | chunked-2 | no | decoded | unknown | resource | zsm | 38279 | 5 |
-| 88 | resource:segment-5 | resource:s5:ptr:seg5+other | chunked-2 | no | decoded | unknown | resource | zsm | 1587 | 2 |
-| 88 | resource:segment-5 | resource:s5:zero+ptr:seg6 | chunked-2 | no | decoded | unknown | resource | zsm | 85 | 2 |
-| 88 | resource:segment-5 | resource:s5:zero+ptr:seg5 | chunked-2 | no | decoded | unknown | resource | zsm | 68 | 1 |
+| 88 | resource:segment-5 | resource:s5:zero+other | chunked-2 | no | decoded | unknown | resource | zsm | 40019 | 10 |
 
 Samples of type 88 as `resource:s5:zero+other`:
 - `pack/core_restofworld/core_restofworld.rpf!7!0`: 2,496 bytes, head `0000000000000000e001005000000000000000000000000000000300b33d8f7d`
@@ -1437,36 +1353,40 @@ Samples of type 88 as `resource:s5:zero+other`:
 - `pack/shared_minigame000/shared_minigame000.rpf!19!0`: 35,936 bytes, head `0000000000000000008c00500000000000000000000000000000027f00000000`
 - `pack/shared_minigame000/shared_minigame000.rpf!19!1`: 1,088 bytes, head `00000000000000002004005000000000000000000000000000ff0500b33d8f7d`
 - `pack/shared_minigame000/shared_minigame000.rpf!19!2`: 28,032 bytes, head `0000000000000000506d00500000000000000000000000000000027f00000000`
-- `packs.rpf!2!0`: 800 bytes, head `00000000000000000003005000000000000000000000000000ff0500b33d8f7d`
-- `packs.rpf!2!1`: 800 bytes, head `00000000000000000003005000000000000000000000000000ff0500b33d8f7d`
-- `packs.rpf!2!2`: 31,104 bytes, head `0000000000000000507900500000000000000000000000000000020000000000`
-
-Samples of type 88 as `resource:s5:ptr:seg5+other`:
 - `packs.rpf!2!16`: 67,200 bytes, head `0000000000000000d00501500000000050060150000000000100027f00000000`
 - `packs.rpf!2!31`: 266,208 bytes, head `0000000000000000900f045000000000d00f0450000000000100027f00000000`
 - `packs.rpf!2!77`: 17,856 bytes, head `00000000000000008045005000000000a0450050000000000100020000000000`
-
-Samples of type 88 as `resource:s5:zero+ptr:seg6`:
-- `packs.rpf!2!53`: 55,600 bytes, head `000000000000000000d900500000000000000000000000000000026400000000`
-- `packs.rpf!2!251`: 27,888 bytes, head `0000000000000000b06c00500000000000000000000000000000026900000000`
-- `packs.rpf!2!283`: 31,104 bytes, head `0000000000000000507900500000000000000000000000000000026e00000000`
-
-Samples of type 88 as `resource:s5:zero+ptr:seg5`:
+- `packs.rpf!2!0`: 800 bytes, head `00000000000000000003005000000000000000000000000000ff0500b33d8f7d`
+- `packs.rpf!2!1`: 800 bytes, head `00000000000000000003005000000000000000000000000000ff0500b33d8f7d`
+- `packs.rpf!2!2`: 31,104 bytes, head `0000000000000000507900500000000000000000000000000000020000000000`
 - `packs.rpf!2!434`: 23,232 bytes, head `0000000000000000805a00500000000000000000000000000000025500000000`
 - `packs.rpf!2!540`: 91,088 bytes, head `0000000000000000906301500000000000000000000000000000025f00000000`
 - `packs.rpf!2!938`: 55,600 bytes, head `000000000000000000d900500000000000000000000000000000025000000000`
+- `packs.rpf!2!53`: 55,600 bytes, head `000000000000000000d900500000000000000000000000000000026400000000`
+- `packs.rpf!2!251`: 27,888 bytes, head `0000000000000000b06c00500000000000000000000000000000026900000000`
+- `packs.rpf!2!283`: 31,104 bytes, head `0000000000000000507900500000000000000000000000000000026e00000000`
 
 ### Type 89: 746 entries
 
 | Type | Identification | Variant | Storage | Transform | Payload | Structure | Capability | Extension | Entries | Archives |
 | ---- | -------------- | ------- | ------- | --------- | ------- | --------- | ---------- | --------- | ------: | -------: |
-| 89 | none | empty | chunked-2 | yes | transform-failed | unknown | unavailable | zscript | 746 | 2 |
+| 89 | resource:segment-5 | resource:s5:other+small | chunked-2 | yes | decoded | unknown | resource | zscript | 746 | 11 |
 
-Samples of type 89 as `empty`:
-- `pack/story000/story000_script.rpf!1!0`: - bytes, head ``
-- `pack/story000/story000_script.rpf!1!1`: - bytes, head ``
-- `pack/story000/story000_script.rpf!1!2`: - bytes, head ``
-- `script.rpf!0!0`: - bytes, head ``
+Samples of type 89 as `resource:s5:other+small`:
+- `pack/story000/story000_script.rpf!1!0`: 66,768 bytes, head `0000000000000000e0ff0050000000008f444300010000006f00000067cedbea`
+- `pack/story000/story000_script.rpf!1!1`: 151,648 bytes, head `00000000000000004050025000000000c14c4300010000006f00000067cedbea`
+- `pack/story000/story000_script.rpf!1!2`: 198,064 bytes, head `0000000000000000e0fe0250000000001d714500010000006f00000067cedbea`
+- `pack/story000/story000_script.rpf!1!252`: 186,880 bytes, head `000000000000000070f701500000000060268d55010000006f00000067cedbea`
+- `pack/story000/story000_script.rpf!1!299`: 220,992 bytes, head `000000000000000080be02500000000030e8f268010000006f00000067cedbea`
+- `pack/story000/story000_script.rpf!1!314`: 1,310,720 bytes, head `0000000000000000a0ab135000000000503e656c010000006f00000067cedbea`
+- `pack/story000/story000_script.rpf!1!163`: 155,232 bytes, head `0000000000000000a0fd01500000000021394f39010000006f00000067cedbea`
+- `pack/story000/story000_script.rpf!1!210`: 12,368 bytes, head `000000000000000020300050000000002d793946010000006f00000067cedbea`
+- `pack/story000/story000_script.rpf!1!214`: 131,072 bytes, head `0000000000000000d0490150000000004a3b3148010000006f00000067cedbea`
+- `pack/story000/story000_script.rpf!1!362`: 6,272 bytes, head `000000000000000040180050000000005d5f7e7c010000006f00000067cedbea`
+- `pack/story000/story000_script.rpf!1!267`: 26,656 bytes, head `0000000000000000f0670050000000007856525c010000006f00000067cedbea`
+- `pack/story000/story000_script.rpf!1!222`: 21,072 bytes, head `000000000000000020520050000000007930534b010000006f00000067cedbea`
+- `pack/story000/story000_script.rpf!1!93`: 76,848 bytes, head `0000000000000000f02b0150000000007e726321010000006f00000067cedbea`
+- `script.rpf!0!0`: 1,310,720 bytes, head `0000000000000000903f13500000000085af07b4010000006f00000067cedbea`
 
 ### Type 93: 211 entries
 
@@ -1514,24 +1434,15 @@ Samples of type 96 as `zeros`:
 
 | Type | Identification | Variant | Storage | Transform | Payload | Structure | Capability | Extension | Entries | Archives |
 | ---- | -------------- | ------- | ------- | --------- | ------- | --------- | ---------- | --------- | ------: | -------: |
-| 99 | resource:segment-5 | resource:s5:other+small | chunked-2 | no | decoded | unknown | resource | zcps | 94 | 1 |
-| 99 | resource:segment-5 | resource:s5:ptr:seg5+small | chunked-2 | no | decoded | unknown | resource | zcps | 2 | 1 |
-| 99 | resource:segment-5 | resource:s5:ptr:seg6+small | chunked-2 | no | decoded | unknown | resource | zcps | 1 | 1 |
-| 99 | resource:segment-5 | resource:s5:tag:2Fu}+small | chunked-2 | no | decoded | unknown | resource | zcps | 1 | 1 |
+| 99 | resource:segment-5 | resource:s5:other+small | chunked-2 | no | decoded | unknown | resource | zcps | 98 | 4 |
 
 Samples of type 99 as `resource:s5:other+small`:
 - `packs.rpf!56!0`: 2,208 bytes, head `00000000000000008008005000000000aad07f01aad07f014e0000004e000000`
 - `packs.rpf!56!1`: 2,016 bytes, head `0000000000000000c00700500000000057930306579303064e0000004e000000`
 - `packs.rpf!56!2`: 1,680 bytes, head `00000000000000007006005000000000fc8b870cfc8b870c6b0000006b000000`
-
-Samples of type 99 as `resource:s5:ptr:seg5+small`:
 - `packs.rpf!56!31`: 832 bytes, head `0000000000000000c0020050000000007076b45c7076b45c0300000003000000`
 - `packs.rpf!56!32`: 1,744 bytes, head `0000000000000000b0060050000000009035e25d9035e25d7100000071000000`
-
-Samples of type 99 as `resource:s5:ptr:seg6+small`:
 - `packs.rpf!56!41`: 1,536 bytes, head `0000000000000000e0050050000000009066726c9066726c5f0000005f000000`
-
-Samples of type 99 as `resource:s5:tag:2Fu}+small`:
 - `packs.rpf!56!52`: 736 bytes, head `000000000000000070020050000000003246757d3246757d0400000004000000`
 
 ### Type 100: 27482 entries
@@ -1676,15 +1587,12 @@ Samples of type 113 as `resource:s5:ptr:seg5+zero`:
 
 | Type | Identification | Variant | Storage | Transform | Payload | Structure | Capability | Extension | Entries | Archives |
 | ---- | -------------- | ------- | ------- | --------- | ------- | --------- | ---------- | --------- | ------: | -------: |
-| 114 | resource:segment-5 | resource:s5:ptr:seg5+zero | chunked-2 | no | decoded | unknown | resource | zcgc | 490 | 2 |
-| 114 | resource:segment-5 | resource:s5:zero+ptr:seg5 | chunked-2 | no | decoded | unknown | resource | zcgc | 28 | 1 |
+| 114 | resource:segment-5 | resource:s5:ptr:seg5+zero | chunked-2 | no | decoded | unknown | resource | zcgc | 518 | 3 |
 
 Samples of type 114 as `resource:s5:ptr:seg5+zero`:
 - `packs.rpf!0!1`: 1,114,288 bytes, head `0000000000000000900000500000000030000050000000000000000000000000`
 - `packs.rpf!0!3`: 4,849,840 bytes, head `0000000000000000900000500000000030000050000000000000000000000000`
 - `packs.rpf!0!5`: 1,114,288 bytes, head `0000000000000000900000500000000030000050000000000000000000000000`
-
-Samples of type 114 as `resource:s5:zero+ptr:seg5`:
 - `packs.rpf!40!13`: 1,600 bytes, head `0000000000000000200600500000000000000000000000003000005000000000`
 - `packs.rpf!40!21`: 1,744 bytes, head `0000000000000000b00600500000000000000000000000003000005000000000`
 - `packs.rpf!40!22`: 131,072 bytes, head `0000000000000000b02901500000000000000000000000003000005000000000`
@@ -1707,8 +1615,8 @@ Samples of type 115 as `resource:s5:ptr:seg5+zero`:
 | 255 | format:adat | format:adat | stored | no | decoded | verified | structural | - | 71676 | 122 |
 | 255 | format:kb2 | format:kb2 | stored | no | decoded | verified | structural | - | 797 | 4 |
 | 255 | xml:CDataFileMgr__ContentChangeSetDef | xml:CDataFileMgr__ContentChangeSetDef | chunked-3 | no | decoded | verified | text | xml | 96 | 10 |
+| 255 | none | binary:12000000 | chunked-3 | no | decoded | unknown | bytes | - | 82 | 67 |
 | 255 | xml:timecycle_modifier_data | xml:timecycle_modifier_data | chunked-3 | no | decoded | verified | text | xml | 49 | 1 |
-| 255 | none | text | chunked-3 | no | decoded | unknown | bytes | - | 44 | 35 |
 | 255 | xml:rage__bgCrackType | xml:rage__bgCrackType | chunked-3 | yes | decoded | verified | text | xml | 36 | 1 |
 | 255 | xml:CVehiclePoints | xml:CVehiclePoints | chunked-3 | no | decoded | verified | text | xml | 32 | 1 |
 | 255 | xml:timecycle_keyframe_data | xml:timecycle_keyframe_data | chunked-3 | no | decoded | verified | text | xml | 27 | 1 |
@@ -1718,18 +1626,10 @@ Samples of type 115 as `resource:s5:ptr:seg5+zero`:
 | 255 | xml:CTuningFile | xml:CTuningFile | chunked-3 | no | decoded | verified | text | xml | 10 | 1 |
 | 255 | xml:SSetupData | xml:SSetupData | chunked-3 | no | decoded | verified | text | xml | 10 | 10 |
 | 255 | none | text | chunked-3 | yes | decoded | unknown | bytes | - | 9 | 1 |
-| 255 | none | binary:12000000 | chunked-3 | no | decoded | unknown | bytes | - | 7 | 4 |
-| 255 | none | binary:a6000000 | chunked-3 | no | decoded | unknown | bytes | - | 6 | 5 |
 | 255 | xml:WaveData | xml:WaveData | chunked-3 | yes | decoded | verified | text | xml | 6 | 1 |
 | 255 | format:edup | format:edup | chunked-3 | no | decoded | verified | structural | - | 5 | 5 |
-| 255 | none | binary:1a000000 | chunked-3 | no | decoded | unknown | bytes | - | 5 | 3 |
 | 255 | xml:CDamageDataManager | xml:CDamageDataManager | chunked-3 | no | decoded | verified | text | xml | 5 | 1 |
 | 255 | xml:GridAtlasInfo | xml:GridAtlasInfo | chunked-3 | no | decoded | verified | text | xml | 4 | 1 |
-| 255 | none | binary:14000000 | chunked-3 | no | decoded | unknown | bytes | - | 3 | 3 |
-| 255 | none | binary:19000000 | chunked-3 | no | decoded | unknown | bytes | - | 3 | 3 |
-| 255 | none | binary:3d000000 | chunked-3 | no | decoded | unknown | bytes | - | 3 | 3 |
-| 255 | none | binary:45020000 | chunked-3 | no | decoded | unknown | bytes | - | 3 | 3 |
-| 255 | none | binary:56000000 | chunked-3 | no | decoded | unknown | bytes | - | 3 | 3 |
 | 255 | xml:CCoverProcessorTuning | xml:CCoverProcessorTuning | chunked-3 | no | decoded | verified | text | xml | 3 | 1 |
 | 255 | format:psin | format:psin | chunked-3 | yes | decoded | verified | structural | - | 2 | 1 |
 | 255 | signature:Observed("mhiu") | signature:Observed("mhiu") | chunked-3 | no | decoded | unknown | bytes | - | 2 | 1 |
@@ -1738,11 +1638,6 @@ Samples of type 115 as `resource:s5:ptr:seg5+zero`:
 | 255 | xml:ShoreWavePlacementData | xml:ShoreWavePlacementData | chunked-3 | no | decoded | verified | text | xml | 2 | 2 |
 | 255 | xml:VehicleControlsInfo | xml:VehicleControlsInfo | chunked-3 | yes | decoded | verified | text | xml | 2 | 1 |
 | 255 | xml:unvalidated | xml:unvalidated | chunked-3 | no | decoded | tentative | text | - | 2 | 1 |
-| 255 | none | binary:000000c0 | chunked-3 | no | decoded | unknown | bytes | - | 1 | 1 |
-| 255 | none | binary:21030000 | chunked-3 | no | decoded | unknown | bytes | - | 1 | 1 |
-| 255 | none | binary:29000000 | chunked-3 | no | decoded | unknown | bytes | - | 1 | 1 |
-| 255 | none | binary:50414d48 | chunked-3 | no | decoded | unknown | bytes | - | 1 | 1 |
-| 255 | none | binary:50530009 | chunked-3 | no | decoded | unknown | bytes | - | 1 | 1 |
 | 255 | none | text | chunked-4 | no | decoded | unknown | bytes | - | 1 | 1 |
 | 255 | signature:Observed("sps1") | signature:Observed("sps1") | chunked-3 | no | decoded | unknown | bytes | - | 1 | 1 |
 | 255 | xml:ActionCoordinator__ActionCoordinatorData | xml:ActionCoordinator__ActionCoordinatorData | chunked-3 | yes | decoded | verified | text | xml | 1 | 1 |
@@ -1949,33 +1844,36 @@ Samples of type 255 as `xml:CDataFileMgr__ContentChangeSetDef`:
 - `pack/story000_bvh4/story000_bvh4.rpf!1`: 14,426 bytes, head `efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d`
 - `pack/story000_restofworld/story000_restofworld.rpf!18`: 772 bytes, head `efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d`
 
-Samples of type 255 as `xml:timecycle_modifier_data`:
-- `common.rpf!20`: 46,064 bytes, head `3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554`
-- `common.rpf!26`: 113,019 bytes, head `3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554`
-- `common.rpf!30`: 19,545 bytes, head `3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554`
-
-Samples of type 255 as `text`:
+Samples of type 255 as `binary:12000000`:
+- `audio.rpf!14!2`: 71 bytes, head `1200000013000000ea885a04000000010000004d44a2a0040000000400000000`
+- `audio.rpf!14!10`: 3,275,304 bytes, head `12000000f8002e00ea885a0401441d0c4312931280086210a00bcc14cb1b941c`
+- `audio.rpf!14!12`: 71 bytes, head `1200000013000000ea885a04000000010000006693932a040000000400000000`
+- `audio.rpf!14!7`: 1,136,793 bytes, head `14000000ade41000ea885a0403aaaaaaaa090000000600000002000000080700`
+- `audio.rpf!14!13`: 521,572 bytes, head `1900000014210700ea885a0404aaaaaaaa000000000000000000803f04000000`
+- `audio.rpf!14!4`: 17,964 bytes, head `1a0000008c3e0000ea885a0408000000aaaaaaaa000000000000000000000000`
+- `audio.rpf!14!17`: 399,540 bytes, head `1a00000044f70400ea885a0403000000aaaaaaaa617564696f3a2f7366782f00`
+- `audio.rpf!14!9`: 17,412 bytes, head `29000000d0350000ea885a0400a0aaaaaa00000044fd00005c5d000000000000`
+- `audio.rpf!14!16`: 895,898 bytes, head `3d00000096980a00ea885a0403010000aa00000000ffffffffffffffff000100`
+- `audio.rpf!14!3`: 19,947,076 bytes, head `45020000f4c4d300ea885a04cb0000000100cb000000020001cb0000000102cb`
+- `audio.rpf!14!6`: 11,030,779 bytes, head `56000000f30e6d00ea885a0404aaaaaaaa00000002000000f6dc2b7e00000000`
+- `audio.rpf!14!0`: 52 bytes, head `a600000004000000ea885a040400000000000000040000000000000000000000`
+- `audio.rpf!14!15`: 15,574,463 bytes, head `a60000006f2e9200ea885a0431aaaaaaaa000031aaaaaaaa0500ec4786040000`
 - `audio.rpf!14!1`: 5,242 bytes, head `414d425f53545245414d5f414e494d414c5f303100414d425f53545245414d5f`
 - `audio.rpf!14!5`: 195,439 bytes, head `64726976657253657474696e67735f57617665526f6f74506174680064726976`
 - `audio.rpf!14!8`: 522 bytes, head `42617365436f6d6d6f6e3a736f756e64735f636f6d6d6f6e3a536f756e64730d`
+- `common.rpf!111`: 3,274,036 bytes, head `000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0`
+- `common.rpf!300`: 1,038,100 bytes, head `210300003bb86173fb5c57633bb86173fb5c576300fd3fbb6f9b5f9b479b3fbb`
+- `common.rpf!332`: 48,588 bytes, head `50414d4801020000ed8cbc1b9000a400000050c6000018c6000097c30000a045`
 - `common.rpf!117`: 117,176 bytes, head `636c6f7564732e737472617475732e6e6f6973655f776569676874732e6d6564`
 - `common.rpf!151`: 47 bytes, head `505446585f4149525f524553495354414e434520312e300d0a47454e5f574154`
 - `common.rpf!185`: 24,285 bytes, head `616c7068615265736f6c76652e66780d0a616d6269656e742e66780d0a616d62`
 - `levels.rpf!326!0`: 15 bytes, head `464f5243455f454d5054595f525046`
 - `levels.rpf!1220!0`: 15 bytes, head `464f5243455f454d5054595f525046`
-- `levels.rpf!1681!0`: 15 bytes, head `464f5243455f454d5054595f525046`
-- `pack/core_bvh4/core_bvh4.rpf!28!0`: 15 bytes, head `464f5243455f454d5054595f525046`
-- `pack/core_bvh4/core_bvh4.rpf!144!0`: 15 bytes, head `464f5243455f454d5054595f525046`
-- `pack/core_bvh4/core_bvh4.rpf!208!0`: 15 bytes, head `464f5243455f454d5054595f525046`
-- `pack/core_restofworld/core_restofworld.rpf!1!1`: 57 bytes, head `42617365436f6d6d6f6e5f726573746f66776f726c643a736f756e64735f636f`
-- `pack/shared_minigame000/shared_minigame000.rpf!12!0`: 15 bytes, head `464f5243455f454d5054595f525046`
-- `pack/shared_minigame000/shared_minigame000.rpf!30!2`: 464 bytes, head `4d696e6967616d65303030436f6d6d6f6e3a646c634d696e6967616d65303030`
-- `pack/shared_minigame000/shared_minigame000.rpf!30!5`: 92 bytes, head `4d696e6967616d653030302e53636f72650d0a4d696e6967616d653030302e53`
-- `pack/story000/story000.rpf!2!0`: 15 bytes, head `464f5243455f454d5054595f525046`
-- `pack/story000/story000.rpf!102!0`: 15 bytes, head `464f5243455f454d5054595f525046`
-- `pack/story000/story000.rpf!164!0`: 15 bytes, head `464f5243455f454d5054595f525046`
-- `pack/story000_restofworld/story000_restofworld.rpf!0!0`: 146 bytes, head `53746f7279303030436f6d6d6f6e5f726573746f66776f726c643a646c635374`
-- `pack/story000_restofworld/story000_restofworld.rpf!0!2`: 70 bytes, head `53746f72793030305f726573746f66776f726c642e4375747363656e65730d0a`
+
+Samples of type 255 as `xml:timecycle_modifier_data`:
+- `common.rpf!20`: 46,064 bytes, head `3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554`
+- `common.rpf!26`: 113,019 bytes, head `3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554`
+- `common.rpf!30`: 19,545 bytes, head `3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554`
 
 Samples of type 255 as `xml:rage__bgCrackType`:
 - `common.rpf!48`: 4,624 bytes, head `efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d`
@@ -2037,22 +1935,6 @@ Samples of type 255 as `text`:
 - `common.rpf!204`: 26,704 bytes, head `3230300d0a360d0a31302e38353439093436322e343938340d0a302e30303030`
 - `common.rpf!208`: 45,781 bytes, head `3335300d0a370d0a3233332e30393434093235382e313930350d0a3231382e33`
 
-Samples of type 255 as `binary:12000000`:
-- `audio.rpf!14!2`: 71 bytes, head `1200000013000000ea885a04000000010000004d44a2a0040000000400000000`
-- `audio.rpf!14!10`: 3,275,304 bytes, head `12000000f8002e00ea885a0401441d0c4312931280086210a00bcc14cb1b941c`
-- `audio.rpf!14!12`: 71 bytes, head `1200000013000000ea885a04000000010000006693932a040000000400000000`
-- `pack/shared_minigame000/shared_minigame000.rpf!30!7`: 56,012 bytes, head `12000000583a0000ea885a0458000000cd20b3d414000400a682b3d416000100`
-- `pack/story000/story000.rpf!336!4`: 7,725,415 bytes, head `1200000053692d00ea885a04011b030122020181080219038a0301800201a904`
-- `pack/story000_restofworld/story000_restofworld.rpf!0!3`: 550 bytes, head `12000000fe000000ea885a0401a85c01bb7201779101467301c97101b48801fc`
-
-Samples of type 255 as `binary:a6000000`:
-- `audio.rpf!14!0`: 52 bytes, head `a600000004000000ea885a040400000000000000040000000000000000000000`
-- `audio.rpf!14!15`: 15,574,463 bytes, head `a60000006f2e9200ea885a0431aaaaaaaa000031aaaaaaaa0500ec4786040000`
-- `pack/core_restofworld/core_restofworld.rpf!1!0`: 78 bytes, head `a600000012000000ea885a040600ffffffffffffffffffffffff040000000000`
-- `pack/shared_minigame000/shared_minigame000.rpf!30!8`: 189,789 bytes, head `a600000071460100ea885a040600ffffffffffffffffffffffff31aaaaaaaa00`
-- `pack/story000/story000.rpf!336!2`: 2,058,823 bytes, head `a60000000b7f0d00ea885a0431aaaaaaaa0e001e8be10200000000ffffffff8f`
-- `pack/story000_restofworld/story000_restofworld.rpf!0!1`: 4,395 bytes, head `a6000000c7060000ea885a040600ffffffffffffffffffffffff31aaaaaaaa01`
-
 Samples of type 255 as `xml:WaveData`:
 - `common.rpf!17`: 747 bytes, head `3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554`
 - `common.rpf!169`: 957 bytes, head `3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554`
@@ -2065,13 +1947,6 @@ Samples of type 255 as `format:edup`:
 - `pack/story000/story000.rpf!532`: 28 bytes, head `45445550000000001000000091616df07a5df6d6aa87f0fde046897c`
 - `textures.rpf!20`: 965,964 bytes, head `4544555017440000e213c93376ba0200559b36b0fba88dcc6536f8da62060400`
 
-Samples of type 255 as `binary:1a000000`:
-- `audio.rpf!14!4`: 17,964 bytes, head `1a0000008c3e0000ea885a0408000000aaaaaaaa000000000000000000000000`
-- `audio.rpf!14!17`: 399,540 bytes, head `1a00000044f70400ea885a0403000000aaaaaaaa617564696f3a2f7366782f00`
-- `pack/shared_minigame000/shared_minigame000.rpf!30!1`: 21,772 bytes, head `1a00000038520000ea885a0402000000aaaaaaaa000000001d0c0000a8aaaaaa`
-- `pack/story000/story000.rpf!336!0`: 1,650,908 bytes, head `1a0000009c301900ea885a0402000000aaaaaaaa000000001b0c0000aaaaaaaa`
-- `pack/story000/story000.rpf!336!8`: 52 bytes, head `1a00000004000000ea885a040400000000000000040000000000000000000000`
-
 Samples of type 255 as `xml:CDamageDataManager`:
 - `common.rpf!148`: 12,498 bytes, head `3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554`
 - `common.rpf!216`: 104,082 bytes, head `efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d`
@@ -2081,31 +1956,6 @@ Samples of type 255 as `xml:GridAtlasInfo`:
 - `common.rpf!23`: 1,040 bytes, head `3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554`
 - `common.rpf!40`: 1,044 bytes, head `3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554`
 - `common.rpf!183`: 1,078 bytes, head `3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554`
-
-Samples of type 255 as `binary:14000000`:
-- `audio.rpf!14!7`: 1,136,793 bytes, head `14000000ade41000ea885a0403aaaaaaaa090000000600000002000000080700`
-- `pack/shared_minigame000/shared_minigame000.rpf!30!3`: 6,147 bytes, head `140000008b170000ea885a0401aaaaaaaa00000003aaaaaaaa070000000d0000`
-- `pack/story000/story000.rpf!336!9`: 66 bytes, head `140000000a000000ea885a0401aaaaaaaa000400000000000000040000000000`
-
-Samples of type 255 as `binary:19000000`:
-- `audio.rpf!14!13`: 521,572 bytes, head `1900000014210700ea885a0404aaaaaaaa000000000000000000803f04000000`
-- `pack/shared_minigame000/shared_minigame000.rpf!30!4`: 5,092 bytes, head `19000000b4110000ea885a0402aaaaaaaa000000000000000000803f00000000`
-- `pack/story000/story000.rpf!336!6`: 324 bytes, head `19000000f4000000ea885a0402aaaaaaaa000000000000000000803f00000000`
-
-Samples of type 255 as `binary:3d000000`:
-- `audio.rpf!14!16`: 895,898 bytes, head `3d00000096980a00ea885a0403010000aa00000000ffffffffffffffff000100`
-- `pack/shared_minigame000/shared_minigame000.rpf!30!0`: 9,106 bytes, head `3d000000fa190000ea885a0403010000aa00000000ffffffffffffffff000000`
-- `pack/story000/story000.rpf!336!5`: 712,614 bytes, head `3d000000d6620700ea885a0403010000aa00000000ffffffffffffffff000000`
-
-Samples of type 255 as `binary:45020000`:
-- `audio.rpf!14!3`: 19,947,076 bytes, head `45020000f4c4d300ea885a04cb0000000100cb000000020001cb0000000102cb`
-- `pack/shared_minigame000/shared_minigame000.rpf!30!9`: 14,340 bytes, head `45020000c4280000ea885a041d000000ffffffffffffffffffffffffffffffff`
-- `pack/story000/story000.rpf!336!7`: 644,112 bytes, head `4502000058b10500ea885a04a80000001100000054c16b03000000008f72460b`
-
-Samples of type 255 as `binary:56000000`:
-- `audio.rpf!14!6`: 11,030,779 bytes, head `56000000f30e6d00ea885a0404aaaaaaaa00000002000000f6dc2b7e00000000`
-- `pack/shared_minigame000/shared_minigame000.rpf!30!6`: 803,744 bytes, head `5600000050650700ea885a0458aaaaaaaa00000058aaaaaaaa02000000000000`
-- `pack/story000/story000.rpf!336!1`: 1,434,939 bytes, head `560000007bff1000ea885a0404aaaaaaaa00000002000000f6dc2b7e00000000`
 
 Samples of type 255 as `xml:CCoverProcessorTuning`:
 - `common.rpf!16`: 11,554 bytes, head `efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d`
@@ -2139,21 +1989,6 @@ Samples of type 255 as `xml:VehicleControlsInfo`:
 Samples of type 255 as `xml:unvalidated`:
 - `common.rpf!314`: 14,262,150 bytes, head `3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554`
 - `common.rpf!385`: 4,283,195 bytes, head `3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554`
-
-Samples of type 255 as `binary:000000c0`:
-- `common.rpf!111`: 3,274,036 bytes, head `000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0`
-
-Samples of type 255 as `binary:21030000`:
-- `common.rpf!300`: 1,038,100 bytes, head `210300003bb86173fb5c57633bb86173fb5c576300fd3fbb6f9b5f9b479b3fbb`
-
-Samples of type 255 as `binary:29000000`:
-- `audio.rpf!14!9`: 17,412 bytes, head `29000000d0350000ea885a0400a0aaaaaa00000044fd00005c5d000000000000`
-
-Samples of type 255 as `binary:50414d48`:
-- `common.rpf!332`: 48,588 bytes, head `50414d4801020000ed8cbc1b9000a400000050c6000018c6000097c30000a045`
-
-Samples of type 255 as `binary:50530009`:
-- `shaders.rpf!0`: 275,540,780 bytes, head `5053000930783635463431454444000000000000000000000000000000000000`
 
 Samples of type 255 as `text`:
 - `levels.rpf!1091!0`: 15 bytes, head `464f5243455f454d5054595f525046`

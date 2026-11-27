@@ -225,6 +225,10 @@ containers. The 750 that remain undecoded are the payload-transform failures of
 the separate task; no encoding-4 row is among them. The storage distribution is
 unchanged (`chunked-4` is still 14,488).
 
+That task has since decoded its 750 rows, so a later census reports 0 undecoded,
+0 `blocked` and 3,047 nothing-recognised entries (RPF9-F160). The table above
+records this pass, not the final state.
+
 No newly readable payload is an RPF9 archive: the 14,432 resource headers, the
 55 `PSIN` documents and the one unrecognised payload are not archives, and the
 nested archive count remains 4,351. No additional archive was opened, so the

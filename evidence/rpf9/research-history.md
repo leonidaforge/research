@@ -320,6 +320,24 @@ wall clock is not quoted because an unrelated scan shared the disk. The
 integrated build's only census-path change is a shared helper for the stored
 prefix, which returns the same prefix for every valid row.
 
+## Payload transform: storage integration (2026-11-27)
+
+The 750 remaining transform failures were storage integration. The descriptor's
+four stream fields define the covered range, including a trailing region at
+`+0x30` that the decoder ignored; the counter is measured from the first chunk
+byte, so an encoding-2 stored prefix does not advance it; and a raw-DEFLATE row
+has no chunk table, so the selection path refused it before reading. The
+type-89 shape is new and now decodes, as do the four raw-DEFLATE rows. All
+1,398 transformed entries decode, the 648 baseline digests are unchanged, and
+the encoding-4 population is byte-identical (RPF9-F156 to RPF9-F159).
+
+The census after the fix enumerates the same 22 roots, 4,373 archives and
+1,255,039 entries, and no entry is undecoded: `blocked` falls from 750 to zero,
+resource containers rise by 746 and the four raw-DEFLATE rows join the
+identified `PSIN` population. The 14,432 previously `undecodable` encoding-4
+rows stay `partially-identified`. The storage distribution is unchanged
+(RPF9-F160).
+
 ## Open
 
 - Meaning of descriptor `+0x08`, and any use of `+0x12`.

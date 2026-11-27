@@ -17,6 +17,7 @@ All integers are little-endian. Offsets are relative to the start of the archive
 | [names.md](names.md)                                       | Path resolution, name hashes, type classes, extensions, runtime dictionary      |
 | [payloads.md](payloads.md)                                 | Payload addressing, reads, decoding, chunk tables, observed storage layout      |
 | [chunk-encoding-4.md](chunk-encoding-4.md)                 | The encoding-4 chunk table and framing, its samples and its verification        |
+| [payload-transform.md](payload-transform.md)               | Transform descriptor fields, covered range, counter, storage integration        |
 | [entry-classification.md](entry-classification.md)         | Identifying what an entry holds, claims, extensions, capability                 |
 | [type-registry.md](type-registry.md)                       | The engine's native type-to-extension table and its reverse lookup              |
 | [type-inventory.md](type-inventory.md)                     | Every entry of every archive, as the metadata pass enumerated it                |
@@ -50,7 +51,7 @@ Evidence: [evidence/rpf9/INDEX.md](../../../evidence/rpf9/INDEX.md). Corrections
 | Signature check                                   | Confirmed, conditional. RSASSA-PKCS1-v1_5 with SHA-256 over the double hash of the signed spans and a 2048-bit RSA key. Verifies on all 22 inspected archives once step 1 runs. Metadata only                                                                                                                                            |
 | Stored primary area                               | Transformed in the inspected archives. Step 4 decodes it and the metadata signature verifies                                                                                                                                                                                                                                             |
 | Structural checks in validation                   | None found                                                                                                                                                                                                                                                                                                                               |
-| Payload transform                                 | Routing confirmed. Algorithm and key source unknown                                                                                                                                                                                                                                                                                      |
+| Payload transform                                 | Confirmed on the installation. The descriptor selects the range and key state; all 1,398 transformed entries decode, and the census reports no undecoded entry (RPF9-F156 to RPF9-F160)                                                                                                                             |
 | Enumeration, directory hierarchy                  | None on the traced paths. Paths are flat hashed stems                                                                                                                                                                                                                                                                                    |
 | Native TOC reading                                | Authenticated metadata parses directly. 6534 rows across 22 tested archives; stored and chunked payloads extract                                                                                                                                                                                                                         |
 
@@ -60,10 +61,10 @@ Authenticated metadata gives each row's location record, type ID, compression mo
 
 1. Column identities. Most column meanings remain unknown, see [schema.md](schema.md). The location records, name hash, chunk table, payload-transform flag and read source are established.
 2. Name strings. Names are hashes, so they resolve only against an external list of candidate paths. Matching also needs the archive's mount prefix and the extension-to-type table, see [names.md](names.md#offline-consequences).
-3. Entries with the payload transform flag. Their stored bytes cannot be read without the unknown transform.
+3. Entries with the payload transform flag. Their stored bytes are read through the descriptor's range and the executable's key state; every transformed entry of this installation decodes (RPF9-F156 to RPF9-F160).
 4. Payload bytes are not authenticated by the metadata signature.
 
-Stored rows and chunked rows have been extracted from authenticated metadata with exact logical sizes. A nested archive also yields raw DEFLATE mode-1 rows without a chunk table, eight of which extracted to exact logical sizes (RPF9-F103, RPF9-F104, RPF9-F118). Every row with a chunk encoding of 2, 3 or 4 is readable when it is not behind the payload transform; encoding 4 accounts for all 14,488 rows that earlier builds could not decode (RPF9-F151).
+Stored rows and chunked rows have been extracted from authenticated metadata with exact logical sizes. A nested archive also yields raw DEFLATE mode-1 rows without a chunk table, eight of which extracted to exact logical sizes (RPF9-F103, RPF9-F104, RPF9-F118). Every row with a chunk encoding of 2, 3 or 4 is readable, including the rows behind the payload transform; encoding 4 accounts for all 14,488 rows that earlier builds could not decode (RPF9-F151).
 
 The engine does not validate the table's structure. A tool that reads RPF9 metadata MUST bounds-check counts, offsets and indices itself.
 

@@ -76,8 +76,25 @@ The 56 were used only as a regression set: their bytes must not change.
 
 ## B. Payload transform failures
 
-**Established.** 1,398 entries carry the payload transform. 648 were read
-successfully and 750 were not.
+**Solved.** Every transformed entry decodes. The failures were storage
+integration, not the block program or key state.
+
+The descriptor's stream fields at `+0x18`, `+0x20`, `+0x28` and `+0x30` define
+the covered range, including a trailing region the decoder ignored. The
+keystream counter starts at the first chunk byte, so an encoding-2 stored
+prefix does not advance it. The 746 chunked-2 type-89 rows use a shape
+(`0x1000/0x1000/0x31000/0x1000`) the decoder had hard-coded away. The four
+raw-DEFLATE rows were refused before any byte was read because the selection
+path required a chunk table; they are one DEFLATE stream whose selection now
+inflates the whole stream and accepts only zero trailing bytes.
+
+All 1,398 entries were read to their end and hashed: 746 chunked-2, 648
+chunked-3 and 4 raw DEFLATE, with no failures. The 648 rows that decoded
+before the change are byte-identical. See
+[payload-transform.md](payload-transform.md).
+
+**Established before the fix.** 1,398 entries carry the payload transform.
+648 were read successfully and 750 were not.
 
 | Storage       | Entries | Outcome                       |
 | ------------- | ------: | ----------------------------- |
@@ -98,14 +115,19 @@ four type-11 failures are stored with raw DEFLATE:
 - 746 rows of type 89: `pack/story000/story000_script.rpf!1!0` and `pack/story000/story000_script.rpf!1!1`
 - 4 rows of type 11: `pack/story000/story000.rpf!90!0` and `pack/story000/story000.rpf!407!0`
 
-**Missing.** Why these 750 do not verify. The key state that decodes the
+**Was missing.** Why these 750 did not verify. The key state that decodes the
 chunked-3 rows is available, so the difference is in the rows, not in the
 installation: the storage shape, the descriptor, or the transform's parameters.
-Nothing is asserted about which.
+Nothing was asserted about which. **Established:** the descriptor shape, the
+counter origin and the stage relative to decompression; not a different key or
+block program.
 
 **Done when** each failing combination is explained by a property of the row —
 not by a change to the transform implementation — and the census reports it as a
-decoded payload or as a documented format.
+decoded payload or as a documented format. **Met:** each combination is
+explained by its descriptor's stream fields and its storage framing, the
+decoder derives both from the row, and the new census reports all 1,398 as
+decoded.
 
 **Scope.** Do not change the transform decoder in this task. 1,398 entries and
 the 648 that already decode are the regression set: they must decode to the same
@@ -113,7 +135,7 @@ bytes afterwards.
 
 ## C. Shared resource structures
 
-**Established.** 1,138,382 entries — 90.7% of the installation — are reported
+**Established.** 1,153,560 entries — 91.9% of the installation — are reported
 as resource containers. What that rests on is narrow: the first 16 bytes are
 eight zero bytes and a segment-5 pointer whose low 28 bits are a page-map
 offset. Recognition stops there. No page map was walked, no segment was
@@ -121,19 +143,21 @@ resolved, and nothing behind the pointer was read, so the group is a set of
 payloads that agree on 16 bytes, not a verified structure.
 
 The census normalises the next two 32-bit fields so unrelated payloads are not
-merged and pointer values are not split into thousands of buckets. The largest
+merged and pointer values are not split into thousands of buckets. The
 normalised shapes are:
 
 | Normalised header      | Entries |
 | ---------------------- | ------: |
-| `s5:ptr:seg5+zero`     | 448,037 |
-| `s5:small+ptr:seg5`    | 296,111 |
-| `s5:small+zero`        | 118,189 |
-| `s5:zero+zero`         |  96,573 |
-| `s5:zero+small`        |  73,080 |
-| `s5:ptr:seg5+ptr:seg5` |  55,387 |
-| `s5:zero+other`        |  38,279 |
-| `s5:zero+ptr:seg5`     |  10,194 |
+| `s5:small+ptr:seg5`    | 300,879 |
+| `s5:ptr:seg5+zero`     | 297,579 |
+| `s5:ptr:seg5+ptr:seg5` | 223,385 |
+| `s5:small+zero`        | 119,843 |
+| `s5:zero+zero`         |  96,582 |
+| `s5:zero+small`        |  73,592 |
+| `s5:zero+other`        |  40,019 |
+| `s5:other+small`       |     844 |
+| `s5:other+other`       |     611 |
+| `s5:other+zero`        |     226 |
 
 `ptr:seg5` means a 16-byte-aligned pointer into the system segment, `small` a
 value below 0x10000, `tag:` four printable bytes, and the two fields are

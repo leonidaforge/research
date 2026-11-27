@@ -1,6 +1,6 @@
 {
  "schema": "leonida-forge.rpf9-entry-matrix/2",
- "census": "leonida-forge.rpf9-census-merged/2",
+ "census": "leonida-forge.rpf9-census-merged/1",
  "archive_roots": [
   "anim.rpf",
   "appdata0.rpf",
@@ -163,40 +163,27 @@
  "entries": 1255039,
  "stopped": {},
  "complete": true,
- "completion": {
-  "complete": true,
-  "reasons": [],
-  "checks": {
-   "roots_discovered": 22,
-   "roots_opened": 22,
-   "roots_failed": 0,
-   "roots_stopped": 0,
-   "reconciles": true
-  },
-  "pending_traversal": 0
- },
+ "completion": null,
  "coverage": {
   "archives_opened": 4373,
-  "containers_identified": 1152814,
+  "containers_identified": 1153560,
   "declared_asset_classes": 1181971,
-  "entries_decoded": 1254289,
+  "entries_decoded": 1255039,
   "entries_enumerated": 1255039,
   "entries_probed": 1255039,
-  "entries_undecoded": 750,
+  "entries_undecoded": 0,
   "failed_archives": 0,
   "nested_archives_opened": 4351,
   "rejected_archive_candidates": 0,
-  "structures_verified": 93627,
-  "unresolved_formats": 3797,
+  "structures_verified": 93631,
+  "unresolved_formats": 3047,
   "roots_discovered": 22,
   "roots_opened": 22,
-  "failed_roots": 0,
-  "archives_resumed": 0
+  "failed_roots": 0
  },
  "outcomes": {
-  "blocked": 750,
-  "identified": 93627,
-  "partially-identified": 1157615,
+  "identified": 93631,
+  "partially-identified": 1158361,
   "unresolved": 3047
  },
  "types": [
@@ -517,8 +504,7 @@
    "identifications": {},
    "outcomes": {
     "partially-identified": 28328,
-    "identified": 20280,
-    "blocked": 4
+    "identified": 20284
    },
    "declared": {
     "zmt": 48612
@@ -778,7 +764,7 @@
    "archives": 2,
    "identifications": {},
    "outcomes": {
-    "blocked": 746
+    "partially-identified": 746
    },
    "declared": {
     "zscript": 746
@@ -1208,136 +1194,19 @@
    "variant": "format:rpf9"
   },
   {
-   "archive_count": 1275,
-   "archives": [
-    "data.rpf!14",
-    "levels.rpf!10",
-    "levels.rpf!11",
-    "levels.rpf!2",
-    "levels.rpf!4",
-    "levels.rpf!5",
-    "levels.rpf!6",
-    "levels.rpf!8"
-   ],
-   "capability": "resource",
-   "entries": 154704,
-   "extension": "zdr",
-   "extension_provenance": "native",
-   "identification": "resource:segment-5",
-   "outcome": "partially-identified",
-   "payload": "decoded",
-   "samples": [
-    {
-     "archive": "data.rpf!14",
-     "chain": "data.rpf!14!0",
-     "head": "0000000000000000b080005000000000c07c0050000000000000000000000000",
-     "size": 42752
-    },
-    {
-     "archive": "data.rpf!14",
-     "chain": "data.rpf!14!1",
-     "head": "0000000000000000e08809500000000030870950000000000000000000000000",
-     "size": 822080
-    },
-    {
-     "archive": "data.rpf!14",
-     "chain": "data.rpf!14!2",
-     "head": "0000000000000000e02b07500000000030280750000000000000000000000000",
-     "size": 543408
-    },
-    {
-     "archive": "levels.rpf!2",
-     "chain": "levels.rpf!2!0",
-     "head": "0000000000000000c070045000000000005a0450000000000000000000000000",
-     "size": 1603856
-    },
-    {
-     "archive": "levels.rpf!2",
-     "chain": "levels.rpf!2!2",
-     "head": "0000000000000000307600500000000080740050000000000000000000000000",
-     "size": 354048
-    },
-    {
-     "archive": "levels.rpf!2",
-     "chain": "levels.rpf!2!3",
-     "head": "000000000000000090da01500000000010d50150000000000000000000000000",
-     "size": 945120
-    },
-    {
-     "archive": "pack/core_restofworld/core_restofworld.rpf!8",
-     "chain": "pack/core_restofworld/core_restofworld.rpf!8!0",
-     "head": "0000000000000000a01a005000000000b0170050000000000000000000000000",
-     "size": 11040
-    },
-    {
-     "archive": "pack/core_restofworld/core_restofworld.rpf!8",
-     "chain": "pack/core_restofworld/core_restofworld.rpf!8!2",
-     "head": "000000000000000080b900500000000040b50050000000000000000000000000",
-     "size": 2981792
-    },
-    {
-     "archive": "pack/core_restofworld/core_restofworld.rpf!8",
-     "chain": "pack/core_restofworld/core_restofworld.rpf!8!6",
-     "head": "00000000000000004033005000000000f02e0050000000000000000000000000",
-     "size": 68816
-    },
-    {
-     "archive": "pack/shared_minigame000/shared_minigame000.rpf!3",
-     "chain": "pack/shared_minigame000/shared_minigame000.rpf!3!2",
-     "head": "0000000000000000b02f005000000000802d0050000000000000000000000000",
-     "size": 18976
-    },
-    {
-     "archive": "pack/shared_minigame000/shared_minigame000.rpf!3",
-     "chain": "pack/shared_minigame000/shared_minigame000.rpf!3!3",
-     "head": "0000000000000000500800500000000030070050000000000000000000000000",
-     "size": 2816
-    },
-    {
-     "archive": "pack/shared_minigame000/shared_minigame000.rpf!3",
-     "chain": "pack/shared_minigame000/shared_minigame000.rpf!3!4",
-     "head": "0000000000000000d0ff005000000000c0620150000000000000000000000000",
-     "size": 407376
-    },
-    {
-     "archive": "pack/story000/story000.rpf!6",
-     "chain": "pack/story000/story000.rpf!6!0",
-     "head": "0000000000000000c09400500000000080930050000000000000000000000000",
-     "size": 266752
-    },
-    {
-     "archive": "pack/story000/story000.rpf!6",
-     "chain": "pack/story000/story000.rpf!6!1",
-     "head": "000000000000000030bb005000000000b0b90050000000000000000000000000",
-     "size": 224048
-    },
-    {
-     "archive": "pack/story000/story000.rpf!6",
-     "chain": "pack/story000/story000.rpf!6!4",
-     "head": "000000000000000080c400500000000040c30050000000000000000000000000",
-     "size": 312496
-    }
-   ],
-   "storage": "chunked-2",
-   "structure": "unknown",
-   "transform": false,
-   "type": 2,
-   "variant": "resource:s5:ptr:seg5+zero"
-  },
-  {
-   "archive_count": 257,
+   "archive_count": 1532,
    "archives": [
     "data.rpf!26",
+    "data.rpf!14",
     "levels.rpf!14",
     "levels.rpf!15",
     "levels.rpf!23",
     "levels.rpf!41",
     "levels.rpf!5",
-    "levels.rpf!52",
-    "levels.rpf!59"
+    "levels.rpf!52"
    ],
    "capability": "resource",
-   "entries": 9997,
+   "entries": 164701,
    "extension": "zdr",
    "extension_provenance": "native",
    "identification": "resource:segment-5",
@@ -1363,6 +1232,24 @@
      "size": 36688
     },
     {
+     "archive": "data.rpf!14",
+     "chain": "data.rpf!14!0",
+     "head": "0000000000000000b080005000000000c07c0050000000000000000000000000",
+     "size": 42752
+    },
+    {
+     "archive": "data.rpf!14",
+     "chain": "data.rpf!14!1",
+     "head": "0000000000000000e08809500000000030870950000000000000000000000000",
+     "size": 822080
+    },
+    {
+     "archive": "data.rpf!14",
+     "chain": "data.rpf!14!2",
+     "head": "0000000000000000e02b07500000000030280750000000000000000000000000",
+     "size": 543408
+    },
+    {
      "archive": "levels.rpf!5",
      "chain": "levels.rpf!5!6",
      "head": "00000000000000008036005000000000a033005000000000f01d005000000000",
@@ -1379,6 +1266,24 @@
      "chain": "levels.rpf!5!72",
      "head": "0000000000000000d03600500000000050340050000000001022005000000000",
      "size": 84592
+    },
+    {
+     "archive": "levels.rpf!2",
+     "chain": "levels.rpf!2!0",
+     "head": "0000000000000000c070045000000000005a0450000000000000000000000000",
+     "size": 1603856
+    },
+    {
+     "archive": "levels.rpf!2",
+     "chain": "levels.rpf!2!2",
+     "head": "0000000000000000307600500000000080740050000000000000000000000000",
+     "size": 354048
+    },
+    {
+     "archive": "levels.rpf!2",
+     "chain": "levels.rpf!2!3",
+     "head": "000000000000000090da01500000000010d50150000000000000000000000000",
+     "size": 945120
     },
     {
      "archive": "pack/core_restofworld/core_restofworld.rpf!8",
@@ -1399,6 +1304,24 @@
      "size": 55696
     },
     {
+     "archive": "pack/core_restofworld/core_restofworld.rpf!8",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!8!0",
+     "head": "0000000000000000a01a005000000000b0170050000000000000000000000000",
+     "size": 11040
+    },
+    {
+     "archive": "pack/core_restofworld/core_restofworld.rpf!8",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!8!2",
+     "head": "000000000000000080b900500000000040b50050000000000000000000000000",
+     "size": 2981792
+    },
+    {
+     "archive": "pack/core_restofworld/core_restofworld.rpf!8",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!8!6",
+     "head": "00000000000000004033005000000000f02e0050000000000000000000000000",
+     "size": 68816
+    },
+    {
      "archive": "pack/shared_minigame000/shared_minigame000.rpf!29",
      "chain": "pack/shared_minigame000/shared_minigame000.rpf!29!111",
      "head": "0000000000000000000d005000000000100c005000000000b007005000000000",
@@ -1415,6 +1338,24 @@
      "chain": "pack/shared_minigame000/shared_minigame000.rpf!29!179",
      "head": "00000000000000004015005000000000d013005000000000c00a005000000000",
      "size": 314624
+    },
+    {
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!3",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!3!2",
+     "head": "0000000000000000b02f005000000000802d0050000000000000000000000000",
+     "size": 18976
+    },
+    {
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!3",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!3!3",
+     "head": "0000000000000000500800500000000030070050000000000000000000000000",
+     "size": 2816
+    },
+    {
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!3",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!3!4",
+     "head": "0000000000000000d0ff005000000000c0620150000000000000000000000000",
+     "size": 407376
     }
    ],
    "storage": "chunked-2",
@@ -1424,51 +1365,13 @@
    "variant": "resource:s5:ptr:seg5+ptr:seg5"
   },
   {
-   "archive_count": 2,
+   "archive_count": 3,
    "archives": [
     "levels.rpf!1719",
     "levels.rpf!1806"
    ],
    "capability": "resource",
-   "entries": 3017,
-   "extension": "zdr",
-   "extension_provenance": "native",
-   "identification": "resource:segment-5",
-   "outcome": "partially-identified",
-   "payload": "decoded",
-   "samples": [
-    {
-     "archive": "levels.rpf!1719",
-     "chain": "levels.rpf!1719!4",
-     "head": "00000000000000006055005000000000b04f0050000000000000000000000000",
-     "size": 54928
-    },
-    {
-     "archive": "levels.rpf!1719",
-     "chain": "levels.rpf!1719!5",
-     "head": "0000000000000000b00d005000000000900c0050000000000000000000000000",
-     "size": 5376
-    },
-    {
-     "archive": "levels.rpf!1719",
-     "chain": "levels.rpf!1719!6",
-     "head": "0000000000000000000e005000000000e00c0050000000000000000000000000",
-     "size": 4992
-    }
-   ],
-   "storage": "chunked-4",
-   "structure": "unknown",
-   "transform": false,
-   "type": 2,
-   "variant": "resource:s5:ptr:seg5+zero"
-  },
-  {
-   "archive_count": 1,
-   "archives": [
-    "levels.rpf!1719"
-   ],
-   "capability": "resource",
-   "entries": 179,
+   "entries": 3196,
    "extension": "zdr",
    "extension_provenance": "native",
    "identification": "resource:segment-5",
@@ -1492,6 +1395,24 @@
      "chain": "levels.rpf!1719!107",
      "head": "0000000000000000e00f005000000000d00d0050000000004008005000000000",
      "size": 21472
+    },
+    {
+     "archive": "levels.rpf!1719",
+     "chain": "levels.rpf!1719!4",
+     "head": "00000000000000006055005000000000b04f0050000000000000000000000000",
+     "size": 54928
+    },
+    {
+     "archive": "levels.rpf!1719",
+     "chain": "levels.rpf!1719!5",
+     "head": "0000000000000000b00d005000000000900c0050000000000000000000000000",
+     "size": 5376
+    },
+    {
+     "archive": "levels.rpf!1719",
+     "chain": "levels.rpf!1719!6",
+     "head": "0000000000000000000e005000000000e00c0050000000000000000000000000",
+     "size": 4992
     }
    ],
    "storage": "chunked-4",
@@ -1501,7 +1422,7 @@
    "variant": "resource:s5:ptr:seg5+ptr:seg5"
   },
   {
-   "archive_count": 259,
+   "archive_count": 320,
    "archives": [
     "data.rpf!26",
     "levels.rpf!12",
@@ -1513,7 +1434,7 @@
     "levels.rpf!52"
    ],
    "capability": "resource",
-   "entries": 45390,
+   "entries": 55488,
    "extension": "zft",
    "extension_provenance": "native",
    "identification": "resource:segment-5",
@@ -1557,6 +1478,24 @@
      "size": 69776
     },
     {
+     "archive": "levels.rpf!12",
+     "chain": "levels.rpf!12!8",
+     "head": "0000000000000000a0240050000000000000000000000000500e005000000000",
+     "size": 63616
+    },
+    {
+     "archive": "levels.rpf!12",
+     "chain": "levels.rpf!12!9",
+     "head": "0000000000000000a0150050000000000000000000000000b007005000000000",
+     "size": 9072
+    },
+    {
+     "archive": "levels.rpf!12",
+     "chain": "levels.rpf!12!20",
+     "head": "000000000000000020150050000000000000000000000000b007005000000000",
+     "size": 137296
+    },
+    {
      "archive": "pack/core_restofworld/core_restofworld.rpf!8",
      "chain": "pack/core_restofworld/core_restofworld.rpf!8!1",
      "head": "000000000000000080770050000000003050005000000000003d005000000000",
@@ -1593,6 +1532,12 @@
      "size": 324800
     },
     {
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!33",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!33!94",
+     "head": "0000000000000000601d0050000000000000000000000000d00e005000000000",
+     "size": 192720
+    },
+    {
      "archive": "packs.rpf!18",
      "chain": "packs.rpf!18!0",
      "head": "0000000000000000a054005000000000b03f005000000000a03d005000000000",
@@ -1616,57 +1561,6 @@
    "transform": false,
    "type": 3,
    "variant": "resource:s5:ptr:seg5+ptr:seg5"
-  },
-  {
-   "archive_count": 61,
-   "archives": [
-    "levels.rpf!12",
-    "levels.rpf!173",
-    "levels.rpf!21",
-    "levels.rpf!227",
-    "levels.rpf!41",
-    "levels.rpf!78",
-    "levels.rpf!92",
-    "levels.rpf!99"
-   ],
-   "capability": "resource",
-   "entries": 10098,
-   "extension": "zft",
-   "extension_provenance": "native",
-   "identification": "resource:segment-5",
-   "outcome": "partially-identified",
-   "payload": "decoded",
-   "samples": [
-    {
-     "archive": "levels.rpf!12",
-     "chain": "levels.rpf!12!8",
-     "head": "0000000000000000a0240050000000000000000000000000500e005000000000",
-     "size": 63616
-    },
-    {
-     "archive": "levels.rpf!12",
-     "chain": "levels.rpf!12!9",
-     "head": "0000000000000000a0150050000000000000000000000000b007005000000000",
-     "size": 9072
-    },
-    {
-     "archive": "levels.rpf!12",
-     "chain": "levels.rpf!12!20",
-     "head": "000000000000000020150050000000000000000000000000b007005000000000",
-     "size": 137296
-    },
-    {
-     "archive": "pack/shared_minigame000/shared_minigame000.rpf!33",
-     "chain": "pack/shared_minigame000/shared_minigame000.rpf!33!94",
-     "head": "0000000000000000601d0050000000000000000000000000d00e005000000000",
-     "size": 192720
-    }
-   ],
-   "storage": "chunked-2",
-   "structure": "unknown",
-   "transform": false,
-   "type": 3,
-   "variant": "resource:s5:zero+ptr:seg5"
   },
   {
    "archive_count": 178,
@@ -2823,38 +2717,38 @@
     "pack/story000/story000.rpf!421",
     "pack/story000/story000.rpf!90"
    ],
-   "capability": "unavailable",
+   "capability": "structural",
    "entries": 4,
    "extension": "zmt",
    "extension_provenance": "native",
-   "identification": "none",
-   "outcome": "blocked",
-   "payload": "transform-failed",
+   "identification": "format:psin",
+   "outcome": "identified",
+   "payload": "decoded",
    "samples": [
     {
      "archive": "pack/story000/story000.rpf!90",
      "chain": "pack/story000/story000.rpf!90!0",
-     "head": "",
-     "size": null
+     "head": "5053494e000a16e08b3eafcb40000000aaaaaaaaaaaaaaaaf654382a804a0500",
+     "size": 1073528
     },
     {
      "archive": "pack/story000/story000.rpf!407",
      "chain": "pack/story000/story000.rpf!407!0",
-     "head": "",
-     "size": null
+     "head": "5053494e0085ff500501000060000000aaaaaaaaaaaaaaaa64cc75a8680d0000",
+     "size": 13315952
     },
     {
      "archive": "pack/story000/story000.rpf!410",
      "chain": "pack/story000/story000.rpf!410!0",
-     "head": "",
-     "size": null
+     "head": "5053494e002572e081d7b11030810000aaaaaaaaaaaaaaaa84887a04c0010000",
+     "size": 3731576
     }
    ],
    "storage": "raw-deflate",
-   "structure": "unknown",
+   "structure": "verified",
    "transform": true,
    "type": 11,
-   "variant": "empty"
+   "variant": "format:psin"
   },
   {
    "archive_count": 1,
@@ -3200,52 +3094,13 @@
    "variant": "resource:s5:small+ptr:seg5"
   },
   {
-   "archive_count": 2,
+   "archive_count": 4,
    "archives": [
     "levels.rpf!1644",
     "levels.rpf!1937"
    ],
    "capability": "resource",
-   "entries": 596,
-   "extension": "zvert",
-   "extension_provenance": "native",
-   "identification": "resource:segment-5",
-   "outcome": "partially-identified",
-   "payload": "decoded",
-   "samples": [
-    {
-     "archive": "levels.rpf!1644",
-     "chain": "levels.rpf!1644!0",
-     "head": "0000000000000000f01400500000000070100050000000000d000d0000000000",
-     "size": 89296
-    },
-    {
-     "archive": "levels.rpf!1644",
-     "chain": "levels.rpf!1644!1",
-     "head": "0000000000000000400500500000000060050050000000000300030000000000",
-     "size": 132480
-    },
-    {
-     "archive": "levels.rpf!1644",
-     "chain": "levels.rpf!1644!2",
-     "head": "0000000000000000900e005000000000400e0050000000000900090000000000",
-     "size": 145472
-    }
-   ],
-   "storage": "chunked-2",
-   "structure": "unknown",
-   "transform": false,
-   "type": 18,
-   "variant": "resource:s5:ptr:seg5+other"
-  },
-  {
-   "archive_count": 2,
-   "archives": [
-    "levels.rpf!1644",
-    "levels.rpf!1937"
-   ],
-   "capability": "resource",
-   "entries": 15,
+   "entries": 611,
    "extension": "zvert",
    "extension_provenance": "native",
    "identification": "resource:segment-5",
@@ -3269,6 +3124,24 @@
      "chain": "levels.rpf!1644!324",
      "head": "0000000000000000000800500000000028080050000000000500050000000000",
      "size": 78608
+    },
+    {
+     "archive": "levels.rpf!1644",
+     "chain": "levels.rpf!1644!0",
+     "head": "0000000000000000f01400500000000070100050000000000d000d0000000000",
+     "size": 89296
+    },
+    {
+     "archive": "levels.rpf!1644",
+     "chain": "levels.rpf!1644!1",
+     "head": "0000000000000000400500500000000060050050000000000300030000000000",
+     "size": 132480
+    },
+    {
+     "archive": "levels.rpf!1644",
+     "chain": "levels.rpf!1644!2",
+     "head": "0000000000000000900e005000000000400e0050000000000900090000000000",
+     "size": 145472
     }
    ],
    "storage": "chunked-2",
@@ -3641,14 +3514,15 @@
    "variant": "resource:s5:zero+zero"
   },
   {
-   "archive_count": 3,
+   "archive_count": 13,
    "archives": [
     "data.rpf!29",
     "pack/core_restofworld/core_restofworld.rpf!5",
-    "pack/story000/story000.rpf!295"
+    "pack/story000/story000.rpf!295",
+    "pack/story000_restofworld/story000_restofworld.rpf!12"
    ],
    "capability": "resource",
-   "entries": 144,
+   "entries": 226,
    "extension": "zpt",
    "extension_provenance": "native",
    "identification": "resource:segment-5",
@@ -3674,6 +3548,54 @@
      "size": 477824
     },
     {
+     "archive": "data.rpf!29",
+     "chain": "data.rpf!29!6",
+     "head": "0000000000000000009a005000000000209c0050000000000000000000000000",
+     "size": 54528
+    },
+    {
+     "archive": "data.rpf!29",
+     "chain": "data.rpf!29!8",
+     "head": "0000000000000000804400500000000080450050000000000000000000000000",
+     "size": 20112
+    },
+    {
+     "archive": "data.rpf!29",
+     "chain": "data.rpf!29!9",
+     "head": "0000000000000000800805500000000010000650000000000000000000000000",
+     "size": 485904
+    },
+    {
+     "archive": "data.rpf!29",
+     "chain": "data.rpf!29!132",
+     "head": "0000000000000000406500500000000028660050000000000000000000000000",
+     "size": 28576
+    },
+    {
+     "archive": "data.rpf!29",
+     "chain": "data.rpf!29!103",
+     "head": "0000000000000000003c005000000000443d0050000000000000000000000000",
+     "size": 18048
+    },
+    {
+     "archive": "data.rpf!29",
+     "chain": "data.rpf!29!42",
+     "head": "0000000000000000607100500000000058730050000000000000000000000000",
+     "size": 34304
+    },
+    {
+     "archive": "data.rpf!29",
+     "chain": "data.rpf!29!121",
+     "head": "0000000000000000606c005000000000686d0050000000000000000000000000",
+     "size": 36192
+    },
+    {
+     "archive": "data.rpf!29",
+     "chain": "data.rpf!29!1",
+     "head": "0000000000000000c03e005000000000783f0050000000000000000000000000",
+     "size": 18672
+    },
+    {
      "archive": "pack/core_restofworld/core_restofworld.rpf!5",
      "chain": "pack/core_restofworld/core_restofworld.rpf!5!0",
      "head": "000000000000000030890750000000002a4d0950000000000000000000000000",
@@ -3696,46 +3618,6 @@
      "chain": "pack/story000/story000.rpf!295!11",
      "head": "0000000000000000f091025000000000f4120350000000000000000000000000",
      "size": 281600
-    }
-   ],
-   "storage": "chunked-2",
-   "structure": "unknown",
-   "transform": false,
-   "type": 72,
-   "variant": "resource:s5:other+zero"
-  },
-  {
-   "archive_count": 3,
-   "archives": [
-    "data.rpf!29",
-    "pack/story000/story000.rpf!295",
-    "pack/story000_restofworld/story000_restofworld.rpf!12"
-   ],
-   "capability": "resource",
-   "entries": 75,
-   "extension": "zpt",
-   "extension_provenance": "native",
-   "identification": "resource:segment-5",
-   "outcome": "partially-identified",
-   "payload": "decoded",
-   "samples": [
-    {
-     "archive": "data.rpf!29",
-     "chain": "data.rpf!29!6",
-     "head": "0000000000000000009a005000000000209c0050000000000000000000000000",
-     "size": 54528
-    },
-    {
-     "archive": "data.rpf!29",
-     "chain": "data.rpf!29!8",
-     "head": "0000000000000000804400500000000080450050000000000000000000000000",
-     "size": 20112
-    },
-    {
-     "archive": "data.rpf!29",
-     "chain": "data.rpf!29!9",
-     "head": "0000000000000000800805500000000010000650000000000000000000000000",
-     "size": 485904
     },
     {
      "archive": "pack/story000/story000.rpf!295",
@@ -3756,6 +3638,18 @@
      "size": 19360
     },
     {
+     "archive": "pack/story000/story000.rpf!295",
+     "chain": "pack/story000/story000.rpf!295!47",
+     "head": "0000000000000000002400500000000038240050000000000000000000000000",
+     "size": 10528
+    },
+    {
+     "archive": "pack/story000/story000.rpf!295",
+     "chain": "pack/story000/story000.rpf!295!56",
+     "head": "0000000000000000e05f00500000000048610050000000000000000000000000",
+     "size": 28528
+    },
+    {
      "archive": "pack/story000_restofworld/story000_restofworld.rpf!12",
      "chain": "pack/story000_restofworld/story000_restofworld.rpf!12!0",
      "head": "0000000000000000807704500000000060400550000000000000000000000000",
@@ -3766,189 +3660,7 @@
    "structure": "unknown",
    "transform": false,
    "type": 72,
-   "variant": "resource:s5:ptr:seg5+zero"
-  },
-  {
-   "archive_count": 1,
-   "archives": [
-    "data.rpf!29"
-   ],
-   "capability": "resource",
-   "entries": 1,
-   "extension": "zpt",
-   "extension_provenance": "native",
-   "identification": "resource:segment-5",
-   "outcome": "partially-identified",
-   "payload": "decoded",
-   "samples": [
-    {
-     "archive": "data.rpf!29",
-     "chain": "data.rpf!29!132",
-     "head": "0000000000000000406500500000000028660050000000000000000000000000",
-     "size": 28576
-    }
-   ],
-   "storage": "chunked-2",
-   "structure": "unknown",
-   "transform": false,
-   "type": 72,
-   "variant": "resource:s5:tag:(f+zero"
-  },
-  {
-   "archive_count": 1,
-   "archives": [
-    "pack/story000/story000.rpf!295"
-   ],
-   "capability": "resource",
-   "entries": 1,
-   "extension": "zpt",
-   "extension_provenance": "native",
-   "identification": "resource:segment-5",
-   "outcome": "partially-identified",
-   "payload": "decoded",
-   "samples": [
-    {
-     "archive": "pack/story000/story000.rpf!295",
-     "chain": "pack/story000/story000.rpf!295!47",
-     "head": "0000000000000000002400500000000038240050000000000000000000000000",
-     "size": 10528
-    }
-   ],
-   "storage": "chunked-2",
-   "structure": "unknown",
-   "transform": false,
-   "type": 72,
-   "variant": "resource:s5:tag:8$+zero"
-  },
-  {
-   "archive_count": 1,
-   "archives": [
-    "data.rpf!29"
-   ],
-   "capability": "resource",
-   "entries": 1,
-   "extension": "zpt",
-   "extension_provenance": "native",
-   "identification": "resource:segment-5",
-   "outcome": "partially-identified",
-   "payload": "decoded",
-   "samples": [
-    {
-     "archive": "data.rpf!29",
-     "chain": "data.rpf!29!103",
-     "head": "0000000000000000003c005000000000443d0050000000000000000000000000",
-     "size": 18048
-    }
-   ],
-   "storage": "chunked-2",
-   "structure": "unknown",
-   "transform": false,
-   "type": 72,
-   "variant": "resource:s5:tag:D=+zero"
-  },
-  {
-   "archive_count": 1,
-   "archives": [
-    "pack/story000/story000.rpf!295"
-   ],
-   "capability": "resource",
-   "entries": 1,
-   "extension": "zpt",
-   "extension_provenance": "native",
-   "identification": "resource:segment-5",
-   "outcome": "partially-identified",
-   "payload": "decoded",
-   "samples": [
-    {
-     "archive": "pack/story000/story000.rpf!295",
-     "chain": "pack/story000/story000.rpf!295!56",
-     "head": "0000000000000000e05f00500000000048610050000000000000000000000000",
-     "size": 28528
-    }
-   ],
-   "storage": "chunked-2",
-   "structure": "unknown",
-   "transform": false,
-   "type": 72,
-   "variant": "resource:s5:tag:Ha+zero"
-  },
-  {
-   "archive_count": 1,
-   "archives": [
-    "data.rpf!29"
-   ],
-   "capability": "resource",
-   "entries": 1,
-   "extension": "zpt",
-   "extension_provenance": "native",
-   "identification": "resource:segment-5",
-   "outcome": "partially-identified",
-   "payload": "decoded",
-   "samples": [
-    {
-     "archive": "data.rpf!29",
-     "chain": "data.rpf!29!42",
-     "head": "0000000000000000607100500000000058730050000000000000000000000000",
-     "size": 34304
-    }
-   ],
-   "storage": "chunked-2",
-   "structure": "unknown",
-   "transform": false,
-   "type": 72,
-   "variant": "resource:s5:tag:Xs+zero"
-  },
-  {
-   "archive_count": 1,
-   "archives": [
-    "data.rpf!29"
-   ],
-   "capability": "resource",
-   "entries": 1,
-   "extension": "zpt",
-   "extension_provenance": "native",
-   "identification": "resource:segment-5",
-   "outcome": "partially-identified",
-   "payload": "decoded",
-   "samples": [
-    {
-     "archive": "data.rpf!29",
-     "chain": "data.rpf!29!121",
-     "head": "0000000000000000606c005000000000686d0050000000000000000000000000",
-     "size": 36192
-    }
-   ],
-   "storage": "chunked-2",
-   "structure": "unknown",
-   "transform": false,
-   "type": 72,
-   "variant": "resource:s5:tag:hm+zero"
-  },
-  {
-   "archive_count": 1,
-   "archives": [
-    "data.rpf!29"
-   ],
-   "capability": "resource",
-   "entries": 1,
-   "extension": "zpt",
-   "extension_provenance": "native",
-   "identification": "resource:segment-5",
-   "outcome": "partially-identified",
-   "payload": "decoded",
-   "samples": [
-    {
-     "archive": "data.rpf!29",
-     "chain": "data.rpf!29!1",
-     "head": "0000000000000000c03e005000000000783f0050000000000000000000000000",
-     "size": 18672
-    }
-   ],
-   "storage": "chunked-2",
-   "structure": "unknown",
-   "transform": false,
-   "type": 72,
-   "variant": "resource:s5:tag:x?+zero"
+   "variant": "resource:s5:other+zero"
   },
   {
    "archive_count": 312,
@@ -4476,16 +4188,16 @@
    "variant": "resource:s5:ptr:seg5+zero"
   },
   {
-   "archive_count": 5,
+   "archive_count": 10,
    "archives": [
     "pack/core_restofworld/core_restofworld.rpf!7",
     "pack/shared_minigame000/shared_minigame000.rpf!19",
     "packs.rpf!2",
-    "packs.rpf!23",
-    "packs.rpf!50"
+    "packs.rpf!50",
+    "packs.rpf!23"
    ],
    "capability": "resource",
-   "entries": 38279,
+   "entries": 40019,
    "extension": "zsm",
    "extension_provenance": "native",
    "identification": "resource:segment-5",
@@ -4530,45 +4242,6 @@
     },
     {
      "archive": "packs.rpf!2",
-     "chain": "packs.rpf!2!0",
-     "head": "00000000000000000003005000000000000000000000000000ff0500b33d8f7d",
-     "size": 800
-    },
-    {
-     "archive": "packs.rpf!2",
-     "chain": "packs.rpf!2!1",
-     "head": "00000000000000000003005000000000000000000000000000ff0500b33d8f7d",
-     "size": 800
-    },
-    {
-     "archive": "packs.rpf!2",
-     "chain": "packs.rpf!2!2",
-     "head": "0000000000000000507900500000000000000000000000000000020000000000",
-     "size": 31104
-    }
-   ],
-   "storage": "chunked-2",
-   "structure": "unknown",
-   "transform": false,
-   "type": 88,
-   "variant": "resource:s5:zero+other"
-  },
-  {
-   "archive_count": 2,
-   "archives": [
-    "packs.rpf!2",
-    "packs.rpf!50"
-   ],
-   "capability": "resource",
-   "entries": 1587,
-   "extension": "zsm",
-   "extension_provenance": "native",
-   "identification": "resource:segment-5",
-   "outcome": "partially-identified",
-   "payload": "decoded",
-   "samples": [
-    {
-     "archive": "packs.rpf!2",
      "chain": "packs.rpf!2!16",
      "head": "0000000000000000d00501500000000050060150000000000100027f00000000",
      "size": 67200
@@ -4584,28 +4257,43 @@
      "chain": "packs.rpf!2!77",
      "head": "00000000000000008045005000000000a0450050000000000100020000000000",
      "size": 17856
-    }
-   ],
-   "storage": "chunked-2",
-   "structure": "unknown",
-   "transform": false,
-   "type": 88,
-   "variant": "resource:s5:ptr:seg5+other"
-  },
-  {
-   "archive_count": 2,
-   "archives": [
-    "packs.rpf!2",
-    "packs.rpf!50"
-   ],
-   "capability": "resource",
-   "entries": 85,
-   "extension": "zsm",
-   "extension_provenance": "native",
-   "identification": "resource:segment-5",
-   "outcome": "partially-identified",
-   "payload": "decoded",
-   "samples": [
+    },
+    {
+     "archive": "packs.rpf!2",
+     "chain": "packs.rpf!2!0",
+     "head": "00000000000000000003005000000000000000000000000000ff0500b33d8f7d",
+     "size": 800
+    },
+    {
+     "archive": "packs.rpf!2",
+     "chain": "packs.rpf!2!1",
+     "head": "00000000000000000003005000000000000000000000000000ff0500b33d8f7d",
+     "size": 800
+    },
+    {
+     "archive": "packs.rpf!2",
+     "chain": "packs.rpf!2!2",
+     "head": "0000000000000000507900500000000000000000000000000000020000000000",
+     "size": 31104
+    },
+    {
+     "archive": "packs.rpf!2",
+     "chain": "packs.rpf!2!434",
+     "head": "0000000000000000805a00500000000000000000000000000000025500000000",
+     "size": 23232
+    },
+    {
+     "archive": "packs.rpf!2",
+     "chain": "packs.rpf!2!540",
+     "head": "0000000000000000906301500000000000000000000000000000025f00000000",
+     "size": 91088
+    },
+    {
+     "archive": "packs.rpf!2",
+     "chain": "packs.rpf!2!938",
+     "head": "000000000000000000d900500000000000000000000000000000025000000000",
+     "size": 55600
+    },
     {
      "archive": "packs.rpf!2",
      "chain": "packs.rpf!2!53",
@@ -4629,90 +4317,112 @@
    "structure": "unknown",
    "transform": false,
    "type": 88,
-   "variant": "resource:s5:zero+ptr:seg6"
+   "variant": "resource:s5:zero+other"
   },
   {
-   "archive_count": 1,
+   "archive_count": 11,
    "archives": [
-    "packs.rpf!2"
+    "pack/story000/story000_script.rpf!1",
+    "script.rpf!0"
    ],
    "capability": "resource",
-   "entries": 68,
-   "extension": "zsm",
+   "entries": 746,
+   "extension": "zscript",
    "extension_provenance": "native",
    "identification": "resource:segment-5",
    "outcome": "partially-identified",
    "payload": "decoded",
    "samples": [
     {
-     "archive": "packs.rpf!2",
-     "chain": "packs.rpf!2!434",
-     "head": "0000000000000000805a00500000000000000000000000000000025500000000",
-     "size": 23232
-    },
-    {
-     "archive": "packs.rpf!2",
-     "chain": "packs.rpf!2!540",
-     "head": "0000000000000000906301500000000000000000000000000000025f00000000",
-     "size": 91088
-    },
-    {
-     "archive": "packs.rpf!2",
-     "chain": "packs.rpf!2!938",
-     "head": "000000000000000000d900500000000000000000000000000000025000000000",
-     "size": 55600
-    }
-   ],
-   "storage": "chunked-2",
-   "structure": "unknown",
-   "transform": false,
-   "type": 88,
-   "variant": "resource:s5:zero+ptr:seg5"
-  },
-  {
-   "archive_count": 2,
-   "archives": [
-    "pack/story000/story000_script.rpf!1",
-    "script.rpf!0"
-   ],
-   "capability": "unavailable",
-   "entries": 746,
-   "extension": "zscript",
-   "extension_provenance": "native",
-   "identification": "none",
-   "outcome": "blocked",
-   "payload": "transform-failed",
-   "samples": [
-    {
      "archive": "pack/story000/story000_script.rpf!1",
      "chain": "pack/story000/story000_script.rpf!1!0",
-     "head": "",
-     "size": null
+     "head": "0000000000000000e0ff0050000000008f444300010000006f00000067cedbea",
+     "size": 66768
     },
     {
      "archive": "pack/story000/story000_script.rpf!1",
      "chain": "pack/story000/story000_script.rpf!1!1",
-     "head": "",
-     "size": null
+     "head": "00000000000000004050025000000000c14c4300010000006f00000067cedbea",
+     "size": 151648
     },
     {
      "archive": "pack/story000/story000_script.rpf!1",
      "chain": "pack/story000/story000_script.rpf!1!2",
-     "head": "",
-     "size": null
+     "head": "0000000000000000e0fe0250000000001d714500010000006f00000067cedbea",
+     "size": 198064
+    },
+    {
+     "archive": "pack/story000/story000_script.rpf!1",
+     "chain": "pack/story000/story000_script.rpf!1!252",
+     "head": "000000000000000070f701500000000060268d55010000006f00000067cedbea",
+     "size": 186880
+    },
+    {
+     "archive": "pack/story000/story000_script.rpf!1",
+     "chain": "pack/story000/story000_script.rpf!1!299",
+     "head": "000000000000000080be02500000000030e8f268010000006f00000067cedbea",
+     "size": 220992
+    },
+    {
+     "archive": "pack/story000/story000_script.rpf!1",
+     "chain": "pack/story000/story000_script.rpf!1!314",
+     "head": "0000000000000000a0ab135000000000503e656c010000006f00000067cedbea",
+     "size": 1310720
+    },
+    {
+     "archive": "pack/story000/story000_script.rpf!1",
+     "chain": "pack/story000/story000_script.rpf!1!163",
+     "head": "0000000000000000a0fd01500000000021394f39010000006f00000067cedbea",
+     "size": 155232
+    },
+    {
+     "archive": "pack/story000/story000_script.rpf!1",
+     "chain": "pack/story000/story000_script.rpf!1!210",
+     "head": "000000000000000020300050000000002d793946010000006f00000067cedbea",
+     "size": 12368
+    },
+    {
+     "archive": "pack/story000/story000_script.rpf!1",
+     "chain": "pack/story000/story000_script.rpf!1!214",
+     "head": "0000000000000000d0490150000000004a3b3148010000006f00000067cedbea",
+     "size": 131072
+    },
+    {
+     "archive": "pack/story000/story000_script.rpf!1",
+     "chain": "pack/story000/story000_script.rpf!1!362",
+     "head": "000000000000000040180050000000005d5f7e7c010000006f00000067cedbea",
+     "size": 6272
+    },
+    {
+     "archive": "pack/story000/story000_script.rpf!1",
+     "chain": "pack/story000/story000_script.rpf!1!267",
+     "head": "0000000000000000f0670050000000007856525c010000006f00000067cedbea",
+     "size": 26656
+    },
+    {
+     "archive": "pack/story000/story000_script.rpf!1",
+     "chain": "pack/story000/story000_script.rpf!1!222",
+     "head": "000000000000000020520050000000007930534b010000006f00000067cedbea",
+     "size": 21072
+    },
+    {
+     "archive": "pack/story000/story000_script.rpf!1",
+     "chain": "pack/story000/story000_script.rpf!1!93",
+     "head": "0000000000000000f02b0150000000007e726321010000006f00000067cedbea",
+     "size": 76848
     },
     {
      "archive": "script.rpf!0",
      "chain": "script.rpf!0!0",
-     "head": "",
-     "size": null
+     "head": "0000000000000000903f13500000000085af07b4010000006f00000067cedbea",
+     "size": 1310720
     }
    ],
    "storage": "chunked-2",
    "structure": "unknown",
    "transform": true,
    "type": 89,
-   "variant": "empty"
+   "variant": "resource:s5:other+small"
   },
   {
    "archive_count": 1,
@@ -4856,12 +4566,12 @@
    "variant": "zeros"
   },
   {
-   "archive_count": 1,
+   "archive_count": 4,
    "archives": [
     "packs.rpf!56"
    ],
    "capability": "resource",
-   "entries": 94,
+   "entries": 98,
    "extension": "zcps",
    "extension_provenance": "native",
    "identification": "resource:segment-5",
@@ -4885,27 +4595,7 @@
      "chain": "packs.rpf!56!2",
      "head": "00000000000000007006005000000000fc8b870cfc8b870c6b0000006b000000",
      "size": 1680
-    }
-   ],
-   "storage": "chunked-2",
-   "structure": "unknown",
-   "transform": false,
-   "type": 99,
-   "variant": "resource:s5:other+small"
-  },
-  {
-   "archive_count": 1,
-   "archives": [
-    "packs.rpf!56"
-   ],
-   "capability": "resource",
-   "entries": 2,
-   "extension": "zcps",
-   "extension_provenance": "native",
-   "identification": "resource:segment-5",
-   "outcome": "partially-identified",
-   "payload": "decoded",
-   "samples": [
+    },
     {
      "archive": "packs.rpf!56",
      "chain": "packs.rpf!56!31",
@@ -4917,53 +4607,13 @@
      "chain": "packs.rpf!56!32",
      "head": "0000000000000000b0060050000000009035e25d9035e25d7100000071000000",
      "size": 1744
-    }
-   ],
-   "storage": "chunked-2",
-   "structure": "unknown",
-   "transform": false,
-   "type": 99,
-   "variant": "resource:s5:ptr:seg5+small"
-  },
-  {
-   "archive_count": 1,
-   "archives": [
-    "packs.rpf!56"
-   ],
-   "capability": "resource",
-   "entries": 1,
-   "extension": "zcps",
-   "extension_provenance": "native",
-   "identification": "resource:segment-5",
-   "outcome": "partially-identified",
-   "payload": "decoded",
-   "samples": [
+    },
     {
      "archive": "packs.rpf!56",
      "chain": "packs.rpf!56!41",
      "head": "0000000000000000e0050050000000009066726c9066726c5f0000005f000000",
      "size": 1536
-    }
-   ],
-   "storage": "chunked-2",
-   "structure": "unknown",
-   "transform": false,
-   "type": 99,
-   "variant": "resource:s5:ptr:seg6+small"
-  },
-  {
-   "archive_count": 1,
-   "archives": [
-    "packs.rpf!56"
-   ],
-   "capability": "resource",
-   "entries": 1,
-   "extension": "zcps",
-   "extension_provenance": "native",
-   "identification": "resource:segment-5",
-   "outcome": "partially-identified",
-   "payload": "decoded",
-   "samples": [
+    },
     {
      "archive": "packs.rpf!56",
      "chain": "packs.rpf!56!52",
@@ -4975,7 +4625,7 @@
    "structure": "unknown",
    "transform": false,
    "type": 99,
-   "variant": "resource:s5:tag:2Fu}+small"
+   "variant": "resource:s5:other+small"
   },
   {
    "archive_count": 11,
@@ -5536,13 +5186,13 @@
    "variant": "resource:s5:ptr:seg5+zero"
   },
   {
-   "archive_count": 2,
+   "archive_count": 3,
    "archives": [
     "packs.rpf!0",
     "packs.rpf!40"
    ],
    "capability": "resource",
-   "entries": 490,
+   "entries": 518,
    "extension": "zcgc",
    "extension_provenance": "native",
    "identification": "resource:segment-5",
@@ -5566,27 +5216,7 @@
      "chain": "packs.rpf!0!5",
      "head": "0000000000000000900000500000000030000050000000000000000000000000",
      "size": 1114288
-    }
-   ],
-   "storage": "chunked-2",
-   "structure": "unknown",
-   "transform": false,
-   "type": 114,
-   "variant": "resource:s5:ptr:seg5+zero"
-  },
-  {
-   "archive_count": 1,
-   "archives": [
-    "packs.rpf!40"
-   ],
-   "capability": "resource",
-   "entries": 28,
-   "extension": "zcgc",
-   "extension_provenance": "native",
-   "identification": "resource:segment-5",
-   "outcome": "partially-identified",
-   "payload": "decoded",
-   "samples": [
+    },
     {
      "archive": "packs.rpf!40",
      "chain": "packs.rpf!40!13",
@@ -5610,7 +5240,7 @@
    "structure": "unknown",
    "transform": false,
    "type": 114,
-   "variant": "resource:s5:zero+ptr:seg5"
+   "variant": "resource:s5:ptr:seg5+zero"
   },
   {
    "archive_count": 4,
@@ -6019,6 +5649,177 @@
    "variant": "xml:CDataFileMgr__ContentChangeSetDef"
   },
   {
+   "archive_count": 67,
+   "archives": [
+    "audio.rpf!14",
+    "common.rpf",
+    "levels.rpf!1220",
+    "levels.rpf!1681",
+    "levels.rpf!1775",
+    "levels.rpf!326",
+    "pack/core_bvh4/core_bvh4.rpf!144",
+    "pack/core_bvh4/core_bvh4.rpf!208"
+   ],
+   "capability": "bytes",
+   "entries": 82,
+   "extension": "-",
+   "extension_provenance": "unresolved",
+   "identification": "none",
+   "outcome": "unresolved",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "audio.rpf!14",
+     "chain": "audio.rpf!14!2",
+     "head": "1200000013000000ea885a04000000010000004d44a2a0040000000400000000",
+     "size": 71
+    },
+    {
+     "archive": "audio.rpf!14",
+     "chain": "audio.rpf!14!10",
+     "head": "12000000f8002e00ea885a0401441d0c4312931280086210a00bcc14cb1b941c",
+     "size": 3275304
+    },
+    {
+     "archive": "audio.rpf!14",
+     "chain": "audio.rpf!14!12",
+     "head": "1200000013000000ea885a04000000010000006693932a040000000400000000",
+     "size": 71
+    },
+    {
+     "archive": "audio.rpf!14",
+     "chain": "audio.rpf!14!7",
+     "head": "14000000ade41000ea885a0403aaaaaaaa090000000600000002000000080700",
+     "size": 1136793
+    },
+    {
+     "archive": "audio.rpf!14",
+     "chain": "audio.rpf!14!13",
+     "head": "1900000014210700ea885a0404aaaaaaaa000000000000000000803f04000000",
+     "size": 521572
+    },
+    {
+     "archive": "audio.rpf!14",
+     "chain": "audio.rpf!14!4",
+     "head": "1a0000008c3e0000ea885a0408000000aaaaaaaa000000000000000000000000",
+     "size": 17964
+    },
+    {
+     "archive": "audio.rpf!14",
+     "chain": "audio.rpf!14!17",
+     "head": "1a00000044f70400ea885a0403000000aaaaaaaa617564696f3a2f7366782f00",
+     "size": 399540
+    },
+    {
+     "archive": "audio.rpf!14",
+     "chain": "audio.rpf!14!9",
+     "head": "29000000d0350000ea885a0400a0aaaaaa00000044fd00005c5d000000000000",
+     "size": 17412
+    },
+    {
+     "archive": "audio.rpf!14",
+     "chain": "audio.rpf!14!16",
+     "head": "3d00000096980a00ea885a0403010000aa00000000ffffffffffffffff000100",
+     "size": 895898
+    },
+    {
+     "archive": "audio.rpf!14",
+     "chain": "audio.rpf!14!3",
+     "head": "45020000f4c4d300ea885a04cb0000000100cb000000020001cb0000000102cb",
+     "size": 19947076
+    },
+    {
+     "archive": "audio.rpf!14",
+     "chain": "audio.rpf!14!6",
+     "head": "56000000f30e6d00ea885a0404aaaaaaaa00000002000000f6dc2b7e00000000",
+     "size": 11030779
+    },
+    {
+     "archive": "audio.rpf!14",
+     "chain": "audio.rpf!14!0",
+     "head": "a600000004000000ea885a040400000000000000040000000000000000000000",
+     "size": 52
+    },
+    {
+     "archive": "audio.rpf!14",
+     "chain": "audio.rpf!14!15",
+     "head": "a60000006f2e9200ea885a0431aaaaaaaa000031aaaaaaaa0500ec4786040000",
+     "size": 15574463
+    },
+    {
+     "archive": "audio.rpf!14",
+     "chain": "audio.rpf!14!1",
+     "head": "414d425f53545245414d5f414e494d414c5f303100414d425f53545245414d5f",
+     "size": 5242
+    },
+    {
+     "archive": "audio.rpf!14",
+     "chain": "audio.rpf!14!5",
+     "head": "64726976657253657474696e67735f57617665526f6f74506174680064726976",
+     "size": 195439
+    },
+    {
+     "archive": "audio.rpf!14",
+     "chain": "audio.rpf!14!8",
+     "head": "42617365436f6d6d6f6e3a736f756e64735f636f6d6d6f6e3a536f756e64730d",
+     "size": 522
+    },
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!111",
+     "head": "000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0",
+     "size": 3274036
+    },
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!300",
+     "head": "210300003bb86173fb5c57633bb86173fb5c576300fd3fbb6f9b5f9b479b3fbb",
+     "size": 1038100
+    },
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!332",
+     "head": "50414d4801020000ed8cbc1b9000a400000050c6000018c6000097c30000a045",
+     "size": 48588
+    },
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!117",
+     "head": "636c6f7564732e737472617475732e6e6f6973655f776569676874732e6d6564",
+     "size": 117176
+    },
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!151",
+     "head": "505446585f4149525f524553495354414e434520312e300d0a47454e5f574154",
+     "size": 47
+    },
+    {
+     "archive": "common.rpf",
+     "chain": "common.rpf!185",
+     "head": "616c7068615265736f6c76652e66780d0a616d6269656e742e66780d0a616d62",
+     "size": 24285
+    },
+    {
+     "archive": "levels.rpf!326",
+     "chain": "levels.rpf!326!0",
+     "head": "464f5243455f454d5054595f525046",
+     "size": 15
+    },
+    {
+     "archive": "levels.rpf!1220",
+     "chain": "levels.rpf!1220!0",
+     "head": "464f5243455f454d5054595f525046",
+     "size": 15
+    }
+   ],
+   "storage": "chunked-3",
+   "structure": "unknown",
+   "transform": false,
+   "type": 255,
+   "variant": "binary:12000000"
+  },
+  {
    "archive_count": 1,
    "archives": [
     "common.rpf"
@@ -6055,159 +5856,6 @@
    "transform": false,
    "type": 255,
    "variant": "xml:timecycle_modifier_data"
-  },
-  {
-   "archive_count": 35,
-   "archives": [
-    "audio.rpf!14",
-    "common.rpf",
-    "levels.rpf!1220",
-    "levels.rpf!1681",
-    "levels.rpf!1775",
-    "levels.rpf!326",
-    "pack/core_bvh4/core_bvh4.rpf!144",
-    "pack/core_bvh4/core_bvh4.rpf!208"
-   ],
-   "capability": "bytes",
-   "entries": 44,
-   "extension": "-",
-   "extension_provenance": "unresolved",
-   "identification": "none",
-   "outcome": "unresolved",
-   "payload": "decoded",
-   "samples": [
-    {
-     "archive": "audio.rpf!14",
-     "chain": "audio.rpf!14!1",
-     "head": "414d425f53545245414d5f414e494d414c5f303100414d425f53545245414d5f",
-     "size": 5242
-    },
-    {
-     "archive": "audio.rpf!14",
-     "chain": "audio.rpf!14!5",
-     "head": "64726976657253657474696e67735f57617665526f6f74506174680064726976",
-     "size": 195439
-    },
-    {
-     "archive": "audio.rpf!14",
-     "chain": "audio.rpf!14!8",
-     "head": "42617365436f6d6d6f6e3a736f756e64735f636f6d6d6f6e3a536f756e64730d",
-     "size": 522
-    },
-    {
-     "archive": "common.rpf",
-     "chain": "common.rpf!117",
-     "head": "636c6f7564732e737472617475732e6e6f6973655f776569676874732e6d6564",
-     "size": 117176
-    },
-    {
-     "archive": "common.rpf",
-     "chain": "common.rpf!151",
-     "head": "505446585f4149525f524553495354414e434520312e300d0a47454e5f574154",
-     "size": 47
-    },
-    {
-     "archive": "common.rpf",
-     "chain": "common.rpf!185",
-     "head": "616c7068615265736f6c76652e66780d0a616d6269656e742e66780d0a616d62",
-     "size": 24285
-    },
-    {
-     "archive": "levels.rpf!326",
-     "chain": "levels.rpf!326!0",
-     "head": "464f5243455f454d5054595f525046",
-     "size": 15
-    },
-    {
-     "archive": "levels.rpf!1220",
-     "chain": "levels.rpf!1220!0",
-     "head": "464f5243455f454d5054595f525046",
-     "size": 15
-    },
-    {
-     "archive": "levels.rpf!1681",
-     "chain": "levels.rpf!1681!0",
-     "head": "464f5243455f454d5054595f525046",
-     "size": 15
-    },
-    {
-     "archive": "pack/core_bvh4/core_bvh4.rpf!28",
-     "chain": "pack/core_bvh4/core_bvh4.rpf!28!0",
-     "head": "464f5243455f454d5054595f525046",
-     "size": 15
-    },
-    {
-     "archive": "pack/core_bvh4/core_bvh4.rpf!144",
-     "chain": "pack/core_bvh4/core_bvh4.rpf!144!0",
-     "head": "464f5243455f454d5054595f525046",
-     "size": 15
-    },
-    {
-     "archive": "pack/core_bvh4/core_bvh4.rpf!208",
-     "chain": "pack/core_bvh4/core_bvh4.rpf!208!0",
-     "head": "464f5243455f454d5054595f525046",
-     "size": 15
-    },
-    {
-     "archive": "pack/core_restofworld/core_restofworld.rpf!1",
-     "chain": "pack/core_restofworld/core_restofworld.rpf!1!1",
-     "head": "42617365436f6d6d6f6e5f726573746f66776f726c643a736f756e64735f636f",
-     "size": 57
-    },
-    {
-     "archive": "pack/shared_minigame000/shared_minigame000.rpf!12",
-     "chain": "pack/shared_minigame000/shared_minigame000.rpf!12!0",
-     "head": "464f5243455f454d5054595f525046",
-     "size": 15
-    },
-    {
-     "archive": "pack/shared_minigame000/shared_minigame000.rpf!30",
-     "chain": "pack/shared_minigame000/shared_minigame000.rpf!30!2",
-     "head": "4d696e6967616d65303030436f6d6d6f6e3a646c634d696e6967616d65303030",
-     "size": 464
-    },
-    {
-     "archive": "pack/shared_minigame000/shared_minigame000.rpf!30",
-     "chain": "pack/shared_minigame000/shared_minigame000.rpf!30!5",
-     "head": "4d696e6967616d653030302e53636f72650d0a4d696e6967616d653030302e53",
-     "size": 92
-    },
-    {
-     "archive": "pack/story000/story000.rpf!2",
-     "chain": "pack/story000/story000.rpf!2!0",
-     "head": "464f5243455f454d5054595f525046",
-     "size": 15
-    },
-    {
-     "archive": "pack/story000/story000.rpf!102",
-     "chain": "pack/story000/story000.rpf!102!0",
-     "head": "464f5243455f454d5054595f525046",
-     "size": 15
-    },
-    {
-     "archive": "pack/story000/story000.rpf!164",
-     "chain": "pack/story000/story000.rpf!164!0",
-     "head": "464f5243455f454d5054595f525046",
-     "size": 15
-    },
-    {
-     "archive": "pack/story000_restofworld/story000_restofworld.rpf!0",
-     "chain": "pack/story000_restofworld/story000_restofworld.rpf!0!0",
-     "head": "53746f7279303030436f6d6d6f6e5f726573746f66776f726c643a646c635374",
-     "size": 146
-    },
-    {
-     "archive": "pack/story000_restofworld/story000_restofworld.rpf!0",
-     "chain": "pack/story000_restofworld/story000_restofworld.rpf!0!2",
-     "head": "53746f72793030305f726573746f66776f726c642e4375747363656e65730d0a",
-     "size": 70
-    }
-   ],
-   "storage": "chunked-3",
-   "structure": "unknown",
-   "transform": false,
-   "type": 255,
-   "variant": "text"
   },
   {
    "archive_count": 1,
@@ -6656,125 +6304,6 @@
    "variant": "text"
   },
   {
-   "archive_count": 4,
-   "archives": [
-    "audio.rpf!14",
-    "pack/shared_minigame000/shared_minigame000.rpf!30",
-    "pack/story000/story000.rpf!336",
-    "pack/story000_restofworld/story000_restofworld.rpf!0"
-   ],
-   "capability": "bytes",
-   "entries": 7,
-   "extension": "-",
-   "extension_provenance": "unresolved",
-   "identification": "none",
-   "outcome": "unresolved",
-   "payload": "decoded",
-   "samples": [
-    {
-     "archive": "audio.rpf!14",
-     "chain": "audio.rpf!14!2",
-     "head": "1200000013000000ea885a04000000010000004d44a2a0040000000400000000",
-     "size": 71
-    },
-    {
-     "archive": "audio.rpf!14",
-     "chain": "audio.rpf!14!10",
-     "head": "12000000f8002e00ea885a0401441d0c4312931280086210a00bcc14cb1b941c",
-     "size": 3275304
-    },
-    {
-     "archive": "audio.rpf!14",
-     "chain": "audio.rpf!14!12",
-     "head": "1200000013000000ea885a04000000010000006693932a040000000400000000",
-     "size": 71
-    },
-    {
-     "archive": "pack/shared_minigame000/shared_minigame000.rpf!30",
-     "chain": "pack/shared_minigame000/shared_minigame000.rpf!30!7",
-     "head": "12000000583a0000ea885a0458000000cd20b3d414000400a682b3d416000100",
-     "size": 56012
-    },
-    {
-     "archive": "pack/story000/story000.rpf!336",
-     "chain": "pack/story000/story000.rpf!336!4",
-     "head": "1200000053692d00ea885a04011b030122020181080219038a0301800201a904",
-     "size": 7725415
-    },
-    {
-     "archive": "pack/story000_restofworld/story000_restofworld.rpf!0",
-     "chain": "pack/story000_restofworld/story000_restofworld.rpf!0!3",
-     "head": "12000000fe000000ea885a0401a85c01bb7201779101467301c97101b48801fc",
-     "size": 550
-    }
-   ],
-   "storage": "chunked-3",
-   "structure": "unknown",
-   "transform": false,
-   "type": 255,
-   "variant": "binary:12000000"
-  },
-  {
-   "archive_count": 5,
-   "archives": [
-    "audio.rpf!14",
-    "pack/core_restofworld/core_restofworld.rpf!1",
-    "pack/shared_minigame000/shared_minigame000.rpf!30",
-    "pack/story000/story000.rpf!336",
-    "pack/story000_restofworld/story000_restofworld.rpf!0"
-   ],
-   "capability": "bytes",
-   "entries": 6,
-   "extension": "-",
-   "extension_provenance": "unresolved",
-   "identification": "none",
-   "outcome": "unresolved",
-   "payload": "decoded",
-   "samples": [
-    {
-     "archive": "audio.rpf!14",
-     "chain": "audio.rpf!14!0",
-     "head": "a600000004000000ea885a040400000000000000040000000000000000000000",
-     "size": 52
-    },
-    {
-     "archive": "audio.rpf!14",
-     "chain": "audio.rpf!14!15",
-     "head": "a60000006f2e9200ea885a0431aaaaaaaa000031aaaaaaaa0500ec4786040000",
-     "size": 15574463
-    },
-    {
-     "archive": "pack/core_restofworld/core_restofworld.rpf!1",
-     "chain": "pack/core_restofworld/core_restofworld.rpf!1!0",
-     "head": "a600000012000000ea885a040600ffffffffffffffffffffffff040000000000",
-     "size": 78
-    },
-    {
-     "archive": "pack/shared_minigame000/shared_minigame000.rpf!30",
-     "chain": "pack/shared_minigame000/shared_minigame000.rpf!30!8",
-     "head": "a600000071460100ea885a040600ffffffffffffffffffffffff31aaaaaaaa00",
-     "size": 189789
-    },
-    {
-     "archive": "pack/story000/story000.rpf!336",
-     "chain": "pack/story000/story000.rpf!336!2",
-     "head": "a60000000b7f0d00ea885a0431aaaaaaaa0e001e8be10200000000ffffffff8f",
-     "size": 2058823
-    },
-    {
-     "archive": "pack/story000_restofworld/story000_restofworld.rpf!0",
-     "chain": "pack/story000_restofworld/story000_restofworld.rpf!0!1",
-     "head": "a6000000c7060000ea885a040600ffffffffffffffffffffffff31aaaaaaaa01",
-     "size": 4395
-    }
-   ],
-   "storage": "chunked-3",
-   "structure": "unknown",
-   "transform": false,
-   "type": 255,
-   "variant": "binary:a6000000"
-  },
-  {
    "archive_count": 1,
    "archives": [
     "common.rpf"
@@ -6867,58 +6396,6 @@
    "variant": "format:edup"
   },
   {
-   "archive_count": 3,
-   "archives": [
-    "audio.rpf!14",
-    "pack/shared_minigame000/shared_minigame000.rpf!30",
-    "pack/story000/story000.rpf!336"
-   ],
-   "capability": "bytes",
-   "entries": 5,
-   "extension": "-",
-   "extension_provenance": "unresolved",
-   "identification": "none",
-   "outcome": "unresolved",
-   "payload": "decoded",
-   "samples": [
-    {
-     "archive": "audio.rpf!14",
-     "chain": "audio.rpf!14!4",
-     "head": "1a0000008c3e0000ea885a0408000000aaaaaaaa000000000000000000000000",
-     "size": 17964
-    },
-    {
-     "archive": "audio.rpf!14",
-     "chain": "audio.rpf!14!17",
-     "head": "1a00000044f70400ea885a0403000000aaaaaaaa617564696f3a2f7366782f00",
-     "size": 399540
-    },
-    {
-     "archive": "pack/shared_minigame000/shared_minigame000.rpf!30",
-     "chain": "pack/shared_minigame000/shared_minigame000.rpf!30!1",
-     "head": "1a00000038520000ea885a0402000000aaaaaaaa000000001d0c0000a8aaaaaa",
-     "size": 21772
-    },
-    {
-     "archive": "pack/story000/story000.rpf!336",
-     "chain": "pack/story000/story000.rpf!336!0",
-     "head": "1a0000009c301900ea885a0402000000aaaaaaaa000000001b0c0000aaaaaaaa",
-     "size": 1650908
-    },
-    {
-     "archive": "pack/story000/story000.rpf!336",
-     "chain": "pack/story000/story000.rpf!336!8",
-     "head": "1a00000004000000ea885a040400000000000000040000000000000000000000",
-     "size": 52
-    }
-   ],
-   "storage": "chunked-3",
-   "structure": "unknown",
-   "transform": false,
-   "type": 255,
-   "variant": "binary:1a000000"
-  },
-  {
    "archive_count": 1,
    "archives": [
     "common.rpf"
@@ -6993,206 +6470,6 @@
    "transform": false,
    "type": 255,
    "variant": "xml:GridAtlasInfo"
-  },
-  {
-   "archive_count": 3,
-   "archives": [
-    "audio.rpf!14",
-    "pack/shared_minigame000/shared_minigame000.rpf!30",
-    "pack/story000/story000.rpf!336"
-   ],
-   "capability": "bytes",
-   "entries": 3,
-   "extension": "-",
-   "extension_provenance": "unresolved",
-   "identification": "none",
-   "outcome": "unresolved",
-   "payload": "decoded",
-   "samples": [
-    {
-     "archive": "audio.rpf!14",
-     "chain": "audio.rpf!14!7",
-     "head": "14000000ade41000ea885a0403aaaaaaaa090000000600000002000000080700",
-     "size": 1136793
-    },
-    {
-     "archive": "pack/shared_minigame000/shared_minigame000.rpf!30",
-     "chain": "pack/shared_minigame000/shared_minigame000.rpf!30!3",
-     "head": "140000008b170000ea885a0401aaaaaaaa00000003aaaaaaaa070000000d0000",
-     "size": 6147
-    },
-    {
-     "archive": "pack/story000/story000.rpf!336",
-     "chain": "pack/story000/story000.rpf!336!9",
-     "head": "140000000a000000ea885a0401aaaaaaaa000400000000000000040000000000",
-     "size": 66
-    }
-   ],
-   "storage": "chunked-3",
-   "structure": "unknown",
-   "transform": false,
-   "type": 255,
-   "variant": "binary:14000000"
-  },
-  {
-   "archive_count": 3,
-   "archives": [
-    "audio.rpf!14",
-    "pack/shared_minigame000/shared_minigame000.rpf!30",
-    "pack/story000/story000.rpf!336"
-   ],
-   "capability": "bytes",
-   "entries": 3,
-   "extension": "-",
-   "extension_provenance": "unresolved",
-   "identification": "none",
-   "outcome": "unresolved",
-   "payload": "decoded",
-   "samples": [
-    {
-     "archive": "audio.rpf!14",
-     "chain": "audio.rpf!14!13",
-     "head": "1900000014210700ea885a0404aaaaaaaa000000000000000000803f04000000",
-     "size": 521572
-    },
-    {
-     "archive": "pack/shared_minigame000/shared_minigame000.rpf!30",
-     "chain": "pack/shared_minigame000/shared_minigame000.rpf!30!4",
-     "head": "19000000b4110000ea885a0402aaaaaaaa000000000000000000803f00000000",
-     "size": 5092
-    },
-    {
-     "archive": "pack/story000/story000.rpf!336",
-     "chain": "pack/story000/story000.rpf!336!6",
-     "head": "19000000f4000000ea885a0402aaaaaaaa000000000000000000803f00000000",
-     "size": 324
-    }
-   ],
-   "storage": "chunked-3",
-   "structure": "unknown",
-   "transform": false,
-   "type": 255,
-   "variant": "binary:19000000"
-  },
-  {
-   "archive_count": 3,
-   "archives": [
-    "audio.rpf!14",
-    "pack/shared_minigame000/shared_minigame000.rpf!30",
-    "pack/story000/story000.rpf!336"
-   ],
-   "capability": "bytes",
-   "entries": 3,
-   "extension": "-",
-   "extension_provenance": "unresolved",
-   "identification": "none",
-   "outcome": "unresolved",
-   "payload": "decoded",
-   "samples": [
-    {
-     "archive": "audio.rpf!14",
-     "chain": "audio.rpf!14!16",
-     "head": "3d00000096980a00ea885a0403010000aa00000000ffffffffffffffff000100",
-     "size": 895898
-    },
-    {
-     "archive": "pack/shared_minigame000/shared_minigame000.rpf!30",
-     "chain": "pack/shared_minigame000/shared_minigame000.rpf!30!0",
-     "head": "3d000000fa190000ea885a0403010000aa00000000ffffffffffffffff000000",
-     "size": 9106
-    },
-    {
-     "archive": "pack/story000/story000.rpf!336",
-     "chain": "pack/story000/story000.rpf!336!5",
-     "head": "3d000000d6620700ea885a0403010000aa00000000ffffffffffffffff000000",
-     "size": 712614
-    }
-   ],
-   "storage": "chunked-3",
-   "structure": "unknown",
-   "transform": false,
-   "type": 255,
-   "variant": "binary:3d000000"
-  },
-  {
-   "archive_count": 3,
-   "archives": [
-    "audio.rpf!14",
-    "pack/shared_minigame000/shared_minigame000.rpf!30",
-    "pack/story000/story000.rpf!336"
-   ],
-   "capability": "bytes",
-   "entries": 3,
-   "extension": "-",
-   "extension_provenance": "unresolved",
-   "identification": "none",
-   "outcome": "unresolved",
-   "payload": "decoded",
-   "samples": [
-    {
-     "archive": "audio.rpf!14",
-     "chain": "audio.rpf!14!3",
-     "head": "45020000f4c4d300ea885a04cb0000000100cb000000020001cb0000000102cb",
-     "size": 19947076
-    },
-    {
-     "archive": "pack/shared_minigame000/shared_minigame000.rpf!30",
-     "chain": "pack/shared_minigame000/shared_minigame000.rpf!30!9",
-     "head": "45020000c4280000ea885a041d000000ffffffffffffffffffffffffffffffff",
-     "size": 14340
-    },
-    {
-     "archive": "pack/story000/story000.rpf!336",
-     "chain": "pack/story000/story000.rpf!336!7",
-     "head": "4502000058b10500ea885a04a80000001100000054c16b03000000008f72460b",
-     "size": 644112
-    }
-   ],
-   "storage": "chunked-3",
-   "structure": "unknown",
-   "transform": false,
-   "type": 255,
-   "variant": "binary:45020000"
-  },
-  {
-   "archive_count": 3,
-   "archives": [
-    "audio.rpf!14",
-    "pack/shared_minigame000/shared_minigame000.rpf!30",
-    "pack/story000/story000.rpf!336"
-   ],
-   "capability": "bytes",
-   "entries": 3,
-   "extension": "-",
-   "extension_provenance": "unresolved",
-   "identification": "none",
-   "outcome": "unresolved",
-   "payload": "decoded",
-   "samples": [
-    {
-     "archive": "audio.rpf!14",
-     "chain": "audio.rpf!14!6",
-     "head": "56000000f30e6d00ea885a0404aaaaaaaa00000002000000f6dc2b7e00000000",
-     "size": 11030779
-    },
-    {
-     "archive": "pack/shared_minigame000/shared_minigame000.rpf!30",
-     "chain": "pack/shared_minigame000/shared_minigame000.rpf!30!6",
-     "head": "5600000050650700ea885a0458aaaaaaaa00000058aaaaaaaa02000000000000",
-     "size": 803744
-    },
-    {
-     "archive": "pack/story000/story000.rpf!336",
-     "chain": "pack/story000/story000.rpf!336!1",
-     "head": "560000007bff1000ea885a0404aaaaaaaa00000002000000f6dc2b7e00000000",
-     "size": 1434939
-    }
-   ],
-   "storage": "chunked-3",
-   "structure": "unknown",
-   "transform": false,
-   "type": 255,
-   "variant": "binary:56000000"
   },
   {
    "archive_count": 1,
@@ -7456,136 +6733,6 @@
    "transform": false,
    "type": 255,
    "variant": "xml:unvalidated"
-  },
-  {
-   "archive_count": 1,
-   "archives": [
-    "common.rpf"
-   ],
-   "capability": "bytes",
-   "entries": 1,
-   "extension": "-",
-   "extension_provenance": "unresolved",
-   "identification": "none",
-   "outcome": "unresolved",
-   "payload": "decoded",
-   "samples": [
-    {
-     "archive": "common.rpf",
-     "chain": "common.rpf!111",
-     "head": "000000c0000000c0000000c0000000c0000000c0000000c0000000c0000000c0",
-     "size": 3274036
-    }
-   ],
-   "storage": "chunked-3",
-   "structure": "unknown",
-   "transform": false,
-   "type": 255,
-   "variant": "binary:000000c0"
-  },
-  {
-   "archive_count": 1,
-   "archives": [
-    "common.rpf"
-   ],
-   "capability": "bytes",
-   "entries": 1,
-   "extension": "-",
-   "extension_provenance": "unresolved",
-   "identification": "none",
-   "outcome": "unresolved",
-   "payload": "decoded",
-   "samples": [
-    {
-     "archive": "common.rpf",
-     "chain": "common.rpf!300",
-     "head": "210300003bb86173fb5c57633bb86173fb5c576300fd3fbb6f9b5f9b479b3fbb",
-     "size": 1038100
-    }
-   ],
-   "storage": "chunked-3",
-   "structure": "unknown",
-   "transform": false,
-   "type": 255,
-   "variant": "binary:21030000"
-  },
-  {
-   "archive_count": 1,
-   "archives": [
-    "audio.rpf!14"
-   ],
-   "capability": "bytes",
-   "entries": 1,
-   "extension": "-",
-   "extension_provenance": "unresolved",
-   "identification": "none",
-   "outcome": "unresolved",
-   "payload": "decoded",
-   "samples": [
-    {
-     "archive": "audio.rpf!14",
-     "chain": "audio.rpf!14!9",
-     "head": "29000000d0350000ea885a0400a0aaaaaa00000044fd00005c5d000000000000",
-     "size": 17412
-    }
-   ],
-   "storage": "chunked-3",
-   "structure": "unknown",
-   "transform": false,
-   "type": 255,
-   "variant": "binary:29000000"
-  },
-  {
-   "archive_count": 1,
-   "archives": [
-    "common.rpf"
-   ],
-   "capability": "bytes",
-   "entries": 1,
-   "extension": "-",
-   "extension_provenance": "unresolved",
-   "identification": "none",
-   "outcome": "unresolved",
-   "payload": "decoded",
-   "samples": [
-    {
-     "archive": "common.rpf",
-     "chain": "common.rpf!332",
-     "head": "50414d4801020000ed8cbc1b9000a400000050c6000018c6000097c30000a045",
-     "size": 48588
-    }
-   ],
-   "storage": "chunked-3",
-   "structure": "unknown",
-   "transform": false,
-   "type": 255,
-   "variant": "binary:50414d48"
-  },
-  {
-   "archive_count": 1,
-   "archives": [
-    "shaders.rpf"
-   ],
-   "capability": "bytes",
-   "entries": 1,
-   "extension": "-",
-   "extension_provenance": "unresolved",
-   "identification": "none",
-   "outcome": "unresolved",
-   "payload": "decoded",
-   "samples": [
-    {
-     "archive": "shaders.rpf",
-     "chain": "shaders.rpf!0",
-     "head": "5053000930783635463431454444000000000000000000000000000000000000",
-     "size": 275540780
-    }
-   ],
-   "storage": "chunked-3",
-   "structure": "unknown",
-   "transform": false,
-   "type": 255,
-   "variant": "binary:50530009"
   },
   {
    "archive_count": 1,

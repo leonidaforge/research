@@ -7,8 +7,9 @@ Each item states what is known, what is missing, and what would count as done. C
 The five findings that the census measured now have their own tasks in
 [identification-follow-up.md](identification-follow-up.md). Chunk encoding 4 is
 solved: all 14,488 entries decode ([chunk-encoding-4.md](chunk-encoding-4.md)).
-The payload transform failures, resource structures, type 255 and the newly
-observed types remain open.
+The payload transform is solved: all 1,398 transformed entries decode
+([payload-transform.md](payload-transform.md)). Resource structures, type 255
+and the newly observed types remain open.
 
 ## 1. Resource containers
 
@@ -18,7 +19,7 @@ observed types remain open.
 
 **Done when** a resource container can list its resources, each with its own type identifier and count, and the classification can report an asset class per resource instead of per entry.
 
-**Blocks.** 1,138,382 entries, 90.7% of the installation. It is also the precondition for any resource viewer.
+**Blocks.** 1,153,560 entries, 91.9% of the installation. It is also the precondition for any resource viewer.
 
 ## 2. A bounded head read
 
@@ -48,11 +49,16 @@ observed types remain open.
 
 ## 5. Transform behind the transform
 
-**Known.** 1,398 entries carry the payload transform. Where the executable's key state is available the census decodes them; 750 did not verify and are reported as `blocked` with no format guess, and no entry in the installation is `transform-unavailable`.
+**Solved.** All 1,398 transformed entries decode; the remaining 750 failed on
+storage integration, not on the transform. The descriptor's stream fields at
+`+0x18`, `+0x20`, `+0x28` and `+0x30` select the covered range, the counter
+starts at the first chunk byte, and raw DEFLATE has its own selection path.
+The range formula, the four observed shapes and the integrity limits are in
+[payload-transform.md](payload-transform.md).
 
-**Missing.** Nothing for the classification itself. The open work is the transform's own coverage across builds, which belongs to the cryptography documents.
-
-**Done when** no entry in a census is `transform-unavailable`.
+**Open outside this repository.** Whether another build uses other field
+values. A reader MUST derive the range from the fields and reject a descriptor
+that describes no usable range.
 
 ## Rejected
 

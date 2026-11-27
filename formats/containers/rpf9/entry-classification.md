@@ -203,7 +203,7 @@ A summary is written to a temporary name and only replaces its target once its o
 
 Both passes are driven by `tools/rpf9/census_all.py`, and the machine-written documents are produced by `tools/rpf9/entry_matrix.py` from the merged census, so no figure below is copied by hand.
 
-The counts below were produced by one binary and one executable, and both are recorded in every journal line. The scanner that produced this payload pass is SHA-256 `ef1cde45d69162d01eaa14aa6a8bc21753d229d507c4e25108776a92ff7c36bd`. The executable was build `e95020b2`, SHA-256 `e95020b2fa4a721db3df59fdecf75621730ac559d8835252f6c3b658d5a08993`. The pre-fix payload pass used scanner `d9620f6c…`; its 14,432 `undecodable` rows are the encoding-4 population this pass decodes. An integrated rerun with the final build (`6560e67c…`) reproduced the same counts; the timing table is from the uncontended pass. The integrated build adds the verification command and a shared helper for the stored-prefix rule; neither changes what the census classifies. Because the journal is keyed to the whole binary, a rebuilt scanner rejects older journals and re-runs the roots rather than mixing counts.
+The counts below were produced by one binary and one executable, and both are recorded in every journal line. The scanner that produced this payload pass is SHA-256 `6774edb32f406f92b7afdc4681ec6b928b00c116584f3591b225170004e929cd`. The executable was build `e95020b2`, SHA-256 `e95020b2fa4a721db3df59fdecf75621730ac559d8835252f6c3b658d5a08993`. Earlier payload passes used scanner `d9620f6c…` and then `6560e67c…`; the first reported 14,432 `undecodable` rows, the second 750 `blocked` rows. This pass adds the descriptor-derived transform range, the counter origin at the first chunk byte and a raw-DEFLATE selection path, so every entry decodes. The timing table is from the uncontended pass that preceded this one, because the roots this fix affects were re-run while other work shared the machine. Because the journal is keyed to the whole binary, a rebuilt scanner rejects older journals and re-runs the roots rather than mixing counts.
 
 ### What the metadata pass establishes
 
@@ -246,40 +246,38 @@ It enumerated 1,255,039 entries in 4,373 archives, root by root the same numbers
 
 | Outcome                |   Entries | Share |
 | ---------------------- | --------: | ----: |
-| `partially-identified` | 1,157,615 | 92.2% |
-| `identified`           |    93,627 |  7.5% |
+| `partially-identified` | 1,158,361 | 92.3% |
+| `identified`           |    93,631 |  7.5% |
 | `unresolved`           |     3,047 |  0.2% |
-| `blocked`              |       750 |  0.1% |
 
-Every entry has exactly one outcome, and the four that occur add up to the entry count. Three outcomes of the vocabulary occur nowhere: no entry is `undecodable`, none is `malformed`, and none is `transform-unavailable`. `blocked` is 750 entries behind the payload transform that did not verify; the encoding-4 rows that the previous pass reported as `undecodable` are now `partially-identified` resource containers (RPF9-F151).
+Every entry has exactly one outcome, and the three that occur add up to the entry count. Four outcomes of the vocabulary occur nowhere: no entry is `blocked`, none is `undecodable`, none is `malformed`, and none is `transform-unavailable`. The payload transform now decodes every row that carries it, so `blocked` no longer occurs; the encoding-4 rows that the earlier pass reported as `undecodable` are `partially-identified` resource containers (RPF9-F151), and the type-89 rows behind the transform are too (RPF9-F160).
 
 | Identification         |   Entries |
 | ---------------------- | --------: |
-| resource container     | 1,152,814 |
-| supported format       |    97,489 |
-| nothing recognised     |     3,797 |
+| resource container     | 1,153,560 |
+| supported format       |    97,493 |
+| nothing recognised     |     3,047 |
 | validated XML document |       491 |
 | named signature        |       448 |
 
-`nothing recognised` is 3,797 entries, of which 3,047 were read and found unrecognisable. The other 750 were reached and could not be read: they are behind the transform that did not verify, and are not counted as a negative result about their bytes.
+`nothing recognised` is 3,047 entries, every one of them read and found unrecognisable.
 
 | Format | Entries |
 | ------ | ------: |
 | `ADAT` |  71,676 |
-| `PSIN` |  19,080 |
+| `PSIN` |  19,084 |
 | RPF9   |   4,351 |
 | `RBF0` |   1,493 |
 | `KB2`  |     797 |
 | GFx    |      87 |
 | `EDUP` |       5 |
 
-The 4,351 RPF9 rows are the whole of the nesting in this installation: the passes opened exactly 4,351 nested archives, every one of them through a type-0 row. Opening an archive is a separate fact from recognising its magic. The 4,351 RPF9 rows are `partially-identified` on the strength of a four-byte match; that all 4,351 then authenticated and were walked is what `archives_opened` records, and it is the stronger claim. No other entry that was _read_ holds an archive. The 750 entries the payload pass could not read are not evidence either way, and none of them is claimed to hold one.
+The 4,351 RPF9 rows are the whole of the nesting in this installation: the passes opened exactly 4,351 nested archives, every one of them through a type-0 row. Opening an archive is a separate fact from recognising its magic. The 4,351 RPF9 rows are `partially-identified` on the strength of a four-byte match; that all 4,351 then authenticated and were walked is what `archives_opened` records, and it is the stronger claim. No other entry that was _read_ holds an archive.
 
 | Capability  |   Entries |
 | ----------- | --------: |
-| resource    | 1,152,814 |
-| structural  |    93,138 |
-| unavailable |       750 |
+| resource    | 1,153,560 |
+| structural  |    93,142 |
 | archive     |     4,351 |
 | bytes       |     3,495 |
 | text        |       491 |
@@ -294,8 +292,8 @@ The 4,351 RPF9 rows are the whole of the nesting in this installation: the passe
 
 | Structure claim |   Entries |
 | --------------- | --------: |
-| unknown         | 1,157,059 |
-| verified        |    93,627 |
+| unknown         | 1,157,055 |
+| verified        |    93,631 |
 | probable        |     4,351 |
 | tentative       |         2 |
 
@@ -309,7 +307,7 @@ The 4,351 RPF9 rows are the whole of the nesting in this installation: the passe
 | `chunked-4`   |    14,488 |
 | `raw-deflate` |       161 |
 
-1,398 entries carry the payload transform. 648 of them decoded; 750 did not verify and are reported as `blocked`, not guessed at. The two differ in storage: every blocked row is chunked-2 or raw DEFLATE, and every chunked-3 transformed row decoded.
+1,398 entries carry the payload transform and every one decodes, including the 746 type-89 rows in chunked-2 storage and the four raw-DEFLATE rows ([payload-transform.md](payload-transform.md)).
 
 ### What it cost
 
