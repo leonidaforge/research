@@ -40,3 +40,22 @@ the same way.
 observed pairs are `(1,1)` through `(108,108)`. A reader SHOULD require equal
 counts and MUST require `count <= capacity`; requiring a strict inequality would
 reject every observed row (DDICT-F05).
+
+## The inferred boundary was reported as unable to produce a usable dictionary
+
+**Candidate.** Measured on the 53-archive corpus, the standalone inference
+disagreed with native page metadata on 1,513 rows and produced no usable
+dictionary on any of them, so a standalone open was described as always failing
+loudly (DDICT-F09).
+
+**Correction.** Two things changed the number and the reach of the claim. The
+inference now refuses a tie between equally supported boundaries instead of
+breaking it by offset order, so the same corpus reports 1,521 disagreements and
+every one of them has no candidate rather than a candidate without a root form.
+The installation-wide survey also shows the corpus limit: of 45,200 type-4 rows
+read through their original chains, 6,304 boundaries disagree and 25 of those
+disagreements still yield a root form whose members all resolve. The inference
+can therefore land on a non-native boundary that parses completely. Native page
+metadata stays authoritative, an inferred boundary is marked as inferred, and a
+failed inference is still never read as evidence that the resource is not a
+dictionary.

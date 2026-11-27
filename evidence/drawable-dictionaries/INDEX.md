@@ -26,7 +26,7 @@ are cited from
 Each row was reconstructed with its native page split. The archive page
 metadata was present for all 8,209 rows, so no row depends on an inferred
 system/graphics boundary. The shared offset/pointer inference disagrees with the
-native split on 1,513 of the 8,209 rows, which is why the reported results use
+native split on 1,521 of the 8,209 rows, which is why the reported results use
 the native split and why an inferred split is not evidence of a wrong resource.
 
 Member counts, number of dictionaries: 1 → 7,181; 2 → 56; 3 → 5; 4 → 878; 6 → 1;
@@ -45,9 +45,9 @@ Member counts, number of dictionaries: 1 → 7,181; 2 → 56; 3 → 5; 4 → 878
 | DDICT-F06 | Each hash equals `joaat` of a member drawable's name with its final extension (`.#dr`) removed                                                                 | `CROSS_SAMPLE` 12,480/12,480 members | Confirmed   |
 | DDICT-F07 | Every value is a system pointer to a member drawable whose page-map word is zero                                                                               | `CROSS_SAMPLE` 12,480/12,480 members | Confirmed   |
 | DDICT-F08 | No empty dictionary was observed; the empty case is accepted only on structure plus the `+0x18` word                                                           | `CROSS_SAMPLE` 0 empty rows in 8,209 | Null result |
-| DDICT-F09 | The inferred system/graphics boundary yields no usable dictionary on every row where it disagrees with native metadata                                          | `CROSS_SAMPLE` 1,513 rows: 1,479 no root form, 34 no candidate, 0 usable | Confirmed |
+| DDICT-F09 | The inferred system/graphics boundary yields no usable dictionary on every row of the 53-archive corpus where it disagrees with native metadata; in the installation-wide rows it yields a fully resolved dictionary on 25 of the 6,304 disagreements | `CROSS_SAMPLE` 1,521 disagreements of 8,209 rows: 1,521 no candidate, 0 usable; `CROSS_SAMPLE` 45,200 chain rows: 6,304 disagreements, of which 25 resolve every member | Confirmed for both corpora; the inferred boundary is never authoritative |
 | DDICT-F10 | Member identity is the array position; a repeated hash or a shared drawable pointer does not remove an entry                                                   | `BINARY` parser rules; `SYNTHETIC` duplicate fixtures | Confirmed |
-| DDICT-F11 | Types 4, 5 and 16 share only the zero word, the page map and the `+0x18` word; type 16 parses as a texture dictionary and never as a drawable dictionary          | `CROSS_SAMPLE` 8,209 type-4, 3 type-5 and 285 type-16 rows | Confirmed |
+| DDICT-F11 | Types 4, 5 and 16 share only the zero word, the page map and the `+0x18` word; in the rows read type 16 parses as a texture dictionary and not as a drawable dictionary                                                              | `CROSS_SAMPLE` 8,209 type-4, 3 type-5 and 285 type-16 rows; scoped to those rows | Confirmed for the sampled rows |
 
 ## Validation
 

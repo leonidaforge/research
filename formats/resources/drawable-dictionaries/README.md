@@ -114,12 +114,29 @@ accepts the dictionary when at least one member resolves (DDICT-F07).
 ## Native and inferred boundaries
 
 The archive's page metadata is authoritative for the system/graphics boundary.
-The standalone inference in `model::split_resource` disagrees with it on 1,513
-of the 8,209 rows. On every one of those rows the inferred boundary produces no
-usable dictionary: 1,479 have no dictionary root form and 34 have no inference
-candidate at all, and **no** row yields a root form with members. A standalone
-open of such a resource therefore fails loudly instead of misreading it
+The standalone inference in `model::split_resource_reason` disagrees with it on
+1,521 of the 8,209 rows of the 53-archive corpus. On every one of those rows the
+inference produces no boundary at all: no candidate passes the page-map check, or
+several candidates tie and the tie is refused instead of broken. No row of that
+corpus yields a dictionary root form with members from the inferred boundary, so
+a standalone open there fails loudly instead of misreading the resource
 (DDICT-F09).
+
+The installation-wide survey finds the exception that the 53-archive corpus does
+not contain. Of the 48,584 type-4 entries the census counts, 45,200 were read
+through their original chains: 6,304 boundaries disagree, and 25 of those
+disagreements still yield a root form whose members all resolve. The inference
+can therefore land on a boundary that parses completely but is not the native
+one, which is why the app uses native page metadata whenever it is available and
+marks an inferred boundary as inferred.
+
+The failure is reported as a layout problem, with the reason it could not be
+inferred or the boundaries that tie, and it says that native page metadata is
+required. It is not reported as evidence that the resource is something other
+than a drawable dictionary: a resource whose boundary cannot be inferred is
+unmeasured, and opening it from its archive supplies the authoritative layout.
+A failed inference is never counted as a negative in the corpus numbers above.
+
 ## Member values
 
 Every value is a system pointer to an `rmcDrawable` at the offsets documented in
