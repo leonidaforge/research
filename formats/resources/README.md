@@ -6,26 +6,27 @@ Everything here comes from payload data of the Scarlett build. No engine code pa
 
 Drawable object structure read from resources is in [drawables](drawables/README.md).
 Fragment roots and their member drawables are in [fragments](fragments/README.md).
+Drawable dictionaries, whose members are the multi-part drawable containers, are in [drawable-dictionaries](drawable-dictionaries/README.md).
 
 ## Status
 
-| Part                                                                | Status                                                                     |
-| ------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| Stored entry: 16 zero bytes, then one chunk per page, except a split page | Confirmed in the rechecked rows (RES-F10, RES-F24)     |
-| A chunk is a zlib stream or a raw (uncompressed) page               | Confirmed for the type 6 rows; see [pages.md](pages.md#raw-stored-page) (RES-F24) |
-| Segment order: system segment first, then graphics segment          | Confirmed in the rechecked rows (RES-F01, RES-F11)     |
-| Resource header: zero `u64`, system pointer to the page map at `+8` | Confirmed in the rechecked rows (RES-F11)              |
-| Pointer values: 4-bit segment selector, 28-bit offset               | Confirmed (RES-F16). A 16-bit split is rejected by offsets above `0xFFFF`  |
-| Pointer count and bounds                                            | Confirmed in the rechecked rows (RES-F02, RES-F17, RES-F18) |
-| Page-map location and count bytes                                   | Confirmed (RES-F12)                                                        |
-| Page-map length and zero slots                                      | Probable. `16 + 8 * pages` fits; slots are always zero as stored (RES-F12)  |
-| Page sizes and the `0x10000` unit                                   | Confirmed for the samples, Probable as a rule (RES-F14, RES-F28)           |
-| Split pages at 32 MiB                                               | Confirmed, four instances (RES-F15)                                        |
-| A stream is one page except a split page; a raw page is not a stream | Tested scope in [pages.md](pages.md#page-and-stream-relation) (RES-F27)   |
-| 0DRP root header at `+0x10..+0x4F`                                 | Confirmed positions in one type 11, one type 73 and one type 74 resource (RES-F29, RES-F30) |
-| 16-byte records behind the `+0x38` pointer                         | Confirmed for the same three resources (RES-F31)                           |
-| Header field meanings beyond the page-map pointer                   | Unknown                                                                    |
-| Types 2, 4, 5, 11, 73 and 74 follow the same layout                | Confirmed for the rechecked samples; other rows untested (RES-F20)         |
+| Part                                                                      | Status                                                                                      |
+| ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Stored entry: 16 zero bytes, then one chunk per page, except a split page | Confirmed in the rechecked rows (RES-F10, RES-F24)                                          |
+| A chunk is a zlib stream or a raw (uncompressed) page                     | Confirmed for the type 6 rows; see [pages.md](pages.md#raw-stored-page) (RES-F24)           |
+| Segment order: system segment first, then graphics segment                | Confirmed in the rechecked rows (RES-F01, RES-F11)                                          |
+| Resource header: zero `u64`, system pointer to the page map at `+8`       | Confirmed in the rechecked rows (RES-F11)                                                   |
+| Pointer values: 4-bit segment selector, 28-bit offset                     | Confirmed (RES-F16). A 16-bit split is rejected by offsets above `0xFFFF`                   |
+| Pointer count and bounds                                                  | Confirmed in the rechecked rows (RES-F02, RES-F17, RES-F18)                                 |
+| Page-map location and count bytes                                         | Confirmed (RES-F12)                                                                         |
+| Page-map length and zero slots                                            | Probable. `16 + 8 * pages` fits; slots are always zero as stored (RES-F12)                  |
+| Page sizes and the `0x10000` unit                                         | Confirmed for the samples, Probable as a rule (RES-F14, RES-F28)                            |
+| Split pages at 32 MiB                                                     | Confirmed, four instances (RES-F15)                                                         |
+| A stream is one page except a split page; a raw page is not a stream      | Tested scope in [pages.md](pages.md#page-and-stream-relation) (RES-F27)                     |
+| 0DRP root header at `+0x10..+0x4F`                                        | Confirmed positions in one type 11, one type 73 and one type 74 resource (RES-F29, RES-F30) |
+| 16-byte records behind the `+0x38` pointer                                | Confirmed for the same three resources (RES-F31)                                            |
+| Header field meanings beyond the page-map pointer                         | Unknown                                                                                     |
+| Types 2, 4, 5, 11, 73 and 74 follow the same layout                       | Confirmed for the rechecked samples; other rows untested (RES-F20)                          |
 
 ## Model
 
@@ -54,18 +55,18 @@ Documents:
 
 Some resources carry the four bytes `0DRP` at system `+0x10` (RES-F21). The layout at `+0x10..+0x4F` was read on one type 11, one type 73 and one type 74 resource (RES-F29); the rows are listed in [Sample locators](../../evidence/resources/INDEX.md#sample-locators). Offsets are from the start of the system segment.
 
-| Offset | Width | Observed content                                   | Status                    |
-| ------ | ----- | -------------------------------------------------- | ------------------------- |
-| `+0x10` | 4     | `0DRP`                                             | Confirmed (samples)       |
-| `+0x14` | 1     | `0x7A`                                             | Confirmed (samples)       |
-| `+0x18` | 8     | zero                                               | Confirmed (samples)       |
-| `+0x20` | 8     | `1`, `1`, `2` for the type 11, 73 and 74 samples    | Unknown; varies by row    |
-| `+0x28` | 8     | system pointer                                     | Confirmed (samples)       |
-| `+0x30` | 8     | system pointer, or zero                            | Confirmed (samples)       |
-| `+0x38` | 8     | system pointer to 16-byte records                  | Confirmed (samples)       |
-| `+0x40` | 8     | system pointer, or zero                            | Confirmed (samples)       |
-| `+0x48` | 2 × 4 | four `u16` fields                                  | Confirmed bytes; meanings **Unknown** |
-| `+0x50` | 8     | system pointer, or zero                            | Not in the candidate; observed in the type 73 and 74 samples |
+| Offset  | Width | Observed content                                 | Status                                                       |
+| ------- | ----- | ------------------------------------------------ | ------------------------------------------------------------ |
+| `+0x10` | 4     | `0DRP`                                           | Confirmed (samples)                                          |
+| `+0x14` | 1     | `0x7A`                                           | Confirmed (samples)                                          |
+| `+0x18` | 8     | zero                                             | Confirmed (samples)                                          |
+| `+0x20` | 8     | `1`, `1`, `2` for the type 11, 73 and 74 samples | Unknown; varies by row                                       |
+| `+0x28` | 8     | system pointer                                   | Confirmed (samples)                                          |
+| `+0x30` | 8     | system pointer, or zero                          | Confirmed (samples)                                          |
+| `+0x38` | 8     | system pointer to 16-byte records                | Confirmed (samples)                                          |
+| `+0x40` | 8     | system pointer, or zero                          | Confirmed (samples)                                          |
+| `+0x48` | 2 × 4 | four `u16` fields                                | Confirmed bytes; meanings **Unknown**                        |
+| `+0x50` | 8     | system pointer, or zero                          | Not in the candidate; observed in the type 73 and 74 samples |
 
 - Every nonzero pointer above resolved inside the system segment in the three samples; no out-of-bounds or cross-page pointer was found (RES-F30). The page-map pointer at `+0x08` is also a system pointer.
 - Across the three families, the tag, the version byte, the zero at `+0x18`, the pointer positions and the four `u16` positions hold. The `+0x20` word and the values of the four `u16` differ between the samples. The 16-byte record width also holds.
@@ -77,11 +78,11 @@ Some resources carry the four bytes `0DRP` at system `+0x10` (RES-F21). The layo
 
 The pointer at `+0x38` leads to a sequence of 16-byte records in the system segment (RES-F31); the rows are listed in [Sample locators](../../evidence/resources/INDEX.md#sample-locators):
 
-| Offset | Width | Observed content                                          |
-| ------ | ----- | --------------------------------------------------------- |
-| `+0`   | 4     | a 4-byte value; meaning **Unknown**                       |
+| Offset | Width | Observed content                                                            |
+| ------ | ----- | --------------------------------------------------------------------------- |
+| `+0`   | 4     | a 4-byte value; meaning **Unknown**                                         |
 | `+4`   | 4     | a 4-byte value; used as a length in the boundary check; meaning **Unknown** |
-| `+8`   | 8     | pointer; the segment selects the addressed segment        |
+| `+8`   | 8     | pointer; the segment selects the addressed segment                          |
 
 - The width is 16 bytes for the type 11, 73 and 74 samples. The walk reads the third `u16` field at `+0x48` times 16 bytes; the field's meaning is unconfirmed.
 - The records need not end at the page map. In the type 74 sample the records end at `0x15A00`, a range fills `0x15A00..0x15A50`, and the page map starts at `0x15A50`.
@@ -106,13 +107,13 @@ The pointer at `+0x38` leads to a sequence of 16-byte records in the system segm
 
 ## Terms
 
-| Term             | Meaning                                                                | Confidence                              |
-| ---------------- | ---------------------------------------------------------------------- | --------------------------------------- |
-| system segment   | Segment at prefix `0x5`; holds the header and pointers                 | Probable (RAGE convention)              |
-| graphics segment | Segment at prefix `0x6`; holds addressed data                          | Probable (RAGE convention)              |
-| page map         | Structure at the system offset named by `+0x08`                        | Confirmed (location), Probable (extent) |
-| page             | A unit counted by the page map, reconstructed from one or more zlib streams or from one raw chunk | Confirmed (count), Probable (size rule) |
-| stream           | One zlib unit that reconstructs all or part of a page                  | Confirmed                               |
-| raw page         | One stored chunk with no zlib header whose stored and reconstructed lengths are equal | Confirmed (bytes), Probable (page identity) |
+| Term             | Meaning                                                                                           | Confidence                                  |
+| ---------------- | ------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| system segment   | Segment at prefix `0x5`; holds the header and pointers                                            | Probable (RAGE convention)                  |
+| graphics segment | Segment at prefix `0x6`; holds addressed data                                                     | Probable (RAGE convention)                  |
+| page map         | Structure at the system offset named by `+0x08`                                                   | Confirmed (location), Probable (extent)     |
+| page             | A unit counted by the page map, reconstructed from one or more zlib streams or from one raw chunk | Confirmed (count), Probable (size rule)     |
+| stream           | One zlib unit that reconstructs all or part of a page                                             | Confirmed                                   |
+| raw page         | One stored chunk with no zlib header whose stored and reconstructed lengths are equal             | Confirmed (bytes), Probable (page identity) |
 
 A reader SHOULD keep the numeric prefixes and not depend on these names.
