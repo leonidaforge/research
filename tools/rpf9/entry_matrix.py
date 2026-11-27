@@ -62,6 +62,8 @@ def json_document(summary, combinations):
 def cell(value):
     if value is None:
         return '-'
+    if isinstance(value, int):
+        return format(value, ',')
     return str(value).replace('|', '\\|')
 
 
@@ -100,8 +102,8 @@ def roots_table(summary):
         lines.append(
             '| {} | {} | {} | {} |'.format(
                 cell(root['root']),
-                root['archives'],
-                root['entries'],
+                cell(root['archives']),
+                cell(root['entries']),
                 cell(root['stopped']),
             )
         )
@@ -179,18 +181,21 @@ def type_table(combinations):
     ]
     for row in summary:
         declared = ', '.join(
-            '`{}` {}'.format(name, entries) for name, entries in sorted(row['declared'].items())
+            '`{}` {}'.format(name, cell(entries))
+            for name, entries in sorted(row['declared'].items())
         )
         payload = ', '.join(
-            '`{}` {}'.format(name, entries) for name, entries in sorted(row['payload'].items())
+            '`{}` {}'.format(name, cell(entries))
+            for name, entries in sorted(row['payload'].items())
         )
         outcomes = ', '.join(
-            '{} {}'.format(name, entries) for name, entries in sorted(row['outcomes'].items())
+            '{} {}'.format(name, cell(entries))
+            for name, entries in sorted(row['outcomes'].items())
         )
         lines.append(
             '| {} | {} | {} | {} | {} |'.format(
                 cell(row['type']),
-                row['entries'],
+                cell(row['entries']),
                 declared or '-',
                 payload or '-',
                 outcomes or '-',
@@ -222,7 +227,7 @@ def distribution_tables(combinations):
             ]
         )
         for value, entries in distribution(combinations, field):
-            lines.append('| {} | {} |'.format(cell(value), entries))
+            lines.append('| {} | {} |'.format(cell(value), cell(entries)))
         lines.append('')
     return lines
 
@@ -292,11 +297,11 @@ def document(summary, combinations, title='RPF9 entry matrix'):
     ]
     for name in COVERAGE_ORDER:
         if name in coverage:
-            parts.append('| {} | {} |'.format(name, coverage[name]))
+            parts.append('| {} | {} |'.format(name, cell(coverage[name])))
     for name in sorted(coverage):
         # A count the writer does not know about is still published.
         if name not in COVERAGE_ORDER:
-            parts.append('| {} | {} |'.format(name, coverage[name]))
+            parts.append('| {} | {} |'.format(name, cell(coverage[name])))
     roots = coverage.get('roots_discovered', len(roots))
     parts.extend(
         [
