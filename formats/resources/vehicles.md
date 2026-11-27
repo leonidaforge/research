@@ -103,21 +103,34 @@ tyres carry the marker and split.
 
 ## Rendering
 
-The body decodes through `lforge-model` as a fragment. Materials that carry a
-resolved diffuse texture keep it. Materials with no diffuse texture are coloured
-by shader class: paint, glass, emissive, or tyre. The wheel rim and tyre decode
-as separate scenes and are placed at the skeleton pivots, scaled to a common
-diameter, and mirrored on the right side.
+The body decodes through `lforge-model` as a fragment. A preview renders the body
+alone. The shared wheel kits do not follow an individual arch, so a mounted rim
+reads as a wrong part rather than as a missing one. Wheel decoding and mounting
+stay in `attach_wheels` in the preview example, which no preview calls.
 
-Fifteen vehicles rendered from these resources in the pilot. The body, rims, and
-tyres are game geometry. Paint colours are presentation choices, not extracted
-paint data.
+Materials are shaded by the metal-roughness model in `lforge-renderer`: three
+studio lights with a GGX lobe, a procedural backdrop sampled by reflection, and
+an ACES tone map. A material carries metalness, roughness, and an emissive
+weight. The preview classifies each material by shader hash and gives paint,
+glass, lamp, tyre, and trim their own response.
+
+Painted panels carry no albedo texture. The paint shader declares a Diffuse key
+that no store we hold resolves, so the preview tints those panels with a colour
+from `vehicleColors.json`. Glass, lamps, grilles, and badges do resolve, from
+`data/ttdb/vehicles/ttdb_vehicles.ttpf`; on Akane that is 10 of 24 materials.
+
+A batch run rendered 321 of the 324 bodies found by the archive scan. Each model
+is a separate process, so one failure does not stop the run. Three bodies fail:
+`arcturus` decodes no renderable mesh, and `grouse` and `taco` have no inferable
+system/graphics boundary.
 
 ## Open items
 
-- Per-model wheel and tyre selection is not resolved. The pilot uses one generic
-  rim and tyre pair.
+- The paint Diffuse key `0x5D7A3A87CC19967D` resolves in no extracted store. It
+  appears only as a shader reference inside type 4 drawables in `packs.rpf`, so
+  the dictionary that holds it is still unlocated.
+- Per-model wheel and tyre selection is not resolved. The shared kits are decoded
+  and could be mounted, but they fit the arches badly.
 - ZMT metadata and per-model handling files are not identified.
 - Boats and aircraft have no wheel bones; their previews are body-only.
-- Four of the fifteen pilot vehicles selected a body fragment without a direct
-  skeleton. Their previews are body-only until linked skeletons are read.
+
