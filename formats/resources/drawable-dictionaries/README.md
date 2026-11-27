@@ -123,12 +123,26 @@ a standalone open there fails loudly instead of misreading the resource
 (DDICT-F09).
 
 The installation-wide survey finds the exception that the 53-archive corpus does
-not contain. Of the 48,584 type-4 entries the census counts, 45,200 were read
-through their original chains: 6,304 boundaries disagree, and 25 of those
-disagreements still yield a root form whose members all resolve. The inference
-can therefore land on a boundary that parses completely but is not the native
-one, which is why the app uses native page metadata whenever it is available and
-marks an inferred boundary as inferred.
+not contain. Of the 48,584 type-4 entries the census counts, 45,200 were resolved
+through their original chains and 45,200 were read; 45,199 carry a native split,
+and 6,304 of those disagree with the inferred boundary. Of the disagreements,
+6,278 have no candidate, 1 has no dictionary root form, and 25 still yield a root
+form whose members all resolve. The inference can therefore land on a boundary
+that parses completely but is not the native one, which is why the app uses
+native page metadata whenever it is available and marks an inferred boundary as
+inferred.
+
+The 25 rows are located, and reading one explains what the overlap is. 22 sit in
+the `levels.rpf` rivers and canals groups
+(`levels.rpf!1355!3` is one), and 3 in `pack/story000/story000.rpf!235`. Read
+`levels.rpf!1355!3` at its native boundary `0x1080` and the single member
+`lo_rvr_04_water_fh_rvr_1sa_001_lod.#dr` decodes to 2,449 vertices and 4,534
+triangles. Read at the inferred `0x553e`, the same dictionary enumerates: same
+page map, same one member, same name, state `drawable`. The member then fails to
+decode with `the drawable yielded no renderable mesh`, because the system segment
+was cut past the member's own records. The overlap is therefore a boundary that
+enumerates but cannot assemble, not one that silently misplaces geometry, and the
+standalone open still fails loudly, one step later than on the other 6,279 rows.
 
 The failure is reported as a layout problem, with the reason it could not be
 inferred or the boundaries that tie, and it says that native page metadata is

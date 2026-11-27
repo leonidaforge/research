@@ -59,3 +59,19 @@ can therefore land on a non-native boundary that parses completely. Native page
 metadata stays authoritative, an inferred boundary is marked as inferred, and a
 failed inference is still never read as evidence that the resource is not a
 dictionary.
+
+## The overlap between the inferred and native boundary was read, not assumed
+
+**Candidate.** The 53-archive corpus produced no usable dictionary from an
+inferred boundary on any disagreeing row, which was read as the general
+behaviour.
+
+**Correction.** The installation-wide read locates 25 rows where the inferred
+boundary does enumerate the dictionary with every member resolved. Reading one,
+`levels.rpf!1355!3`, shows what that means: at the native `0x1080` the single
+member decodes to 2,449 vertices and 4,534 triangles, while at the inferred
+`0x553e` the dictionary enumerates identically and the member then fails with
+`the drawable yielded no renderable mesh`. The system segment had been cut past
+the member's own records. A standalone open therefore still fails loudly on those
+rows, one step later than elsewhere, which is why native page metadata remains
+authoritative and an inferred boundary is marked as inferred.
