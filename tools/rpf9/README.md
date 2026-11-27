@@ -62,9 +62,13 @@ A line is reused only when all of these match:
 | `summary`       | the path, byte count and SHA-256 of the summary the line's counters came from |
 
 The census gives each line an opaque `--journal-identity`, which is the SHA-256 of the
-fields above. A record cut short by an interruption is repaired at the next append; a
-record from another identity is ignored. `journal.jsonl` in the output directory holds
-one line per completed root, and a root is only reused from it when its identity
+fields above. `fingerprint` is not a whole-file hash: it covers the root's size, its
+modification time in nanoseconds and 1 MiB at each end, so a change in the middle of a
+root that alters neither end is not detected. That is why a reused line is also bound
+to the digest of the summary it came from. A record cut short by an interruption is
+repaired at the next append; a record from another identity is ignored. `journal.jsonl`
+in the output directory holds one line per completed root, and a root is only reused
+from it when its identity
 matches, the summary it came from is present with the recorded digest, and it did not
 stop at a limit.
 

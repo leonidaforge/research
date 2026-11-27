@@ -1,14 +1,21 @@
 # RPF9 identification follow-up tasks
 
-Five pieces of work the full census leaves measurable but unsolved. Each one is
-separate: none of them depends on another, and none is started by the
-classification itself.
+Five pieces of work the full census leaves measurable but unsolved. They are
+separate investigations — none of them has to be finished before another
+starts — but they are not independent. A and B both ask how a chunk stream is
+framed and meet in the same decoder, so a finding in one changes what the other
+is testing. C and E both describe resource containers: three of E's five types
+are containers, so their layouts cannot be described before C's shared structure
+is. D's filename work overlaps the name discovery and stringtable work this
+repository already carries. None of the five is started by the classification
+itself.
 
 Every count here comes from the payload census of the installation — 22 root
 archives, 4,373 archives, 1,255,039 entries — and can be reproduced with
 `tools/rpf9/census_breakdown.py` on the merged census. Sample chains name the
-row through the archives it was reached in, starting from the installation-
-relative path.
+row as `<root archive>!<row>` or `<root archive>!<outer row>!<inner row>`, with
+the root given by its installation-relative path, so a chain can be opened from
+the installation directory without searching for it.
 
 ## A. Chunk-encoding 4
 
@@ -33,7 +40,7 @@ text `FORCE_EMPTY_RPF`.
 
 Representative undecodable rows, with the archive each lives in:
 
-- 4,768 rows of type 15: `core_bvh4.rpf!772!0` (131,280 bytes) and `!772!1` (196,816 bytes)
+- 4,768 rows of type 15: `pack/core_bvh4/core_bvh4.rpf!772!0` (131,280 bytes) and `pack/core_bvh4/core_bvh4.rpf!772!1` (196,816 bytes)
 - 4,087 rows of type 73: `levels.rpf!772!0` (1,263,616 bytes) and `levels.rpf!927!0` (6,384 bytes)
 - 3,196 rows of type 2: `levels.rpf!1719!4` (54,928 bytes) and `levels.rpf!1719!5` (5,376 bytes)
 
@@ -74,8 +81,8 @@ successfully and 750 were not.
 Every type-89 entry (746 of 746) is transformed, chunked-2, and blocked. The
 four type-11 failures are stored with raw DEFLATE:
 
-- 746 rows of type 89: `story000_script.rpf!1!0` and `!1!1`
-- 4 rows of type 11: `story000.rpf!90!0` and `story000.rpf!407!0`
+- 746 rows of type 89: `pack/story000/story000_script.rpf!1!0` and `pack/story000/story000_script.rpf!1!1`
+- 4 rows of type 11: `pack/story000/story000.rpf!90!0` and `pack/story000/story000.rpf!407!0`
 
 **Missing.** Why these 750 do not verify. The key state that decodes the
 chunked-3 rows is available, so the difference is in the rows, not in the
@@ -92,11 +99,16 @@ bytes afterwards.
 
 ## C. Shared resource structures
 
-**Established.** 1,138,382 entries are resource containers, 90.7% of the
-installation. The classification reads the first 16 bytes: eight zero bytes and
-a segment-5 pointer with a 28-bit page-map offset. The census normalises the
-next two 32-bit fields so unrelated payloads are not merged and pointer values
-are not split into thousands of buckets. The largest variants:
+**Established.** 1,138,382 entries — 90.7% of the installation — are reported
+as resource containers. What that rests on is narrow: the first 16 bytes are
+eight zero bytes and a segment-5 pointer whose low 28 bits are a page-map
+offset. Recognition stops there. No page map was walked, no segment was
+resolved, and nothing behind the pointer was read, so the group is a set of
+payloads that agree on 16 bytes, not a verified structure.
+
+The census normalises the next two 32-bit fields so unrelated payloads are not
+merged and pointer values are not split into thousands of buckets. The largest
+normalised shapes are:
 
 | Normalised header      | Entries |
 | ---------------------- | ------: |
@@ -111,10 +123,15 @@ are not split into thousands of buckets. The largest variants:
 
 `ptr:seg5` means a 16-byte-aligned pointer into the system segment, `small` a
 value below 0x10000, `tag:` four printable bytes, and the two fields are
-`u32@0x10` and `u32@0x18`. The whole distribution is in the matrix.
+`u32@0x10` and `u32@0x18`. The whole distribution is in the matrix. The shapes
+are normalisations chosen to keep unlike payloads apart: two different shapes
+are not evidence of two structures, and one shape is not evidence of one field
+layout.
 
 **Missing.** What those two fields mean, whether all of these are one structure
 with optional fields or several structures, and the page map behind the pointer.
+Nothing here establishes that any two entries in the group are the same asset
+class.
 
 **Done when** the resource header is described field by field, with the page map
 walked for at least one segment, and the variants are either explained or shown
@@ -150,10 +167,16 @@ nothing, and a name for the rows whose path hash the local tables do not resolve
 - `EDUP`: the five rows described, or recorded as too rare to identify yet.
 - `PSIN`: the two type-255 rows placed against the type-11 rows of the same
   format.
-- Named signatures: `MoVE`, `MHIU`, `SGD5` and `SPS1` described or rejected.
+- Named signatures: `MHIU` (2 rows), `SGD5` (2) and `SPS1` (1) described or
+  rejected. `MoVE` is not one of them: the census places `MoVE` under type 64,
+  which the registry already names `mrf` (443 rows).
 - Unknown text and binary payloads: the 92 heads grouped or rejected one by one.
 - Original filenames: which rows can be named from the archive's own evidence,
-  and which cannot be named at all.
+  and which cannot be named at all. This must account for the name discovery and
+  stringtable work the repository already carries — the path hashes, the LUT
+  files, the runtime dictionaries and the candidate-naming tooling in
+  [names.md](names.md) and `lforge names` — by verifying or extending it, not by
+  starting a second naming path beside it.
 - Payload-derived extensions: which of these families establishes an extension
   from the bytes, and which only from a decision a person makes.
 
