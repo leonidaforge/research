@@ -124,10 +124,10 @@ block program.
 
 **Done when** each failing combination is explained by a property of the row —
 not by a change to the transform implementation — and the census reports it as a
-decoded payload or as a documented format. **Met:** each combination is
-explained by its descriptor's stream fields and its storage framing, the
-decoder derives both from the row, and the new census reports all 1,398 as
-decoded.
+decoded payload or as a documented format. **Met for the observed installation
+and build:** each combination is explained by its descriptor's stream fields and
+its storage framing, the decoder derives both from the row, and the new census
+reports all 1,398 as decoded. Another build's field values remain open.
 
 **Scope.** Do not change the transform decoder in this task. 1,398 entries and
 the 648 that already decode are the regression set: they must decode to the same

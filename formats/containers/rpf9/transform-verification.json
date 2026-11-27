@@ -44,5 +44,20 @@
   "computed_digest": "80c4ec5b0c49fd17235b93ac2568f62e467515abab70d891ac071a8bf7a76cb9",
   "digest_matches_accepted": true
  },
+ "rebased_recheck": {
+  "scanner": "63bc772fb73f280331ed6ccef647afc6e8152601d35c449bd3d9be00401e7bd8",
+  "entries": 1398,
+  "decoded": 1398,
+  "identical": 1398,
+  "changed": 0,
+  "logical_bytes": 298916159,
+  "digest_of_digests": "1f6ab07dfef771cfb6ffdb86be8f51851ee82c7616b0676081822ae12061830f",
+  "supported_entries": 648,
+  "supported_identical": 648,
+  "supported_digest_of_digests": "8a5d85cb346e08231399b426dabb725390baae4c1e6df89d6ede7e6a24c33f54",
+  "encoding_4_entries": 14488,
+  "encoding_4_identical": 14488,
+  "encoding_4_digest_of_digests": "80c4ec5b0c49fd17235b93ac2568f62e467515abab70d891ac071a8bf7a76cb9"
+ },
  "note": "The digest of digests is the SHA-256 of the per-entry decoded SHA-256 values in archive-selector order. It is a reproducible fingerprint, not an authentication value. No payload bytes, keys, key states or tables are published."
 }

@@ -338,6 +338,16 @@ identified `PSIN` population. The 14,432 previously `undecodable` encoding-4
 rows stay `partially-identified`. The storage distribution is unchanged
 (RPF9-F160).
 
+The rebased implementation was verified again: the 1,398 digests, the 648
+previously supported digests and the 14,488 encoding-4 digests are unchanged.
+Selection was made bounded at the same time. A chunked stream is selected from
+the chunks an 8 MiB probe holds and then read in full through the streaming
+transform; a raw DEFLATE stream is selected by decoding it in fixed steps, so
+no stored size has to fit in memory. A descriptor whose fields overflow, or
+cover no position, is refused instead of being treated as plaintext. A census
+with the rebased scanner and another with the final build each reproduced the
+accepted counts, outcomes and combinations exactly (RPF9-F160).
+
 ## Open
 
 - Meaning of descriptor `+0x08`, and any use of `+0x12`.
@@ -345,7 +355,7 @@ rows stay `partially-identified`. The storage distribution is unchanged
 - The content of the `B` sub-blocks.
 - The stored state of the secondary area and of archives other than the inspected ones, and how many bytes of the primary area change. One earlier note called the primary regions "post-transform" from the order of initialization alone. The step 4 pass, the archive scan and the verified signature now confirm the primary area is stored transformed in the inspected archives (RPF9-F28, RPF9-F48, RPF9-F102).
 - Whether a second executable build registers the same keys or binds to the same archives. Cipher algorithms 1, 2 and `0x12`, whether the embedded schedule is the standard AES-256 expansion, and the role of the `B` trailer remain open.
-- The block program of the payload transform's algorithm `0x11`: its round structure, table roles and key use, without which no transformed payload can be decoded (RPF9-F117). The descriptor, the algorithm selection and the key state are established (RPF9-F114 to RPF9-F116). Payload bytes are not covered by the metadata signature.
+- Whether another executable build uses other payload-transform descriptor field values. The range is derived per row rather than chosen from a rule set (RPF9-F156). Payload bytes are not covered by the metadata signature.
 - The meaning of the 16-byte stored prefix before encoding-2 and some
   encoding-4 chunks (RPF9-F119, RPF9-F124, RPF9-F150). Its length is known; its
   content is only observed to be zero.

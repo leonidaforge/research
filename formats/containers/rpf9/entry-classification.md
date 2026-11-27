@@ -201,9 +201,9 @@ Each root gets a journal of its own: one line per completed archive, written and
 
 A summary is written to a temporary name and only replaces its target once its own write has finished, so a reader never sees a half-written file. A stopped or failed census still publishes what it counted and exits non-zero, and the driver deletes that summary instead of merging it; only a run whose completion checks pass is merged and quoted. Measured: a scan of `audio.rpf` killed after 25 s had journalled four archives, and the rerun with the same identity reproduced the uninterrupted totals exactly.
 
-Both passes are driven by `tools/rpf9/census_all.py`, and the machine-written documents are produced by `tools/rpf9/entry_matrix.py` from the merged census, so no figure below is copied by hand.
+Both passes use the same root discovery, root naming and limits, and the machine-written documents are produced by `tools/rpf9/entry_matrix.py` from the merged census, so no figure below is copied by hand.
 
-The counts below were produced by one binary and one executable, and both are recorded in every journal line. The scanner that produced this payload pass is SHA-256 `6774edb32f406f92b7afdc4681ec6b928b00c116584f3591b225170004e929cd`. The executable was build `e95020b2`, SHA-256 `e95020b2fa4a721db3df59fdecf75621730ac559d8835252f6c3b658d5a08993`. Earlier payload passes used scanner `d9620f6c…` and then `6560e67c…`; the first reported 14,432 `undecodable` rows, the second 750 `blocked` rows. This pass adds the descriptor-derived transform range, the counter origin at the first chunk byte and a raw-DEFLATE selection path, so every entry decodes. The timing table is from the uncontended pass that preceded this one, because the roots this fix affects were re-run while other work shared the machine. Because the journal is keyed to the whole binary, a rebuilt scanner rejects older journals and re-runs the roots rather than mixing counts.
+The counts below were produced by one binary and one executable, and both are recorded in every journal line. The scanner that produced this payload pass is SHA-256 `6774edb32f406f92b7afdc4681ec6b928b00c116584f3591b225170004e929cd`. The executable was build `e95020b2`, SHA-256 `e95020b2fa4a721db3df59fdecf75621730ac559d8835252f6c3b658d5a08993`. Earlier payload passes used scanner `d9620f6c…` and then `6560e67c…`; the first reported 14,432 `undecodable` rows, the second 750 `blocked` rows. This pass adds the descriptor-derived transform range, the counter origin at the first chunk byte and a raw-DEFLATE selection path, so every entry decodes. A census with the rebased scanner `5ee002c3…` and another with the final build `63bc772f…` each reproduced every count, outcome and combination. The timing table is from the uncontended pass that preceded this one, because the roots this fix affects were re-run while other work shared the machine. Because the journal is keyed to the whole binary, a rebuilt scanner rejects older journals and re-runs the roots rather than mixing counts.
 
 ### What the metadata pass establishes
 
@@ -309,16 +309,18 @@ The 4,351 RPF9 rows are the whole of the nesting in this installation: the passe
 
 1,398 entries carry the payload transform and every one decodes, including the 746 type-89 rows in chunked-2 storage and the four raw-DEFLATE rows ([payload-transform.md](payload-transform.md)).
 
-### What it cost
+### What the encoding-4 pass cost
 
-Both passes ran against the same release build, one root archive at a time, on one machine reading a 150 GiB installation.
+Both passes that produced these coverage counts ran against the same release
+build, one root archive at a time, on one machine reading a 150 GiB
+installation.
 
 | Pass     | Wall clock  |   Entries | Entries per second | Archives per second |
 | -------- | ----------- | --------: | -----------------: | ------------------: |
 | metadata | 20 min 28 s | 1,255,039 |              1,022 |                 3.6 |
 | payload  | 29 min 31 s | 1,255,039 |                709 |                 2.5 |
 
-Each pass ran on its own, from an empty output directory, so neither figure shares the machine with the other. The cost is per entry, not per byte: classifying an entry decodes one chunk before it can read the first 64 bytes, and that chunk's size is what the archive chose, not what the census asked for. An earlier note in this repository measured 91 entries per second; that figure came from a debug build. The same archive taken with a release build is four times faster, which is why a complete count is now affordable and why no figure here is a budgeted sample.
+Each pass ran on its own, from an empty output directory, so neither figure shares the machine with the other. The payload timing belongs to the pass that decoded the 14,432 encoding-4 rows. The later transform pass re-ran the roots whose rows it had refused, while other work shared the machine, so its wall clock is not comparable and is not quoted. The cost is per entry, not per byte: classifying an entry decodes one chunk before it can read the first 64 bytes, and that chunk's size is what the archive chose, not what the census asked for. An earlier note in this repository measured 91 entries per second; that figure came from a debug build. The same archive taken with a release build is four times faster, which is why a complete count is now affordable and why no figure here is a budgeted sample.
 
 ### What the types say
 
@@ -326,7 +328,7 @@ The 22 roots together reach 46 type ids: the 45 registered ids that rows use, an
 
 Type 0 holds exactly 4,351 entries, and the passes opened exactly 4,351 nested archives. Every nested archive in this installation is a type-0 row. The type is still not a format: a type-0 row is an archive only because its payload is one, which is what the payload pass checks.
 
-Some types hold one format throughout the installation, and others do not. Every type-0 row is an RPF9 archive (4,351), every type-64 row is a `MoVE` payload (443) and every type-66 row is a GFx payload (87). Against that, `PSIN` appears under four types — 11 (18,787), 93 (211), 94 (80) and 255 (2) — and type 11 holds `PSIN` and `RBF0` (1,493) side by side.
+Some types hold one format throughout the installation, and others do not. Every type-0 row is an RPF9 archive (4,351), every type-64 row is a `MoVE` payload (443) and every type-66 row is a GFx payload (87). Against that, `PSIN` appears under four types — 11 (18,791), 93 (211), 94 (80) and 255 (2) — and type 11 holds `PSIN` and `RBF0` (1,493) side by side.
 
 Type 255 is the catch-all the build does not name, 73,068 entries strong, and it holds everything: `ADAT` (71,676), `KB2` (797), `EDUP` (5), `PSIN` (2), 491 XML documents, five named signatures and 92 payloads that match nothing. No extension is declared for any of them, and 72,579 of those rows have none — the 489 that parsed as XML are the only ones that established one for themselves.
 

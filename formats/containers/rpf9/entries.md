@@ -117,7 +117,7 @@ After the metadata signature verifies, the location records can be read for ever
 
 The counts are observations from one archive, not format limits. The type ids are numeric; their extensions come from the recovered [type registry](type-registry.md), and what each id holds is recorded per entry in the [type inventory](type-inventory.md). Layout A and non-main read sources are confirmed by code but were not observed in this sample.
 
-Stored and chunked rows extract to exactly their logical sizes. Rows behind the payload transform are refused because the transform is unknown (RPF9-F104). Successful extraction does not authenticate payload bytes.
+Stored and chunked rows extract to exactly their logical sizes. Rows behind the payload transform extract through the range the descriptor selects (RPF9-F156). Successful extraction does not authenticate payload bytes.
 
 ## Path resolution
 

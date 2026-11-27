@@ -1,6 +1,6 @@
 # RPF9 payload transform: storage integration and complete coverage
 
-The payload transform is the per-entry counter-mode keystream applied to a
+The payload transform is the per-entry counter-mode keystream applied to an
 entry's stored bytes before they are decompressed. This document records what
 the remaining 750 failures were, which property of each row caused them, and
 the range and counter rules that now decode every transformed entry of the
@@ -51,8 +51,8 @@ For the common shape `a = b = 0x400`, `c = 0x1C00`, `t = 0` this is the first
 2048 bytes, the first 1024 bytes of the buffers at 9216, 17408, 25600, ... and
 no tail, exactly the range RPF9-F134 established. The whole-range shape
 `a = 0`, `b = 0x1000`, `c = 0`, `t = 0` makes the buffers abut from 0, so the
-whole stream is covered. A zero `a = b = c = t` describes no range and is
-rejected.
+whole stream is covered. A descriptor that covers no position, or whose field
+sums overflow, is rejected rather than treated as a plaintext stream.
 
 The engine transforms whole 16-byte blocks: a block is transformed when its
 start is in the range, and a block that straddles a region boundary is
@@ -137,11 +137,11 @@ chunked-3 rows.
 
 | Path | Checks |
 | --- | --- |
-| Transformed zlib chunk | Every zlib chunk inflates to its declared logical size and its Adler-32 matches; the chunk consumes exactly its compressed bytes |
+| Transformed zlib chunk | Every zlib chunk read inflates to its declared logical size and its Adler-32 matches; the chunk consumes exactly its compressed bytes |
 | Transformed raw DEFLATE | Stream end, exact declared logical size, and zero bytes after the stream |
 | Transformed copy chunk | Exact stored size equals logical size; no checksum exists |
 | Chunk table | Stored sizes, padding and logical sizes sum to the entry's declared sizes; prefix is 0 or 16 |
-| Counter | Whole 16-byte blocks; no partial block is transformed |
+| Counter | Whole 16-byte blocks, chosen by block start; no partial block is transformed, so a window read returns the bytes of the full read |
 
 A successfully inflated stream is not authentication. The metadata signature
 covers no payload bytes. The SHA-256 digests in the verification evidence are
@@ -169,6 +169,12 @@ The 14,488 encoding-4 entries were re-read by their preserved archive chains:
 all 14,488 digests are identical and the aggregate digest of digests is still
 `80c4ec5b0c49fd17235b93ac2568f62e467515abab70d891ac071a8bf7a76cb9`.
 
+The rebased branch was verified again with the final build (scanner
+`63bc772f…`): 1,398 complete decodes, 298,916,159 logical bytes, no changed
+digest against the preserved inventory, and the same aggregate digests. The
+648-row comparison and the encoding-4 regression were repeated with the same
+result.
+
 ### Representative rows
 
 | Chain | Type | Storage | `a`/`b`/`c`/`t` | Logical bytes |
@@ -193,9 +199,17 @@ descriptor whose fields describe no usable range.
 
 ## Limitations
 
-Verification reads at most 8 MiB of stored bytes. A transformed entry whose
-stored range is larger is refused, not decoded partially. No transformed entry
-of this installation exceeds it: the largest stored range is 5,898,608 bytes.
+Selecting the key state for a chunked entry reads at most 8 MiB of stored
+bytes. Every chunk the probe holds is verified against its declared size and
+Adler-32; a longer stream is still selected, read and extracted through the
+streaming transform, and its later chunks are verified as they are read. A row
+whose first chunk alone exceeds 8 MiB is refused, because no candidate can be
+tested. Raw DEFLATE selection has no stored-size cap: the stream is read
+through the transform and inflated in bounded steps.
+
+No transformed entry of this installation exceeds the probe: the largest
+stored range is 5,898,608 bytes. The probe only chooses the key state;
+verification reads every entry to its end.
 
 ## Reproduction
 
