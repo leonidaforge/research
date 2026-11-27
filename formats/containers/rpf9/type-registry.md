@@ -65,6 +65,10 @@ Type ids 64 to 115, path variant:
 
 The alternate variant is the same list with the `z` replaced by `i` (`imf`, `idr`, … `icov`); the hash variant replaces it with `#` (`#mf`, `#dr`, … `#cov`). Ids 92 and 97 and the five unprefixed entries keep their single spelling in every variant.
 
+The three variants are three tables the engine has, not three spellings of one name. The path resolver uses the first; a caller passing variant 1 or 2 gets the `i…` or `#…` spelling, and no caller that was traced does. Nothing in this document treats them as interchangeable, and nothing applies an `i…` or `#…` spelling to a file name: only the path variant is used for that.
+
+Seventy-one ids are registered, and they share seventy distinct extensions: ids 106 and 112 both answer `znmd`. A count of registered ids is therefore not a count of extension strings, and a reverse lookup of `znmd` cannot answer which of the two ids a name belongs to.
+
 ## What the registry does and does not say
 
 A registered extension names the **asset class the engine assigns to the type**. It says nothing about the payload's format, and a payload of a different format does not invalidate it:
@@ -77,6 +81,16 @@ A registered extension names the **asset class the engine assigns to the type**.
 The last two are independent confirmations: the registry and the payload evidence agree on ids 66 and 11 without either being derived from the other.
 
 Every id outside the two ranges is unregistered. `0xFF` is unregistered by construction. Unregistered ids are not "unknown types": the engine has no extension for them and prints `???`.
+
+## Applicability
+
+The tables were read from one build, `e95020b2`. They are a fact about that build's data, not about the format: another build may register different ids, and nothing here says it does not.
+
+What the application does with that when it is given a different executable:
+
+- The census takes the executable's SHA-256 as part of its checkpoint identity, so a run against another build never reuses a journal or a summary written against this one.
+- The registry document records `source_build` and the full SHA-256 of the executable it was read from, and `lforge archive registry --json` publishes them with the tables, so a reader can compare.
+- The classification applies the table to the type id whatever executable produced the archive. That is a deliberate choice: the type id comes from the archive, and the extension is the name the engine gives that id. It does not make the table verified for a build it was not read from, and the provenance field says `native` — a declaration — for exactly that reason.
 
 ## Limits
 

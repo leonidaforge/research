@@ -1,0 +1,194 @@
+# RPF9 identification follow-up tasks
+
+Five pieces of work the full census leaves measurable but unsolved. Each one is
+separate: none of them depends on another, and none is started by the
+classification itself.
+
+Every count here comes from the payload census of the installation — 22 root
+archives, 4,373 archives, 1,255,039 entries — and can be reproduced with
+`tools/rpf9/census_breakdown.py` on the merged census. Sample chains name the
+row through the archives it was reached in, starting from the installation-
+relative path.
+
+## A. Chunk-encoding 4
+
+**Established.** 14,488 entries are stored with chunk encoding 4. 14,432 of them
+cannot be decoded at all, and every entry the census could not decode uses this
+encoding: no undecodable entry has any other storage. The 56 that did decode are
+55 `PSIN` rows of type 11 and one 15-byte row of type 255 whose payload is the
+text `FORCE_EMPTY_RPF`.
+
+| Type        | Entries | Outcome                       |
+| ----------- | ------: | ----------------------------- |
+| 15 (`zbdr`) |   4,768 | undecodable                   |
+| 73 (`zmap`) |   4,087 | undecodable                   |
+| 2 (`zdr`)   |   3,196 | undecodable                   |
+| 6 (`zbn`)   |   1,654 | undecodable                   |
+| 16 (`zbdd`) |     256 | undecodable                   |
+| 4 (`zdd`)   |     256 | undecodable                   |
+| 74 (`ztyp`) |     173 | undecodable                   |
+| 11 (`zmt`)  |      88 | 55 identified, 33 undecodable |
+| 67 (`zcd`)  |       9 | undecodable                   |
+| 255         |       1 | unresolved                    |
+
+Representative undecodable rows, with the archive each lives in:
+
+- 4,768 rows of type 15: `core_bvh4.rpf!772!0` (131,280 bytes) and `!772!1` (196,816 bytes)
+- 4,087 rows of type 73: `levels.rpf!772!0` (1,263,616 bytes) and `levels.rpf!927!0` (6,384 bytes)
+- 3,196 rows of type 2: `levels.rpf!1719!4` (54,928 bytes) and `levels.rpf!1719!5` (5,376 bytes)
+
+Representative rows that did decode:
+
+- 55 rows of type 11: `levels.rpf!1029!4065` (2,504 bytes), head `5053494e…`
+- 1 row of type 255: `levels.rpf!1091!0` (15 bytes), head `FORCE_EMPTY_RPF`
+
+**Missing.** What encoding 4 means. The decoder has no branch for it, so the
+error is "unrecognised chunk encoding" rather than a structural finding: nothing
+is known about how those bytes are framed, compressed or padded.
+
+**Done when** the encoding's framing is described from the bytes, at least one
+row decodes to a size that matches its location record, and the census reports
+those rows with a real payload state.
+
+**Scope.** Do not add an encoding-4 path by guessing from the encoding number.
+Do not treat the 56 decodable rows as evidence about the 14,432 that are not.
+
+## B. Payload transform failures
+
+**Established.** 1,398 entries carry the payload transform. 648 were read
+successfully and 750 were not.
+
+| Storage       | Entries | Outcome                       |
+| ------------- | ------: | ----------------------------- |
+| `chunked-2`   |     746 | blocked                       |
+| `chunked-3`   |     648 | 638 identified, 10 unresolved |
+| `raw-deflate` |       4 | blocked                       |
+
+| Type           | Entries |
+| -------------- | ------: |
+| 89 (`zscript`) |     746 |
+| 11 (`zmt`)     |     500 |
+| 255            |     151 |
+| 14 (`zdatb`)   |       1 |
+
+Every type-89 entry (746 of 746) is transformed, chunked-2, and blocked. The
+four type-11 failures are stored with raw DEFLATE:
+
+- 746 rows of type 89: `story000_script.rpf!1!0` and `!1!1`
+- 4 rows of type 11: `story000.rpf!90!0` and `story000.rpf!407!0`
+
+**Missing.** Why these 750 do not verify. The key state that decodes the
+chunked-3 rows is available, so the difference is in the rows, not in the
+installation: the storage shape, the descriptor, or the transform's parameters.
+Nothing is asserted about which.
+
+**Done when** each failing combination is explained by a property of the row —
+not by a change to the transform implementation — and the census reports it as a
+decoded payload or as a documented format.
+
+**Scope.** Do not change the transform decoder in this task. 1,398 entries and
+the 648 that already decode are the regression set: they must decode to the same
+bytes afterwards.
+
+## C. Shared resource structures
+
+**Established.** 1,138,382 entries are resource containers, 90.7% of the
+installation. The classification reads the first 16 bytes: eight zero bytes and
+a segment-5 pointer with a 28-bit page-map offset. The census normalises the
+next two 32-bit fields so unrelated payloads are not merged and pointer values
+are not split into thousands of buckets. The largest variants:
+
+| Normalised header      | Entries |
+| ---------------------- | ------: |
+| `s5:ptr:seg5+zero`     | 448,037 |
+| `s5:small+ptr:seg5`    | 296,111 |
+| `s5:small+zero`        | 118,189 |
+| `s5:zero+zero`         |  96,573 |
+| `s5:zero+small`        |  73,080 |
+| `s5:ptr:seg5+ptr:seg5` |  55,387 |
+| `s5:zero+other`        |  38,279 |
+| `s5:zero+ptr:seg5`     |  10,194 |
+
+`ptr:seg5` means a 16-byte-aligned pointer into the system segment, `small` a
+value below 0x10000, `tag:` four printable bytes, and the two fields are
+`u32@0x10` and `u32@0x18`. The whole distribution is in the matrix.
+
+**Missing.** What those two fields mean, whether all of these are one structure
+with optional fields or several structures, and the page map behind the pointer.
+
+**Done when** the resource header is described field by field, with the page map
+walked for at least one segment, and the variants are either explained or shown
+to be the same structure.
+
+**Scope.** Similar extensions or similar headers are not equivalence. The
+existing research, texture and model implementations are the reusable parts;
+none of them should be copied into a new parser before this task establishes
+what is shared.
+
+## D. Type-255 identification and naming
+
+**Established.** 73,068 entries carry type 255, the one id the build does not
+register. 72,579 of them have no extension and none is invented.
+
+| Identification     |                      Entries |
+| ------------------ | ---------------------------: |
+| `ADAT`             |                       71,676 |
+| `KB2`              |                          797 |
+| XML document       | 491 (489 parsed, 2 unparsed) |
+| nothing recognised |                           92 |
+| `EDUP`             |                            5 |
+| `PSIN`             |                            2 |
+| named signature    |                            5 |
+
+**Missing.** An extension for any of them, an owner for the 92 rows that match
+nothing, and a name for the rows whose path hash the local tables do not resolve.
+
+**Done when**, for each family separately:
+
+- `ADAT`: a documented container with a verified field layout.
+- `KB2`: the two variants (`KB2j`, `KB2n`) distinguished by their framing.
+- `EDUP`: the five rows described, or recorded as too rare to identify yet.
+- `PSIN`: the two type-255 rows placed against the type-11 rows of the same
+  format.
+- Named signatures: `MoVE`, `MHIU`, `SGD5` and `SPS1` described or rejected.
+- Unknown text and binary payloads: the 92 heads grouped or rejected one by one.
+- Original filenames: which rows can be named from the archive's own evidence,
+  and which cannot be named at all.
+- Payload-derived extensions: which of these families establishes an extension
+  from the bytes, and which only from a decision a person makes.
+
+**Scope.** An extension chosen for convenience is not a native naming fact. Only
+the engine's registry declares those, and it declares nothing for type 255.
+
+## E. Newly observed and unresolved types
+
+**Established.** The full inventory reached every type id that earlier, bounded
+runs had missed. Five of them are worth their own investigation:
+
+| Type | Extension | Entries | Identification     |
+| ---- | --------- | ------: | ------------------ |
+| 18   | `zvert`   |     611 | resource container |
+| 100  | `zsp`     |  27,482 | resource container |
+| 104  | `zmsk`    |   1,476 | nothing recognised |
+| 105  | `zhdat`   |   1,476 | nothing recognised |
+| 113  | `zkit`    |   2,715 | resource container |
+
+Types 104 and 105 carry the same number of entries. Every type-105 head begins
+with `PAMH` (`50414d48`), and type-105 rows are 8,748 bytes in the samples. Type
+104 rows are 32 bytes:
+
+- type 104: `levels.rpf!69!0`, head `01000102800080000000000080008000…`
+- type 105: `levels.rpf!1237!0`, head `50414d480132375f31350074400040000000…`
+
+**Missing.** A layout for `PAMH`; anything at all about the 32-byte type-104
+rows; and the meaning of the `zvert`, `zsp` and `zkit` extensions beyond the
+registry's naming.
+
+**A hypothesis, not a finding.** Types 104 and 105 have equal counts, appear in
+the same archives, and read like a header and its payload. That is a reason to
+investigate them together, and nothing more: no ordering, pairing or containment
+has been observed.
+
+**Done when** `PAMH` has a verified layout, the type-104 rows are either placed
+in it or described as a separate structure, and the equal counts are explained
+or left as a coincidence with the evidence that would settle it named.

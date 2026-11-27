@@ -163,6 +163,18 @@
  "entries": 1255039,
  "stopped": {},
  "complete": true,
+ "completion": {
+  "complete": true,
+  "reasons": [],
+  "checks": {
+   "roots_discovered": 22,
+   "roots_opened": 22,
+   "roots_failed": 0,
+   "roots_stopped": 0,
+   "reconciles": true
+  },
+  "pending_traversal": 0
+ },
  "coverage": {
   "archives_opened": 4373,
   "containers_identified": 1138382,
@@ -173,6 +185,7 @@
   "entries_undecoded": 15182,
   "failed_archives": 0,
   "nested_archives_opened": 4351,
+  "rejected_archive_candidates": 0,
   "structures_verified": 93627,
   "unresolved_formats": 18229,
   "roots_discovered": 22,
@@ -180,191 +193,243 @@
   "failed_roots": 0,
   "archives_resumed": 0
  },
- "outcomes": null,
+ "outcomes": {
+  "blocked": 750,
+  "identified": 93627,
+  "partially-identified": 1143183,
+  "undecodable": 14432,
+  "unresolved": 3047
+ },
  "types": [
   {
    "type": 0,
-   "entries": 4351
+   "entries": 4351,
+   "archives": 17
   },
   {
    "type": 2,
-   "entries": 167897
+   "entries": 167897,
+   "archives": 1289
   },
   {
    "type": 3,
-   "entries": 55488
+   "entries": 55488,
+   "archives": 265
   },
   {
    "type": 4,
-   "entries": 48584
+   "entries": 48584,
+   "archives": 179
   },
   {
    "type": 5,
-   "entries": 2612
+   "entries": 2612,
+   "archives": 33
   },
   {
    "type": 6,
-   "entries": 92199
+   "entries": 92199,
+   "archives": 970
   },
   {
    "type": 11,
-   "entries": 48612
+   "entries": 48612,
+   "archives": 422
   },
   {
    "type": 14,
-   "entries": 2
+   "entries": 2,
+   "archives": 2
   },
   {
    "type": 15,
-   "entries": 250434
+   "entries": 250434,
+   "archives": 1204
   },
   {
    "type": 16,
-   "entries": 22382
+   "entries": 22382,
+   "archives": 132
   },
   {
    "type": 17,
-   "entries": 22440
+   "entries": 22440,
+   "archives": 263
   },
   {
    "type": 18,
-   "entries": 611
+   "entries": 611,
+   "archives": 2
   },
   {
    "type": 64,
-   "entries": 443
+   "entries": 443,
+   "archives": 2
   },
   {
    "type": 66,
-   "entries": 87
+   "entries": 87,
+   "archives": 7
   },
   {
    "type": 67,
-   "entries": 62384
+   "entries": 62384,
+   "archives": 384
   },
   {
    "type": 69,
-   "entries": 1
+   "entries": 1,
+   "archives": 1
   },
   {
    "type": 70,
-   "entries": 8443
+   "entries": 8443,
+   "archives": 67
   },
   {
    "type": 72,
-   "entries": 226
+   "entries": 226,
+   "archives": 4
   },
   {
    "type": 73,
-   "entries": 166072
+   "entries": 166072,
+   "archives": 316
   },
   {
    "type": 74,
-   "entries": 6308
+   "entries": 6308,
+   "archives": 591
   },
   {
    "type": 77,
-   "entries": 3
+   "entries": 3,
+   "archives": 1
   },
   {
    "type": 78,
-   "entries": 25608
+   "entries": 25608,
+   "archives": 131
   },
   {
    "type": 79,
-   "entries": 27644
+   "entries": 27644,
+   "archives": 12
   },
   {
    "type": 86,
-   "entries": 11
+   "entries": 11,
+   "archives": 1
   },
   {
    "type": 87,
-   "entries": 15067
+   "entries": 15067,
+   "archives": 185
   },
   {
    "type": 88,
-   "entries": 40019
+   "entries": 40019,
+   "archives": 5
   },
   {
    "type": 89,
-   "entries": 746
+   "entries": 746,
+   "archives": 2
   },
   {
    "type": 93,
-   "entries": 211
+   "entries": 211,
+   "archives": 1
   },
   {
    "type": 94,
-   "entries": 80
+   "entries": 80,
+   "archives": 1
   },
   {
    "type": 95,
-   "entries": 518
+   "entries": 518,
+   "archives": 2
   },
   {
    "type": 96,
-   "entries": 1
+   "entries": 1,
+   "archives": 1
   },
   {
    "type": 99,
-   "entries": 98
+   "entries": 98,
+   "archives": 1
   },
   {
    "type": 100,
-   "entries": 27482
+   "entries": 27482,
+   "archives": 11
   },
   {
    "type": 101,
-   "entries": 5
+   "entries": 5,
+   "archives": 1
   },
   {
    "type": 102,
-   "entries": 142
+   "entries": 142,
+   "archives": 13
   },
   {
    "type": 103,
-   "entries": 6762
+   "entries": 6762,
+   "archives": 17
   },
   {
    "type": 104,
-   "entries": 1476
+   "entries": 1476,
+   "archives": 1
   },
   {
    "type": 105,
-   "entries": 1476
+   "entries": 1476,
+   "archives": 1
   },
   {
    "type": 108,
-   "entries": 32878
+   "entries": 32878,
+   "archives": 4
   },
   {
    "type": 109,
-   "entries": 4
+   "entries": 4,
+   "archives": 4
   },
   {
    "type": 110,
-   "entries": 5
+   "entries": 5,
+   "archives": 5
   },
   {
    "type": 111,
-   "entries": 30511
+   "entries": 30511,
+   "archives": 39
   },
   {
    "type": 113,
-   "entries": 2715
+   "entries": 2715,
+   "archives": 1
   },
   {
    "type": 114,
-   "entries": 518
+   "entries": 518,
+   "archives": 2
   },
   {
    "type": 115,
-   "entries": 8415
+   "entries": 8415,
+   "archives": 4
   },
   {
    "type": 255,
-   "entries": 73068
+   "entries": 73068,
+   "archives": 171
   }
  ],
  "type_summary": [
@@ -372,9 +437,7 @@
    "type": 0,
    "entries": 4351,
    "archives": 17,
-   "identifications": {
-    "format:rpf9": 4351
-   },
+   "identifications": {},
    "outcomes": {
     "partially-identified": 4351
    },
@@ -386,11 +449,8 @@
   {
    "type": 2,
    "entries": 167897,
-   "archives": 1275,
-   "identifications": {
-    "resource:segment-5": 164701,
-    "none": 3196
-   },
+   "archives": 1289,
+   "identifications": {},
    "outcomes": {
     "partially-identified": 164701,
     "undecodable": 3196
@@ -403,10 +463,8 @@
   {
    "type": 3,
    "entries": 55488,
-   "archives": 259,
-   "identifications": {
-    "resource:segment-5": 55488
-   },
+   "archives": 265,
+   "identifications": {},
    "outcomes": {
     "partially-identified": 55488
    },
@@ -418,11 +476,8 @@
   {
    "type": 4,
    "entries": 48584,
-   "archives": 178,
-   "identifications": {
-    "resource:segment-5": 48328,
-    "none": 256
-   },
+   "archives": 179,
+   "identifications": {},
    "outcomes": {
     "partially-identified": 48328,
     "undecodable": 256
@@ -436,9 +491,7 @@
    "type": 5,
    "entries": 2612,
    "archives": 33,
-   "identifications": {
-    "resource:segment-5": 2612
-   },
+   "identifications": {},
    "outcomes": {
     "partially-identified": 2612
    },
@@ -450,11 +503,8 @@
   {
    "type": 6,
    "entries": 92199,
-   "archives": 969,
-   "identifications": {
-    "resource:segment-5": 90545,
-    "none": 1654
-   },
+   "archives": 970,
+   "identifications": {},
    "outcomes": {
     "partially-identified": 90545,
     "undecodable": 1654
@@ -467,13 +517,8 @@
   {
    "type": 11,
    "entries": 48612,
-   "archives": 282,
-   "identifications": {
-    "resource:segment-5": 28295,
-    "format:psin": 18787,
-    "format:rbf0": 1493,
-    "none": 37
-   },
+   "archives": 422,
+   "identifications": {},
    "outcomes": {
     "partially-identified": 28295,
     "identified": 20280,
@@ -488,10 +533,8 @@
   {
    "type": 14,
    "entries": 2,
-   "archives": 1,
-   "identifications": {
-    "none": 2
-   },
+   "archives": 2,
+   "identifications": {},
    "outcomes": {
     "unresolved": 2
    },
@@ -503,11 +546,8 @@
   {
    "type": 15,
    "entries": 250434,
-   "archives": 1203,
-   "identifications": {
-    "resource:segment-5": 245666,
-    "none": 4768
-   },
+   "archives": 1204,
+   "identifications": {},
    "outcomes": {
     "partially-identified": 245666,
     "undecodable": 4768
@@ -520,11 +560,8 @@
   {
    "type": 16,
    "entries": 22382,
-   "archives": 131,
-   "identifications": {
-    "resource:segment-5": 22126,
-    "none": 256
-   },
+   "archives": 132,
+   "identifications": {},
    "outcomes": {
     "partially-identified": 22126,
     "undecodable": 256
@@ -538,9 +575,7 @@
    "type": 17,
    "entries": 22440,
    "archives": 263,
-   "identifications": {
-    "resource:segment-5": 22440
-   },
+   "identifications": {},
    "outcomes": {
     "partially-identified": 22440
    },
@@ -553,9 +588,7 @@
    "type": 18,
    "entries": 611,
    "archives": 2,
-   "identifications": {
-    "resource:segment-5": 611
-   },
+   "identifications": {},
    "outcomes": {
     "partially-identified": 611
    },
@@ -568,9 +601,7 @@
    "type": 64,
    "entries": 443,
    "archives": 2,
-   "identifications": {
-    "signature:Observed(\"move\")": 443
-   },
+   "identifications": {},
    "outcomes": {
     "partially-identified": 443
    },
@@ -583,9 +614,7 @@
    "type": 66,
    "entries": 87,
    "archives": 7,
-   "identifications": {
-    "format:gfx": 87
-   },
+   "identifications": {},
    "outcomes": {
     "identified": 87
    },
@@ -597,11 +626,8 @@
   {
    "type": 67,
    "entries": 62384,
-   "archives": 383,
-   "identifications": {
-    "resource:segment-5": 62375,
-    "none": 9
-   },
+   "archives": 384,
+   "identifications": {},
    "outcomes": {
     "partially-identified": 62375,
     "undecodable": 9
@@ -615,9 +641,7 @@
    "type": 69,
    "entries": 1,
    "archives": 1,
-   "identifications": {
-    "resource:segment-5": 1
-   },
+   "identifications": {},
    "outcomes": {
     "partially-identified": 1
    },
@@ -630,9 +654,7 @@
    "type": 70,
    "entries": 8443,
    "archives": 67,
-   "identifications": {
-    "resource:segment-5": 8443
-   },
+   "identifications": {},
    "outcomes": {
     "partially-identified": 8443
    },
@@ -644,10 +666,8 @@
   {
    "type": 72,
    "entries": 226,
-   "archives": 3,
-   "identifications": {
-    "resource:segment-5": 226
-   },
+   "archives": 4,
+   "identifications": {},
    "outcomes": {
     "partially-identified": 226
    },
@@ -659,11 +679,8 @@
   {
    "type": 73,
    "entries": 166072,
-   "archives": 312,
-   "identifications": {
-    "resource:segment-5": 161985,
-    "none": 4087
-   },
+   "archives": 316,
+   "identifications": {},
    "outcomes": {
     "partially-identified": 161985,
     "undecodable": 4087
@@ -676,11 +693,8 @@
   {
    "type": 74,
    "entries": 6308,
-   "archives": 589,
-   "identifications": {
-    "resource:segment-5": 6135,
-    "none": 173
-   },
+   "archives": 591,
+   "identifications": {},
    "outcomes": {
     "partially-identified": 6135,
     "undecodable": 173
@@ -694,9 +708,7 @@
    "type": 77,
    "entries": 3,
    "archives": 1,
-   "identifications": {
-    "resource:segment-5": 3
-   },
+   "identifications": {},
    "outcomes": {
     "partially-identified": 3
    },
@@ -709,9 +721,7 @@
    "type": 78,
    "entries": 25608,
    "archives": 131,
-   "identifications": {
-    "resource:segment-5": 25608
-   },
+   "identifications": {},
    "outcomes": {
     "partially-identified": 25608
    },
@@ -724,9 +734,7 @@
    "type": 79,
    "entries": 27644,
    "archives": 12,
-   "identifications": {
-    "resource:segment-5": 27644
-   },
+   "identifications": {},
    "outcomes": {
     "partially-identified": 27644
    },
@@ -739,9 +747,7 @@
    "type": 86,
    "entries": 11,
    "archives": 1,
-   "identifications": {
-    "resource:segment-5": 11
-   },
+   "identifications": {},
    "outcomes": {
     "partially-identified": 11
    },
@@ -754,9 +760,7 @@
    "type": 87,
    "entries": 15067,
    "archives": 185,
-   "identifications": {
-    "resource:segment-5": 15067
-   },
+   "identifications": {},
    "outcomes": {
     "partially-identified": 15067
    },
@@ -769,9 +773,7 @@
    "type": 88,
    "entries": 40019,
    "archives": 5,
-   "identifications": {
-    "resource:segment-5": 40019
-   },
+   "identifications": {},
    "outcomes": {
     "partially-identified": 40019
    },
@@ -784,9 +786,7 @@
    "type": 89,
    "entries": 746,
    "archives": 2,
-   "identifications": {
-    "none": 746
-   },
+   "identifications": {},
    "outcomes": {
     "blocked": 746
    },
@@ -799,9 +799,7 @@
    "type": 93,
    "entries": 211,
    "archives": 1,
-   "identifications": {
-    "format:psin": 211
-   },
+   "identifications": {},
    "outcomes": {
     "identified": 211
    },
@@ -814,9 +812,7 @@
    "type": 94,
    "entries": 80,
    "archives": 1,
-   "identifications": {
-    "format:psin": 80
-   },
+   "identifications": {},
    "outcomes": {
     "identified": 80
    },
@@ -829,9 +825,7 @@
    "type": 95,
    "entries": 518,
    "archives": 2,
-   "identifications": {
-    "resource:segment-5": 518
-   },
+   "identifications": {},
    "outcomes": {
     "partially-identified": 518
    },
@@ -844,9 +838,7 @@
    "type": 96,
    "entries": 1,
    "archives": 1,
-   "identifications": {
-    "none": 1
-   },
+   "identifications": {},
    "outcomes": {
     "unresolved": 1
    },
@@ -859,9 +851,7 @@
    "type": 99,
    "entries": 98,
    "archives": 1,
-   "identifications": {
-    "resource:segment-5": 98
-   },
+   "identifications": {},
    "outcomes": {
     "partially-identified": 98
    },
@@ -874,9 +864,7 @@
    "type": 100,
    "entries": 27482,
    "archives": 11,
-   "identifications": {
-    "resource:segment-5": 27482
-   },
+   "identifications": {},
    "outcomes": {
     "partially-identified": 27482
    },
@@ -889,9 +877,7 @@
    "type": 101,
    "entries": 5,
    "archives": 1,
-   "identifications": {
-    "resource:segment-5": 5
-   },
+   "identifications": {},
    "outcomes": {
     "partially-identified": 5
    },
@@ -904,9 +890,7 @@
    "type": 102,
    "entries": 142,
    "archives": 13,
-   "identifications": {
-    "resource:segment-5": 142
-   },
+   "identifications": {},
    "outcomes": {
     "partially-identified": 142
    },
@@ -919,9 +903,7 @@
    "type": 103,
    "entries": 6762,
    "archives": 17,
-   "identifications": {
-    "resource:segment-5": 6762
-   },
+   "identifications": {},
    "outcomes": {
     "partially-identified": 6762
    },
@@ -934,9 +916,7 @@
    "type": 104,
    "entries": 1476,
    "archives": 1,
-   "identifications": {
-    "none": 1476
-   },
+   "identifications": {},
    "outcomes": {
     "unresolved": 1476
    },
@@ -949,9 +929,7 @@
    "type": 105,
    "entries": 1476,
    "archives": 1,
-   "identifications": {
-    "none": 1476
-   },
+   "identifications": {},
    "outcomes": {
     "unresolved": 1476
    },
@@ -964,9 +942,7 @@
    "type": 108,
    "entries": 32878,
    "archives": 4,
-   "identifications": {
-    "resource:segment-5": 32878
-   },
+   "identifications": {},
    "outcomes": {
     "partially-identified": 32878
    },
@@ -979,9 +955,7 @@
    "type": 109,
    "entries": 4,
    "archives": 4,
-   "identifications": {
-    "resource:segment-5": 4
-   },
+   "identifications": {},
    "outcomes": {
     "partially-identified": 4
    },
@@ -994,9 +968,7 @@
    "type": 110,
    "entries": 5,
    "archives": 5,
-   "identifications": {
-    "resource:segment-5": 5
-   },
+   "identifications": {},
    "outcomes": {
     "partially-identified": 5
    },
@@ -1009,9 +981,7 @@
    "type": 111,
    "entries": 30511,
    "archives": 39,
-   "identifications": {
-    "resource:segment-5": 30511
-   },
+   "identifications": {},
    "outcomes": {
     "partially-identified": 30511
    },
@@ -1024,9 +994,7 @@
    "type": 113,
    "entries": 2715,
    "archives": 1,
-   "identifications": {
-    "resource:segment-5": 2715
-   },
+   "identifications": {},
    "outcomes": {
     "partially-identified": 2715
    },
@@ -1039,9 +1007,7 @@
    "type": 114,
    "entries": 518,
    "archives": 2,
-   "identifications": {
-    "resource:segment-5": 518
-   },
+   "identifications": {},
    "outcomes": {
     "partially-identified": 518
    },
@@ -1054,9 +1020,7 @@
    "type": 115,
    "entries": 8415,
    "archives": 4,
-   "identifications": {
-    "resource:segment-5": 8415
-   },
+   "identifications": {},
    "outcomes": {
     "partially-identified": 8415
    },
@@ -1068,182 +1032,8 @@
   {
    "type": 255,
    "entries": 73068,
-   "archives": 122,
-   "identifications": {
-    "format:adat": 71676,
-    "format:kb2": 797,
-    "xml:CDataFileMgr__ContentChangeSetDef": 117,
-    "xml:timecycle_modifier_data": 49,
-    "none": 92,
-    "xml:rage__bgCrackType": 36,
-    "xml:CVehiclePoints": 32,
-    "xml:timecycle_keyframe_data": 27,
-    "xml:CTuningFile": 34,
-    "xml:CDataFileMgr__ContentDef": 11,
-    "xml:SSetupData": 10,
-    "xml:WaveData": 6,
-    "format:edup": 5,
-    "xml:CDamageDataManager": 5,
-    "xml:GridAtlasInfo": 4,
-    "xml:CCoverProcessorTuning": 3,
-    "format:psin": 2,
-    "signature:Observed(\"mhiu\")": 2,
-    "signature:Observed(\"sgd5\")": 2,
-    "xml:CVehiclePerformanceMaps": 2,
-    "xml:ShoreWavePlacementData": 2,
-    "xml:VehicleControlsInfo": 2,
-    "xml:unvalidated": 2,
-    "signature:Observed(\"sps1\")": 1,
-    "xml:ActionCoordinator__ActionCoordinatorData": 1,
-    "xml:BoatHullBlackList": 1,
-    "xml:CAimUpperBodyDataBlock": 1,
-    "xml:CAnimSceneAttachSlotSetManager": 1,
-    "xml:CAnimalAnimationContexts": 1,
-    "xml:CAnimalAttackBehaviours": 1,
-    "xml:CAttachmentSlotData": 1,
-    "xml:CBaitingInfo": 1,
-    "xml:CBodyAnimConstraintInfoStateSetManager": 1,
-    "xml:CBreakableVehicleDoorLockManagerData": 1,
-    "xml:CClimbTuneMgr": 1,
-    "xml:CCombatInfoMgr": 1,
-    "xml:CContentsOfWeatherXmlFile": 1,
-    "xml:CConversationDictionary": 1,
-    "xml:CConversationList": 1,
-    "xml:CDiscoverableCollection": 1,
-    "xml:CDoorInteractionDataList": 1,
-    "xml:CDrivingStyleCollection": 1,
-    "xml:CDynamicScenarioManager": 1,
-    "xml:CEnergyConfigInfos": 1,
-    "xml:CEntityComponentLodManagerData": 1,
-    "xml:CFallenSnowData": 1,
-    "xml:CFiringPatternInfoManager": 1,
-    "xml:CFleeDecisionMakerData": 1,
-    "xml:CFluidVesselManager": 1,
-    "xml:CGarageInitDataList": 1,
-    "xml:CGraphicsDefinitionsData": 1,
-    "xml:CHazardNodes": 1,
-    "xml:CHeadbobConditionManager": 1,
-    "xml:CHealthConfigInfo": 1,
-    "xml:CIdlePreferenceManager": 1,
-    "xml:CLadderMetadataManager": 1,
-    "xml:CLadderRailsMetadataManager": 1,
-    "xml:CLassoDataManager": 1,
-    "xml:CMissions": 1,
-    "xml:CMoodConditionManager": 1,
-    "xml:CMovieQualityVariationMap": 1,
-    "xml:CObjectComponentSetManager": 1,
-    "xml:CPairedPedDataBlock": 1,
-    "xml:CParkingSplines": 1,
-    "xml:CPedAccuracyManager": 1,
-    "xml:CPedArmourMetaData": 1,
-    "xml:CPedBreathingTypes": 1,
-    "xml:CPedComponentSetManager": 1,
-    "xml:CPedDensityScoringConfigMap": 1,
-    "xml:CPedFormationInfoManager": 1,
-    "xml:CPedHeadbobSettingsManager": 1,
-    "xml:CPedInventoryLoadOutManager": 1,
-    "xml:CPedMoodConditionTreesManager": 1,
-    "xml:CPedMoodSettingsManager": 1,
-    "xml:CPedMotivationInfoManager": 1,
-    "xml:CPedScheduleInfoManager": 1,
-    "xml:CPedSpeedDataBlock": 1,
-    "xml:CPedTimeWarpSettingsManager": 1,
-    "xml:CPedVariationBodyTypeManager": 1,
-    "xml:CPersonaEnumValuesMap": 1,
-    "xml:CPlayerDiscoverableDataCollection": 1,
-    "xml:CProceduralInfo": 1,
-    "xml:CScatteringTransmittance__FogVolumeListData": 1,
-    "xml:CScenarioPropDataManager": 1,
-    "xml:CSceneTerrainAnalyzerMgrDataInstance": 1,
-    "xml:CScenicViewManager": 1,
-    "xml:CSearchPointOfInterestRuleSet": 1,
-    "xml:CSnowTrackData": 1,
-    "xml:CStandardPosesManager": 1,
-    "xml:CTVPlaylistContainer": 1,
-    "xml:CTacticalAnalysisDistributionStore": 1,
-    "xml:CTaskDataInfoManager": 1,
-    "xml:CTaskMoveLocalMovement__Tunables": 1,
-    "xml:CTrainConfigs": 1,
-    "xml:CTyreDataSet": 1,
-    "xml:CUpperBodyIdleConditionManager": 1,
-    "xml:CUpperBodyIdleSettingsManager": 1,
-    "xml:CVehicleAIHandlingEntry": 1,
-    "xml:CVehicleBaseRatingsAndEstimatesMap": 1,
-    "xml:CVehicleBoneOffsetsArray": 1,
-    "xml:CVehicleComponentSetManager": 1,
-    "xml:CVehicleDistantLightData": 1,
-    "xml:CVehiclePointsMeta": 1,
-    "xml:CWeaponActionHashToIndexMappings": 1,
-    "xml:Clock__Filter__Presets": 1,
-    "xml:Combat__GoalData__Store": 1,
-    "xml:Combat__Settings__ActionStore": 1,
-    "xml:Confront__StyleCollection": 1,
-    "xml:CoverShadowTunables": 1,
-    "xml:CustomClouds": 1,
-    "xml:DiffractionProfiles": 1,
-    "xml:EnvironmentalWaterDisturbManager": 1,
-    "xml:FogVolumeProfileList": 1,
-    "xml:GameShape__Data__LocationNameLoopkup": 1,
-    "xml:GameShape__Data__ManagerSettings": 1,
-    "xml:GlintsProfiles": 1,
-    "xml:InteractionFoam_Tunables": 1,
-    "xml:InteriorGroups": 1,
-    "xml:LUTColorblindnessVariationMap": 1,
-    "xml:LandingPageVideos": 1,
-    "xml:LightAnimationPresets": 1,
-    "xml:LostTargetSearch__Tunables": 1,
-    "xml:MainWaterTune": 1,
-    "xml:MapState__Data__Templates": 1,
-    "xml:MaterialDataList": 1,
-    "xml:Mindset__CMindsetDictionary": 1,
-    "xml:ModelTagMappings": 1,
-    "xml:ModelTags": 1,
-    "xml:Modular__SM__AIBehaviour__LockControllerConfig": 1,
-    "xml:Modular__SM__AmbientCompanion__Profile__CBuddyMindsetProfileDictionary": 1,
-    "xml:OceanSimPresets": 1,
-    "xml:OceanWaveCalmingCurves": 1,
-    "xml:PatchConstants": 1,
-    "xml:PathingStyleData": 1,
-    "xml:PedMotion__PedMotionData": 1,
-    "xml:PostFXSpline__Store": 1,
-    "xml:PromptInternal__PromptTunables": 1,
-    "xml:RegionTintMap": 1,
-    "xml:Relationships__GroupsData": 1,
-    "xml:Respawn__MetaData": 1,
-    "xml:RumbleProfileList": 1,
-    "xml:SMandatoryPacksData": 1,
-    "xml:STPedMotionPredictionSetContainer": 1,
-    "xml:STPedNavigationPredictiontPresetContainer": 1,
-    "xml:STS_Config": 1,
-    "xml:SoftBoundTuningList": 1,
-    "xml:SpecialAbilityTagTargetsSettings": 1,
-    "xml:Sprinklers__RootData": 1,
-    "xml:StudioConfigurationData": 1,
-    "xml:Tactical__PointValidation__DataStore": 1,
-    "xml:TargetScoring__ProfileDataStore_t_PedAccuracy__ScoringFactor__Enum": 1,
-    "xml:TargetScoring__ProfileDataStore_t_PedTargetScoring__ScoringFactor__Enum": 1,
-    "xml:TextureGridInfo": 1,
-    "xml:TyreProfileList": 1,
-    "xml:VehicleFragImpulseFunction": 1,
-    "xml:WalkAndTalkProfileData": 1,
-    "xml:WaterTessellationSettings__AllAllowancesAndThresholds": 1,
-    "xml:WeaponAnimations__ConfigData": 1,
-    "xml:WeaponAnimations__FullbodyControllerData": 1,
-    "xml:Witnesses__Informations": 1,
-    "xml:aiNavIMapGroupData": 1,
-    "xml:hrsSimTuneMgr": 1,
-    "xml:naSpeechEventTypeBatchRequestParams": 1,
-    "xml:rage__MediaDecoderSettings": 1,
-    "xml:rage__bgConfig": 1,
-    "xml:rage__crRetarget__SolversTunables": 1,
-    "xml:rage__fragTuneStruct": 1,
-    "xml:rage__fwRetargetCoordinatorConfig": 1,
-    "xml:rage__phMBS_MaterialParamsDatabase_Def": 1,
-    "xml:sCollisionEventScannerTuning": 1,
-    "xml:sPedDamageModifiers": 1,
-    "xml:sPedDistractionModifiers": 1,
-    "xml:time_data": 1
-   },
+   "archives": 171,
+   "identifications": {},
    "outcomes": {
     "identified": 72969,
     "unresolved": 92,
@@ -1264,9 +1054,9 @@
     "data.rpf",
     "levels.rpf",
     "navmeshes.rpf",
-    "core_bvh4.rpf",
-    "core_licenses_data.rpf",
-    "core_restofworld.rpf"
+    "pack/core_bvh4/core_bvh4.rpf",
+    "pack/core_licenses/core_licenses_data.rpf",
+    "pack/core_restofworld/core_restofworld.rpf"
    ],
    "capability": "archive",
    "entries": 4351,
@@ -1367,56 +1157,56 @@
      "size": 10304608
     },
     {
-     "archive": "core_bvh4.rpf",
-     "chain": "core_bvh4.rpf!0",
+     "archive": "pack/core_bvh4/core_bvh4.rpf",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!0",
      "head": "39465052f00c0000600b0000e003000036830e76a524e4df007a040050010000",
      "size": 707456
     },
     {
-     "archive": "core_bvh4.rpf",
-     "chain": "core_bvh4.rpf!1",
+     "archive": "pack/core_bvh4/core_bvh4.rpf",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!1",
      "head": "3946505210120000d00f0000e003000017bf70faa40dc26b007a040050010000",
      "size": 7211536
     },
     {
-     "archive": "core_bvh4.rpf",
-     "chain": "core_bvh4.rpf!2",
+     "archive": "pack/core_bvh4/core_bvh4.rpf",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!2",
      "head": "39465052409e01005060010020a400003e942ca369507bbe007a040050010000",
      "size": 9253920
     },
     {
-     "archive": "core_licenses_data.rpf",
-     "chain": "core_licenses_data.rpf!0",
+     "archive": "pack/core_licenses/core_licenses_data.rpf",
+     "chain": "pack/core_licenses/core_licenses_data.rpf!0",
      "head": "394650522003000000030000500000003ebc6832fd091054007a040050010000",
      "size": 7760
     },
     {
-     "archive": "core_restofworld.rpf",
-     "chain": "core_restofworld.rpf!0",
+     "archive": "pack/core_restofworld/core_restofworld.rpf",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!0",
      "head": "39465052b002000090020000500000004104a8ef7ca75efc007a040050010000",
      "size": 41360
     },
     {
-     "archive": "core_restofworld.rpf",
-     "chain": "core_restofworld.rpf!1",
+     "archive": "pack/core_restofworld/core_restofworld.rpf",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!1",
      "head": "39465052c0020000a002000070000000a3fe64d1c37c2b16007a040050010000",
      "size": 912
     },
     {
-     "archive": "core_restofworld.rpf",
-     "chain": "core_restofworld.rpf!2",
+     "archive": "pack/core_restofworld/core_restofworld.rpf",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!2",
      "head": "39465052a028010060090100004e0000db91e02f645f323b007a040050010000",
      "size": 22363648
     },
     {
-     "archive": "core_restofworld001.rpf",
-     "chain": "core_restofworld001.rpf!0",
+     "archive": "pack/core_restofworld001/core_restofworld001.rpf",
+     "chain": "pack/core_restofworld001/core_restofworld001.rpf!0",
      "head": "39465052b0070000e0060000500600006506a274ec5ac1a9007a040050010000",
      "size": 785200
     },
     {
-     "archive": "shared_minigame000.rpf",
-     "chain": "shared_minigame000.rpf!0",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!0",
      "head": "3946505230040000e0030000b00000001f00f294c6dbb731007a040050010000",
      "size": 79584
     }
@@ -1484,56 +1274,56 @@
      "size": 945120
     },
     {
-     "archive": "core_restofworld.rpf!8",
-     "chain": "core_restofworld.rpf!8!0",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!8",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!8!0",
      "head": "0000000000000000a01a005000000000b0170050000000000000000000000000",
      "size": 11040
     },
     {
-     "archive": "core_restofworld.rpf!8",
-     "chain": "core_restofworld.rpf!8!2",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!8",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!8!2",
      "head": "000000000000000080b900500000000040b50050000000000000000000000000",
      "size": 2981792
     },
     {
-     "archive": "core_restofworld.rpf!8",
-     "chain": "core_restofworld.rpf!8!6",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!8",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!8!6",
      "head": "00000000000000004033005000000000f02e0050000000000000000000000000",
      "size": 68816
     },
     {
-     "archive": "shared_minigame000.rpf!3",
-     "chain": "shared_minigame000.rpf!3!2",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!3",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!3!2",
      "head": "0000000000000000b02f005000000000802d0050000000000000000000000000",
      "size": 18976
     },
     {
-     "archive": "shared_minigame000.rpf!3",
-     "chain": "shared_minigame000.rpf!3!3",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!3",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!3!3",
      "head": "0000000000000000500800500000000030070050000000000000000000000000",
      "size": 2816
     },
     {
-     "archive": "shared_minigame000.rpf!3",
-     "chain": "shared_minigame000.rpf!3!4",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!3",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!3!4",
      "head": "0000000000000000d0ff005000000000c0620150000000000000000000000000",
      "size": 407376
     },
     {
-     "archive": "story000.rpf!6",
-     "chain": "story000.rpf!6!0",
+     "archive": "pack/story000/story000.rpf!6",
+     "chain": "pack/story000/story000.rpf!6!0",
      "head": "0000000000000000c09400500000000080930050000000000000000000000000",
      "size": 266752
     },
     {
-     "archive": "story000.rpf!6",
-     "chain": "story000.rpf!6!1",
+     "archive": "pack/story000/story000.rpf!6",
+     "chain": "pack/story000/story000.rpf!6!1",
      "head": "000000000000000030bb005000000000b0b90050000000000000000000000000",
      "size": 224048
     },
     {
-     "archive": "story000.rpf!6",
-     "chain": "story000.rpf!6!4",
+     "archive": "pack/story000/story000.rpf!6",
+     "chain": "pack/story000/story000.rpf!6!4",
      "head": "000000000000000080c400500000000040c30050000000000000000000000000",
      "size": 312496
     }
@@ -1601,38 +1391,38 @@
      "size": 84592
     },
     {
-     "archive": "core_restofworld.rpf!8",
-     "chain": "core_restofworld.rpf!8!33",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!8",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!8!33",
      "head": "0000000000000000b02a00500000000040260050000000007016005000000000",
      "size": 40720
     },
     {
-     "archive": "core_restofworld.rpf!8",
-     "chain": "core_restofworld.rpf!8!43",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!8",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!8!43",
      "head": "0000000000000000e029005000000000a025005000000000901a005000000000",
      "size": 42880
     },
     {
-     "archive": "core_restofworld.rpf!8",
-     "chain": "core_restofworld.rpf!8!82",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!8",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!8!82",
      "head": "0000000000000000301a0050000000006016005000000000100d005000000000",
      "size": 55696
     },
     {
-     "archive": "shared_minigame000.rpf!29",
-     "chain": "shared_minigame000.rpf!29!111",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!29",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!29!111",
      "head": "0000000000000000000d005000000000100c005000000000b007005000000000",
      "size": 82256
     },
     {
-     "archive": "shared_minigame000.rpf!29",
-     "chain": "shared_minigame000.rpf!29!174",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!29",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!29!174",
      "head": "0000000000000000008a0050000000000087005000000000207c005000000000",
      "size": 1019168
     },
     {
-     "archive": "shared_minigame000.rpf!29",
-     "chain": "shared_minigame000.rpf!29!179",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!29",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!29!179",
      "head": "00000000000000004015005000000000d013005000000000c00a005000000000",
      "size": 314624
     }
@@ -1739,38 +1529,38 @@
      "size": 69776
     },
     {
-     "archive": "core_restofworld.rpf!8",
-     "chain": "core_restofworld.rpf!8!1",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!8",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!8!1",
      "head": "000000000000000080770050000000003050005000000000003d005000000000",
      "size": 2164624
     },
     {
-     "archive": "core_restofworld.rpf!8",
-     "chain": "core_restofworld.rpf!8!3",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!8",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!8!3",
      "head": "0000000000000000e036005000000000a02c005000000000c027005000000000",
      "size": 161248
     },
     {
-     "archive": "core_restofworld.rpf!8",
-     "chain": "core_restofworld.rpf!8!4",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!8",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!8!4",
      "head": "0000000000000000702b005000000000a0150050000000007011005000000000",
      "size": 51328
     },
     {
-     "archive": "shared_minigame000.rpf!33",
-     "chain": "shared_minigame000.rpf!33!10",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!33",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!33!10",
      "head": "00000000000000006019005000000000800e0050000000008007005000000000",
      "size": 9840
     },
     {
-     "archive": "shared_minigame000.rpf!33",
-     "chain": "shared_minigame000.rpf!33!32",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!33",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!33!32",
      "head": "0000000000000000b096005000000000f05c005000000000f055005000000000",
      "size": 350528
     },
     {
-     "archive": "shared_minigame000.rpf!33",
-     "chain": "shared_minigame000.rpf!33!45",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!33",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!33!45",
      "head": "000000000000000050ab005000000000e06a005000000000e063005000000000",
      "size": 324800
     },
@@ -1838,8 +1628,8 @@
      "size": 137296
     },
     {
-     "archive": "shared_minigame000.rpf!33",
-     "chain": "shared_minigame000.rpf!33!94",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!33",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!33!94",
      "head": "0000000000000000601d0050000000000000000000000000d00e005000000000",
      "size": 192720
     }
@@ -1907,62 +1697,62 @@
      "size": 4480
     },
     {
-     "archive": "core_restofworld.rpf!2",
-     "chain": "core_restofworld.rpf!2!0",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!2",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!2!0",
      "head": "0000000000000000500b00500000000000000000000000000100000000000000",
      "size": 8640
     },
     {
-     "archive": "core_restofworld.rpf!2",
-     "chain": "core_restofworld.rpf!2!1",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!2",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!2!1",
      "head": "0000000000000000703900500000000000000000000000000100000000000000",
      "size": 212688
     },
     {
-     "archive": "core_restofworld.rpf!2",
-     "chain": "core_restofworld.rpf!2!2",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!2",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!2!2",
      "head": "0000000000000000006900500000000000000000000000000100000000000000",
      "size": 160224
     },
     {
-     "archive": "shared_minigame000.rpf!3",
-     "chain": "shared_minigame000.rpf!3!1",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!3",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!3!1",
      "head": "0000000000000000002000500000000000000000000000000100000000000000",
      "size": 122624
     },
     {
-     "archive": "shared_minigame000.rpf!3",
-     "chain": "shared_minigame000.rpf!3!5",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!3",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!3!5",
      "head": "0000000000000000e01000500000000000000000000000000100000000000000",
      "size": 9568
     },
     {
-     "archive": "shared_minigame000.rpf!3",
-     "chain": "shared_minigame000.rpf!3!20",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!3",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!3!20",
      "head": "0000000000000000900800500000000000000000000000000100000000000000",
      "size": 3056
     },
     {
-     "archive": "story000.rpf!131",
-     "chain": "story000.rpf!131!0",
+     "archive": "pack/story000/story000.rpf!131",
+     "chain": "pack/story000/story000.rpf!131!0",
      "head": "0000000000000000801b00500000000000000000000000000100000000000000",
      "size": 28512
     },
     {
-     "archive": "story000.rpf!131",
-     "chain": "story000.rpf!131!1",
+     "archive": "pack/story000/story000.rpf!131",
+     "chain": "pack/story000/story000.rpf!131!1",
      "head": "0000000000000000801b00500000000000000000000000000100000000000000",
      "size": 28736
     },
     {
-     "archive": "story000.rpf!131",
-     "chain": "story000.rpf!131!2",
+     "archive": "pack/story000/story000.rpf!131",
+     "chain": "pack/story000/story000.rpf!131!2",
      "head": "0000000000000000801b00500000000000000000000000000100000000000000",
      "size": 22944
     },
     {
-     "archive": "story000_restofworld.rpf!17",
-     "chain": "story000_restofworld.rpf!17!0",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf!17",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!17!0",
      "head": "0000000000000000f01c00500000000000000000000000000100000000000000",
      "size": 67088
     },
@@ -2086,38 +1876,38 @@
      "size": 524544
     },
     {
-     "archive": "core_restofworld.rpf!4",
-     "chain": "core_restofworld.rpf!4!0",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!4",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!4!0",
      "head": "0000000000000000700100500000000000000000000000000100000000000000",
      "size": 8624
     },
     {
-     "archive": "core_restofworld.rpf!4",
-     "chain": "core_restofworld.rpf!4!1",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!4",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!4!1",
      "head": "0000000000000000700100500000000000000000000000000100000000000000",
      "size": 8624
     },
     {
-     "archive": "core_restofworld.rpf!4",
-     "chain": "core_restofworld.rpf!4!2",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!4",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!4!2",
      "head": "0000000000000000e00000500000000000000000000000000100000000000000",
      "size": 4368
     },
     {
-     "archive": "shared_minigame000.rpf!11",
-     "chain": "shared_minigame000.rpf!11!0",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!11",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!11!0",
      "head": "0000000000000000e00000500000000000000000000000000100000000000000",
      "size": 2162960
     },
     {
-     "archive": "shared_minigame000.rpf!11",
-     "chain": "shared_minigame000.rpf!11!1",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!11",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!11!1",
      "head": "0000000000000000e00000500000000000000000000000000100000000000000",
      "size": 262416
     },
     {
-     "archive": "shared_minigame000.rpf!11",
-     "chain": "shared_minigame000.rpf!11!2",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!11",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!11!2",
      "head": "0000000000000000e00000500000000000000000000000000100000000000000",
      "size": 262416
     },
@@ -2185,38 +1975,38 @@
      "size": 147824
     },
     {
-     "archive": "shared_minigame000.rpf!3",
-     "chain": "shared_minigame000.rpf!3!0",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!3",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!3!0",
      "head": "000000000000000010a200500000000006010000924599420000000000000000",
      "size": 41648
     },
     {
-     "archive": "shared_minigame000.rpf!3",
-     "chain": "shared_minigame000.rpf!3!8",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!3",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!3!8",
      "head": "000000000000000080f70050000000000601000036812b420000000000000000",
      "size": 63424
     },
     {
-     "archive": "shared_minigame000.rpf!3",
-     "chain": "shared_minigame000.rpf!3!13",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!3",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!3!13",
      "head": "000000000000000070ff01500000000006010000fe3346420000000000000000",
      "size": 151776
     },
     {
-     "archive": "story000.rpf!6",
-     "chain": "story000.rpf!6!2",
+     "archive": "pack/story000/story000.rpf!6",
+     "chain": "pack/story000/story000.rpf!6!2",
      "head": "0000000000000000a020015000000000060100001513a1420000000000000000",
      "size": 73920
     },
     {
-     "archive": "story000.rpf!6",
-     "chain": "story000.rpf!6!3",
+     "archive": "pack/story000/story000.rpf!6",
+     "chain": "pack/story000/story000.rpf!6!3",
      "head": "0000000000000000b0ec085000000000060100002fb5e0420000000000000000",
      "size": 584928
     },
     {
-     "archive": "story000.rpf!6",
-     "chain": "story000.rpf!6!6",
+     "archive": "pack/story000/story000.rpf!6",
+     "chain": "pack/story000/story000.rpf!6!6",
      "head": "000000000000000020fe00500000000006010000ceac68420000000000000000",
      "size": 73200
     }
@@ -2340,44 +2130,44 @@
      "size": 10768
     },
     {
-     "archive": "shared_minigame000.rpf!44",
-     "chain": "shared_minigame000.rpf!44!0",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!44",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!44!0",
      "head": "00000000000000005001005000000000304452507a0000000000000000000000",
      "size": 4896
     },
     {
-     "archive": "story000.rpf!43",
-     "chain": "story000.rpf!43!0",
+     "archive": "pack/story000/story000.rpf!43",
+     "chain": "pack/story000/story000.rpf!43!0",
      "head": "0000000000000000e0b3005000000000304452507a0000000000000000000000",
      "size": 46800
     },
     {
-     "archive": "story000.rpf!43",
-     "chain": "story000.rpf!43!1",
+     "archive": "pack/story000/story000.rpf!43",
+     "chain": "pack/story000/story000.rpf!43!1",
      "head": "00000000000000000065025000000000304452507a0000000000000000000000",
      "size": 196608
     },
     {
-     "archive": "story000.rpf!43",
-     "chain": "story000.rpf!43!2",
+     "archive": "pack/story000/story000.rpf!43",
+     "chain": "pack/story000/story000.rpf!43!2",
      "head": "00000000000000008053005000000000304452507a0000000000000000000000",
      "size": 22224
     },
     {
-     "archive": "story000_restofworld.rpf!13",
-     "chain": "story000_restofworld.rpf!13!0",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf!13",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!13!0",
      "head": "000000000000000050ce035000000000304452507a0000000000000000000000",
      "size": 393216
     },
     {
-     "archive": "story000_restofworld.rpf!13",
-     "chain": "story000_restofworld.rpf!13!1",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf!13",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!13!1",
      "head": "0000000000000000202a065000000000304452507a0000000000000000000000",
      "size": 524288
     },
     {
-     "archive": "story000_restofworld.rpf!13",
-     "chain": "story000_restofworld.rpf!13!2",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf!13",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!13!2",
      "head": "0000000000000000e055065000000000304452507a0000000000000000000000",
      "size": 524288
     },
@@ -2499,74 +2289,74 @@
      "size": 109976
     },
     {
-     "archive": "core_restofworld.rpf",
-     "chain": "core_restofworld.rpf!20",
+     "archive": "pack/core_restofworld/core_restofworld.rpf",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!20",
      "head": "5053494e00007550d0a9e30300360000aaaaaaaaaaaaaaaa7f9743cc60030000",
      "size": 34464
     },
     {
-     "archive": "core_restofworld.rpf",
-     "chain": "core_restofworld.rpf!25",
+     "archive": "pack/core_restofworld/core_restofworld.rpf",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!25",
      "head": "5053494e0000b0d00101000000820000aaaaaaaaaaaaaaaa02010000081c0000",
      "size": 67200
     },
     {
-     "archive": "core_restofworld.rpf",
-     "chain": "core_restofworld.rpf!27",
+     "archive": "pack/core_restofworld/core_restofworld.rpf",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!27",
      "head": "5053494e0000456001010000a03c0000aaaaaaaaaaaaaaaa0201000070020000",
      "size": 23168
     },
     {
-     "archive": "shared_minigame000.rpf!0",
-     "chain": "shared_minigame000.rpf!0!3",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!0",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!0!3",
      "head": "5053494e00000070a1f0d59308000000aaaaaaaaaaaaaaaa808637b730000000",
      "size": 488
     },
     {
-     "archive": "shared_minigame000.rpf!1",
-     "chain": "shared_minigame000.rpf!1!3",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!1",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!1!3",
      "head": "5053494e00000070a1f0d59308000000aaaaaaaaaaaaaaaa808637b730000000",
      "size": 488
     },
     {
-     "archive": "shared_minigame000.rpf!6",
-     "chain": "shared_minigame000.rpf!6!3",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!6",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!6!3",
      "head": "5053494e00000070a1f0d59308000000aaaaaaaaaaaaaaaa808637b730000000",
      "size": 488
     },
     {
-     "archive": "story000.rpf!5",
-     "chain": "story000.rpf!5!319",
+     "archive": "pack/story000/story000.rpf!5",
+     "chain": "pack/story000/story000.rpf!5!319",
      "head": "5053494e00000220a1f0d59380000000aaaaaaaaaaaaaaaa808637b730000000",
      "size": 2472
     },
     {
-     "archive": "story000.rpf!8",
-     "chain": "story000.rpf!8!319",
+     "archive": "pack/story000/story000.rpf!8",
+     "chain": "pack/story000/story000.rpf!8!319",
      "head": "5053494e00000220a1f0d59380000000aaaaaaaaaaaaaaaa808637b730000000",
      "size": 2472
     },
     {
-     "archive": "story000.rpf!42",
-     "chain": "story000.rpf!42!0",
+     "archive": "pack/story000/story000.rpf!42",
+     "chain": "pack/story000/story000.rpf!42!0",
      "head": "5053494e000008e04c4efe40c0080000aaaaaaaaaaaaaaaa7070707070707070",
      "size": 2656
     },
     {
-     "archive": "story000_script.rpf!0",
-     "chain": "story000_script.rpf!0!0",
+     "archive": "pack/story000/story000_script.rpf!0",
+     "chain": "pack/story000/story000_script.rpf!0!0",
      "head": "5053494e000024600801000060000000aaaaaaaaaaaaaaaa4d00000070000000",
      "size": 13696
     },
     {
-     "archive": "story000_script.rpf!0",
-     "chain": "story000_script.rpf!0!1",
+     "archive": "pack/story000/story000_script.rpf!0",
+     "chain": "pack/story000/story000_script.rpf!0!1",
      "head": "5053494e00008f20bde686df18000000aaaaaaaaaaaaaaaa09010000a0000000",
      "size": 50376
     },
     {
-     "archive": "story000_script.rpf!0",
-     "chain": "story000_script.rpf!0!2",
+     "archive": "pack/story000/story000_script.rpf!0",
+     "chain": "pack/story000/story000_script.rpf!0!2",
      "head": "5053494e00002d600501000048030000aaaaaaaaaaaaaaaa0601000060000000",
      "size": 18248
     }
@@ -2586,8 +2376,8 @@
     "data.rpf!21",
     "data.rpf!35",
     "levels.rpf!1808",
-    "core_restofworld.rpf",
-    "core_restofworld.rpf!9"
+    "pack/core_restofworld/core_restofworld.rpf",
+    "pack/core_restofworld/core_restofworld.rpf!9"
    ],
    "capability": "structural",
    "entries": 1278,
@@ -2640,26 +2430,26 @@
      "size": 26230
     },
     {
-     "archive": "core_restofworld.rpf!9",
-     "chain": "core_restofworld.rpf!9!0",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!9",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!9!0",
      "head": "52424630fbff010000001700434d6f7669655375627469746c65436f6e746169",
      "size": 14109
     },
     {
-     "archive": "core_restofworld.rpf!9",
-     "chain": "core_restofworld.rpf!9!1",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!9",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!9!1",
      "head": "52424630fbff010000001700434d6f7669655375627469746c65436f6e746169",
      "size": 4117
     },
     {
-     "archive": "core_restofworld.rpf",
-     "chain": "core_restofworld.rpf!22",
+     "archive": "pack/core_restofworld/core_restofworld.rpf",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!22",
      "head": "52424630fbff010000001e005666785465787475726541746c61734d65746164",
      "size": 5138
     },
     {
-     "archive": "story000.rpf",
-     "chain": "story000.rpf!645",
+     "archive": "pack/story000/story000.rpf",
+     "chain": "pack/story000/story000.rpf!645",
      "head": "52424630fbff010000001e005666785465787475726541746c61734d65746164",
      "size": 18906
     },
@@ -2683,10 +2473,10 @@
     "data.rpf",
     "data.rpf!23",
     "levels.rpf",
-    "core_licenses_data.rpf!0",
-    "story000.rpf!147",
-    "story000.rpf!245",
-    "story000.rpf!67"
+    "pack/core_licenses/core_licenses_data.rpf!0",
+    "pack/story000/story000.rpf!147",
+    "pack/story000/story000.rpf!245",
+    "pack/story000/story000.rpf!67"
    ],
    "capability": "structural",
    "entries": 437,
@@ -2739,50 +2529,50 @@
      "size": 1432
     },
     {
-     "archive": "core_licenses_data.rpf!0",
-     "chain": "core_licenses_data.rpf!0!0",
+     "archive": "pack/core_licenses/core_licenses_data.rpf!0",
+     "chain": "pack/core_licenses/core_licenses_data.rpf!0!0",
      "head": "5053494e0000028040e3659e30000000aaaaaaaaaaaaaaaa0101000020020000",
      "size": 1320
     },
     {
-     "archive": "core_licenses_data.rpf!0",
-     "chain": "core_licenses_data.rpf!0!1",
+     "archive": "pack/core_licenses/core_licenses_data.rpf!0",
+     "chain": "pack/core_licenses/core_licenses_data.rpf!0!1",
      "head": "5053494e000002a040e3659e30000000aaaaaaaaaaaaaaaa0101000040020000",
      "size": 4152
     },
     {
-     "archive": "story000.rpf!67",
-     "chain": "story000.rpf!67!0",
+     "archive": "pack/story000/story000.rpf!67",
+     "chain": "pack/story000/story000.rpf!67!0",
      "head": "5053494e001e51906bd3a23600020000aaaaaaaaaaaaaaaae6164dd710000000",
      "size": 2295324
     },
     {
-     "archive": "story000.rpf!67",
-     "chain": "story000.rpf!67!1",
+     "archive": "pack/story000/story000.rpf!67",
+     "chain": "pack/story000/story000.rpf!67!1",
      "head": "5053494e00000aa09369d35e10020000aaaaaaaaaaaaaaaa0101000040060000",
      "size": 4784
     },
     {
-     "archive": "story000.rpf!147",
-     "chain": "story000.rpf!147!0",
+     "archive": "pack/story000/story000.rpf!147",
+     "chain": "pack/story000/story000.rpf!147!0",
      "head": "5053494e000927c00901000080100000aaaaaaaaaaaaaaaa0101000000c80100",
      "size": 694312
     },
     {
-     "archive": "story000_script.rpf!3",
-     "chain": "story000_script.rpf!3!0",
+     "archive": "pack/story000/story000_script.rpf!3",
+     "chain": "pack/story000/story000_script.rpf!3!0",
      "head": "5053494e00000340d823b6ae48000000aaaaaaaaaaaaaaaa31c6b48530020000",
      "size": 2608
     },
     {
-     "archive": "story000_script.rpf!3",
-     "chain": "story000_script.rpf!3!1",
+     "archive": "pack/story000/story000_script.rpf!3",
+     "chain": "pack/story000/story000_script.rpf!3!1",
      "head": "5053494e000008401600000010010000aaaaaaaaaaaaaaaa31c6b48540040000",
      "size": 4016
     },
     {
-     "archive": "story000_script.rpf!3",
-     "chain": "story000_script.rpf!3!2",
+     "archive": "pack/story000/story000_script.rpf!3",
+     "chain": "pack/story000/story000_script.rpf!3!2",
      "head": "5053494e000068c01600000028030000aaaaaaaaaaaaaaaa4400000070070000",
      "size": 34240
     },
@@ -2842,7 +2632,7 @@
    "archives": [
     "data.rpf",
     "data.rpf!21",
-    "story000.rpf!245",
+    "pack/story000/story000.rpf!245",
     "packs.rpf",
     "textures.rpf"
    ],
@@ -2873,20 +2663,20 @@
      "size": 3945
     },
     {
-     "archive": "story000.rpf!245",
-     "chain": "story000.rpf!245!14",
+     "archive": "pack/story000/story000.rpf!245",
+     "chain": "pack/story000/story000.rpf!245!14",
      "head": "52424630fbff010000002000416d6269656e7452756c65735f5f436f6e646974",
      "size": 190589
     },
     {
-     "archive": "story000.rpf!245",
-     "chain": "story000.rpf!245!52",
+     "archive": "pack/story000/story000.rpf!245",
+     "chain": "pack/story000/story000.rpf!245!52",
      "head": "52424630fbff010000002000416d6269656e7452756c65735f5f436f6e646974",
      "size": 85019
     },
     {
-     "archive": "story000.rpf!245",
-     "chain": "story000.rpf!245!56",
+     "archive": "pack/story000/story000.rpf!245",
+     "chain": "pack/story000/story000.rpf!245!56",
      "head": "52424630fbff010000002000416d6269656e7452756c65735f5f436f6e646974",
      "size": 12022
     },
@@ -3000,10 +2790,10 @@
   {
    "archive_count": 4,
    "archives": [
-    "story000.rpf!407",
-    "story000.rpf!410",
-    "story000.rpf!421",
-    "story000.rpf!90"
+    "pack/story000/story000.rpf!407",
+    "pack/story000/story000.rpf!410",
+    "pack/story000/story000.rpf!421",
+    "pack/story000/story000.rpf!90"
    ],
    "capability": "unavailable",
    "entries": 4,
@@ -3014,20 +2804,20 @@
    "payload": "transform-failed",
    "samples": [
     {
-     "archive": "story000.rpf!90",
-     "chain": "story000.rpf!90!0",
+     "archive": "pack/story000/story000.rpf!90",
+     "chain": "pack/story000/story000.rpf!90!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!407",
-     "chain": "story000.rpf!407!0",
+     "archive": "pack/story000/story000.rpf!407",
+     "chain": "pack/story000/story000.rpf!407!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!410",
-     "chain": "story000.rpf!410!0",
+     "archive": "pack/story000/story000.rpf!410",
+     "chain": "pack/story000/story000.rpf!410!0",
      "head": "",
      "size": null
     }
@@ -3093,7 +2883,7 @@
   {
    "archive_count": 1,
    "archives": [
-    "story000_script.rpf!2"
+    "pack/story000/story000_script.rpf!2"
    ],
    "capability": "bytes",
    "entries": 1,
@@ -3104,8 +2894,8 @@
    "payload": "decoded",
    "samples": [
     {
-     "archive": "story000_script.rpf!2",
-     "chain": "story000_script.rpf!2!0",
+     "archive": "pack/story000/story000_script.rpf!2",
+     "chain": "pack/story000/story000_script.rpf!2!0",
      "head": "5834040040430a001d001c0000000000583402006811000000000000a409011c",
      "size": 672576
     }
@@ -3119,14 +2909,14 @@
   {
    "archive_count": 1203,
    "archives": [
-    "core_bvh4.rpf!0",
-    "core_bvh4.rpf!1",
-    "core_bvh4.rpf!2",
-    "core_bvh4.rpf!3",
-    "core_bvh4.rpf!4",
-    "core_bvh4.rpf!5",
-    "core_bvh4.rpf!6",
-    "core_bvh4.rpf!7"
+    "pack/core_bvh4/core_bvh4.rpf!0",
+    "pack/core_bvh4/core_bvh4.rpf!1",
+    "pack/core_bvh4/core_bvh4.rpf!2",
+    "pack/core_bvh4/core_bvh4.rpf!3",
+    "pack/core_bvh4/core_bvh4.rpf!4",
+    "pack/core_bvh4/core_bvh4.rpf!5",
+    "pack/core_bvh4/core_bvh4.rpf!6",
+    "pack/core_bvh4/core_bvh4.rpf!7"
    ],
    "capability": "resource",
    "entries": 245666,
@@ -3137,38 +2927,38 @@
    "payload": "decoded",
    "samples": [
     {
-     "archive": "core_bvh4.rpf!0",
-     "chain": "core_bvh4.rpf!0!0",
+     "archive": "pack/core_bvh4/core_bvh4.rpf!0",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!0!0",
      "head": "000000000000000080000050000000000100000000000000a000005000000000",
      "size": 5840
     },
     {
-     "archive": "core_bvh4.rpf!0",
-     "chain": "core_bvh4.rpf!0!1",
+     "archive": "pack/core_bvh4/core_bvh4.rpf!0",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!0!1",
      "head": "000000000000000080000050000000000100000000000000a000005000000000",
      "size": 1376464
     },
     {
-     "archive": "core_bvh4.rpf!0",
-     "chain": "core_bvh4.rpf!0!2",
+     "archive": "pack/core_bvh4/core_bvh4.rpf!0",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!0!2",
      "head": "000000000000000080000050000000000100000000000000a000005000000000",
      "size": 9424
     },
     {
-     "archive": "shared_minigame000_bvh4.rpf!0",
-     "chain": "shared_minigame000_bvh4.rpf!0!1",
+     "archive": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf!0",
+     "chain": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf!0!1",
      "head": "000000000000000080000050000000000100000000000000a000005000000000",
      "size": 4816
     },
     {
-     "archive": "shared_minigame000_bvh4.rpf!0",
-     "chain": "shared_minigame000_bvh4.rpf!0!2",
+     "archive": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf!0",
+     "chain": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf!0!2",
      "head": "000000000000000080000050000000000100000000000000a000005000000000",
      "size": 131280
     },
     {
-     "archive": "shared_minigame000_bvh4.rpf!0",
-     "chain": "shared_minigame000_bvh4.rpf!0!3",
+     "archive": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf!0",
+     "chain": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf!0!3",
      "head": "000000000000000080000050000000000100000000000000a000005000000000",
      "size": 976
     }
@@ -3182,7 +2972,7 @@
   {
    "archive_count": 1,
    "archives": [
-    "core_bvh4.rpf!772"
+    "pack/core_bvh4/core_bvh4.rpf!772"
    ],
    "capability": "unavailable",
    "entries": 4768,
@@ -3193,20 +2983,20 @@
    "payload": "undecodable",
    "samples": [
     {
-     "archive": "core_bvh4.rpf!772",
-     "chain": "core_bvh4.rpf!772!0",
+     "archive": "pack/core_bvh4/core_bvh4.rpf!772",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!772!0",
      "head": "",
      "size": 131280
     },
     {
-     "archive": "core_bvh4.rpf!772",
-     "chain": "core_bvh4.rpf!772!1",
+     "archive": "pack/core_bvh4/core_bvh4.rpf!772",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!772!1",
      "head": "",
      "size": 196816
     },
     {
-     "archive": "core_bvh4.rpf!772",
-     "chain": "core_bvh4.rpf!772!2",
+     "archive": "pack/core_bvh4/core_bvh4.rpf!772",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!772!2",
      "head": "",
      "size": 11216
     }
@@ -3220,14 +3010,14 @@
   {
    "archive_count": 131,
    "archives": [
-    "core_bvh4.rpf!10",
-    "core_bvh4.rpf!13",
-    "core_bvh4.rpf!17",
-    "core_bvh4.rpf!2",
-    "core_bvh4.rpf!27",
-    "core_bvh4.rpf!33",
-    "core_bvh4.rpf!35",
-    "core_bvh4.rpf!7"
+    "pack/core_bvh4/core_bvh4.rpf!10",
+    "pack/core_bvh4/core_bvh4.rpf!13",
+    "pack/core_bvh4/core_bvh4.rpf!17",
+    "pack/core_bvh4/core_bvh4.rpf!2",
+    "pack/core_bvh4/core_bvh4.rpf!27",
+    "pack/core_bvh4/core_bvh4.rpf!33",
+    "pack/core_bvh4/core_bvh4.rpf!35",
+    "pack/core_bvh4/core_bvh4.rpf!7"
    ],
    "capability": "resource",
    "entries": 22126,
@@ -3238,38 +3028,38 @@
    "payload": "decoded",
    "samples": [
     {
-     "archive": "core_bvh4.rpf!2",
-     "chain": "core_bvh4.rpf!2!1",
+     "archive": "pack/core_bvh4/core_bvh4.rpf!2",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!2!1",
      "head": "0000000000000000e00000500000000000000000000000000100000000000000",
      "size": 272
     },
     {
-     "archive": "core_bvh4.rpf!2",
-     "chain": "core_bvh4.rpf!2!8",
+     "archive": "pack/core_bvh4/core_bvh4.rpf!2",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!2!8",
      "head": "0000000000000000e00000500000000000000000000000000100000000000000",
      "size": 272
     },
     {
-     "archive": "core_bvh4.rpf!2",
-     "chain": "core_bvh4.rpf!2!13",
+     "archive": "pack/core_bvh4/core_bvh4.rpf!2",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!2!13",
      "head": "0000000000000000e00000500000000000000000000000000100000000000000",
      "size": 272
     },
     {
-     "archive": "shared_minigame000_bvh4.rpf!0",
-     "chain": "shared_minigame000_bvh4.rpf!0!0",
+     "archive": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf!0",
+     "chain": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf!0!0",
      "head": "0000000000000000e00000500000000000000000000000000100000000000000",
      "size": 272
     },
     {
-     "archive": "shared_minigame000_bvh4.rpf!0",
-     "chain": "shared_minigame000_bvh4.rpf!0!8",
+     "archive": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf!0",
+     "chain": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf!0!8",
      "head": "0000000000000000800000500000000000000000000000000100000000000000",
      "size": 192
     },
     {
-     "archive": "shared_minigame000_bvh4.rpf!0",
-     "chain": "shared_minigame000_bvh4.rpf!0!20",
+     "archive": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf!0",
+     "chain": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf!0!20",
      "head": "0000000000000000600000500000000000000000000000000100000000000000",
      "size": 160
     }
@@ -3283,7 +3073,7 @@
   {
    "archive_count": 1,
    "archives": [
-    "core_bvh4.rpf!772"
+    "pack/core_bvh4/core_bvh4.rpf!772"
    ],
    "capability": "unavailable",
    "entries": 256,
@@ -3294,20 +3084,20 @@
    "payload": "undecodable",
    "samples": [
     {
-     "archive": "core_bvh4.rpf!772",
-     "chain": "core_bvh4.rpf!772!8",
+     "archive": "pack/core_bvh4/core_bvh4.rpf!772",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!772!8",
      "head": "",
      "size": 368
     },
     {
-     "archive": "core_bvh4.rpf!772",
-     "chain": "core_bvh4.rpf!772!13",
+     "archive": "pack/core_bvh4/core_bvh4.rpf!772",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!772!13",
      "head": "",
      "size": 240
     },
     {
-     "archive": "core_bvh4.rpf!772",
-     "chain": "core_bvh4.rpf!772!31",
+     "archive": "pack/core_bvh4/core_bvh4.rpf!772",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!772!31",
      "head": "",
      "size": 160
     }
@@ -3321,14 +3111,14 @@
   {
    "archive_count": 263,
    "archives": [
-    "core_bvh4.rpf!11",
-    "core_bvh4.rpf!13",
-    "core_bvh4.rpf!15",
-    "core_bvh4.rpf!19",
-    "core_bvh4.rpf!21",
-    "core_bvh4.rpf!23",
-    "core_bvh4.rpf!25",
-    "core_bvh4.rpf!26"
+    "pack/core_bvh4/core_bvh4.rpf!11",
+    "pack/core_bvh4/core_bvh4.rpf!13",
+    "pack/core_bvh4/core_bvh4.rpf!15",
+    "pack/core_bvh4/core_bvh4.rpf!19",
+    "pack/core_bvh4/core_bvh4.rpf!21",
+    "pack/core_bvh4/core_bvh4.rpf!23",
+    "pack/core_bvh4/core_bvh4.rpf!25",
+    "pack/core_bvh4/core_bvh4.rpf!26"
    ],
    "capability": "resource",
    "entries": 22440,
@@ -3339,38 +3129,38 @@
    "payload": "decoded",
    "samples": [
     {
-     "archive": "core_bvh4.rpf!11",
-     "chain": "core_bvh4.rpf!11!0",
+     "archive": "pack/core_bvh4/core_bvh4.rpf!11",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!11!0",
      "head": "0000000000000000b0000050000000000200000000000000d000005000000000",
      "size": 1114368
     },
     {
-     "archive": "core_bvh4.rpf!11",
-     "chain": "core_bvh4.rpf!11!1",
+     "archive": "pack/core_bvh4/core_bvh4.rpf!11",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!11!1",
      "head": "000000000000000080000050000000000100000000000000a000005000000000",
      "size": 1310928
     },
     {
-     "archive": "core_bvh4.rpf!11",
-     "chain": "core_bvh4.rpf!11!2",
+     "archive": "pack/core_bvh4/core_bvh4.rpf!11",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!11!2",
      "head": "000000000000000080000050000000000100000000000000a000005000000000",
      "size": 5072
     },
     {
-     "archive": "shared_minigame000_bvh4.rpf!2",
-     "chain": "shared_minigame000_bvh4.rpf!2!8",
+     "archive": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf!2",
+     "chain": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf!2!8",
      "head": "000000000000000080000050000000000100000000000000a000005000000000",
      "size": 3280
     },
     {
-     "archive": "shared_minigame000_bvh4.rpf!2",
-     "chain": "shared_minigame000_bvh4.rpf!2!29",
+     "archive": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf!2",
+     "chain": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf!2!29",
      "head": "000000000000000080000050000000000100000000000000a000005000000000",
      "size": 131280
     },
     {
-     "archive": "shared_minigame000_bvh4.rpf!2",
-     "chain": "shared_minigame000_bvh4.rpf!2!41",
+     "archive": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf!2",
+     "chain": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf!2!41",
      "head": "000000000000000080000050000000000100000000000000a000005000000000",
      "size": 131280
     }
@@ -3463,7 +3253,7 @@
    "archive_count": 2,
    "archives": [
     "anim.rpf!43",
-    "story000.rpf!84"
+    "pack/story000/story000.rpf!84"
    ],
    "capability": "bytes",
    "entries": 443,
@@ -3492,20 +3282,20 @@
      "size": 754
     },
     {
-     "archive": "story000.rpf!84",
-     "chain": "story000.rpf!84!0",
+     "archive": "pack/story000/story000.rpf!84",
+     "chain": "pack/story000/story000.rpf!84!0",
      "head": "4d6f56451300000000000000000000000000000063782e003403000000000000",
      "size": 871
     },
     {
-     "archive": "story000.rpf!84",
-     "chain": "story000.rpf!84!1",
+     "archive": "pack/story000/story000.rpf!84",
+     "chain": "pack/story000/story000.rpf!84!1",
      "head": "4d6f56451300000000000000000000000000000084ec5500c402000000000000",
      "size": 754
     },
     {
-     "archive": "story000.rpf!84",
-     "chain": "story000.rpf!84!2",
+     "archive": "pack/story000/story000.rpf!84",
+     "chain": "pack/story000/story000.rpf!84!2",
      "head": "4d6f5645130000000000000000000000000000003de85c002c0f000000000000",
      "size": 3935
     }
@@ -3617,74 +3407,74 @@
      "size": 3568
     },
     {
-     "archive": "core_restofworld.rpf!8",
-     "chain": "core_restofworld.rpf!8!128",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!8",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!8!128",
      "head": "0000000000000000900500500000000000000000000000000000000000000000",
      "size": 1504
     },
     {
-     "archive": "core_restofworld001.rpf!0",
-     "chain": "core_restofworld001.rpf!0!0",
+     "archive": "pack/core_restofworld001/core_restofworld001.rpf!0",
+     "chain": "pack/core_restofworld001/core_restofworld001.rpf!0!0",
      "head": "000000000000000020b201500000000000000000000000000000000000000000",
      "size": 131072
     },
     {
-     "archive": "core_restofworld001.rpf!0",
-     "chain": "core_restofworld001.rpf!0!1",
+     "archive": "pack/core_restofworld001/core_restofworld001.rpf!0",
+     "chain": "pack/core_restofworld001/core_restofworld001.rpf!0!1",
      "head": "0000000000000000f00b01500000000000000000000000000000000000000000",
      "size": 68752
     },
     {
-     "archive": "core_restofworld001.rpf!0",
-     "chain": "core_restofworld001.rpf!0!2",
+     "archive": "pack/core_restofworld001/core_restofworld001.rpf!0",
+     "chain": "pack/core_restofworld001/core_restofworld001.rpf!0!2",
      "head": "000000000000000000bc00500000000000000000000000000000000000000000",
      "size": 65536
     },
     {
-     "archive": "shared_minigame000.rpf!33",
-     "chain": "shared_minigame000.rpf!33!143",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!33",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!33!143",
      "head": "0000000000000000f08f00500000000000000000000000000000000000000000",
      "size": 37488
     },
     {
-     "archive": "shared_minigame000.rpf!46",
-     "chain": "shared_minigame000.rpf!46!473",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!46",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!46!473",
      "head": "0000000000000000801200500000000000000000000000000000000000000000",
      "size": 4912
     },
     {
-     "archive": "story000.rpf!4",
-     "chain": "story000.rpf!4!11",
+     "archive": "pack/story000/story000.rpf!4",
+     "chain": "pack/story000/story000.rpf!4!11",
      "head": "0000000000000000207708500000000000000000000000000000000000000000",
      "size": 555296
     },
     {
-     "archive": "story000.rpf!4",
-     "chain": "story000.rpf!4!29",
+     "archive": "pack/story000/story000.rpf!4",
+     "chain": "pack/story000/story000.rpf!4!29",
      "head": "0000000000000000c0f000500000000000000000000000000000000000000000",
      "size": 62048
     },
     {
-     "archive": "story000.rpf!4",
-     "chain": "story000.rpf!4!47",
+     "archive": "pack/story000/story000.rpf!4",
+     "chain": "pack/story000/story000.rpf!4!47",
      "head": "0000000000000000407d00500000000000000000000000000000000000000000",
      "size": 32272
     },
     {
-     "archive": "story000_restofworld.rpf!1",
-     "chain": "story000_restofworld.rpf!1!0",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf!1",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!1!0",
      "head": "0000000000000000103503500000000000000000000000000000000000000000",
      "size": 323376
     },
     {
-     "archive": "story000_restofworld.rpf!1",
-     "chain": "story000_restofworld.rpf!1!1",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf!1",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!1!1",
      "head": "0000000000000000c09a29500000000000000000000000000000000000000000",
      "size": 2728384
     },
     {
-     "archive": "story000_restofworld.rpf!1",
-     "chain": "story000_restofworld.rpf!1!2",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf!1",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!1!2",
      "head": "0000000000000000e0d700500000000000000000000000000000000000000000",
      "size": 55424
     }
@@ -3798,20 +3588,20 @@
      "size": 12064
     },
     {
-     "archive": "story000.rpf!341",
-     "chain": "story000.rpf!341!0",
+     "archive": "pack/story000/story000.rpf!341",
+     "chain": "pack/story000/story000.rpf!341!0",
      "head": "0000000000000000c0f400500000000000000000000000000000000000000000",
      "size": 65360
     },
     {
-     "archive": "story000.rpf!427",
-     "chain": "story000.rpf!427!0",
+     "archive": "pack/story000/story000.rpf!427",
+     "chain": "pack/story000/story000.rpf!427!0",
      "head": "0000000000000000701700500000000000000000000000000000000000000000",
      "size": 6496
     },
     {
-     "archive": "story000.rpf!427",
-     "chain": "story000.rpf!427!1",
+     "archive": "pack/story000/story000.rpf!427",
+     "chain": "pack/story000/story000.rpf!427!1",
      "head": "0000000000000000702300500000000000000000000000000000000000000000",
      "size": 9968
     }
@@ -3826,8 +3616,8 @@
    "archive_count": 3,
    "archives": [
     "data.rpf!29",
-    "core_restofworld.rpf!5",
-    "story000.rpf!295"
+    "pack/core_restofworld/core_restofworld.rpf!5",
+    "pack/story000/story000.rpf!295"
    ],
    "capability": "resource",
    "entries": 144,
@@ -3856,26 +3646,26 @@
      "size": 477824
     },
     {
-     "archive": "core_restofworld.rpf!5",
-     "chain": "core_restofworld.rpf!5!0",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!5",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!5!0",
      "head": "000000000000000030890750000000002a4d0950000000000000000000000000",
      "size": 695696
     },
     {
-     "archive": "story000.rpf!295",
-     "chain": "story000.rpf!295!3",
+     "archive": "pack/story000/story000.rpf!295",
+     "chain": "pack/story000/story000.rpf!295!3",
      "head": "0000000000000000704d015000000000fc7f0150000000000000000000000000",
      "size": 127184
     },
     {
-     "archive": "story000.rpf!295",
-     "chain": "story000.rpf!295!8",
+     "archive": "pack/story000/story000.rpf!295",
+     "chain": "pack/story000/story000.rpf!295!8",
      "head": "0000000000000000e010035000000000886d0350000000000000000000000000",
      "size": 262880
     },
     {
-     "archive": "story000.rpf!295",
-     "chain": "story000.rpf!295!11",
+     "archive": "pack/story000/story000.rpf!295",
+     "chain": "pack/story000/story000.rpf!295!11",
      "head": "0000000000000000f091025000000000f4120350000000000000000000000000",
      "size": 281600
     }
@@ -3890,8 +3680,8 @@
    "archive_count": 3,
    "archives": [
     "data.rpf!29",
-    "story000.rpf!295",
-    "story000_restofworld.rpf!12"
+    "pack/story000/story000.rpf!295",
+    "pack/story000_restofworld/story000_restofworld.rpf!12"
    ],
    "capability": "resource",
    "entries": 75,
@@ -3920,26 +3710,26 @@
      "size": 485904
     },
     {
-     "archive": "story000.rpf!295",
-     "chain": "story000.rpf!295!0",
+     "archive": "pack/story000/story000.rpf!295",
+     "chain": "pack/story000/story000.rpf!295!0",
      "head": "0000000000000000b0fc00500000000040170150000000000000000000000000",
      "size": 91152
     },
     {
-     "archive": "story000.rpf!295",
-     "chain": "story000.rpf!295!1",
+     "archive": "pack/story000/story000.rpf!295",
+     "chain": "pack/story000/story000.rpf!295!1",
      "head": "000000000000000000ef005000000000800d0150000000000000000000000000",
      "size": 84592
     },
     {
-     "archive": "story000.rpf!295",
-     "chain": "story000.rpf!295!2",
+     "archive": "pack/story000/story000.rpf!295",
+     "chain": "pack/story000/story000.rpf!295!2",
      "head": "0000000000000000b04100500000000000420050000000000000000000000000",
      "size": 19360
     },
     {
-     "archive": "story000_restofworld.rpf!12",
-     "chain": "story000_restofworld.rpf!12!0",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf!12",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!12!0",
      "head": "0000000000000000807704500000000060400550000000000000000000000000",
      "size": 417328
     }
@@ -3979,7 +3769,7 @@
   {
    "archive_count": 1,
    "archives": [
-    "story000.rpf!295"
+    "pack/story000/story000.rpf!295"
    ],
    "capability": "resource",
    "entries": 1,
@@ -3990,8 +3780,8 @@
    "payload": "decoded",
    "samples": [
     {
-     "archive": "story000.rpf!295",
-     "chain": "story000.rpf!295!47",
+     "archive": "pack/story000/story000.rpf!295",
+     "chain": "pack/story000/story000.rpf!295!47",
      "head": "0000000000000000002400500000000038240050000000000000000000000000",
      "size": 10528
     }
@@ -4031,7 +3821,7 @@
   {
    "archive_count": 1,
    "archives": [
-    "story000.rpf!295"
+    "pack/story000/story000.rpf!295"
    ],
    "capability": "resource",
    "entries": 1,
@@ -4042,8 +3832,8 @@
    "payload": "decoded",
    "samples": [
     {
-     "archive": "story000.rpf!295",
-     "chain": "story000.rpf!295!56",
+     "archive": "pack/story000/story000.rpf!295",
+     "chain": "pack/story000/story000.rpf!295!56",
      "head": "0000000000000000e05f00500000000048610050000000000000000000000000",
      "size": 28528
     }
@@ -4171,38 +3961,38 @@
      "size": 49936
     },
     {
-     "archive": "shared_minigame000.rpf!2",
-     "chain": "shared_minigame000.rpf!2!0",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!2",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!2!0",
      "head": "0000000000000000c004005000000000304452507a0000000000000000000000",
      "size": 3888
     },
     {
-     "archive": "shared_minigame000.rpf!2",
-     "chain": "shared_minigame000.rpf!2!1",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!2",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!2!1",
      "head": "0000000000000000700e005000000000304452507a0000000000000000000000",
      "size": 7968
     },
     {
-     "archive": "shared_minigame000.rpf!2",
-     "chain": "shared_minigame000.rpf!2!2",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!2",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!2!2",
      "head": "0000000000000000802a005000000000304452507a0000000000000000000000",
      "size": 17472
     },
     {
-     "archive": "story000.rpf!10",
-     "chain": "story000.rpf!10!0",
+     "archive": "pack/story000/story000.rpf!10",
+     "chain": "pack/story000/story000.rpf!10!0",
      "head": "0000000000000000900e005000000000304452507a0000000000000000000000",
      "size": 8096
     },
     {
-     "archive": "story000.rpf!10",
-     "chain": "story000.rpf!10!1",
+     "archive": "pack/story000/story000.rpf!10",
+     "chain": "pack/story000/story000.rpf!10!1",
      "head": "0000000000000000102b005000000000304452507a0000000000000000000000",
      "size": 17488
     },
     {
-     "archive": "story000.rpf!10",
-     "chain": "story000.rpf!10!2",
+     "archive": "pack/story000/story000.rpf!10",
+     "chain": "pack/story000/story000.rpf!10!2",
      "head": "0000000000000000102b005000000000304452507a0000000000000000000000",
      "size": 17632
     }
@@ -4293,44 +4083,44 @@
      "size": 131072
     },
     {
-     "archive": "core_restofworld.rpf!0",
-     "chain": "core_restofworld.rpf!0!0",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!0",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!0!0",
      "head": "0000000000000000e0a7005000000000304452507a0000000000000000000000",
      "size": 69488
     },
     {
-     "archive": "shared_minigame000.rpf!2",
-     "chain": "shared_minigame000.rpf!2!4",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!2",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!2!4",
      "head": "0000000000000000c044005000000000304452507a0000000000000000000000",
      "size": 22704
     },
     {
-     "archive": "shared_minigame000.rpf!2",
-     "chain": "shared_minigame000.rpf!2!5",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!2",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!2!5",
      "head": "00000000000000000002005000000000304452507a0000000000000000000000",
      "size": 1840
     },
     {
-     "archive": "shared_minigame000.rpf!2",
-     "chain": "shared_minigame000.rpf!2!6",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!2",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!2!6",
      "head": "0000000000000000303c005000000000304452507a0000000000000000000000",
      "size": 21712
     },
     {
-     "archive": "story000.rpf!10",
-     "chain": "story000.rpf!10!68",
+     "archive": "pack/story000/story000.rpf!10",
+     "chain": "pack/story000/story000.rpf!10!68",
      "head": "0000000000000000f046005000000000304452507a0000000000000000000000",
      "size": 23728
     },
     {
-     "archive": "story000.rpf!10",
-     "chain": "story000.rpf!10!69",
+     "archive": "pack/story000/story000.rpf!10",
+     "chain": "pack/story000/story000.rpf!10!69",
      "head": "0000000000000000b010005000000000304452507a0000000000000000000000",
      "size": 6640
     },
     {
-     "archive": "story000.rpf!10",
-     "chain": "story000.rpf!10!70",
+     "archive": "pack/story000/story000.rpf!10",
+     "chain": "pack/story000/story000.rpf!10!70",
      "head": "0000000000000000e03c005000000000304452507a0000000000000000000000",
      "size": 21344
     },
@@ -4433,14 +4223,14 @@
   {
    "archive_count": 131,
    "archives": [
-    "story000.rpf!11",
-    "story000.rpf!12",
-    "story000.rpf!13",
-    "story000.rpf!16",
-    "story000.rpf!19",
-    "story000.rpf!20",
-    "story000.rpf!25",
-    "story000.rpf!4"
+    "pack/story000/story000.rpf!11",
+    "pack/story000/story000.rpf!12",
+    "pack/story000/story000.rpf!13",
+    "pack/story000/story000.rpf!16",
+    "pack/story000/story000.rpf!19",
+    "pack/story000/story000.rpf!20",
+    "pack/story000/story000.rpf!25",
+    "pack/story000/story000.rpf!4"
    ],
    "capability": "resource",
    "entries": 25608,
@@ -4451,38 +4241,38 @@
    "payload": "decoded",
    "samples": [
     {
-     "archive": "story000.rpf!4",
-     "chain": "story000.rpf!4!0",
+     "archive": "pack/story000/story000.rpf!4",
+     "chain": "pack/story000/story000.rpf!4!0",
      "head": "0000000000000000b08200500000000000000000000000000000000000000000",
      "size": 33488
     },
     {
-     "archive": "story000.rpf!4",
-     "chain": "story000.rpf!4!1",
+     "archive": "pack/story000/story000.rpf!4",
+     "chain": "pack/story000/story000.rpf!4!1",
      "head": "0000000000000000207201500000000000000000000000000000000000000000",
      "size": 131072
     },
     {
-     "archive": "story000.rpf!4",
-     "chain": "story000.rpf!4!2",
+     "archive": "pack/story000/story000.rpf!4",
+     "chain": "pack/story000/story000.rpf!4!2",
      "head": "0000000000000000600400500000000000000000000000000000000000000000",
      "size": 1152
     },
     {
-     "archive": "story000_restofworld.rpf!2",
-     "chain": "story000_restofworld.rpf!2!0",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf!2",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!2!0",
      "head": "0000000000000000c0db02500000000000000000000000000000000000000000",
      "size": 196608
     },
     {
-     "archive": "story000_restofworld.rpf!2",
-     "chain": "story000_restofworld.rpf!2!1",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf!2",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!2!1",
      "head": "0000000000000000c00300500000000000000000000000000000000000000000",
      "size": 992
     },
     {
-     "archive": "story000_restofworld.rpf!2",
-     "chain": "story000_restofworld.rpf!2!2",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf!2",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!2!2",
      "head": "0000000000000000902700500000000000000000000000000000000000000000",
      "size": 10160
     }
@@ -4615,38 +4405,38 @@
      "size": 241920
     },
     {
-     "archive": "story000.rpf!1",
-     "chain": "story000.rpf!1!0",
+     "archive": "pack/story000/story000.rpf!1",
+     "chain": "pack/story000/story000.rpf!1!0",
      "head": "0000000000000000e0ff095000000000304452507a0000000000000000000000",
      "size": 706144
     },
     {
-     "archive": "story000.rpf!1",
-     "chain": "story000.rpf!1!1",
+     "archive": "pack/story000/story000.rpf!1",
+     "chain": "pack/story000/story000.rpf!1!1",
      "head": "00000000000000002058025000000000304452507a0000000000000000000000",
      "size": 197920
     },
     {
-     "archive": "story000.rpf!1",
-     "chain": "story000.rpf!1!2",
+     "archive": "pack/story000/story000.rpf!1",
+     "chain": "pack/story000/story000.rpf!1!2",
      "head": "00000000000000008072025000000000304452507a0000000000000000000000",
      "size": 207856
     },
     {
-     "archive": "story000_restofworld.rpf!5",
-     "chain": "story000_restofworld.rpf!5!0",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf!5",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!5!0",
      "head": "0000000000000000f0a6025000000000304452507a0000000000000000000000",
      "size": 225568
     },
     {
-     "archive": "story000_restofworld.rpf!5",
-     "chain": "story000_restofworld.rpf!5!1",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf!5",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!5!1",
      "head": "000000000000000090c8005000000000304452507a0000000000000000000000",
      "size": 73936
     },
     {
-     "archive": "story000_restofworld.rpf!5",
-     "chain": "story000_restofworld.rpf!5!2",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf!5",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!5!2",
      "head": "00000000000000002096005000000000304452507a0000000000000000000000",
      "size": 79936
     }
@@ -4660,8 +4450,8 @@
   {
    "archive_count": 5,
    "archives": [
-    "core_restofworld.rpf!7",
-    "shared_minigame000.rpf!19",
+    "pack/core_restofworld/core_restofworld.rpf!7",
+    "pack/shared_minigame000/shared_minigame000.rpf!19",
     "packs.rpf!2",
     "packs.rpf!23",
     "packs.rpf!50"
@@ -4675,38 +4465,38 @@
    "payload": "decoded",
    "samples": [
     {
-     "archive": "core_restofworld.rpf!7",
-     "chain": "core_restofworld.rpf!7!0",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!7",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!7!0",
      "head": "0000000000000000e001005000000000000000000000000000000300b33d8f7d",
      "size": 2496
     },
     {
-     "archive": "core_restofworld.rpf!7",
-     "chain": "core_restofworld.rpf!7!1",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!7",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!7!1",
      "head": "0000000000000000f001005000000000000000000000000000000300b33d8f7d",
      "size": 2448
     },
     {
-     "archive": "core_restofworld.rpf!7",
-     "chain": "core_restofworld.rpf!7!2",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!7",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!7!2",
      "head": "00000000000000000002005000000000000000000000000000000300b33d8f7d",
      "size": 3328
     },
     {
-     "archive": "shared_minigame000.rpf!19",
-     "chain": "shared_minigame000.rpf!19!0",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!19",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!19!0",
      "head": "0000000000000000008c00500000000000000000000000000000027f00000000",
      "size": 35936
     },
     {
-     "archive": "shared_minigame000.rpf!19",
-     "chain": "shared_minigame000.rpf!19!1",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!19",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!19!1",
      "head": "00000000000000002004005000000000000000000000000000ff0500b33d8f7d",
      "size": 1088
     },
     {
-     "archive": "shared_minigame000.rpf!19",
-     "chain": "shared_minigame000.rpf!19!2",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!19",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!19!2",
      "head": "0000000000000000506d00500000000000000000000000000000027f00000000",
      "size": 28032
     },
@@ -4854,7 +4644,7 @@
   {
    "archive_count": 2,
    "archives": [
-    "story000_script.rpf!1",
+    "pack/story000/story000_script.rpf!1",
     "script.rpf!0"
    ],
    "capability": "unavailable",
@@ -4866,20 +4656,20 @@
    "payload": "transform-failed",
    "samples": [
     {
-     "archive": "story000_script.rpf!1",
-     "chain": "story000_script.rpf!1!0",
+     "archive": "pack/story000/story000_script.rpf!1",
+     "chain": "pack/story000/story000_script.rpf!1!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000_script.rpf!1",
-     "chain": "story000_script.rpf!1!1",
+     "archive": "pack/story000/story000_script.rpf!1",
+     "chain": "pack/story000/story000_script.rpf!1!1",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000_script.rpf!1",
-     "chain": "story000_script.rpf!1!2",
+     "archive": "pack/story000/story000_script.rpf!1",
+     "chain": "pack/story000/story000_script.rpf!1!2",
      "head": "",
      "size": null
     },
@@ -5290,7 +5080,7 @@
   {
    "archive_count": 17,
    "archives": [
-    "core_restofworld.rpf!2",
+    "pack/core_restofworld/core_restofworld.rpf!2",
     "packs.rpf!11",
     "packs.rpf!24",
     "packs.rpf!27",
@@ -5308,20 +5098,20 @@
    "payload": "decoded",
    "samples": [
     {
-     "archive": "core_restofworld.rpf!2",
-     "chain": "core_restofworld.rpf!2!795",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!2",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!2!795",
      "head": "0000000000000000d00000500000000070000050000000000000000000000000",
      "size": 131312
     },
     {
-     "archive": "core_restofworld.rpf!2",
-     "chain": "core_restofworld.rpf!2!796",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!2",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!2!796",
      "head": "0000000000000000d00000500000000070000050000000000000000000000000",
      "size": 5072
     },
     {
-     "archive": "core_restofworld.rpf!2",
-     "chain": "core_restofworld.rpf!2!797",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!2",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!2!797",
      "head": "0000000000000000d00000500000000070000050000000000000000000000000",
      "size": 13712
     },
@@ -5431,8 +5221,8 @@
    "archives": [
     "anim.rpf!26",
     "anim.rpf!79",
-    "story000.rpf!142",
-    "story000_restofworld.rpf!4"
+    "pack/story000/story000.rpf!142",
+    "pack/story000_restofworld/story000_restofworld.rpf!4"
    ],
    "capability": "resource",
    "entries": 32878,
@@ -5461,38 +5251,38 @@
      "size": 379312
     },
     {
-     "archive": "story000.rpf!142",
-     "chain": "story000.rpf!142!0",
+     "archive": "pack/story000/story000.rpf!142",
+     "chain": "pack/story000/story000.rpf!142!0",
      "head": "0000000000000000e0ff005000000000304452507a0000000000000000000000",
      "size": 127600
     },
     {
-     "archive": "story000.rpf!142",
-     "chain": "story000.rpf!142!1",
+     "archive": "pack/story000/story000.rpf!142",
+     "chain": "pack/story000/story000.rpf!142!1",
      "head": "000000000000000040a2015000000000304452507a0000000000000000000000",
      "size": 127616
     },
     {
-     "archive": "story000.rpf!142",
-     "chain": "story000.rpf!142!2",
+     "archive": "pack/story000/story000.rpf!142",
+     "chain": "pack/story000/story000.rpf!142!2",
      "head": "0000000000000000a0ff005000000000304452507a0000000000000000000000",
      "size": 109344
     },
     {
-     "archive": "story000_restofworld.rpf!4",
-     "chain": "story000_restofworld.rpf!4!0",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf!4",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!4!0",
      "head": "00000000000000005087005000000000304452507a0000000000000000000000",
      "size": 65536
     },
     {
-     "archive": "story000_restofworld.rpf!4",
-     "chain": "story000_restofworld.rpf!4!1",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf!4",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!4!1",
      "head": "00000000000000005087005000000000304452507a0000000000000000000000",
      "size": 65536
     },
     {
-     "archive": "story000_restofworld.rpf!4",
-     "chain": "story000_restofworld.rpf!4!2",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf!4",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!4!2",
      "head": "0000000000000000c086005000000000304452507a0000000000000000000000",
      "size": 65536
     }
@@ -5547,8 +5337,8 @@
   {
    "archive_count": 5,
    "archives": [
-    "core_restofworld.rpf!3",
-    "shared_minigame000.rpf!36",
+    "pack/core_restofworld/core_restofworld.rpf!3",
+    "pack/shared_minigame000/shared_minigame000.rpf!36",
     "packs.rpf!15",
     "packs.rpf!4",
     "packs.rpf!5"
@@ -5562,14 +5352,14 @@
    "payload": "decoded",
    "samples": [
     {
-     "archive": "core_restofworld.rpf!3",
-     "chain": "core_restofworld.rpf!3!0",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!3",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!3!0",
      "head": "0000000000000000200500500000000002000000060000006000005000000000",
      "size": 1360
     },
     {
-     "archive": "shared_minigame000.rpf!36",
-     "chain": "shared_minigame000.rpf!36!0",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!36",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!36!0",
      "head": "0000000000000000e005005000000000020000000b0000006000005000000000",
      "size": 1584
     },
@@ -5637,38 +5427,38 @@
      "size": 27264
     },
     {
-     "archive": "shared_minigame000.rpf!0",
-     "chain": "shared_minigame000.rpf!0!0",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!0",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!0!0",
      "head": "0000000000000000506d005000000000304452507a0000000000000000000000",
      "size": 28320
     },
     {
-     "archive": "shared_minigame000.rpf!0",
-     "chain": "shared_minigame000.rpf!0!1",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!0",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!0!1",
      "head": "00000000000000005006005000000000304452507a0000000000000000000000",
      "size": 1952
     },
     {
-     "archive": "shared_minigame000.rpf!0",
-     "chain": "shared_minigame000.rpf!0!2",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!0",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!0!2",
      "head": "0000000000000000f004005000000000304452507a0000000000000000000000",
      "size": 1600
     },
     {
-     "archive": "story000.rpf!5",
-     "chain": "story000.rpf!5!0",
+     "archive": "pack/story000/story000.rpf!5",
+     "chain": "pack/story000/story000.rpf!5!0",
      "head": "0000000000000000300b005000000000304452507a0000000000000000000000",
      "size": 3200
     },
     {
-     "archive": "story000.rpf!5",
-     "chain": "story000.rpf!5!1",
+     "archive": "pack/story000/story000.rpf!5",
+     "chain": "pack/story000/story000.rpf!5!1",
      "head": "0000000000000000c068005000000000304452507a0000000000000000000000",
      "size": 27152
     },
     {
-     "archive": "story000.rpf!5",
-     "chain": "story000.rpf!5!2",
+     "archive": "pack/story000/story000.rpf!5",
+     "chain": "pack/story000/story000.rpf!5!2",
      "head": "0000000000000000500d005000000000304452507a0000000000000000000000",
      "size": 3744
     }
@@ -5874,56 +5664,56 @@
      "size": 92256
     },
     {
-     "archive": "shared_minigame000.rpf!7",
-     "chain": "shared_minigame000.rpf!7!0",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!7",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!7!0",
      "head": "41444154010021ff4d000000f60b00000000040008000b000f00130017001a00",
      "size": 589856
     },
     {
-     "archive": "shared_minigame000.rpf!7",
-     "chain": "shared_minigame000.rpf!7!1",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!7",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!7!1",
      "head": "41444154010021ff74000000741100000000030007000a000e00120015001800",
      "size": 1027712
     },
     {
-     "archive": "shared_minigame000.rpf!7",
-     "chain": "shared_minigame000.rpf!7!2",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!7",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!7!2",
      "head": "41444154010021ff1c000000ac0400000000040008000c001000140018001c00",
      "size": 80416
     },
     {
-     "archive": "story000.rpf!0",
-     "chain": "story000.rpf!0!0",
+     "archive": "pack/story000/story000.rpf!0",
+     "chain": "pack/story000/story000.rpf!0!0",
      "head": "41444154010002ff010000004c000000c40087f12cf600400a0000364c000000",
      "size": 63344
     },
     {
-     "archive": "story000.rpf!0",
-     "chain": "story000.rpf!0!1",
+     "archive": "pack/story000/story000.rpf!0",
+     "chain": "pack/story000/story000.rpf!0!1",
      "head": "41444154010002ff010000004c000000024b2ae39c2801a0090000364c000000",
      "size": 76776
     },
     {
-     "archive": "story000.rpf!0",
-     "chain": "story000.rpf!0!2",
+     "archive": "pack/story000/story000.rpf!0",
+     "chain": "pack/story000/story000.rpf!0!2",
      "head": "41444154010002ff02000000880000008411d8eb8968ebef283d000001000036",
      "size": 36912
     },
     {
-     "archive": "story000_restofworld.rpf!3",
-     "chain": "story000_restofworld.rpf!3!0",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf!3",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!3!0",
      "head": "41444154010002ff0600000078010000f65689e25c7f16e7bf3130e78cd21aeb",
      "size": 146048
     },
     {
-     "archive": "story000_restofworld.rpf!3",
-     "chain": "story000_restofworld.rpf!3!1",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf!3",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!3!1",
      "head": "41444154010002ff03000000c4000000ab95dae2bcd658f705b2d1fbd44a0060",
      "size": 57032
     },
     {
-     "archive": "story000_restofworld.rpf!16",
-     "chain": "story000_restofworld.rpf!16!0",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf!16",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!16!0",
      "head": "41444154010025ff070000007a0000000000030003000300030003000300ce13",
      "size": 1925600
     }
@@ -5938,9 +5728,9 @@
    "archive_count": 4,
    "archives": [
     "movies.rpf",
-    "core_restofworld.rpf",
-    "story000.rpf",
-    "story000_restofworld.rpf"
+    "pack/core_restofworld/core_restofworld.rpf",
+    "pack/story000/story000.rpf",
+    "pack/story000_restofworld/story000_restofworld.rpf"
    ],
    "capability": "structural",
    "entries": 797,
@@ -5969,56 +5759,56 @@
      "size": 2214456
     },
     {
-     "archive": "core_restofworld.rpf",
-     "chain": "core_restofworld.rpf!12",
+     "archive": "pack/core_restofworld/core_restofworld.rpf",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!12",
      "head": "4b42326e14cd930a88200000687b03008820000080070000380400001e000000",
      "size": 177458460
     },
     {
-     "archive": "core_restofworld.rpf",
-     "chain": "core_restofworld.rpf!13",
+     "archive": "pack/core_restofworld/core_restofworld.rpf",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!13",
      "head": "4b42326e340d1301da020000e81c0100da02000080070000380400001e000000",
      "size": 18025788
     },
     {
-     "archive": "core_restofworld.rpf",
-     "chain": "core_restofworld.rpf!14",
+     "archive": "pack/core_restofworld/core_restofworld.rpf",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!14",
      "head": "4b42326e7c24ac00c20100001c920100c201000080070000380400001e000000",
      "size": 11281540
     },
     {
-     "archive": "story000.rpf",
-     "chain": "story000.rpf!441",
+     "archive": "pack/story000/story000.rpf",
+     "chain": "pack/story000/story000.rpf!441",
      "head": "4b42326e2c627b002c010000d0e600002c01000000080000d00200001e000000",
      "size": 8086068
     },
     {
-     "archive": "story000.rpf",
-     "chain": "story000.rpf!442",
+     "archive": "pack/story000/story000.rpf",
+     "chain": "pack/story000/story000.rpf!442",
      "head": "4b42326ea4375c00c3010000f8e10000c3010000d0020000000500001e000000",
      "size": 6043564
     },
     {
-     "archive": "story000.rpf",
-     "chain": "story000.rpf!443",
+     "archive": "pack/story000/story000.rpf",
+     "chain": "pack/story000/story000.rpf!443",
      "head": "4b42326e28a21d00d90000004c690100d900000080070000380400001e000000",
      "size": 1942064
     },
     {
-     "archive": "story000_restofworld.rpf",
-     "chain": "story000_restofworld.rpf!21",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!21",
      "head": "4b42326ea8fa5600a9010000d8ce0000a9010000d0020000000500001e000000",
      "size": 5700272
     },
     {
-     "archive": "story000_restofworld.rpf",
-     "chain": "story000_restofworld.rpf!22",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!22",
      "head": "4b42326ef03fd703780c0000ac250100780c000080070000380400001e000000",
      "size": 64438264
     },
     {
-     "archive": "story000_restofworld.rpf",
-     "chain": "story000_restofworld.rpf!23",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!23",
      "head": "4b42326ea8ec84008b020000500c01008b020000d0020000000500001e000000",
      "size": 8711344
     }
@@ -6033,13 +5823,13 @@
    "archive_count": 10,
    "archives": [
     "common.rpf",
-    "core_bvh4.rpf",
-    "core_licenses_data.rpf",
-    "core_restofworld.rpf",
-    "core_restofworld001.rpf",
-    "shared_minigame000.rpf",
-    "shared_minigame000_bvh4.rpf",
-    "story000.rpf"
+    "pack/core_bvh4/core_bvh4.rpf",
+    "pack/core_licenses/core_licenses_data.rpf",
+    "pack/core_restofworld/core_restofworld.rpf",
+    "pack/core_restofworld001/core_restofworld001.rpf",
+    "pack/shared_minigame000/shared_minigame000.rpf",
+    "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf",
+    "pack/story000/story000.rpf"
    ],
    "capability": "text",
    "entries": 96,
@@ -6068,128 +5858,128 @@
      "size": 648
     },
     {
-     "archive": "core_bvh4.rpf",
-     "chain": "core_bvh4.rpf!1281",
+     "archive": "pack/core_bvh4/core_bvh4.rpf",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!1281",
      "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
      "size": 157888
     },
     {
-     "archive": "core_bvh4.rpf",
-     "chain": "core_bvh4.rpf!1282",
+     "archive": "pack/core_bvh4/core_bvh4.rpf",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!1282",
      "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
      "size": 157888
     },
     {
-     "archive": "core_bvh4.rpf",
-     "chain": "core_bvh4.rpf!1283",
+     "archive": "pack/core_bvh4/core_bvh4.rpf",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!1283",
      "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
      "size": 157888
     },
     {
-     "archive": "core_licenses_data.rpf",
-     "chain": "core_licenses_data.rpf!1",
+     "archive": "pack/core_licenses/core_licenses_data.rpf",
+     "chain": "pack/core_licenses/core_licenses_data.rpf!1",
      "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
      "size": 763
     },
     {
-     "archive": "core_restofworld.rpf",
-     "chain": "core_restofworld.rpf!10",
+     "archive": "pack/core_restofworld/core_restofworld.rpf",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!10",
      "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
      "size": 771
     },
     {
-     "archive": "core_restofworld.rpf",
-     "chain": "core_restofworld.rpf!11",
+     "archive": "pack/core_restofworld/core_restofworld.rpf",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!11",
      "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
      "size": 2018
     },
     {
-     "archive": "core_restofworld.rpf",
-     "chain": "core_restofworld.rpf!17",
+     "archive": "pack/core_restofworld/core_restofworld.rpf",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!17",
      "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
      "size": 1412
     },
     {
-     "archive": "core_restofworld001.rpf",
-     "chain": "core_restofworld001.rpf!2",
+     "archive": "pack/core_restofworld001/core_restofworld001.rpf",
+     "chain": "pack/core_restofworld001/core_restofworld001.rpf!2",
      "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
      "size": 777
     },
     {
-     "archive": "core_restofworld001.rpf",
-     "chain": "core_restofworld001.rpf!3",
+     "archive": "pack/core_restofworld001/core_restofworld001.rpf",
+     "chain": "pack/core_restofworld001/core_restofworld001.rpf!3",
      "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
      "size": 961
     },
     {
-     "archive": "shared_minigame000.rpf",
-     "chain": "shared_minigame000.rpf!49",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!49",
      "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
      "size": 3419
     },
     {
-     "archive": "shared_minigame000.rpf",
-     "chain": "shared_minigame000.rpf!50",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!50",
      "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
      "size": 1018
     },
     {
-     "archive": "shared_minigame000.rpf",
-     "chain": "shared_minigame000.rpf!51",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!51",
      "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
      "size": 1183
     },
     {
-     "archive": "shared_minigame000_bvh4.rpf",
-     "chain": "shared_minigame000_bvh4.rpf!8",
+     "archive": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf",
+     "chain": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf!8",
      "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
      "size": 1479
     },
     {
-     "archive": "shared_minigame000_bvh4.rpf",
-     "chain": "shared_minigame000_bvh4.rpf!9",
+     "archive": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf",
+     "chain": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf!9",
      "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
      "size": 981
     },
     {
-     "archive": "shared_minigame000_bvh4.rpf",
-     "chain": "shared_minigame000_bvh4.rpf!12",
+     "archive": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf",
+     "chain": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf!12",
      "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
      "size": 1041
     },
     {
-     "archive": "story000.rpf",
-     "chain": "story000.rpf!456",
+     "archive": "pack/story000/story000.rpf",
+     "chain": "pack/story000/story000.rpf!456",
      "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
      "size": 754
     },
     {
-     "archive": "story000.rpf",
-     "chain": "story000.rpf!458",
+     "archive": "pack/story000/story000.rpf",
+     "chain": "pack/story000/story000.rpf!458",
      "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
      "size": 1003
     },
     {
-     "archive": "story000.rpf",
-     "chain": "story000.rpf!470",
+     "archive": "pack/story000/story000.rpf",
+     "chain": "pack/story000/story000.rpf!470",
      "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
      "size": 3377
     },
     {
-     "archive": "story000_bvh4.rpf",
-     "chain": "story000_bvh4.rpf!0",
+     "archive": "pack/story000_bvh4/story000_bvh4.rpf",
+     "chain": "pack/story000_bvh4/story000_bvh4.rpf!0",
      "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
      "size": 800
     },
     {
-     "archive": "story000_bvh4.rpf",
-     "chain": "story000_bvh4.rpf!1",
+     "archive": "pack/story000_bvh4/story000_bvh4.rpf",
+     "chain": "pack/story000_bvh4/story000_bvh4.rpf!1",
      "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
      "size": 14426
     },
     {
-     "archive": "story000_restofworld.rpf",
-     "chain": "story000_restofworld.rpf!18",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!18",
      "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
      "size": 772
     }
@@ -6247,8 +6037,8 @@
     "levels.rpf!1681",
     "levels.rpf!1775",
     "levels.rpf!326",
-    "core_bvh4.rpf!144",
-    "core_bvh4.rpf!208"
+    "pack/core_bvh4/core_bvh4.rpf!144",
+    "pack/core_bvh4/core_bvh4.rpf!208"
    ],
    "capability": "bytes",
    "entries": 44,
@@ -6313,74 +6103,74 @@
      "size": 15
     },
     {
-     "archive": "core_bvh4.rpf!28",
-     "chain": "core_bvh4.rpf!28!0",
+     "archive": "pack/core_bvh4/core_bvh4.rpf!28",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!28!0",
      "head": "464f5243455f454d5054595f525046",
      "size": 15
     },
     {
-     "archive": "core_bvh4.rpf!144",
-     "chain": "core_bvh4.rpf!144!0",
+     "archive": "pack/core_bvh4/core_bvh4.rpf!144",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!144!0",
      "head": "464f5243455f454d5054595f525046",
      "size": 15
     },
     {
-     "archive": "core_bvh4.rpf!208",
-     "chain": "core_bvh4.rpf!208!0",
+     "archive": "pack/core_bvh4/core_bvh4.rpf!208",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!208!0",
      "head": "464f5243455f454d5054595f525046",
      "size": 15
     },
     {
-     "archive": "core_restofworld.rpf!1",
-     "chain": "core_restofworld.rpf!1!1",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!1",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!1!1",
      "head": "42617365436f6d6d6f6e5f726573746f66776f726c643a736f756e64735f636f",
      "size": 57
     },
     {
-     "archive": "shared_minigame000.rpf!12",
-     "chain": "shared_minigame000.rpf!12!0",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!12",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!12!0",
      "head": "464f5243455f454d5054595f525046",
      "size": 15
     },
     {
-     "archive": "shared_minigame000.rpf!30",
-     "chain": "shared_minigame000.rpf!30!2",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!30",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!30!2",
      "head": "4d696e6967616d65303030436f6d6d6f6e3a646c634d696e6967616d65303030",
      "size": 464
     },
     {
-     "archive": "shared_minigame000.rpf!30",
-     "chain": "shared_minigame000.rpf!30!5",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!30",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!30!5",
      "head": "4d696e6967616d653030302e53636f72650d0a4d696e6967616d653030302e53",
      "size": 92
     },
     {
-     "archive": "story000.rpf!2",
-     "chain": "story000.rpf!2!0",
+     "archive": "pack/story000/story000.rpf!2",
+     "chain": "pack/story000/story000.rpf!2!0",
      "head": "464f5243455f454d5054595f525046",
      "size": 15
     },
     {
-     "archive": "story000.rpf!102",
-     "chain": "story000.rpf!102!0",
+     "archive": "pack/story000/story000.rpf!102",
+     "chain": "pack/story000/story000.rpf!102!0",
      "head": "464f5243455f454d5054595f525046",
      "size": 15
     },
     {
-     "archive": "story000.rpf!164",
-     "chain": "story000.rpf!164!0",
+     "archive": "pack/story000/story000.rpf!164",
+     "chain": "pack/story000/story000.rpf!164!0",
      "head": "464f5243455f454d5054595f525046",
      "size": 15
     },
     {
-     "archive": "story000_restofworld.rpf!0",
-     "chain": "story000_restofworld.rpf!0!0",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf!0",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!0!0",
      "head": "53746f7279303030436f6d6d6f6e5f726573746f66776f726c643a646c635374",
      "size": 146
     },
     {
-     "archive": "story000_restofworld.rpf!0",
-     "chain": "story000_restofworld.rpf!0!2",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf!0",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!0!2",
      "head": "53746f72793030305f726573746f66776f726c642e4375747363656e65730d0a",
      "size": 70
     }
@@ -6585,13 +6375,13 @@
    "archive_count": 10,
    "archives": [
     "common.rpf",
-    "core_bvh4.rpf",
-    "core_licenses_data.rpf",
-    "core_restofworld.rpf",
-    "core_restofworld001.rpf",
-    "shared_minigame000.rpf",
-    "shared_minigame000_bvh4.rpf",
-    "story000.rpf"
+    "pack/core_bvh4/core_bvh4.rpf",
+    "pack/core_licenses/core_licenses_data.rpf",
+    "pack/core_restofworld/core_restofworld.rpf",
+    "pack/core_restofworld001/core_restofworld001.rpf",
+    "pack/shared_minigame000/shared_minigame000.rpf",
+    "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf",
+    "pack/story000/story000.rpf"
    ],
    "capability": "text",
    "entries": 11,
@@ -6614,56 +6404,56 @@
      "size": 4827
     },
     {
-     "archive": "core_bvh4.rpf",
-     "chain": "core_bvh4.rpf!1285",
+     "archive": "pack/core_bvh4/core_bvh4.rpf",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!1285",
      "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
      "size": 553
     },
     {
-     "archive": "core_licenses_data.rpf",
-     "chain": "core_licenses_data.rpf!3",
+     "archive": "pack/core_licenses/core_licenses_data.rpf",
+     "chain": "pack/core_licenses/core_licenses_data.rpf!3",
      "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
      "size": 455
     },
     {
-     "archive": "core_restofworld.rpf",
-     "chain": "core_restofworld.rpf!29",
+     "archive": "pack/core_restofworld/core_restofworld.rpf",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!29",
      "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
      "size": 1640
     },
     {
-     "archive": "core_restofworld001.rpf",
-     "chain": "core_restofworld001.rpf!5",
+     "archive": "pack/core_restofworld001/core_restofworld001.rpf",
+     "chain": "pack/core_restofworld001/core_restofworld001.rpf!5",
      "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
      "size": 638
     },
     {
-     "archive": "shared_minigame000.rpf",
-     "chain": "shared_minigame000.rpf!63",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!63",
      "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
      "size": 2458
     },
     {
-     "archive": "shared_minigame000_bvh4.rpf",
-     "chain": "shared_minigame000_bvh4.rpf!11",
+     "archive": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf",
+     "chain": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf!11",
      "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
      "size": 794
     },
     {
-     "archive": "story000.rpf",
-     "chain": "story000.rpf!695",
+     "archive": "pack/story000/story000.rpf",
+     "chain": "pack/story000/story000.rpf!695",
      "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
      "size": 5232
     },
     {
-     "archive": "story000_bvh4.rpf",
-     "chain": "story000_bvh4.rpf!3",
+     "archive": "pack/story000_bvh4/story000_bvh4.rpf",
+     "chain": "pack/story000_bvh4/story000_bvh4.rpf!3",
      "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
      "size": 622
     },
     {
-     "archive": "story000_restofworld.rpf",
-     "chain": "story000_restofworld.rpf!36",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!36",
      "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
      "size": 2225
     }
@@ -6716,13 +6506,13 @@
    "archive_count": 10,
    "archives": [
     "common.rpf",
-    "core_bvh4.rpf",
-    "core_licenses_data.rpf",
-    "core_restofworld.rpf",
-    "core_restofworld001.rpf",
-    "shared_minigame000.rpf",
-    "shared_minigame000_bvh4.rpf",
-    "story000.rpf"
+    "pack/core_bvh4/core_bvh4.rpf",
+    "pack/core_licenses/core_licenses_data.rpf",
+    "pack/core_restofworld/core_restofworld.rpf",
+    "pack/core_restofworld001/core_restofworld001.rpf",
+    "pack/shared_minigame000/shared_minigame000.rpf",
+    "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf",
+    "pack/story000/story000.rpf"
    ],
    "capability": "text",
    "entries": 10,
@@ -6739,56 +6529,56 @@
      "size": 2912
     },
     {
-     "archive": "core_bvh4.rpf",
-     "chain": "core_bvh4.rpf!1284",
+     "archive": "pack/core_bvh4/core_bvh4.rpf",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!1284",
      "head": "3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554",
      "size": 472
     },
     {
-     "archive": "core_licenses_data.rpf",
-     "chain": "core_licenses_data.rpf!2",
+     "archive": "pack/core_licenses/core_licenses_data.rpf",
+     "chain": "pack/core_licenses/core_licenses_data.rpf!2",
      "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
      "size": 786
     },
     {
-     "archive": "core_restofworld.rpf",
-     "chain": "core_restofworld.rpf!26",
+     "archive": "pack/core_restofworld/core_restofworld.rpf",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!26",
      "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
      "size": 1482
     },
     {
-     "archive": "core_restofworld001.rpf",
-     "chain": "core_restofworld001.rpf!4",
+     "archive": "pack/core_restofworld001/core_restofworld001.rpf",
+     "chain": "pack/core_restofworld001/core_restofworld001.rpf!4",
      "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
      "size": 859
     },
     {
-     "archive": "shared_minigame000.rpf",
-     "chain": "shared_minigame000.rpf!60",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!60",
      "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
      "size": 1561
     },
     {
-     "archive": "shared_minigame000_bvh4.rpf",
-     "chain": "shared_minigame000_bvh4.rpf!10",
+     "archive": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf",
+     "chain": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf!10",
      "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
      "size": 885
     },
     {
-     "archive": "story000.rpf",
-     "chain": "story000.rpf!674",
+     "archive": "pack/story000/story000.rpf",
+     "chain": "pack/story000/story000.rpf!674",
      "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
      "size": 2267
     },
     {
-     "archive": "story000_bvh4.rpf",
-     "chain": "story000_bvh4.rpf!2",
+     "archive": "pack/story000_bvh4/story000_bvh4.rpf",
+     "chain": "pack/story000_bvh4/story000_bvh4.rpf!2",
      "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
      "size": 829
     },
     {
-     "archive": "story000_restofworld.rpf",
-     "chain": "story000_restofworld.rpf!34",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!34",
      "head": "efbbbf3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d",
      "size": 1470
     }
@@ -6841,9 +6631,9 @@
    "archive_count": 4,
    "archives": [
     "audio.rpf!14",
-    "shared_minigame000.rpf!30",
-    "story000.rpf!336",
-    "story000_restofworld.rpf!0"
+    "pack/shared_minigame000/shared_minigame000.rpf!30",
+    "pack/story000/story000.rpf!336",
+    "pack/story000_restofworld/story000_restofworld.rpf!0"
    ],
    "capability": "bytes",
    "entries": 7,
@@ -6872,20 +6662,20 @@
      "size": 71
     },
     {
-     "archive": "shared_minigame000.rpf!30",
-     "chain": "shared_minigame000.rpf!30!7",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!30",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!30!7",
      "head": "12000000583a0000ea885a0458000000cd20b3d414000400a682b3d416000100",
      "size": 56012
     },
     {
-     "archive": "story000.rpf!336",
-     "chain": "story000.rpf!336!4",
+     "archive": "pack/story000/story000.rpf!336",
+     "chain": "pack/story000/story000.rpf!336!4",
      "head": "1200000053692d00ea885a04011b030122020181080219038a0301800201a904",
      "size": 7725415
     },
     {
-     "archive": "story000_restofworld.rpf!0",
-     "chain": "story000_restofworld.rpf!0!3",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf!0",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!0!3",
      "head": "12000000fe000000ea885a0401a85c01bb7201779101467301c97101b48801fc",
      "size": 550
     }
@@ -6900,10 +6690,10 @@
    "archive_count": 5,
    "archives": [
     "audio.rpf!14",
-    "core_restofworld.rpf!1",
-    "shared_minigame000.rpf!30",
-    "story000.rpf!336",
-    "story000_restofworld.rpf!0"
+    "pack/core_restofworld/core_restofworld.rpf!1",
+    "pack/shared_minigame000/shared_minigame000.rpf!30",
+    "pack/story000/story000.rpf!336",
+    "pack/story000_restofworld/story000_restofworld.rpf!0"
    ],
    "capability": "bytes",
    "entries": 6,
@@ -6926,26 +6716,26 @@
      "size": 15574463
     },
     {
-     "archive": "core_restofworld.rpf!1",
-     "chain": "core_restofworld.rpf!1!0",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!1",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!1!0",
      "head": "a600000012000000ea885a040600ffffffffffffffffffffffff040000000000",
      "size": 78
     },
     {
-     "archive": "shared_minigame000.rpf!30",
-     "chain": "shared_minigame000.rpf!30!8",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!30",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!30!8",
      "head": "a600000071460100ea885a040600ffffffffffffffffffffffff31aaaaaaaa00",
      "size": 189789
     },
     {
-     "archive": "story000.rpf!336",
-     "chain": "story000.rpf!336!2",
+     "archive": "pack/story000/story000.rpf!336",
+     "chain": "pack/story000/story000.rpf!336!2",
      "head": "a60000000b7f0d00ea885a0431aaaaaaaa0e001e8be10200000000ffffffff8f",
      "size": 2058823
     },
     {
-     "archive": "story000_restofworld.rpf!0",
-     "chain": "story000_restofworld.rpf!0!1",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf!0",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!0!1",
      "head": "a6000000c7060000ea885a040600ffffffffffffffffffffffff31aaaaaaaa01",
      "size": 4395
     }
@@ -6997,10 +6787,10 @@
   {
    "archive_count": 5,
    "archives": [
-    "core_restofworld.rpf",
-    "core_restofworld001.rpf",
-    "shared_minigame000.rpf",
-    "story000.rpf",
+    "pack/core_restofworld/core_restofworld.rpf",
+    "pack/core_restofworld001/core_restofworld001.rpf",
+    "pack/shared_minigame000/shared_minigame000.rpf",
+    "pack/story000/story000.rpf",
     "textures.rpf"
    ],
    "capability": "structural",
@@ -7012,26 +6802,26 @@
    "payload": "decoded",
    "samples": [
     {
-     "archive": "core_restofworld.rpf",
-     "chain": "core_restofworld.rpf!15",
+     "archive": "pack/core_restofworld/core_restofworld.rpf",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!15",
      "head": "454455502100000093fe3be87ed4b60243fb4dd2543668530552cb8482016604",
      "size": 1548
     },
     {
-     "archive": "core_restofworld001.rpf",
-     "chain": "core_restofworld001.rpf!1",
+     "archive": "pack/core_restofworld001/core_restofworld001.rpf",
+     "chain": "pack/core_restofworld001/core_restofworld001.rpf!1",
      "head": "45445550000000001000000091616df07a5df6d6aa87f0fde046897c",
      "size": 28
     },
     {
-     "archive": "shared_minigame000.rpf",
-     "chain": "shared_minigame000.rpf!53",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!53",
      "head": "4544555004000000947475e857e00412a34145a3e1ff7584666bda319b746a87",
      "size": 236
     },
     {
-     "archive": "story000.rpf",
-     "chain": "story000.rpf!532",
+     "archive": "pack/story000/story000.rpf",
+     "chain": "pack/story000/story000.rpf!532",
      "head": "45445550000000001000000091616df07a5df6d6aa87f0fde046897c",
      "size": 28
     },
@@ -7052,8 +6842,8 @@
    "archive_count": 3,
    "archives": [
     "audio.rpf!14",
-    "shared_minigame000.rpf!30",
-    "story000.rpf!336"
+    "pack/shared_minigame000/shared_minigame000.rpf!30",
+    "pack/story000/story000.rpf!336"
    ],
    "capability": "bytes",
    "entries": 5,
@@ -7076,20 +6866,20 @@
      "size": 399540
     },
     {
-     "archive": "shared_minigame000.rpf!30",
-     "chain": "shared_minigame000.rpf!30!1",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!30",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!30!1",
      "head": "1a00000038520000ea885a0402000000aaaaaaaa000000001d0c0000a8aaaaaa",
      "size": 21772
     },
     {
-     "archive": "story000.rpf!336",
-     "chain": "story000.rpf!336!0",
+     "archive": "pack/story000/story000.rpf!336",
+     "chain": "pack/story000/story000.rpf!336!0",
      "head": "1a0000009c301900ea885a0402000000aaaaaaaa000000001b0c0000aaaaaaaa",
      "size": 1650908
     },
     {
-     "archive": "story000.rpf!336",
-     "chain": "story000.rpf!336!8",
+     "archive": "pack/story000/story000.rpf!336",
+     "chain": "pack/story000/story000.rpf!336!8",
      "head": "1a00000004000000ea885a040400000000000000040000000000000000000000",
      "size": 52
     }
@@ -7180,8 +6970,8 @@
    "archive_count": 3,
    "archives": [
     "audio.rpf!14",
-    "shared_minigame000.rpf!30",
-    "story000.rpf!336"
+    "pack/shared_minigame000/shared_minigame000.rpf!30",
+    "pack/story000/story000.rpf!336"
    ],
    "capability": "bytes",
    "entries": 3,
@@ -7198,14 +6988,14 @@
      "size": 1136793
     },
     {
-     "archive": "shared_minigame000.rpf!30",
-     "chain": "shared_minigame000.rpf!30!3",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!30",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!30!3",
      "head": "140000008b170000ea885a0401aaaaaaaa00000003aaaaaaaa070000000d0000",
      "size": 6147
     },
     {
-     "archive": "story000.rpf!336",
-     "chain": "story000.rpf!336!9",
+     "archive": "pack/story000/story000.rpf!336",
+     "chain": "pack/story000/story000.rpf!336!9",
      "head": "140000000a000000ea885a0401aaaaaaaa000400000000000000040000000000",
      "size": 66
     }
@@ -7220,8 +7010,8 @@
    "archive_count": 3,
    "archives": [
     "audio.rpf!14",
-    "shared_minigame000.rpf!30",
-    "story000.rpf!336"
+    "pack/shared_minigame000/shared_minigame000.rpf!30",
+    "pack/story000/story000.rpf!336"
    ],
    "capability": "bytes",
    "entries": 3,
@@ -7238,14 +7028,14 @@
      "size": 521572
     },
     {
-     "archive": "shared_minigame000.rpf!30",
-     "chain": "shared_minigame000.rpf!30!4",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!30",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!30!4",
      "head": "19000000b4110000ea885a0402aaaaaaaa000000000000000000803f00000000",
      "size": 5092
     },
     {
-     "archive": "story000.rpf!336",
-     "chain": "story000.rpf!336!6",
+     "archive": "pack/story000/story000.rpf!336",
+     "chain": "pack/story000/story000.rpf!336!6",
      "head": "19000000f4000000ea885a0402aaaaaaaa000000000000000000803f00000000",
      "size": 324
     }
@@ -7260,8 +7050,8 @@
    "archive_count": 3,
    "archives": [
     "audio.rpf!14",
-    "shared_minigame000.rpf!30",
-    "story000.rpf!336"
+    "pack/shared_minigame000/shared_minigame000.rpf!30",
+    "pack/story000/story000.rpf!336"
    ],
    "capability": "bytes",
    "entries": 3,
@@ -7278,14 +7068,14 @@
      "size": 895898
     },
     {
-     "archive": "shared_minigame000.rpf!30",
-     "chain": "shared_minigame000.rpf!30!0",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!30",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!30!0",
      "head": "3d000000fa190000ea885a0403010000aa00000000ffffffffffffffff000000",
      "size": 9106
     },
     {
-     "archive": "story000.rpf!336",
-     "chain": "story000.rpf!336!5",
+     "archive": "pack/story000/story000.rpf!336",
+     "chain": "pack/story000/story000.rpf!336!5",
      "head": "3d000000d6620700ea885a0403010000aa00000000ffffffffffffffff000000",
      "size": 712614
     }
@@ -7300,8 +7090,8 @@
    "archive_count": 3,
    "archives": [
     "audio.rpf!14",
-    "shared_minigame000.rpf!30",
-    "story000.rpf!336"
+    "pack/shared_minigame000/shared_minigame000.rpf!30",
+    "pack/story000/story000.rpf!336"
    ],
    "capability": "bytes",
    "entries": 3,
@@ -7318,14 +7108,14 @@
      "size": 19947076
     },
     {
-     "archive": "shared_minigame000.rpf!30",
-     "chain": "shared_minigame000.rpf!30!9",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!30",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!30!9",
      "head": "45020000c4280000ea885a041d000000ffffffffffffffffffffffffffffffff",
      "size": 14340
     },
     {
-     "archive": "story000.rpf!336",
-     "chain": "story000.rpf!336!7",
+     "archive": "pack/story000/story000.rpf!336",
+     "chain": "pack/story000/story000.rpf!336!7",
      "head": "4502000058b10500ea885a04a80000001100000054c16b03000000008f72460b",
      "size": 644112
     }
@@ -7340,8 +7130,8 @@
    "archive_count": 3,
    "archives": [
     "audio.rpf!14",
-    "shared_minigame000.rpf!30",
-    "story000.rpf!336"
+    "pack/shared_minigame000/shared_minigame000.rpf!30",
+    "pack/story000/story000.rpf!336"
    ],
    "capability": "bytes",
    "entries": 3,
@@ -7358,14 +7148,14 @@
      "size": 11030779
     },
     {
-     "archive": "shared_minigame000.rpf!30",
-     "chain": "shared_minigame000.rpf!30!6",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!30",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!30!6",
      "head": "5600000050650700ea885a0458aaaaaaaa00000058aaaaaaaa02000000000000",
      "size": 803744
     },
     {
-     "archive": "story000.rpf!336",
-     "chain": "story000.rpf!336!1",
+     "archive": "pack/story000/story000.rpf!336",
+     "chain": "pack/story000/story000.rpf!336!1",
      "head": "560000007bff1000ea885a0404aaaaaaaa00000002000000f6dc2b7e00000000",
      "size": 1434939
     }
@@ -7546,7 +7336,7 @@
    "archive_count": 2,
    "archives": [
     "common.rpf",
-    "shared_minigame000.rpf"
+    "pack/shared_minigame000/shared_minigame000.rpf"
    ],
    "capability": "text",
    "entries": 2,
@@ -7563,8 +7353,8 @@
      "size": 2369981
     },
     {
-     "archive": "shared_minigame000.rpf",
-     "chain": "shared_minigame000.rpf!66",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!66",
      "head": "3c3f786d6c2076657273696f6e3d27312e302720656e636f64696e673d277574",
      "size": 33393
     }
@@ -11696,5 +11486,6 @@
    "variant": "xml:time_data"
   }
  ],
+ "rejections": null,
  "failures": []
 }

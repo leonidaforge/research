@@ -163,6 +163,18 @@
  "entries": 1255039,
  "stopped": {},
  "complete": true,
+ "completion": {
+  "complete": true,
+  "reasons": [],
+  "checks": {
+   "roots_discovered": 22,
+   "roots_opened": 22,
+   "roots_failed": 0,
+   "roots_stopped": 0,
+   "reconciles": true
+  },
+  "pending_traversal": 0
+ },
  "coverage": {
   "archives_opened": 4373,
   "containers_identified": 0,
@@ -173,6 +185,7 @@
   "entries_undecoded": 0,
   "failed_archives": 0,
   "nested_archives_opened": 4351,
+  "rejected_archive_candidates": 0,
   "structures_verified": 0,
   "unresolved_formats": 1255039,
   "roots_discovered": 22,
@@ -180,191 +193,239 @@
   "failed_roots": 0,
   "archives_resumed": 0
  },
- "outcomes": null,
+ "outcomes": {
+  "not-probed": 1255039
+ },
  "types": [
   {
    "type": 0,
-   "entries": 4351
+   "entries": 4351,
+   "archives": 17
   },
   {
    "type": 2,
-   "entries": 167897
+   "entries": 167897,
+   "archives": 1289
   },
   {
    "type": 3,
-   "entries": 55488
+   "entries": 55488,
+   "archives": 265
   },
   {
    "type": 4,
-   "entries": 48584
+   "entries": 48584,
+   "archives": 179
   },
   {
    "type": 5,
-   "entries": 2612
+   "entries": 2612,
+   "archives": 33
   },
   {
    "type": 6,
-   "entries": 92199
+   "entries": 92199,
+   "archives": 970
   },
   {
    "type": 11,
-   "entries": 48612
+   "entries": 48612,
+   "archives": 422
   },
   {
    "type": 14,
-   "entries": 2
+   "entries": 2,
+   "archives": 2
   },
   {
    "type": 15,
-   "entries": 250434
+   "entries": 250434,
+   "archives": 1204
   },
   {
    "type": 16,
-   "entries": 22382
+   "entries": 22382,
+   "archives": 132
   },
   {
    "type": 17,
-   "entries": 22440
+   "entries": 22440,
+   "archives": 263
   },
   {
    "type": 18,
-   "entries": 611
+   "entries": 611,
+   "archives": 2
   },
   {
    "type": 64,
-   "entries": 443
+   "entries": 443,
+   "archives": 2
   },
   {
    "type": 66,
-   "entries": 87
+   "entries": 87,
+   "archives": 7
   },
   {
    "type": 67,
-   "entries": 62384
+   "entries": 62384,
+   "archives": 384
   },
   {
    "type": 69,
-   "entries": 1
+   "entries": 1,
+   "archives": 1
   },
   {
    "type": 70,
-   "entries": 8443
+   "entries": 8443,
+   "archives": 67
   },
   {
    "type": 72,
-   "entries": 226
+   "entries": 226,
+   "archives": 4
   },
   {
    "type": 73,
-   "entries": 166072
+   "entries": 166072,
+   "archives": 316
   },
   {
    "type": 74,
-   "entries": 6308
+   "entries": 6308,
+   "archives": 591
   },
   {
    "type": 77,
-   "entries": 3
+   "entries": 3,
+   "archives": 1
   },
   {
    "type": 78,
-   "entries": 25608
+   "entries": 25608,
+   "archives": 131
   },
   {
    "type": 79,
-   "entries": 27644
+   "entries": 27644,
+   "archives": 12
   },
   {
    "type": 86,
-   "entries": 11
+   "entries": 11,
+   "archives": 1
   },
   {
    "type": 87,
-   "entries": 15067
+   "entries": 15067,
+   "archives": 185
   },
   {
    "type": 88,
-   "entries": 40019
+   "entries": 40019,
+   "archives": 5
   },
   {
    "type": 89,
-   "entries": 746
+   "entries": 746,
+   "archives": 2
   },
   {
    "type": 93,
-   "entries": 211
+   "entries": 211,
+   "archives": 1
   },
   {
    "type": 94,
-   "entries": 80
+   "entries": 80,
+   "archives": 1
   },
   {
    "type": 95,
-   "entries": 518
+   "entries": 518,
+   "archives": 2
   },
   {
    "type": 96,
-   "entries": 1
+   "entries": 1,
+   "archives": 1
   },
   {
    "type": 99,
-   "entries": 98
+   "entries": 98,
+   "archives": 1
   },
   {
    "type": 100,
-   "entries": 27482
+   "entries": 27482,
+   "archives": 11
   },
   {
    "type": 101,
-   "entries": 5
+   "entries": 5,
+   "archives": 1
   },
   {
    "type": 102,
-   "entries": 142
+   "entries": 142,
+   "archives": 13
   },
   {
    "type": 103,
-   "entries": 6762
+   "entries": 6762,
+   "archives": 17
   },
   {
    "type": 104,
-   "entries": 1476
+   "entries": 1476,
+   "archives": 1
   },
   {
    "type": 105,
-   "entries": 1476
+   "entries": 1476,
+   "archives": 1
   },
   {
    "type": 108,
-   "entries": 32878
+   "entries": 32878,
+   "archives": 4
   },
   {
    "type": 109,
-   "entries": 4
+   "entries": 4,
+   "archives": 4
   },
   {
    "type": 110,
-   "entries": 5
+   "entries": 5,
+   "archives": 5
   },
   {
    "type": 111,
-   "entries": 30511
+   "entries": 30511,
+   "archives": 39
   },
   {
    "type": 113,
-   "entries": 2715
+   "entries": 2715,
+   "archives": 1
   },
   {
    "type": 114,
-   "entries": 518
+   "entries": 518,
+   "archives": 2
   },
   {
    "type": 115,
-   "entries": 8415
+   "entries": 8415,
+   "archives": 4
   },
   {
    "type": 255,
-   "entries": 73068
+   "entries": 73068,
+   "archives": 171
   }
  ],
  "type_summary": [
@@ -372,11 +433,9 @@
    "type": 0,
    "entries": 4351,
    "archives": 17,
-   "identifications": {
-    "none": 4351
-   },
+   "identifications": {},
    "outcomes": {
-    "blocked": 4351
+    "not-probed": 4351
    },
    "declared": {
     "rpf": 4351
@@ -386,12 +445,10 @@
   {
    "type": 2,
    "entries": 167897,
-   "archives": 1287,
-   "identifications": {
-    "none": 167897
-   },
+   "archives": 1289,
+   "identifications": {},
    "outcomes": {
-    "blocked": 167897
+    "not-probed": 167897
    },
    "declared": {
     "zdr": 167897
@@ -402,11 +459,9 @@
    "type": 3,
    "entries": 55488,
    "archives": 265,
-   "identifications": {
-    "none": 55488
-   },
+   "identifications": {},
    "outcomes": {
-    "blocked": 55488
+    "not-probed": 55488
    },
    "declared": {
     "zft": 55488
@@ -416,12 +471,10 @@
   {
    "type": 4,
    "entries": 48584,
-   "archives": 178,
-   "identifications": {
-    "none": 48584
-   },
+   "archives": 179,
+   "identifications": {},
    "outcomes": {
-    "blocked": 48584
+    "not-probed": 48584
    },
    "declared": {
     "zdd": 48584
@@ -432,11 +485,9 @@
    "type": 5,
    "entries": 2612,
    "archives": 33,
-   "identifications": {
-    "none": 2612
-   },
+   "identifications": {},
    "outcomes": {
-    "blocked": 2612
+    "not-probed": 2612
    },
    "declared": {
     "ztd": 2612
@@ -446,12 +497,10 @@
   {
    "type": 6,
    "entries": 92199,
-   "archives": 969,
-   "identifications": {
-    "none": 92199
-   },
+   "archives": 970,
+   "identifications": {},
    "outcomes": {
-    "blocked": 92199
+    "not-probed": 92199
    },
    "declared": {
     "zbn": 92199
@@ -461,12 +510,10 @@
   {
    "type": 11,
    "entries": 48612,
-   "archives": 286,
-   "identifications": {
-    "none": 48612
-   },
+   "archives": 422,
+   "identifications": {},
    "outcomes": {
-    "blocked": 48612
+    "not-probed": 48612
    },
    "declared": {
     "zmt": 48612
@@ -476,12 +523,10 @@
   {
    "type": 14,
    "entries": 2,
-   "archives": 1,
-   "identifications": {
-    "none": 2
-   },
+   "archives": 2,
+   "identifications": {},
    "outcomes": {
-    "blocked": 2
+    "not-probed": 2
    },
    "declared": {
     "zdatb": 2
@@ -491,12 +536,10 @@
   {
    "type": 15,
    "entries": 250434,
-   "archives": 1203,
-   "identifications": {
-    "none": 250434
-   },
+   "archives": 1204,
+   "identifications": {},
    "outcomes": {
-    "blocked": 250434
+    "not-probed": 250434
    },
    "declared": {
     "zbdr": 250434
@@ -506,12 +549,10 @@
   {
    "type": 16,
    "entries": 22382,
-   "archives": 131,
-   "identifications": {
-    "none": 22382
-   },
+   "archives": 132,
+   "identifications": {},
    "outcomes": {
-    "blocked": 22382
+    "not-probed": 22382
    },
    "declared": {
     "zbdd": 22382
@@ -522,11 +563,9 @@
    "type": 17,
    "entries": 22440,
    "archives": 263,
-   "identifications": {
-    "none": 22440
-   },
+   "identifications": {},
    "outcomes": {
-    "blocked": 22440
+    "not-probed": 22440
    },
    "declared": {
     "zbft": 22440
@@ -537,11 +576,9 @@
    "type": 18,
    "entries": 611,
    "archives": 2,
-   "identifications": {
-    "none": 611
-   },
+   "identifications": {},
    "outcomes": {
-    "blocked": 611
+    "not-probed": 611
    },
    "declared": {
     "zvert": 611
@@ -552,11 +589,9 @@
    "type": 64,
    "entries": 443,
    "archives": 2,
-   "identifications": {
-    "none": 443
-   },
+   "identifications": {},
    "outcomes": {
-    "blocked": 443
+    "not-probed": 443
    },
    "declared": {
     "mrf": 443
@@ -567,11 +602,9 @@
    "type": 66,
    "entries": 87,
    "archives": 7,
-   "identifications": {
-    "none": 87
-   },
+   "identifications": {},
    "outcomes": {
-    "blocked": 87
+    "not-probed": 87
    },
    "declared": {
     "gfx": 87
@@ -581,12 +614,10 @@
   {
    "type": 67,
    "entries": 62384,
-   "archives": 383,
-   "identifications": {
-    "none": 62384
-   },
+   "archives": 384,
+   "identifications": {},
    "outcomes": {
-    "blocked": 62384
+    "not-probed": 62384
    },
    "declared": {
     "zcd": 62384
@@ -597,11 +628,9 @@
    "type": 69,
    "entries": 1,
    "archives": 1,
-   "identifications": {
-    "none": 1
-   },
+   "identifications": {},
    "outcomes": {
-    "blocked": 1
+    "not-probed": 1
    },
    "declared": {
     "zpmd": 1
@@ -612,11 +641,9 @@
    "type": 70,
    "entries": 8443,
    "archives": 67,
-   "identifications": {
-    "none": 8443
-   },
+   "identifications": {},
    "outcomes": {
-    "blocked": 8443
+    "not-probed": 8443
    },
    "declared": {
     "zpm": 8443
@@ -627,11 +654,9 @@
    "type": 72,
    "entries": 226,
    "archives": 4,
-   "identifications": {
-    "none": 226
-   },
+   "identifications": {},
    "outcomes": {
-    "blocked": 226
+    "not-probed": 226
    },
    "declared": {
     "zpt": 226
@@ -641,12 +666,10 @@
   {
    "type": 73,
    "entries": 166072,
-   "archives": 312,
-   "identifications": {
-    "none": 166072
-   },
+   "archives": 316,
+   "identifications": {},
    "outcomes": {
-    "blocked": 166072
+    "not-probed": 166072
    },
    "declared": {
     "zmap": 166072
@@ -656,12 +679,10 @@
   {
    "type": 74,
    "entries": 6308,
-   "archives": 589,
-   "identifications": {
-    "none": 6308
-   },
+   "archives": 591,
+   "identifications": {},
    "outcomes": {
-    "blocked": 6308
+    "not-probed": 6308
    },
    "declared": {
     "ztyp": 6308
@@ -672,11 +693,9 @@
    "type": 77,
    "entries": 3,
    "archives": 1,
-   "identifications": {
-    "none": 3
-   },
+   "identifications": {},
    "outcomes": {
-    "blocked": 3
+    "not-probed": 3
    },
    "declared": {
     "zjd": 3
@@ -687,11 +706,9 @@
    "type": 78,
    "entries": 25608,
    "archives": 131,
-   "identifications": {
-    "none": 25608
-   },
+   "identifications": {},
    "outcomes": {
-    "blocked": 25608
+    "not-probed": 25608
    },
    "declared": {
     "zad": 25608
@@ -702,11 +719,9 @@
    "type": 79,
    "entries": 27644,
    "archives": 12,
-   "identifications": {
-    "none": 27644
-   },
+   "identifications": {},
    "outcomes": {
-    "blocked": 27644
+    "not-probed": 27644
    },
    "declared": {
     "znv": 27644
@@ -717,11 +732,9 @@
    "type": 86,
    "entries": 11,
    "archives": 1,
-   "identifications": {
-    "none": 11
-   },
+   "identifications": {},
    "outcomes": {
-    "blocked": 11
+    "not-probed": 11
    },
    "declared": {
     "zfd": 11
@@ -732,11 +745,9 @@
    "type": 87,
    "entries": 15067,
    "archives": 185,
-   "identifications": {
-    "none": 15067
-   },
+   "identifications": {},
    "outcomes": {
-    "blocked": 15067
+    "not-probed": 15067
    },
    "declared": {
     "zas": 15067
@@ -747,11 +758,9 @@
    "type": 88,
    "entries": 40019,
    "archives": 5,
-   "identifications": {
-    "none": 40019
-   },
+   "identifications": {},
    "outcomes": {
-    "blocked": 40019
+    "not-probed": 40019
    },
    "declared": {
     "zsm": 40019
@@ -762,11 +771,9 @@
    "type": 89,
    "entries": 746,
    "archives": 2,
-   "identifications": {
-    "none": 746
-   },
+   "identifications": {},
    "outcomes": {
-    "blocked": 746
+    "not-probed": 746
    },
    "declared": {
     "zscript": 746
@@ -777,11 +784,9 @@
    "type": 93,
    "entries": 211,
    "archives": 1,
-   "identifications": {
-    "none": 211
-   },
+   "identifications": {},
    "outcomes": {
-    "blocked": 211
+    "not-probed": 211
    },
    "declared": {
     "zfc": 211
@@ -792,11 +797,9 @@
    "type": 94,
    "entries": 80,
    "archives": 1,
-   "identifications": {
-    "none": 80
-   },
+   "identifications": {},
    "outcomes": {
-    "blocked": 80
+    "not-probed": 80
    },
    "declared": {
     "zlfc": 80
@@ -807,11 +810,9 @@
    "type": 95,
    "entries": 518,
    "archives": 2,
-   "identifications": {
-    "none": 518
-   },
+   "identifications": {},
    "outcomes": {
-    "blocked": 518
+    "not-probed": 518
    },
    "declared": {
     "zcg": 518
@@ -822,11 +823,9 @@
    "type": 96,
    "entries": 1,
    "archives": 1,
-   "identifications": {
-    "none": 1
-   },
+   "identifications": {},
    "outcomes": {
-    "blocked": 1
+    "not-probed": 1
    },
    "declared": {
     "zasd": 1
@@ -837,11 +836,9 @@
    "type": 99,
    "entries": 98,
    "archives": 1,
-   "identifications": {
-    "none": 98
-   },
+   "identifications": {},
    "outcomes": {
-    "blocked": 98
+    "not-probed": 98
    },
    "declared": {
     "zcps": 98
@@ -852,11 +849,9 @@
    "type": 100,
    "entries": 27482,
    "archives": 11,
-   "identifications": {
-    "none": 27482
-   },
+   "identifications": {},
    "outcomes": {
-    "blocked": 27482
+    "not-probed": 27482
    },
    "declared": {
     "zsp": 27482
@@ -867,11 +862,9 @@
    "type": 101,
    "entries": 5,
    "archives": 1,
-   "identifications": {
-    "none": 5
-   },
+   "identifications": {},
    "outcomes": {
-    "blocked": 5
+    "not-probed": 5
    },
    "declared": {
     "ztsl": 5
@@ -882,11 +875,9 @@
    "type": 102,
    "entries": 142,
    "archives": 13,
-   "identifications": {
-    "none": 142
-   },
+   "identifications": {},
    "outcomes": {
-    "blocked": 142
+    "not-probed": 142
    },
    "declared": {
     "zmmd": 142
@@ -897,11 +888,9 @@
    "type": 103,
    "entries": 6762,
    "archives": 17,
-   "identifications": {
-    "none": 6762
-   },
+   "identifications": {},
    "outcomes": {
-    "blocked": 6762
+    "not-probed": 6762
    },
    "declared": {
     "zfid": 6762
@@ -912,11 +901,9 @@
    "type": 104,
    "entries": 1476,
    "archives": 1,
-   "identifications": {
-    "none": 1476
-   },
+   "identifications": {},
    "outcomes": {
-    "blocked": 1476
+    "not-probed": 1476
    },
    "declared": {
     "zmsk": 1476
@@ -927,11 +914,9 @@
    "type": 105,
    "entries": 1476,
    "archives": 1,
-   "identifications": {
-    "none": 1476
-   },
+   "identifications": {},
    "outcomes": {
-    "blocked": 1476
+    "not-probed": 1476
    },
    "declared": {
     "zhdat": 1476
@@ -942,11 +927,9 @@
    "type": 108,
    "entries": 32878,
    "archives": 4,
-   "identifications": {
-    "none": 32878
-   },
+   "identifications": {},
    "outcomes": {
-    "blocked": 32878
+    "not-probed": 32878
    },
    "declared": {
     "zascd": 32878
@@ -957,11 +940,9 @@
    "type": 109,
    "entries": 4,
    "archives": 4,
-   "identifications": {
-    "none": 4
-   },
+   "identifications": {},
    "outcomes": {
-    "blocked": 4
+    "not-probed": 4
    },
    "declared": {
     "zrd": 4
@@ -972,11 +953,9 @@
    "type": 110,
    "entries": 5,
    "archives": 5,
-   "identifications": {
-    "none": 5
-   },
+   "identifications": {},
    "outcomes": {
-    "blocked": 5
+    "not-probed": 5
    },
    "declared": {
     "zsmam": 5
@@ -987,11 +966,9 @@
    "type": 111,
    "entries": 30511,
    "archives": 39,
-   "identifications": {
-    "none": 30511
-   },
+   "identifications": {},
    "outcomes": {
-    "blocked": 30511
+    "not-probed": 30511
    },
    "declared": {
     "zldbmt": 30511
@@ -1002,11 +979,9 @@
    "type": 113,
    "entries": 2715,
    "archives": 1,
-   "identifications": {
-    "none": 2715
-   },
+   "identifications": {},
    "outcomes": {
-    "blocked": 2715
+    "not-probed": 2715
    },
    "declared": {
     "zkit": 2715
@@ -1017,11 +992,9 @@
    "type": 114,
    "entries": 518,
    "archives": 2,
-   "identifications": {
-    "none": 518
-   },
+   "identifications": {},
    "outcomes": {
-    "blocked": 518
+    "not-probed": 518
    },
    "declared": {
     "zcgc": 518
@@ -1032,11 +1005,9 @@
    "type": 115,
    "entries": 8415,
    "archives": 4,
-   "identifications": {
-    "none": 8415
-   },
+   "identifications": {},
    "outcomes": {
-    "blocked": 8415
+    "not-probed": 8415
    },
    "declared": {
     "zcov": 8415
@@ -1046,12 +1017,10 @@
   {
    "type": 255,
    "entries": 73068,
-   "archives": 127,
-   "identifications": {
-    "none": 73068
-   },
+   "archives": 171,
+   "identifications": {},
    "outcomes": {
-    "blocked": 73068
+    "not-probed": 73068
    },
    "declared": {},
    "payload": {}
@@ -1066,16 +1035,16 @@
     "data.rpf",
     "levels.rpf",
     "navmeshes.rpf",
-    "core_bvh4.rpf",
-    "core_licenses_data.rpf",
-    "core_restofworld.rpf"
+    "pack/core_bvh4/core_bvh4.rpf",
+    "pack/core_licenses/core_licenses_data.rpf",
+    "pack/core_restofworld/core_restofworld.rpf"
    ],
    "capability": "unprobed",
    "entries": 4351,
    "extension": "rpf",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -1169,56 +1138,56 @@
      "size": null
     },
     {
-     "archive": "core_bvh4.rpf",
-     "chain": "core_bvh4.rpf!0",
+     "archive": "pack/core_bvh4/core_bvh4.rpf",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_bvh4.rpf",
-     "chain": "core_bvh4.rpf!1",
+     "archive": "pack/core_bvh4/core_bvh4.rpf",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!1",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_bvh4.rpf",
-     "chain": "core_bvh4.rpf!2",
+     "archive": "pack/core_bvh4/core_bvh4.rpf",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!2",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_licenses_data.rpf",
-     "chain": "core_licenses_data.rpf!0",
+     "archive": "pack/core_licenses/core_licenses_data.rpf",
+     "chain": "pack/core_licenses/core_licenses_data.rpf!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_restofworld.rpf",
-     "chain": "core_restofworld.rpf!0",
+     "archive": "pack/core_restofworld/core_restofworld.rpf",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_restofworld.rpf",
-     "chain": "core_restofworld.rpf!1",
+     "archive": "pack/core_restofworld/core_restofworld.rpf",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!1",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_restofworld.rpf",
-     "chain": "core_restofworld.rpf!2",
+     "archive": "pack/core_restofworld/core_restofworld.rpf",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!2",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_restofworld001.rpf",
-     "chain": "core_restofworld001.rpf!0",
+     "archive": "pack/core_restofworld001/core_restofworld001.rpf",
+     "chain": "pack/core_restofworld001/core_restofworld001.rpf!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "shared_minigame000.rpf",
-     "chain": "shared_minigame000.rpf!0",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!0",
      "head": "",
      "size": null
     }
@@ -1246,7 +1215,7 @@
    "extension": "zdr",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -1286,56 +1255,56 @@
      "size": null
     },
     {
-     "archive": "core_restofworld.rpf!8",
-     "chain": "core_restofworld.rpf!8!0",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!8",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!8!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_restofworld.rpf!8",
-     "chain": "core_restofworld.rpf!8!2",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!8",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!8!2",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_restofworld.rpf!8",
-     "chain": "core_restofworld.rpf!8!6",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!8",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!8!6",
      "head": "",
      "size": null
     },
     {
-     "archive": "shared_minigame000.rpf!3",
-     "chain": "shared_minigame000.rpf!3!2",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!3",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!3!2",
      "head": "",
      "size": null
     },
     {
-     "archive": "shared_minigame000.rpf!3",
-     "chain": "shared_minigame000.rpf!3!3",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!3",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!3!3",
      "head": "",
      "size": null
     },
     {
-     "archive": "shared_minigame000.rpf!3",
-     "chain": "shared_minigame000.rpf!3!4",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!3",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!3!4",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!6",
-     "chain": "story000.rpf!6!0",
+     "archive": "pack/story000/story000.rpf!6",
+     "chain": "pack/story000/story000.rpf!6!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!6",
-     "chain": "story000.rpf!6!1",
+     "archive": "pack/story000/story000.rpf!6",
+     "chain": "pack/story000/story000.rpf!6!1",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!6",
-     "chain": "story000.rpf!6!4",
+     "archive": "pack/story000/story000.rpf!6",
+     "chain": "pack/story000/story000.rpf!6!4",
      "head": "",
      "size": null
     }
@@ -1357,7 +1326,7 @@
    "extension": "zdr",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -1402,7 +1371,7 @@
    "extension": "zft",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -1442,38 +1411,38 @@
      "size": null
     },
     {
-     "archive": "core_restofworld.rpf!8",
-     "chain": "core_restofworld.rpf!8!1",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!8",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!8!1",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_restofworld.rpf!8",
-     "chain": "core_restofworld.rpf!8!3",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!8",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!8!3",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_restofworld.rpf!8",
-     "chain": "core_restofworld.rpf!8!4",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!8",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!8!4",
      "head": "",
      "size": null
     },
     {
-     "archive": "shared_minigame000.rpf!33",
-     "chain": "shared_minigame000.rpf!33!10",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!33",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!33!10",
      "head": "",
      "size": null
     },
     {
-     "archive": "shared_minigame000.rpf!33",
-     "chain": "shared_minigame000.rpf!33!32",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!33",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!33!32",
      "head": "",
      "size": null
     },
     {
-     "archive": "shared_minigame000.rpf!33",
-     "chain": "shared_minigame000.rpf!33!45",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!33",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!33!45",
      "head": "",
      "size": null
     },
@@ -1519,7 +1488,7 @@
    "extension": "zdd",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -1559,62 +1528,62 @@
      "size": null
     },
     {
-     "archive": "core_restofworld.rpf!2",
-     "chain": "core_restofworld.rpf!2!0",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!2",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!2!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_restofworld.rpf!2",
-     "chain": "core_restofworld.rpf!2!1",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!2",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!2!1",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_restofworld.rpf!2",
-     "chain": "core_restofworld.rpf!2!2",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!2",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!2!2",
      "head": "",
      "size": null
     },
     {
-     "archive": "shared_minigame000.rpf!3",
-     "chain": "shared_minigame000.rpf!3!1",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!3",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!3!1",
      "head": "",
      "size": null
     },
     {
-     "archive": "shared_minigame000.rpf!3",
-     "chain": "shared_minigame000.rpf!3!5",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!3",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!3!5",
      "head": "",
      "size": null
     },
     {
-     "archive": "shared_minigame000.rpf!3",
-     "chain": "shared_minigame000.rpf!3!20",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!3",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!3!20",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!131",
-     "chain": "story000.rpf!131!0",
+     "archive": "pack/story000/story000.rpf!131",
+     "chain": "pack/story000/story000.rpf!131!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!131",
-     "chain": "story000.rpf!131!1",
+     "archive": "pack/story000/story000.rpf!131",
+     "chain": "pack/story000/story000.rpf!131!1",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!131",
-     "chain": "story000.rpf!131!2",
+     "archive": "pack/story000/story000.rpf!131",
+     "chain": "pack/story000/story000.rpf!131!2",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000_restofworld.rpf!17",
-     "chain": "story000_restofworld.rpf!17!0",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf!17",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!17!0",
      "head": "",
      "size": null
     },
@@ -1653,7 +1622,7 @@
    "extension": "zdd",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -1698,7 +1667,7 @@
    "extension": "ztd",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -1738,38 +1707,38 @@
      "size": null
     },
     {
-     "archive": "core_restofworld.rpf!4",
-     "chain": "core_restofworld.rpf!4!0",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!4",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!4!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_restofworld.rpf!4",
-     "chain": "core_restofworld.rpf!4!1",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!4",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!4!1",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_restofworld.rpf!4",
-     "chain": "core_restofworld.rpf!4!2",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!4",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!4!2",
      "head": "",
      "size": null
     },
     {
-     "archive": "shared_minigame000.rpf!11",
-     "chain": "shared_minigame000.rpf!11!0",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!11",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!11!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "shared_minigame000.rpf!11",
-     "chain": "shared_minigame000.rpf!11!1",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!11",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!11!1",
      "head": "",
      "size": null
     },
     {
-     "archive": "shared_minigame000.rpf!11",
-     "chain": "shared_minigame000.rpf!11!2",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!11",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!11!2",
      "head": "",
      "size": null
     },
@@ -1815,7 +1784,7 @@
    "extension": "zbn",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -1837,38 +1806,38 @@
      "size": null
     },
     {
-     "archive": "shared_minigame000.rpf!3",
-     "chain": "shared_minigame000.rpf!3!0",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!3",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!3!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "shared_minigame000.rpf!3",
-     "chain": "shared_minigame000.rpf!3!8",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!3",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!3!8",
      "head": "",
      "size": null
     },
     {
-     "archive": "shared_minigame000.rpf!3",
-     "chain": "shared_minigame000.rpf!3!13",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!3",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!3!13",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!6",
-     "chain": "story000.rpf!6!2",
+     "archive": "pack/story000/story000.rpf!6",
+     "chain": "pack/story000/story000.rpf!6!2",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!6",
-     "chain": "story000.rpf!6!3",
+     "archive": "pack/story000/story000.rpf!6",
+     "chain": "pack/story000/story000.rpf!6!3",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!6",
-     "chain": "story000.rpf!6!6",
+     "archive": "pack/story000/story000.rpf!6",
+     "chain": "pack/story000/story000.rpf!6!6",
      "head": "",
      "size": null
     }
@@ -1889,7 +1858,7 @@
    "extension": "zbn",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -1934,7 +1903,7 @@
    "extension": "zmt",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -1992,44 +1961,44 @@
      "size": null
     },
     {
-     "archive": "shared_minigame000.rpf!44",
-     "chain": "shared_minigame000.rpf!44!0",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!44",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!44!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!43",
-     "chain": "story000.rpf!43!0",
+     "archive": "pack/story000/story000.rpf!43",
+     "chain": "pack/story000/story000.rpf!43!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!43",
-     "chain": "story000.rpf!43!1",
+     "archive": "pack/story000/story000.rpf!43",
+     "chain": "pack/story000/story000.rpf!43!1",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!43",
-     "chain": "story000.rpf!43!2",
+     "archive": "pack/story000/story000.rpf!43",
+     "chain": "pack/story000/story000.rpf!43!2",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000_restofworld.rpf!13",
-     "chain": "story000_restofworld.rpf!13!0",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf!13",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!13!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000_restofworld.rpf!13",
-     "chain": "story000_restofworld.rpf!13!1",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf!13",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!13!1",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000_restofworld.rpf!13",
-     "chain": "story000_restofworld.rpf!13!2",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf!13",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!13!2",
      "head": "",
      "size": null
     },
@@ -2075,7 +2044,7 @@
    "extension": "zmt",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -2151,74 +2120,74 @@
      "size": null
     },
     {
-     "archive": "core_restofworld.rpf!9",
-     "chain": "core_restofworld.rpf!9!0",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!9",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!9!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_restofworld.rpf!9",
-     "chain": "core_restofworld.rpf!9!1",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!9",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!9!1",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_restofworld.rpf",
-     "chain": "core_restofworld.rpf!20",
+     "archive": "pack/core_restofworld/core_restofworld.rpf",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!20",
      "head": "",
      "size": null
     },
     {
-     "archive": "shared_minigame000.rpf!0",
-     "chain": "shared_minigame000.rpf!0!3",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!0",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!0!3",
      "head": "",
      "size": null
     },
     {
-     "archive": "shared_minigame000.rpf!1",
-     "chain": "shared_minigame000.rpf!1!3",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!1",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!1!3",
      "head": "",
      "size": null
     },
     {
-     "archive": "shared_minigame000.rpf!6",
-     "chain": "shared_minigame000.rpf!6!3",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!6",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!6!3",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!5",
-     "chain": "story000.rpf!5!319",
+     "archive": "pack/story000/story000.rpf!5",
+     "chain": "pack/story000/story000.rpf!5!319",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!8",
-     "chain": "story000.rpf!8!319",
+     "archive": "pack/story000/story000.rpf!8",
+     "chain": "pack/story000/story000.rpf!8!319",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!42",
-     "chain": "story000.rpf!42!0",
+     "archive": "pack/story000/story000.rpf!42",
+     "chain": "pack/story000/story000.rpf!42!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000_script.rpf!0",
-     "chain": "story000_script.rpf!0!0",
+     "archive": "pack/story000/story000_script.rpf!0",
+     "chain": "pack/story000/story000_script.rpf!0!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000_script.rpf!0",
-     "chain": "story000_script.rpf!0!1",
+     "archive": "pack/story000/story000_script.rpf!0",
+     "chain": "pack/story000/story000_script.rpf!0!1",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000_script.rpf!0",
-     "chain": "story000_script.rpf!0!2",
+     "archive": "pack/story000/story000_script.rpf!0",
+     "chain": "pack/story000/story000_script.rpf!0!2",
      "head": "",
      "size": null
     }
@@ -2237,16 +2206,16 @@
     "data.rpf!21",
     "data.rpf!23",
     "levels.rpf",
-    "core_licenses_data.rpf!0",
-    "story000.rpf!147",
-    "story000.rpf!245"
+    "pack/core_licenses/core_licenses_data.rpf!0",
+    "pack/story000/story000.rpf!147",
+    "pack/story000/story000.rpf!245"
    ],
    "capability": "unprobed",
    "entries": 496,
    "extension": "zmt",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -2292,50 +2261,50 @@
      "size": null
     },
     {
-     "archive": "core_licenses_data.rpf!0",
-     "chain": "core_licenses_data.rpf!0!0",
+     "archive": "pack/core_licenses/core_licenses_data.rpf!0",
+     "chain": "pack/core_licenses/core_licenses_data.rpf!0!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_licenses_data.rpf!0",
-     "chain": "core_licenses_data.rpf!0!1",
+     "archive": "pack/core_licenses/core_licenses_data.rpf!0",
+     "chain": "pack/core_licenses/core_licenses_data.rpf!0!1",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!67",
-     "chain": "story000.rpf!67!0",
+     "archive": "pack/story000/story000.rpf!67",
+     "chain": "pack/story000/story000.rpf!67!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!67",
-     "chain": "story000.rpf!67!1",
+     "archive": "pack/story000/story000.rpf!67",
+     "chain": "pack/story000/story000.rpf!67!1",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!147",
-     "chain": "story000.rpf!147!0",
+     "archive": "pack/story000/story000.rpf!147",
+     "chain": "pack/story000/story000.rpf!147!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000_script.rpf!3",
-     "chain": "story000_script.rpf!3!0",
+     "archive": "pack/story000/story000_script.rpf!3",
+     "chain": "pack/story000/story000_script.rpf!3!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000_script.rpf!3",
-     "chain": "story000_script.rpf!3!1",
+     "archive": "pack/story000/story000_script.rpf!3",
+     "chain": "pack/story000/story000_script.rpf!3!1",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000_script.rpf!3",
-     "chain": "story000_script.rpf!3!2",
+     "archive": "pack/story000/story000_script.rpf!3",
+     "chain": "pack/story000/story000_script.rpf!3!2",
      "head": "",
      "size": null
     },
@@ -2381,7 +2350,7 @@
    "extension": "zmt",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -2425,7 +2394,7 @@
    "extension": "zmt",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -2456,34 +2425,34 @@
   {
    "archive_count": 4,
    "archives": [
-    "story000.rpf!407",
-    "story000.rpf!410",
-    "story000.rpf!421",
-    "story000.rpf!90"
+    "pack/story000/story000.rpf!407",
+    "pack/story000/story000.rpf!410",
+    "pack/story000/story000.rpf!421",
+    "pack/story000/story000.rpf!90"
    ],
    "capability": "unprobed",
    "entries": 4,
    "extension": "zmt",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
-     "archive": "story000.rpf!90",
-     "chain": "story000.rpf!90!0",
+     "archive": "pack/story000/story000.rpf!90",
+     "chain": "pack/story000/story000.rpf!90!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!407",
-     "chain": "story000.rpf!407!0",
+     "archive": "pack/story000/story000.rpf!407",
+     "chain": "pack/story000/story000.rpf!407!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!410",
-     "chain": "story000.rpf!410!0",
+     "archive": "pack/story000/story000.rpf!410",
+     "chain": "pack/story000/story000.rpf!410!0",
      "head": "",
      "size": null
     }
@@ -2504,7 +2473,7 @@
    "extension": "zdatb",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -2523,19 +2492,19 @@
   {
    "archive_count": 1,
    "archives": [
-    "story000_script.rpf!2"
+    "pack/story000/story000_script.rpf!2"
    ],
    "capability": "unprobed",
    "entries": 1,
    "extension": "zdatb",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
-     "archive": "story000_script.rpf!2",
-     "chain": "story000_script.rpf!2!0",
+     "archive": "pack/story000/story000_script.rpf!2",
+     "chain": "pack/story000/story000_script.rpf!2!0",
      "head": "",
      "size": null
     }
@@ -2549,56 +2518,56 @@
   {
    "archive_count": 1203,
    "archives": [
-    "core_bvh4.rpf!0",
-    "core_bvh4.rpf!1",
-    "core_bvh4.rpf!2",
-    "core_bvh4.rpf!3",
-    "core_bvh4.rpf!4",
-    "core_bvh4.rpf!5",
-    "core_bvh4.rpf!6",
-    "core_bvh4.rpf!7"
+    "pack/core_bvh4/core_bvh4.rpf!0",
+    "pack/core_bvh4/core_bvh4.rpf!1",
+    "pack/core_bvh4/core_bvh4.rpf!2",
+    "pack/core_bvh4/core_bvh4.rpf!3",
+    "pack/core_bvh4/core_bvh4.rpf!4",
+    "pack/core_bvh4/core_bvh4.rpf!5",
+    "pack/core_bvh4/core_bvh4.rpf!6",
+    "pack/core_bvh4/core_bvh4.rpf!7"
    ],
    "capability": "unprobed",
    "entries": 245666,
    "extension": "zbdr",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
-     "archive": "core_bvh4.rpf!0",
-     "chain": "core_bvh4.rpf!0!0",
+     "archive": "pack/core_bvh4/core_bvh4.rpf!0",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!0!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_bvh4.rpf!0",
-     "chain": "core_bvh4.rpf!0!1",
+     "archive": "pack/core_bvh4/core_bvh4.rpf!0",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!0!1",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_bvh4.rpf!0",
-     "chain": "core_bvh4.rpf!0!2",
+     "archive": "pack/core_bvh4/core_bvh4.rpf!0",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!0!2",
      "head": "",
      "size": null
     },
     {
-     "archive": "shared_minigame000_bvh4.rpf!0",
-     "chain": "shared_minigame000_bvh4.rpf!0!1",
+     "archive": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf!0",
+     "chain": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf!0!1",
      "head": "",
      "size": null
     },
     {
-     "archive": "shared_minigame000_bvh4.rpf!0",
-     "chain": "shared_minigame000_bvh4.rpf!0!2",
+     "archive": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf!0",
+     "chain": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf!0!2",
      "head": "",
      "size": null
     },
     {
-     "archive": "shared_minigame000_bvh4.rpf!0",
-     "chain": "shared_minigame000_bvh4.rpf!0!3",
+     "archive": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf!0",
+     "chain": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf!0!3",
      "head": "",
      "size": null
     }
@@ -2612,31 +2581,31 @@
   {
    "archive_count": 1,
    "archives": [
-    "core_bvh4.rpf!772"
+    "pack/core_bvh4/core_bvh4.rpf!772"
    ],
    "capability": "unprobed",
    "entries": 4768,
    "extension": "zbdr",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
-     "archive": "core_bvh4.rpf!772",
-     "chain": "core_bvh4.rpf!772!0",
+     "archive": "pack/core_bvh4/core_bvh4.rpf!772",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!772!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_bvh4.rpf!772",
-     "chain": "core_bvh4.rpf!772!1",
+     "archive": "pack/core_bvh4/core_bvh4.rpf!772",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!772!1",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_bvh4.rpf!772",
-     "chain": "core_bvh4.rpf!772!2",
+     "archive": "pack/core_bvh4/core_bvh4.rpf!772",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!772!2",
      "head": "",
      "size": null
     }
@@ -2650,56 +2619,56 @@
   {
    "archive_count": 131,
    "archives": [
-    "core_bvh4.rpf!10",
-    "core_bvh4.rpf!13",
-    "core_bvh4.rpf!17",
-    "core_bvh4.rpf!2",
-    "core_bvh4.rpf!27",
-    "core_bvh4.rpf!33",
-    "core_bvh4.rpf!35",
-    "core_bvh4.rpf!7"
+    "pack/core_bvh4/core_bvh4.rpf!10",
+    "pack/core_bvh4/core_bvh4.rpf!13",
+    "pack/core_bvh4/core_bvh4.rpf!17",
+    "pack/core_bvh4/core_bvh4.rpf!2",
+    "pack/core_bvh4/core_bvh4.rpf!27",
+    "pack/core_bvh4/core_bvh4.rpf!33",
+    "pack/core_bvh4/core_bvh4.rpf!35",
+    "pack/core_bvh4/core_bvh4.rpf!7"
    ],
    "capability": "unprobed",
    "entries": 22126,
    "extension": "zbdd",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
-     "archive": "core_bvh4.rpf!2",
-     "chain": "core_bvh4.rpf!2!1",
+     "archive": "pack/core_bvh4/core_bvh4.rpf!2",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!2!1",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_bvh4.rpf!2",
-     "chain": "core_bvh4.rpf!2!8",
+     "archive": "pack/core_bvh4/core_bvh4.rpf!2",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!2!8",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_bvh4.rpf!2",
-     "chain": "core_bvh4.rpf!2!13",
+     "archive": "pack/core_bvh4/core_bvh4.rpf!2",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!2!13",
      "head": "",
      "size": null
     },
     {
-     "archive": "shared_minigame000_bvh4.rpf!0",
-     "chain": "shared_minigame000_bvh4.rpf!0!0",
+     "archive": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf!0",
+     "chain": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf!0!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "shared_minigame000_bvh4.rpf!0",
-     "chain": "shared_minigame000_bvh4.rpf!0!8",
+     "archive": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf!0",
+     "chain": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf!0!8",
      "head": "",
      "size": null
     },
     {
-     "archive": "shared_minigame000_bvh4.rpf!0",
-     "chain": "shared_minigame000_bvh4.rpf!0!20",
+     "archive": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf!0",
+     "chain": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf!0!20",
      "head": "",
      "size": null
     }
@@ -2713,31 +2682,31 @@
   {
    "archive_count": 1,
    "archives": [
-    "core_bvh4.rpf!772"
+    "pack/core_bvh4/core_bvh4.rpf!772"
    ],
    "capability": "unprobed",
    "entries": 256,
    "extension": "zbdd",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
-     "archive": "core_bvh4.rpf!772",
-     "chain": "core_bvh4.rpf!772!8",
+     "archive": "pack/core_bvh4/core_bvh4.rpf!772",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!772!8",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_bvh4.rpf!772",
-     "chain": "core_bvh4.rpf!772!13",
+     "archive": "pack/core_bvh4/core_bvh4.rpf!772",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!772!13",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_bvh4.rpf!772",
-     "chain": "core_bvh4.rpf!772!31",
+     "archive": "pack/core_bvh4/core_bvh4.rpf!772",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!772!31",
      "head": "",
      "size": null
     }
@@ -2751,56 +2720,56 @@
   {
    "archive_count": 263,
    "archives": [
-    "core_bvh4.rpf!11",
-    "core_bvh4.rpf!13",
-    "core_bvh4.rpf!15",
-    "core_bvh4.rpf!19",
-    "core_bvh4.rpf!21",
-    "core_bvh4.rpf!23",
-    "core_bvh4.rpf!25",
-    "core_bvh4.rpf!26"
+    "pack/core_bvh4/core_bvh4.rpf!11",
+    "pack/core_bvh4/core_bvh4.rpf!13",
+    "pack/core_bvh4/core_bvh4.rpf!15",
+    "pack/core_bvh4/core_bvh4.rpf!19",
+    "pack/core_bvh4/core_bvh4.rpf!21",
+    "pack/core_bvh4/core_bvh4.rpf!23",
+    "pack/core_bvh4/core_bvh4.rpf!25",
+    "pack/core_bvh4/core_bvh4.rpf!26"
    ],
    "capability": "unprobed",
    "entries": 22440,
    "extension": "zbft",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
-     "archive": "core_bvh4.rpf!11",
-     "chain": "core_bvh4.rpf!11!0",
+     "archive": "pack/core_bvh4/core_bvh4.rpf!11",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!11!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_bvh4.rpf!11",
-     "chain": "core_bvh4.rpf!11!1",
+     "archive": "pack/core_bvh4/core_bvh4.rpf!11",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!11!1",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_bvh4.rpf!11",
-     "chain": "core_bvh4.rpf!11!2",
+     "archive": "pack/core_bvh4/core_bvh4.rpf!11",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!11!2",
      "head": "",
      "size": null
     },
     {
-     "archive": "shared_minigame000_bvh4.rpf!2",
-     "chain": "shared_minigame000_bvh4.rpf!2!8",
+     "archive": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf!2",
+     "chain": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf!2!8",
      "head": "",
      "size": null
     },
     {
-     "archive": "shared_minigame000_bvh4.rpf!2",
-     "chain": "shared_minigame000_bvh4.rpf!2!29",
+     "archive": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf!2",
+     "chain": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf!2!29",
      "head": "",
      "size": null
     },
     {
-     "archive": "shared_minigame000_bvh4.rpf!2",
-     "chain": "shared_minigame000_bvh4.rpf!2!41",
+     "archive": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf!2",
+     "chain": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf!2!41",
      "head": "",
      "size": null
     }
@@ -2822,7 +2791,7 @@
    "extension": "zvert",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -2854,14 +2823,14 @@
    "archive_count": 2,
    "archives": [
     "anim.rpf!43",
-    "story000.rpf!84"
+    "pack/story000/story000.rpf!84"
    ],
    "capability": "unprobed",
    "entries": 443,
    "extension": "mrf",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -2883,20 +2852,20 @@
      "size": null
     },
     {
-     "archive": "story000.rpf!84",
-     "chain": "story000.rpf!84!0",
+     "archive": "pack/story000/story000.rpf!84",
+     "chain": "pack/story000/story000.rpf!84!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!84",
-     "chain": "story000.rpf!84!1",
+     "archive": "pack/story000/story000.rpf!84",
+     "chain": "pack/story000/story000.rpf!84!1",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!84",
-     "chain": "story000.rpf!84!2",
+     "archive": "pack/story000/story000.rpf!84",
+     "chain": "pack/story000/story000.rpf!84!2",
      "head": "",
      "size": null
     }
@@ -2923,7 +2892,7 @@
    "extension": "gfx",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -2968,7 +2937,7 @@
    "extension": "zcd",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -3008,74 +2977,74 @@
      "size": null
     },
     {
-     "archive": "core_restofworld.rpf!8",
-     "chain": "core_restofworld.rpf!8!128",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!8",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!8!128",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_restofworld001.rpf!0",
-     "chain": "core_restofworld001.rpf!0!0",
+     "archive": "pack/core_restofworld001/core_restofworld001.rpf!0",
+     "chain": "pack/core_restofworld001/core_restofworld001.rpf!0!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_restofworld001.rpf!0",
-     "chain": "core_restofworld001.rpf!0!1",
+     "archive": "pack/core_restofworld001/core_restofworld001.rpf!0",
+     "chain": "pack/core_restofworld001/core_restofworld001.rpf!0!1",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_restofworld001.rpf!0",
-     "chain": "core_restofworld001.rpf!0!2",
+     "archive": "pack/core_restofworld001/core_restofworld001.rpf!0",
+     "chain": "pack/core_restofworld001/core_restofworld001.rpf!0!2",
      "head": "",
      "size": null
     },
     {
-     "archive": "shared_minigame000.rpf!33",
-     "chain": "shared_minigame000.rpf!33!143",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!33",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!33!143",
      "head": "",
      "size": null
     },
     {
-     "archive": "shared_minigame000.rpf!46",
-     "chain": "shared_minigame000.rpf!46!473",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!46",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!46!473",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!4",
-     "chain": "story000.rpf!4!11",
+     "archive": "pack/story000/story000.rpf!4",
+     "chain": "pack/story000/story000.rpf!4!11",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!4",
-     "chain": "story000.rpf!4!29",
+     "archive": "pack/story000/story000.rpf!4",
+     "chain": "pack/story000/story000.rpf!4!29",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!4",
-     "chain": "story000.rpf!4!47",
+     "archive": "pack/story000/story000.rpf!4",
+     "chain": "pack/story000/story000.rpf!4!47",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000_restofworld.rpf!1",
-     "chain": "story000_restofworld.rpf!1!0",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf!1",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!1!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000_restofworld.rpf!1",
-     "chain": "story000_restofworld.rpf!1!1",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf!1",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!1!1",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000_restofworld.rpf!1",
-     "chain": "story000_restofworld.rpf!1!2",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf!1",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!1!2",
      "head": "",
      "size": null
     }
@@ -3096,7 +3065,7 @@
    "extension": "zcd",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -3134,7 +3103,7 @@
    "extension": "zpmd",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -3167,7 +3136,7 @@
    "extension": "zpm",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -3189,20 +3158,20 @@
      "size": null
     },
     {
-     "archive": "story000.rpf!341",
-     "chain": "story000.rpf!341!0",
+     "archive": "pack/story000/story000.rpf!341",
+     "chain": "pack/story000/story000.rpf!341!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!427",
-     "chain": "story000.rpf!427!0",
+     "archive": "pack/story000/story000.rpf!427",
+     "chain": "pack/story000/story000.rpf!427!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!427",
-     "chain": "story000.rpf!427!1",
+     "archive": "pack/story000/story000.rpf!427",
+     "chain": "pack/story000/story000.rpf!427!1",
      "head": "",
      "size": null
     }
@@ -3217,16 +3186,16 @@
    "archive_count": 4,
    "archives": [
     "data.rpf!29",
-    "core_restofworld.rpf!5",
-    "story000.rpf!295",
-    "story000_restofworld.rpf!12"
+    "pack/core_restofworld/core_restofworld.rpf!5",
+    "pack/story000/story000.rpf!295",
+    "pack/story000_restofworld/story000_restofworld.rpf!12"
    ],
    "capability": "unprobed",
    "entries": 226,
    "extension": "zpt",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -3248,32 +3217,32 @@
      "size": null
     },
     {
-     "archive": "core_restofworld.rpf!5",
-     "chain": "core_restofworld.rpf!5!0",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!5",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!5!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!295",
-     "chain": "story000.rpf!295!0",
+     "archive": "pack/story000/story000.rpf!295",
+     "chain": "pack/story000/story000.rpf!295!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!295",
-     "chain": "story000.rpf!295!1",
+     "archive": "pack/story000/story000.rpf!295",
+     "chain": "pack/story000/story000.rpf!295!1",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!295",
-     "chain": "story000.rpf!295!2",
+     "archive": "pack/story000/story000.rpf!295",
+     "chain": "pack/story000/story000.rpf!295!2",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000_restofworld.rpf!12",
-     "chain": "story000_restofworld.rpf!12!0",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf!12",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!12!0",
      "head": "",
      "size": null
     }
@@ -3301,7 +3270,7 @@
    "extension": "zmap",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -3323,38 +3292,38 @@
      "size": null
     },
     {
-     "archive": "shared_minigame000.rpf!2",
-     "chain": "shared_minigame000.rpf!2!0",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!2",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!2!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "shared_minigame000.rpf!2",
-     "chain": "shared_minigame000.rpf!2!1",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!2",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!2!1",
      "head": "",
      "size": null
     },
     {
-     "archive": "shared_minigame000.rpf!2",
-     "chain": "shared_minigame000.rpf!2!2",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!2",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!2!2",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!10",
-     "chain": "story000.rpf!10!0",
+     "archive": "pack/story000/story000.rpf!10",
+     "chain": "pack/story000/story000.rpf!10!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!10",
-     "chain": "story000.rpf!10!1",
+     "archive": "pack/story000/story000.rpf!10",
+     "chain": "pack/story000/story000.rpf!10!1",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!10",
-     "chain": "story000.rpf!10!2",
+     "archive": "pack/story000/story000.rpf!10",
+     "chain": "pack/story000/story000.rpf!10!2",
      "head": "",
      "size": null
     }
@@ -3378,7 +3347,7 @@
    "extension": "zmap",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -3423,7 +3392,7 @@
    "extension": "ztyp",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -3445,44 +3414,44 @@
      "size": null
     },
     {
-     "archive": "core_restofworld.rpf!0",
-     "chain": "core_restofworld.rpf!0!0",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!0",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!0!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "shared_minigame000.rpf!2",
-     "chain": "shared_minigame000.rpf!2!4",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!2",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!2!4",
      "head": "",
      "size": null
     },
     {
-     "archive": "shared_minigame000.rpf!2",
-     "chain": "shared_minigame000.rpf!2!5",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!2",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!2!5",
      "head": "",
      "size": null
     },
     {
-     "archive": "shared_minigame000.rpf!2",
-     "chain": "shared_minigame000.rpf!2!6",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!2",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!2!6",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!10",
-     "chain": "story000.rpf!10!68",
+     "archive": "pack/story000/story000.rpf!10",
+     "chain": "pack/story000/story000.rpf!10!68",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!10",
-     "chain": "story000.rpf!10!69",
+     "archive": "pack/story000/story000.rpf!10",
+     "chain": "pack/story000/story000.rpf!10!69",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!10",
-     "chain": "story000.rpf!10!70",
+     "archive": "pack/story000/story000.rpf!10",
+     "chain": "pack/story000/story000.rpf!10!70",
      "head": "",
      "size": null
     },
@@ -3516,7 +3485,7 @@
    "extension": "ztyp",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -3554,7 +3523,7 @@
    "extension": "zjd",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -3585,56 +3554,56 @@
   {
    "archive_count": 131,
    "archives": [
-    "story000.rpf!11",
-    "story000.rpf!12",
-    "story000.rpf!13",
-    "story000.rpf!16",
-    "story000.rpf!19",
-    "story000.rpf!20",
-    "story000.rpf!25",
-    "story000.rpf!4"
+    "pack/story000/story000.rpf!11",
+    "pack/story000/story000.rpf!12",
+    "pack/story000/story000.rpf!13",
+    "pack/story000/story000.rpf!16",
+    "pack/story000/story000.rpf!19",
+    "pack/story000/story000.rpf!20",
+    "pack/story000/story000.rpf!25",
+    "pack/story000/story000.rpf!4"
    ],
    "capability": "unprobed",
    "entries": 25608,
    "extension": "zad",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
-     "archive": "story000.rpf!4",
-     "chain": "story000.rpf!4!0",
+     "archive": "pack/story000/story000.rpf!4",
+     "chain": "pack/story000/story000.rpf!4!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!4",
-     "chain": "story000.rpf!4!1",
+     "archive": "pack/story000/story000.rpf!4",
+     "chain": "pack/story000/story000.rpf!4!1",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!4",
-     "chain": "story000.rpf!4!2",
+     "archive": "pack/story000/story000.rpf!4",
+     "chain": "pack/story000/story000.rpf!4!2",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000_restofworld.rpf!2",
-     "chain": "story000_restofworld.rpf!2!0",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf!2",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!2!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000_restofworld.rpf!2",
-     "chain": "story000_restofworld.rpf!2!1",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf!2",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!2!1",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000_restofworld.rpf!2",
-     "chain": "story000_restofworld.rpf!2!2",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf!2",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!2!2",
      "head": "",
      "size": null
     }
@@ -3662,7 +3631,7 @@
    "extension": "znv",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -3700,7 +3669,7 @@
    "extension": "zfd",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -3745,7 +3714,7 @@
    "extension": "zas",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -3767,38 +3736,38 @@
      "size": null
     },
     {
-     "archive": "story000.rpf!1",
-     "chain": "story000.rpf!1!0",
+     "archive": "pack/story000/story000.rpf!1",
+     "chain": "pack/story000/story000.rpf!1!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!1",
-     "chain": "story000.rpf!1!1",
+     "archive": "pack/story000/story000.rpf!1",
+     "chain": "pack/story000/story000.rpf!1!1",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!1",
-     "chain": "story000.rpf!1!2",
+     "archive": "pack/story000/story000.rpf!1",
+     "chain": "pack/story000/story000.rpf!1!2",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000_restofworld.rpf!5",
-     "chain": "story000_restofworld.rpf!5!0",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf!5",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!5!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000_restofworld.rpf!5",
-     "chain": "story000_restofworld.rpf!5!1",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf!5",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!5!1",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000_restofworld.rpf!5",
-     "chain": "story000_restofworld.rpf!5!2",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf!5",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!5!2",
      "head": "",
      "size": null
     }
@@ -3812,8 +3781,8 @@
   {
    "archive_count": 5,
    "archives": [
-    "core_restofworld.rpf!7",
-    "shared_minigame000.rpf!19",
+    "pack/core_restofworld/core_restofworld.rpf!7",
+    "pack/shared_minigame000/shared_minigame000.rpf!19",
     "packs.rpf!2",
     "packs.rpf!23",
     "packs.rpf!50"
@@ -3823,42 +3792,42 @@
    "extension": "zsm",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
-     "archive": "core_restofworld.rpf!7",
-     "chain": "core_restofworld.rpf!7!0",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!7",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!7!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_restofworld.rpf!7",
-     "chain": "core_restofworld.rpf!7!1",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!7",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!7!1",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_restofworld.rpf!7",
-     "chain": "core_restofworld.rpf!7!2",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!7",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!7!2",
      "head": "",
      "size": null
     },
     {
-     "archive": "shared_minigame000.rpf!19",
-     "chain": "shared_minigame000.rpf!19!0",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!19",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!19!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "shared_minigame000.rpf!19",
-     "chain": "shared_minigame000.rpf!19!1",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!19",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!19!1",
      "head": "",
      "size": null
     },
     {
-     "archive": "shared_minigame000.rpf!19",
-     "chain": "shared_minigame000.rpf!19!2",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!19",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!19!2",
      "head": "",
      "size": null
     },
@@ -3890,7 +3859,7 @@
   {
    "archive_count": 2,
    "archives": [
-    "story000_script.rpf!1",
+    "pack/story000/story000_script.rpf!1",
     "script.rpf!0"
    ],
    "capability": "unprobed",
@@ -3898,24 +3867,24 @@
    "extension": "zscript",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
-     "archive": "story000_script.rpf!1",
-     "chain": "story000_script.rpf!1!0",
+     "archive": "pack/story000/story000_script.rpf!1",
+     "chain": "pack/story000/story000_script.rpf!1!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000_script.rpf!1",
-     "chain": "story000_script.rpf!1!1",
+     "archive": "pack/story000/story000_script.rpf!1",
+     "chain": "pack/story000/story000_script.rpf!1!1",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000_script.rpf!1",
-     "chain": "story000_script.rpf!1!2",
+     "archive": "pack/story000/story000_script.rpf!1",
+     "chain": "pack/story000/story000_script.rpf!1!2",
      "head": "",
      "size": null
     },
@@ -3942,7 +3911,7 @@
    "extension": "zfc",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -3980,7 +3949,7 @@
    "extension": "zlfc",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -4019,7 +3988,7 @@
    "extension": "zcg",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -4057,7 +4026,7 @@
    "extension": "zasd",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -4083,7 +4052,7 @@
    "extension": "zcps",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -4128,7 +4097,7 @@
    "extension": "zsp",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -4166,7 +4135,7 @@
    "extension": "ztsl",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -4211,7 +4180,7 @@
    "extension": "zmmd",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -4242,7 +4211,7 @@
   {
    "archive_count": 17,
    "archives": [
-    "core_restofworld.rpf!2",
+    "pack/core_restofworld/core_restofworld.rpf!2",
     "packs.rpf!11",
     "packs.rpf!24",
     "packs.rpf!27",
@@ -4256,24 +4225,24 @@
    "extension": "zfid",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
-     "archive": "core_restofworld.rpf!2",
-     "chain": "core_restofworld.rpf!2!795",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!2",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!2!795",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_restofworld.rpf!2",
-     "chain": "core_restofworld.rpf!2!796",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!2",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!2!796",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_restofworld.rpf!2",
-     "chain": "core_restofworld.rpf!2!797",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!2",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!2!797",
      "head": "",
      "size": null
     },
@@ -4312,7 +4281,7 @@
    "extension": "zmsk",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -4350,7 +4319,7 @@
    "extension": "zhdat",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -4383,15 +4352,15 @@
    "archives": [
     "anim.rpf!26",
     "anim.rpf!79",
-    "story000.rpf!142",
-    "story000_restofworld.rpf!4"
+    "pack/story000/story000.rpf!142",
+    "pack/story000_restofworld/story000_restofworld.rpf!4"
    ],
    "capability": "unprobed",
    "entries": 32878,
    "extension": "zascd",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -4413,38 +4382,38 @@
      "size": null
     },
     {
-     "archive": "story000.rpf!142",
-     "chain": "story000.rpf!142!0",
+     "archive": "pack/story000/story000.rpf!142",
+     "chain": "pack/story000/story000.rpf!142!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!142",
-     "chain": "story000.rpf!142!1",
+     "archive": "pack/story000/story000.rpf!142",
+     "chain": "pack/story000/story000.rpf!142!1",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!142",
-     "chain": "story000.rpf!142!2",
+     "archive": "pack/story000/story000.rpf!142",
+     "chain": "pack/story000/story000.rpf!142!2",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000_restofworld.rpf!4",
-     "chain": "story000_restofworld.rpf!4!0",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf!4",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!4!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000_restofworld.rpf!4",
-     "chain": "story000_restofworld.rpf!4!1",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf!4",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!4!1",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000_restofworld.rpf!4",
-     "chain": "story000_restofworld.rpf!4!2",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf!4",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!4!2",
      "head": "",
      "size": null
     }
@@ -4468,7 +4437,7 @@
    "extension": "zrd",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -4499,8 +4468,8 @@
   {
    "archive_count": 5,
    "archives": [
-    "core_restofworld.rpf!3",
-    "shared_minigame000.rpf!36",
+    "pack/core_restofworld/core_restofworld.rpf!3",
+    "pack/shared_minigame000/shared_minigame000.rpf!36",
     "packs.rpf!15",
     "packs.rpf!4",
     "packs.rpf!5"
@@ -4510,18 +4479,18 @@
    "extension": "zsmam",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
-     "archive": "core_restofworld.rpf!3",
-     "chain": "core_restofworld.rpf!3!0",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!3",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!3!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "shared_minigame000.rpf!36",
-     "chain": "shared_minigame000.rpf!36!0",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!36",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!36!0",
      "head": "",
      "size": null
     },
@@ -4567,7 +4536,7 @@
    "extension": "zldbmt",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -4589,38 +4558,38 @@
      "size": null
     },
     {
-     "archive": "shared_minigame000.rpf!0",
-     "chain": "shared_minigame000.rpf!0!0",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!0",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!0!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "shared_minigame000.rpf!0",
-     "chain": "shared_minigame000.rpf!0!1",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!0",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!0!1",
      "head": "",
      "size": null
     },
     {
-     "archive": "shared_minigame000.rpf!0",
-     "chain": "shared_minigame000.rpf!0!2",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!0",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!0!2",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!5",
-     "chain": "story000.rpf!5!0",
+     "archive": "pack/story000/story000.rpf!5",
+     "chain": "pack/story000/story000.rpf!5!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!5",
-     "chain": "story000.rpf!5!1",
+     "archive": "pack/story000/story000.rpf!5",
+     "chain": "pack/story000/story000.rpf!5!1",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!5",
-     "chain": "story000.rpf!5!2",
+     "archive": "pack/story000/story000.rpf!5",
+     "chain": "pack/story000/story000.rpf!5!2",
      "head": "",
      "size": null
     }
@@ -4641,7 +4610,7 @@
    "extension": "zkit",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -4680,7 +4649,7 @@
    "extension": "zcgc",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -4721,7 +4690,7 @@
    "extension": "zcov",
    "extension_provenance": "native",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -4766,7 +4735,7 @@
    "extension": "-",
    "extension_provenance": "unresolved",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -4806,74 +4775,74 @@
      "size": null
     },
     {
-     "archive": "core_restofworld.rpf",
-     "chain": "core_restofworld.rpf!12",
+     "archive": "pack/core_restofworld/core_restofworld.rpf",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!12",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_restofworld.rpf",
-     "chain": "core_restofworld.rpf!13",
+     "archive": "pack/core_restofworld/core_restofworld.rpf",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!13",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_restofworld.rpf",
-     "chain": "core_restofworld.rpf!14",
+     "archive": "pack/core_restofworld/core_restofworld.rpf",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!14",
      "head": "",
      "size": null
     },
     {
-     "archive": "shared_minigame000.rpf!7",
-     "chain": "shared_minigame000.rpf!7!0",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!7",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!7!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "shared_minigame000.rpf!7",
-     "chain": "shared_minigame000.rpf!7!1",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!7",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!7!1",
      "head": "",
      "size": null
     },
     {
-     "archive": "shared_minigame000.rpf!7",
-     "chain": "shared_minigame000.rpf!7!2",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!7",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!7!2",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!0",
-     "chain": "story000.rpf!0!0",
+     "archive": "pack/story000/story000.rpf!0",
+     "chain": "pack/story000/story000.rpf!0!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!0",
-     "chain": "story000.rpf!0!1",
+     "archive": "pack/story000/story000.rpf!0",
+     "chain": "pack/story000/story000.rpf!0!1",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000.rpf!0",
-     "chain": "story000.rpf!0!2",
+     "archive": "pack/story000/story000.rpf!0",
+     "chain": "pack/story000/story000.rpf!0!2",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000_restofworld.rpf!3",
-     "chain": "story000_restofworld.rpf!3!0",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf!3",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!3!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000_restofworld.rpf!3",
-     "chain": "story000_restofworld.rpf!3!1",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf!3",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!3!1",
      "head": "",
      "size": null
     },
     {
-     "archive": "story000_restofworld.rpf!16",
-     "chain": "story000_restofworld.rpf!16!0",
+     "archive": "pack/story000_restofworld/story000_restofworld.rpf!16",
+     "chain": "pack/story000_restofworld/story000_restofworld.rpf!16!0",
      "head": "",
      "size": null
     },
@@ -4905,15 +4874,15 @@
     "levels.rpf!1681",
     "levels.rpf!1775",
     "levels.rpf!326",
-    "core_bvh4.rpf!144",
-    "core_bvh4.rpf!208"
+    "pack/core_bvh4/core_bvh4.rpf!144",
+    "pack/core_bvh4/core_bvh4.rpf!208"
    ],
    "capability": "unprobed",
    "entries": 441,
    "extension": "-",
    "extension_provenance": "unresolved",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -4971,92 +4940,92 @@
      "size": null
     },
     {
-     "archive": "core_bvh4.rpf!28",
-     "chain": "core_bvh4.rpf!28!0",
+     "archive": "pack/core_bvh4/core_bvh4.rpf!28",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!28!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_bvh4.rpf!144",
-     "chain": "core_bvh4.rpf!144!0",
+     "archive": "pack/core_bvh4/core_bvh4.rpf!144",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!144!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_bvh4.rpf!208",
-     "chain": "core_bvh4.rpf!208!0",
+     "archive": "pack/core_bvh4/core_bvh4.rpf!208",
+     "chain": "pack/core_bvh4/core_bvh4.rpf!208!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_licenses_data.rpf",
-     "chain": "core_licenses_data.rpf!1",
+     "archive": "pack/core_licenses/core_licenses_data.rpf",
+     "chain": "pack/core_licenses/core_licenses_data.rpf!1",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_licenses_data.rpf",
-     "chain": "core_licenses_data.rpf!2",
+     "archive": "pack/core_licenses/core_licenses_data.rpf",
+     "chain": "pack/core_licenses/core_licenses_data.rpf!2",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_licenses_data.rpf",
-     "chain": "core_licenses_data.rpf!3",
+     "archive": "pack/core_licenses/core_licenses_data.rpf",
+     "chain": "pack/core_licenses/core_licenses_data.rpf!3",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_restofworld.rpf!1",
-     "chain": "core_restofworld.rpf!1!0",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!1",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!1!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_restofworld.rpf!1",
-     "chain": "core_restofworld.rpf!1!1",
+     "archive": "pack/core_restofworld/core_restofworld.rpf!1",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!1!1",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_restofworld.rpf",
-     "chain": "core_restofworld.rpf!10",
+     "archive": "pack/core_restofworld/core_restofworld.rpf",
+     "chain": "pack/core_restofworld/core_restofworld.rpf!10",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_restofworld001.rpf",
-     "chain": "core_restofworld001.rpf!1",
+     "archive": "pack/core_restofworld001/core_restofworld001.rpf",
+     "chain": "pack/core_restofworld001/core_restofworld001.rpf!1",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_restofworld001.rpf",
-     "chain": "core_restofworld001.rpf!2",
+     "archive": "pack/core_restofworld001/core_restofworld001.rpf",
+     "chain": "pack/core_restofworld001/core_restofworld001.rpf!2",
      "head": "",
      "size": null
     },
     {
-     "archive": "core_restofworld001.rpf",
-     "chain": "core_restofworld001.rpf!3",
+     "archive": "pack/core_restofworld001/core_restofworld001.rpf",
+     "chain": "pack/core_restofworld001/core_restofworld001.rpf!3",
      "head": "",
      "size": null
     },
     {
-     "archive": "shared_minigame000.rpf!12",
-     "chain": "shared_minigame000.rpf!12!0",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!12",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!12!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "shared_minigame000.rpf!30",
-     "chain": "shared_minigame000.rpf!30!0",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!30",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!30!0",
      "head": "",
      "size": null
     },
     {
-     "archive": "shared_minigame000.rpf!30",
-     "chain": "shared_minigame000.rpf!30!1",
+     "archive": "pack/shared_minigame000/shared_minigame000.rpf!30",
+     "chain": "pack/shared_minigame000/shared_minigame000.rpf!30!1",
      "head": "",
      "size": null
     }
@@ -5078,7 +5047,7 @@
    "extension": "-",
    "extension_provenance": "unresolved",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -5128,7 +5097,7 @@
    "extension": "-",
    "extension_provenance": "unresolved",
    "identification": "none",
-   "outcome": "blocked",
+   "outcome": "not-probed",
    "payload": "not-read",
    "samples": [
     {
@@ -5145,5 +5114,6 @@
    "variant": "not-read"
   }
  ],
+ "rejections": null,
  "failures": []
 }

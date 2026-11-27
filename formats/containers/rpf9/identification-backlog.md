@@ -4,6 +4,8 @@ Work that the classification in [entry-classification.md](entry-classification.m
 
 Each item states what is known, what is missing, and what would count as done. Counts are the inventory's: 1,255,039 entries in 4,373 archives, every one of them classified and given an outcome.
 
+Five findings the census measured but did not solve have their own tasks in [identification-follow-up.md](identification-follow-up.md): chunk encoding 4, the payload transform failures, resource structures, type 255, and the newly observed types.
+
 ## 1. Resource containers
 
 **Known.** A resource payload starts with eight zero bytes and a `0x5…` pointer at `+0x08`. Every resource in the installation is segment 5, and the pointer's low 28 bits are a page-map offset.

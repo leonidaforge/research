@@ -81,15 +81,15 @@ Only `decoded` entries are identified. A state that is not `decoded` is a fact a
 
 Every entry ends an investigation with exactly one outcome, and the census counts them so the counts add up to the entry count. This is what makes an inventory exhaustive rather than a pile of categories: a row cannot be counted twice and cannot be left out.
 
-| Outcome                 | Established                                                        |
-| ----------------------- | ------------------------------------------------------------------ |
-| `identified`            | The payload's own framing was walked and the container named        |
-| `partially-identified`  | Something about the payload, but not the container                  |
-| `unresolved`            | The payload was read and nothing in it was recognised               |
-| `undecodable`           | The storage cannot be decoded                                       |
-| `transform-unavailable` | The payload is behind the transform and no key state is available   |
-| `malformed`             | The metadata describing the payload is malformed                    |
-| `blocked`               | The payload was not read, or the transform did not verify or run    |
+| Outcome                 | Established                                                       |
+| ----------------------- | ----------------------------------------------------------------- |
+| `identified`            | The payload's own framing was walked and the container named      |
+| `partially-identified`  | Something about the payload, but not the container                |
+| `unresolved`            | The payload was read and nothing in it was recognised             |
+| `undecodable`           | The storage cannot be decoded                                     |
+| `transform-unavailable` | The payload is behind the transform and no key state is available |
+| `malformed`             | The metadata describing the payload is malformed                  |
+| `blocked`               | The payload was not read, or the transform did not verify or run  |
 
 `partially-identified` covers the three shapes that stop short of a container: a magic-only match such as `RPF9`, a resource header whose page map was not read, and a payload that looks like XML without parsing as XML. `blocked` is the honest label for a metadata pass and for a transform that failed to verify: nothing was established about the bytes, and the reason field says why.
 
@@ -154,8 +154,8 @@ The capability is what the application dispatches on. The type is not: an entry 
 
 The classification is used twice. A **metadata pass** enumerates every entry without reading a payload; a **payload pass** reads the first decoded bytes of every entry. They are separate investigations with separate journals, because a metadata checkpoint must never stand in for a payload one.
 
-| Pass     | Reads                      | Establishes                                                                    |
-| -------- | -------------------------- | ------------------------------------------------------------------------------ |
+| Pass     | Reads                      | Establishes                                                                     |
+| -------- | -------------------------- | ------------------------------------------------------------------------------- |
 | metadata | the table of contents      | every archive and entry, the type id, the storage shape, the declared extension |
 | payload  | the first 64 decoded bytes | what the entry holds, and one terminal outcome per entry                        |
 
@@ -171,25 +171,27 @@ lforge archive census <root>.rpf --executable <game executable> --recursive \
 
 The payload pass is the same command without `--metadata-only` and with room for what a payload read costs: `--max-archives 16384`, `--max-nested-bytes 2147483648`, `--max-spool-bytes 68719476736`. Reading payloads opens more nested archives, and larger ones, than reading tables of contents does.
 
-Each root gets a journal of its own: one line per completed archive, written and synced before the run moves on, keyed by a SHA-256 over the schema, rule set, registry build, scan mode, limits, the executable's bytes and the root's size and modification time. A root interrupted at archive N resumes at archive N. A line cut short by a limit carries `complete: false` and is walked again. Measured: a scan of `audio.rpf` killed after 25 s had journalled four archives, and the rerun with the same identity reproduced the uninterrupted totals exactly.
+Each root gets a journal of its own: one line per completed archive, written and synced before the run moves on. A line is keyed by a SHA-256 over the schema, the rule set, the registry build, the scan mode, every limit including the entry budget, the scanner's own digest, and the root's size, modification time and 1 MiB head and tail digests. A line also names the summary it came from and that file's digest, so a journal is only reused for the scan that wrote it: a different build, a different budget or a different mode re-runs the root instead of crediting rows it never enumerated. A line cut short by an interruption is repaired at the next append, and a root interrupted at archive N resumes at archive N.
+
+A summary is written to a temporary name and only replaces its target once the run has finished, and the driver exits non-zero unless the merged summary reports `complete: true` with no stopping reason. Measured: a scan of `audio.rpf` killed after 25 s had journalled four archives, and the rerun with the same identity reproduced the uninterrupted totals exactly.
 
 Both passes are driven by `tools/rpf9/census_all.py`, and the machine-written documents are produced by `tools/rpf9/entry_matrix.py` from the merged census, so no figure below is copied by hand.
 
 ### What the metadata pass establishes
 
-22 roots discovered and opened, 4,373 archives opened (4,351 of them nested), 1,255,039 entries enumerated, no archive failed to open, no root stopped at a limit: `complete: true`. It finished in 18 minutes 49 seconds, about 1,112 entries and 3.9 archives per second.
+22 roots discovered and opened, 4,373 archives opened (4,351 of them nested), 1,255,039 entries enumerated, no archive failed to open, no root stopped at a limit: `complete: true`. It finished in 20 minutes 28 seconds, about 1,022 entries and 3.6 archives per second.
 
-| Count                      | Value     |
-| -------------------------- | --------: |
-| entries enumerated         | 1,255,039 |
-| entries probed             |         0 |
-| archives opened            |     4,373 |
-| nested archives opened     |     4,351 |
-| failed archives            |         0 |
-| declared asset classes     | 1,181,971 |
-| unresolved formats         | 1,255,039 |
+| Count                  |     Value |
+| ---------------------- | --------: |
+| entries enumerated     | 1,255,039 |
+| entries probed         |         0 |
+| archives opened        |     4,373 |
+| nested archives opened |     4,351 |
+| failed archives        |         0 |
+| declared asset classes | 1,181,971 |
+| unresolved formats     | 1,255,039 |
 
-Nothing is read, so the pass claims nothing about any payload: every entry is `unprobed` and its outcome is `blocked`. What it does establish is exhaustive: which types exist, in which archives, in what storage shape, and with which declared extension. The full per-root, per-type and per-combination record is [type-inventory.md](type-inventory.md) with the same data in [type-inventory.json](type-inventory.json).
+Nothing is read, so the pass claims nothing about any payload: every entry is `unprobed` and its outcome is `not-probed`. What it does establish is exhaustive: which types exist, in which archives, in what storage shape, and with which declared extension. The full per-root, per-type and per-combination record is [type-inventory.md](type-inventory.md) with the same data in [type-inventory.json](type-inventory.json).
 
 | Declared extension | Entries |
 | ------------------ | ------: |
@@ -212,25 +214,25 @@ The remaining thirty-three extensions are in the type inventory. The `none` row 
 
 The same roots and the same archives, read one entry at a time: the first 64 decoded bytes, never the whole payload. Every figure of this pass is in [entry-matrix.md](entry-matrix.md) with the same data in [entry-matrix.json](entry-matrix.json); the tables below quote it.
 
-It enumerated 1,255,039 entries in 4,373 archives, root by root the same numbers as the metadata pass: two enumerations that never consulted each other agree exactly.
+It enumerated 1,255,039 entries in 4,373 archives, root by root the same numbers as the metadata pass: two enumerations that never consulted each other agree exactly. No archive failed to open in either pass, and no type-0 row was rejected: all 4,351 rows of that type opened as archives, which is what the type claims and what the payload proves. A row whose declared type says archive and whose payload does not open is counted as a rejected candidate with its reason rather than as a failed archive, so a declared type can never make a run look broken. This installation has none.
 
-| Outcome                 | Entries   | Share |
-| ----------------------- | --------: | ----: |
-| `partially-identified`  | 1,143,183 | 91.1% |
-| `identified`            |    93,627 |  7.5% |
-| `undecodable`           |    14,432 |  1.1% |
-| `unresolved`            |     3,047 |  0.2% |
-| `blocked`               |       750 |  0.1% |
+| Outcome                |   Entries | Share |
+| ---------------------- | --------: | ----: |
+| `partially-identified` | 1,143,183 | 91.1% |
+| `identified`           |    93,627 |  7.5% |
+| `undecodable`          |    14,432 |  1.1% |
+| `unresolved`           |     3,047 |  0.2% |
+| `blocked`              |       750 |  0.1% |
 
 Every entry has exactly one outcome, and the five that occur add up to the entry count. Two outcomes of the vocabulary occur nowhere: no entry is `malformed`, and none is `transform-unavailable`. `blocked` is 750 entries behind the payload transform that did not verify; `undecodable` is 14,432 entries whose storage the decoder refused.
 
-| Identification            | Entries   |
-| ------------------------- | --------: |
-| resource container        | 1,138,382 |
-| supported format          |    97,489 |
-| nothing recognised        |    18,229 |
-| validated XML document    |       491 |
-| named signature           |       448 |
+| Identification         |   Entries |
+| ---------------------- | --------: |
+| resource container     | 1,138,382 |
+| supported format       |    97,489 |
+| nothing recognised     |    18,229 |
+| validated XML document |       491 |
+| named signature        |       448 |
 
 `nothing recognised` is 18,229 entries, but only 3,047 of them were read and found unrecognisable. The other 15,182 were never decoded: an entry that could not be read is reported as unidentified with the reason, and is not counted as a negative result about its bytes.
 
@@ -244,9 +246,9 @@ Every entry has exactly one outcome, and the five that occur add up to the entry
 | GFx    |      87 |
 | `EDUP` |       5 |
 
-The 4,351 RPF9 rows are the whole of the nesting in this installation: the passes opened exactly 4,351 nested archives, every one of them through a type-0 row, and no other entry holds an archive.
+The 4,351 RPF9 rows are the whole of the nesting in this installation: the passes opened exactly 4,351 nested archives, every one of them through a type-0 row. Opening an archive is a separate fact from recognising its magic. The 4,351 RPF9 rows are `partially-identified` on the strength of a four-byte match; that all 4,351 then authenticated and were walked is what `archives_opened` records, and it is the stronger claim. No other entry that was _read_ holds an archive. Entries the passes could not read (15,182) are not evidence either way, and none of them is claimed to hold one.
 
-| Capability  | Entries   |
+| Capability  |   Entries |
 | ----------- | --------: |
 | resource    | 1,138,382 |
 | structural  |    93,138 |
@@ -255,7 +257,7 @@ The 4,351 RPF9 rows are the whole of the nesting in this installation: the passe
 | bytes       |     3,495 |
 | text        |       491 |
 
-| Extension provenance | Entries   |
+| Extension provenance |   Entries |
 | -------------------- | --------: |
 | `native`             | 1,181,971 |
 | `unresolved`         |    72,579 |
@@ -263,7 +265,7 @@ The 4,351 RPF9 rows are the whole of the nesting in this installation: the passe
 
 1,181,971 entries carry the extension their type declares and 489 carry one the bytes themselves established: the 491 validated documents, two of which only look like XML and therefore keep no payload extension. 72,579 entries have no extension at all: the 73,068 rows of the unregistered type 255, minus the 489 documents that established `xml` for themselves.
 
-| Structure claim | Entries   |
+| Structure claim |   Entries |
 | --------------- | --------: |
 | unknown         | 1,157,059 |
 | verified        |    93,627 |
@@ -272,26 +274,26 @@ The 4,351 RPF9 rows are the whole of the nesting in this installation: the passe
 
 `unknown` is what a resource container and an unrecognised payload share: the head was read, and neither said what lies behind it. `probable` is the 4,351 RPF9 rows, whose recogniser matches the magic and leaves authentication to whoever opens them. `tentative` is the two payloads that begin like XML and do not parse.
 
-| Storage      | Entries   |
-| ------------ | --------: |
-| `chunked-2`  | 1,139,128 |
-| `stored`     |    76,826 |
-| `chunked-3`  |    24,436 |
-| `chunked-4`  |    14,488 |
-| `raw-deflate`|       161 |
+| Storage       |   Entries |
+| ------------- | --------: |
+| `chunked-2`   | 1,139,128 |
+| `stored`      |    76,826 |
+| `chunked-3`   |    24,436 |
+| `chunked-4`   |    14,488 |
+| `raw-deflate` |       161 |
 
-1,398 entries carry the payload transform. 648 of them decoded; 750 did not verify and are reported as `blocked`, not guessed at.
+1,398 entries carry the payload transform. 648 of them decoded; 750 did not verify and are reported as `blocked`, not guessed at. The two differ in storage: every blocked row is chunked-2 or raw DEFLATE, and every chunked-3 transformed row decoded.
 
 ### What it cost
 
 Both passes ran against the same release build, one root archive at a time, on one machine reading a 150 GiB installation.
 
-| Pass     | Wall clock    | Entries   | Entries per second | Archives per second |
-| -------- | ------------- | --------: | -----------------: | ------------------: |
-| metadata | 18 min 49 s   | 1,255,039 |              1,112 |                 3.9 |
-| payload  | 30 min 47 s   | 1,255,039 |                679 |                 2.4 |
+| Pass     | Wall clock  |   Entries | Entries per second | Archives per second |
+| -------- | ----------- | --------: | -----------------: | ------------------: |
+| metadata | 20 min 28 s | 1,255,039 |              1,022 |                 3.6 |
+| payload  | 26 min  7 s | 1,255,039 |                801 |                 2.8 |
 
-The two overlapped for about five minutes, so both figures are a little pessimistic. The cost is per entry, not per byte: classifying an entry decodes one chunk before it can read the first 64 bytes, and that chunk's size is what the archive chose, not what the census asked for. An earlier note in this repository measured 91 entries per second; that figure came from a debug build. The same archive taken with a release build is four times faster, which is why a complete count is now affordable and why no figure here is a budgeted sample.
+Each pass ran on its own, from an empty output directory, so neither figure shares the machine with the other. The cost is per entry, not per byte: classifying an entry decodes one chunk before it can read the first 64 bytes, and that chunk's size is what the archive chose, not what the census asked for. An earlier note in this repository measured 91 entries per second; that figure came from a debug build. The same archive taken with a release build is four times faster, which is why a complete count is now affordable and why no figure here is a budgeted sample.
 
 ### What the types say
 
@@ -299,9 +301,9 @@ The 22 roots together reach 46 type ids: the 45 registered ids that rows use, an
 
 Type 0 holds exactly 4,351 entries, and the passes opened exactly 4,351 nested archives. Every nested archive in this installation is a type-0 row. The type is still not a format: a type-0 row is an archive only because its payload is one, which is what the payload pass checks.
 
-Some types hold one format throughout the installation, and others do not. Every type-0 row is an RPF9 archive (4,351), every type-64 row is a `MoVE` payload (443) and every type-66 row is a GFx payload (87). Against that, `PSIN` appears under four types — 11 (18,787), 93 (211), 94 (80) and 255 (2) — and type 11 holds `PSIN` and `RBF0` (1,493) side by side. Type 255 holds `ADAT` (71,676), `KB2` (797), `EDUP` (5) and four named signatures, and nothing else.
+Some types hold one format throughout the installation, and others do not. Every type-0 row is an RPF9 archive (4,351), every type-64 row is a `MoVE` payload (443) and every type-66 row is a GFx payload (87). Against that, `PSIN` appears under four types — 11 (18,787), 93 (211), 94 (80) and 255 (2) — and type 11 holds `PSIN` and `RBF0` (1,493) side by side.
 
-Type 255 is the catch-all the build does not name, 73,068 entries strong. The pass records what each of those rows holds, and no extension is declared for any of them.
+Type 255 is the catch-all the build does not name, 73,068 entries strong, and it holds everything: `ADAT` (71,676), `KB2` (797), `EDUP` (5), `PSIN` (2), 491 XML documents, five named signatures and 92 payloads that match nothing. No extension is declared for any of them, and 72,579 of those rows have none — the 489 that parsed as XML are the only ones that established one for themselves.
 
 That is why the type cannot decide the format. A type whose rows share one identification is a type whose rows happened to; the matrix records every identification seen under every type, and it is the payload, not the type, that decides.
 

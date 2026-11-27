@@ -8,20 +8,21 @@ All integers are little-endian. Offsets are relative to the start of the archive
 
 ## Documents
 
-| Document                                                  | Content                                                                         |
-| --------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| [header.md](header.md)                                    | 16-byte header, 0x40-byte prefix, read modes                                    |
-| [metadata.md](metadata.md)                                | Region layout of the metadata area, `A` table                                   |
-| [schema.md](schema.md)                                    | Column descriptors, cell addressing, known field keys                           |
-| [entries.md](entries.md)                                  | Entry IDs, location records, batch operations, enumeration and hierarchy limits |
-| [names.md](names.md)                                      | Path resolution, name hashes, type classes, extensions, runtime dictionary      |
-| [payloads.md](payloads.md)                                | Payload addressing, reads, decoding, chunk tables, observed storage layout      |
-| [entry-classification.md](entry-classification.md)        | Identifying what an entry holds, claims, extensions, capability                 |
-| [type-registry.md](type-registry.md)                      | The engine's native type-to-extension table and its reverse lookup              |
-| [type-inventory.md](type-inventory.md)                    | Every entry of every archive, as the metadata pass enumerated it                |
-| [entry-matrix.md](entry-matrix.md)                        | Every observed combination of type, identification, storage and capability      |
-| [identification-backlog.md](identification-backlog.md)    | Work the classification leaves open, ordered by what it unlocks                 |
-| [cryptography/rpf9](../../../cryptography/rpf9/README.md) | Validation chain, metadata cipher spans, signature check, payload transform     |
+| Document                                                   | Content                                                                         |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| [header.md](header.md)                                     | 16-byte header, 0x40-byte prefix, read modes                                    |
+| [metadata.md](metadata.md)                                 | Region layout of the metadata area, `A` table                                   |
+| [schema.md](schema.md)                                     | Column descriptors, cell addressing, known field keys                           |
+| [entries.md](entries.md)                                   | Entry IDs, location records, batch operations, enumeration and hierarchy limits |
+| [names.md](names.md)                                       | Path resolution, name hashes, type classes, extensions, runtime dictionary      |
+| [payloads.md](payloads.md)                                 | Payload addressing, reads, decoding, chunk tables, observed storage layout      |
+| [entry-classification.md](entry-classification.md)         | Identifying what an entry holds, claims, extensions, capability                 |
+| [type-registry.md](type-registry.md)                       | The engine's native type-to-extension table and its reverse lookup              |
+| [type-inventory.md](type-inventory.md)                     | Every entry of every archive, as the metadata pass enumerated it                |
+| [entry-matrix.md](entry-matrix.md)                         | Every observed combination of type, identification, storage and capability      |
+| [identification-backlog.md](identification-backlog.md)     | Work the classification leaves open, ordered by what it unlocks                 |
+| [identification-follow-up.md](identification-follow-up.md) | The five measured findings that need their own investigation                    |
+| [cryptography/rpf9](../../../cryptography/rpf9/README.md)  | Validation chain, metadata cipher spans, signature check, payload transform     |
 
 Evidence: [evidence/rpf9/INDEX.md](../../../evidence/rpf9/INDEX.md). Corrections to earlier models: [research-history.md](../../../evidence/rpf9/research-history.md).
 
@@ -35,13 +36,13 @@ Evidence: [evidence/rpf9/INDEX.md](../../../evidence/rpf9/INDEX.md). Corrections
 | Column descriptor `+0x08`, `+0x12`                | Unknown. Not read by the traced accessors                                                                                                                                                                                                                     |
 | Cell addressing and value pointers                | Confirmed                                                                                                                                                                                                                                                     |
 | Entry ID composition                              | Confirmed                                                                                                                                                                                                                                                     |
-| Location records R, F, A                          | Confirmed (layouts and accessor order). F and R observed in real rows; A not observed in the sample                                                                                                                                                           |
+| Location records R, F, A                          | Confirmed (layouts and accessor order). F and R observed in real rows; A not observed in any inspected row                                                                                                                                                    |
 | Payload address                                   | Confirmed                                                                                                                                                                                                                                                     |
 | Read path, seek, decoder dispatch, chunk tables   | Confirmed. Codec identity probable (zlib)                                                                                                                                                                                                                     |
-| Path resolution and name hashes                   | Confirmed. Folded MurmurHash3 x64-128 variant and joaat. The type tables are published in [type-registry.md](type-registry.md)                                                                                                                                                                            |
+| Path resolution and name hashes                   | Confirmed. Folded MurmurHash3 x64-128 variant and joaat. The type tables are published in [type-registry.md](type-registry.md)                                                                                                                                |
 | Mount prefix, sorted flag, entry ID tag           | Confirmed (origin). Mounting replaces the default prefix. Fingerprint hash identity probable                                                                                                                                                                  |
 | Nested archives                                   | Confirmed (opened through the parent archive as device, positional reads without decoding). Raw storage requirement probable. An entry whose chunks all copy its bytes can also be read in place (RPF9-F142)                                                  |
-| Entry identification                              | Confirmed (bounded sample). Type, payload format and capability are separate properties; extensions are applied only where established (RPF9-F140). Resource containers are recognised by a narrow header shape but their asset class is not read (RPF9-F141) |
+| Entry identification                              | Confirmed (exhaustive). Every one of the 1,255,039 entries in 4,373 archives has one terminal outcome; type, payload format and capability are separate properties; extensions are applied only where established (RPF9-F140). Resource containers are recognised by a narrow header shape but their asset class is not read (RPF9-F141) |
 | `A` table, `B` sub-blocks                         | Confirmed (index into `B`). Uses of sub-blocks 1, 2, 3, 6 and 9 known                                                                                                                                                                                         |
 | Validation chain order and conditions             | Confirmed                                                                                                                                                                                                                                                     |
 | Metadata cipher spans                             | Confirmed. CBC decryption without authentication for the observed cipher type. The block transform is encoded AES-256: reproducible with the engine's fixed tables and key state, not with a standard AES API                                                 |
