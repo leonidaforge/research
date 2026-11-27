@@ -185,3 +185,35 @@ and manifest validation. They do not use game files.
   cluster grammar is not resolved and no triangles are reconstructed.
 - No engine code path was traced. Pointer validation, record allocation and
   runtime meanings remain unknown.
+
+## skeleton_inspect
+
+Inspects the skeleton a drawable references. It walks the fragment root or the
+resource-level drawable header to the drawable, resolves the skeleton pointer and
+reports the header, bone records, hierarchy, composed local transforms, stored
+inverse-bind validation and geometry influence associations.
+
+```text
+python skeleton_inspect.py inspect --file <DECODED> --system-length <BYTES> [--drawable <OFFSET>] [--json]
+python skeleton_inspect.py census --manifest <MANIFEST.jsonl> [--json]
+```
+
+`--drawable` overrides the drawable offset; without it the reader follows the
+fragment root's `+0x18` member pointer, and falls back to zero when the root is a
+resource-level drawable. The census manifest is JSON Lines with
+`{"id", "file", "system_length"}` and an optional `"drawable"`.
+
+The report separates what the record states from what it does not. The bone
+records supply quaternion, translation, scale, name, parent and two identifiers.
+The `+0x38` array must equal transpose(local rotation) plus local translation,
+and the `+0x30` array must equal the model-space rotation plus
+`-R_model^T * t_model`; a mismatch is an issue, not a repair. Geometry
+associations are accepted only when every vertex has a non-zero weight, every
+weighted lane names a bone inside the skeleton, and the index stream is absent
+only for a one-bone skeleton.
+
+Exit code is 0 when every inspected skeleton is complete or absent, 1 when a
+skeleton is partial or unsupported, and 2 for invalid usage.
+
+The synthetic tests are in `tests/test_skeleton_inspect.py` and run with the
+other drawable tests.
