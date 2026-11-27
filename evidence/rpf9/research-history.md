@@ -313,6 +313,13 @@ now `validated`, and `decoded` is reserved for a read that returned the payload.
 A full-decode command reports the digest, size match and failure category
 (RPF9-F153).
 
+**Provenance.** The accepted payload pass used scanner `ef1cde45…`. An
+integrated rerun with the final build (`6560e67c…`) reproduced the same 22
+roots, 4,373 archives and 1,255,039 entries and the same outcome counts; its
+wall clock is not quoted because an unrelated scan shared the disk. The
+integrated build's only census-path change is a shared helper for the stored
+prefix, which returns the same prefix for every valid row.
+
 ## Open
 
 - Meaning of descriptor `+0x08`, and any use of `+0x12`.

@@ -230,8 +230,10 @@ No newly readable payload is an RPF9 archive: the 14,432 resource headers, the
 nested archive count remains 4,351. No additional archive was opened, so the
 enumeration is complete without a second descent.
 
-The previous pass's scanner was `d9620f6c…`; this pass used `ef1cde45…`. Both
-journals record the scanner digest, so neither run can reuse the other's
+The pre-fix pass's scanner was `d9620f6c…`; the post-fix pass used `ef1cde45…`.
+An integrated rerun with the final build (`6560e67c…`) reproduced the same
+counts; its wall clock is not quoted because an unrelated scan shared the disk.
+Every journal records the scanner digest, so no run can reuse another's
 checkpoints.
 
 ## External research
