@@ -12,14 +12,14 @@ Treating these as one property is the mistake this document exists to prevent. T
 
 A classification reads bounded evidence and records which part of it decided:
 
-| Evidence     | Read                                                     | Cost                                                      |
-| ------------ | -------------------------------------------------------- | --------------------------------------------------------- |
-| Type         | The location record's type byte                          | Metadata only                                             |
-| Storage      | The location record's mode and the chunk table           | Metadata only                                             |
-| Payload      | The decoded payload's first 64 bytes                     | One decoded chunk in the worst case                       |
-| Document     | A decoded document up to 4 MiB, when the head looks XML  | One document                                              |
-| Structure    | Nothing extra: recognisers that walk framing do it on the head | Included in the head read                           |
-| Extension    | The engine's [type registry](type-registry.md)           | Metadata only                                             |
+| Evidence  | Read                                                           | Cost                                |
+| --------- | -------------------------------------------------------------- | ----------------------------------- |
+| Type      | The location record's type byte                                | Metadata only                       |
+| Storage   | The location record's mode and the chunk table                 | Metadata only                       |
+| Payload   | The decoded payload's first 64 bytes                           | One decoded chunk in the worst case |
+| Document  | A decoded document up to 4 MiB, when the head looks XML        | One document                        |
+| Structure | Nothing extra: recognisers that walk framing do it on the head | Included in the head read           |
+| Extension | The engine's [type registry](type-registry.md)                 | Metadata only                       |
 
 The classification reads at most 64 decoded bytes. The matrix publishes the first 32 of them with every sample, which is a sample of the head, not the whole head.
 
@@ -29,18 +29,18 @@ The classification never reads a payload in full, never guesses an extension it 
 
 A classification makes separate claims, each with its own level. A verified signature is not a verified format, and a verified container shape is not a verified asset class.
 
-| Claim | Established by |
-| ----- | -------------- |
-| `signature` | The bytes matched a signature, or the first bytes look like XML. Nothing about structure. |
+| Claim       | Established by                                                                               |
+| ----------- | -------------------------------------------------------------------------------------------- |
+| `signature` | The bytes matched a signature, or the first bytes look like XML. Nothing about structure.    |
 | `structure` | The recogniser walked the payload's own framing from the head, or the whole document parsed. |
-| `asset` | The engine's type registry has an extension for the type id. |
+| `asset`     | The engine's type registry has an extension for the type id.                                 |
 
-| Level | Meaning |
-| ----- | ------- |
-| `verified` | Repeated tests of real data and structural evidence agree |
-| `probable` | Several observations agree, but the evidence that would settle it is missing |
-| `tentative` | A plausible hypothesis that independent checks do not confirm |
-| `unknown` | The available evidence establishes nothing useful |
+| Level       | Meaning                                                                      |
+| ----------- | ---------------------------------------------------------------------------- |
+| `verified`  | Repeated tests of real data and structural evidence agree                    |
+| `probable`  | Several observations agree, but the evidence that would settle it is missing |
+| `tentative` | A plausible hypothesis that independent checks do not confirm                |
+| `unknown`   | The available evidence establishes nothing useful                            |
 
 A recogniser that walks framing from the head claims `verified` structure. The RPF9 recogniser matches the magic only, so its structure is `probable` until a caller opens the archive. A resource header is a verified signature with `unknown` structure: the page map it points at is not read. A named signature such as `MHIU` is a verified signature with unknown structure, format and asset class.
 
@@ -52,14 +52,14 @@ Reading the first 64 decoded bytes never establishes the whole entry. Every clai
 
 Storage says how the bytes are stored, not what they are. The label is stable and is recorded in every census row:
 
-| Label          | Condition                                  |
-| -------------- | ------------------------------------------ |
-| `stored`       | No chunk table, mode 0: the bytes lie as they are |
-| `raw-deflate`  | No chunk table, mode 1: one raw DEFLATE stream |
-| `chunked-2`    | A chunk table with encoding 2               |
-| `chunked-3`    | A chunk table with encoding 3               |
-| `chunked-4`    | A chunk table with encoding 4               |
-| `chunked-other`| A chunk table with any other encoding       |
+| Label           | Condition                                         |
+| --------------- | ------------------------------------------------- |
+| `stored`        | No chunk table, mode 0: the bytes lie as they are |
+| `raw-deflate`   | No chunk table, mode 1: one raw DEFLATE stream    |
+| `chunked-2`     | A chunk table with encoding 2                     |
+| `chunked-3`     | A chunk table with encoding 3                     |
+| `chunked-4`     | A chunk table with encoding 4                     |
+| `chunked-other` | A chunk table with any other encoding             |
 
 The payload transform is recorded separately, because it is a property of the stored bytes rather than of the chunks. A chunk table's per-chunk method decides decoding; the location record's mode does not apply to a chunked entry.
 
@@ -67,34 +67,34 @@ One practical consequence, used by the census: when every chunk of an entry copi
 
 ## Payload state
 
-| State                    | Meaning                                                             |
-| ------------------------ | ------------------------------------------------------------------- |
-| `decoded`                | The decoded head was read                                            |
-| `transform-unavailable`  | The payload is behind the transform and no key state is available     |
-| `transform-failed`       | The transform was available but did not verify or run                 |
-| `undecodable`            | The storage cannot be decoded                                         |
-| `malformed`              | The metadata describing the payload is malformed                      |
+| State                   | Meaning                                                           |
+| ----------------------- | ----------------------------------------------------------------- |
+| `decoded`               | The decoded head was read                                         |
+| `transform-unavailable` | The payload is behind the transform and no key state is available |
+| `transform-failed`      | The transform was available but did not verify or run             |
+| `undecodable`           | The storage cannot be decoded                                     |
+| `malformed`             | The metadata describing the payload is malformed                  |
 
 Only `decoded` entries are identified. A state that is not `decoded` is a fact about the archive, not a guess about the payload: the entry is reported as unidentified with the reason, never as an unknown format.
 
 ## Identification
 
-| Kind           | What it records                                                          |
-| -------------- | ------------------------------------------------------------------------ |
-| `format`       | A supported format and its recogniser's claim                            |
-| `resource`     | Eight zero bytes then a `0x5…` or `0x6…` pointer                          |
-| `xml`          | A document, with its root element when it parsed                          |
-| `signature`    | A named signature whose format is not established                         |
-| `unrecognised` | Nothing in the first 64 bytes identifies the payload                       |
+| Kind           | What it records                                      |
+| -------------- | ---------------------------------------------------- |
+| `format`       | A supported format and its recogniser's claim        |
+| `resource`     | Eight zero bytes then a `0x5…` or `0x6…` pointer     |
+| `xml`          | A document, with its root element when it parsed     |
+| `signature`    | A named signature whose format is not established    |
+| `unrecognised` | Nothing in the first 64 bytes identifies the payload |
 
 ### The resource header
 
 Every resource-shaped payload in the sample starts with the same two 64-bit words:
 
-| Offset | Width | Value                                                                   |
-| ------ | ----- | ----------------------------------------------------------------------- |
-| `+0x00`| 8     | Zero                                                                     |
-| `+0x08`| 8     | A pointer: the segment nibble in bits 28 to 31, the offset in bits 0 to 27 |
+| Offset  | Width | Value                                                                      |
+| ------- | ----- | -------------------------------------------------------------------------- |
+| `+0x00` | 8     | Zero                                                                       |
+| `+0x08` | 8     | A pointer: the segment nibble in bits 28 to 31, the offset in bits 0 to 27 |
 
 The segment nibble is 5 (system) or 6 (graphics). A pointer outside those two segments, a non-zero first word, or a pointer that does not fit in 32 bits is not treated as a resource header, which keeps the match narrow. Observed heads include `0000000000000000 7091e25000000000` (pointer `0x50E29170`, segment 5, offset `0x0E29170`) and `0000000000000000 10fa005000000000` (pointer `0x5000FA10`, segment 5, offset `0x00FA10`).
 
@@ -123,14 +123,14 @@ Two consequences follow. Almost every observed type now has an extension without
 
 ## Capability
 
-| Capability    | Meaning                                                    |
-| ------------- | ---------------------------------------------------------- |
-| `archive`     | The archive commands open its table of contents             |
-| `structural`  | A structural inspection, without field meaning              |
-| `text`        | A document shown as text                                    |
-| `resource`    | A resource container whose asset class is not identified    |
-| `bytes`       | Bytes only, through the binary viewer                       |
-| `unavailable` | Nothing can be decoded; the reason says why                 |
+| Capability    | Meaning                                                  |
+| ------------- | -------------------------------------------------------- |
+| `archive`     | The archive commands open its table of contents          |
+| `structural`  | A structural inspection, without field meaning           |
+| `text`        | A document shown as text                                 |
+| `resource`    | A resource container whose asset class is not identified |
+| `bytes`       | Bytes only, through the binary viewer                    |
+| `unavailable` | Nothing can be decoded; the reason says why              |
 
 The capability is what the application dispatches on. The type is not: an entry typed 0 whose payload is `PSIN` is `structural`, not `archive`.
 
@@ -152,45 +152,45 @@ Every root archive under the installation, found recursively: 22 discovered, 22 
 
 ### What the sample holds
 
-| Identification | Entries | Share |
-| -------------- | ------: | ----: |
-| resource container | 7,189 | 63.7% |
-| supported format | 3,634 | 32.2% |
-| validated XML document | 421 | 3.7% |
-| nothing, or a named signature | 39 | 0.3% |
+| Identification                | Entries | Share |
+| ----------------------------- | ------: | ----: |
+| resource container            |   7,189 | 63.7% |
+| supported format              |   3,634 | 32.2% |
+| validated XML document        |     421 |  3.7% |
+| nothing, or a named signature |      39 |  0.3% |
 
 | Format | Entries |
 | ------ | ------: |
-| `PSIN` | 1,442 |
-| `ADAT` | 1,410 |
-| `KB2` | 522 |
-| `RBF0` | 156 |
-| RPF9 | 104 |
-| GFx | 5 |
+| `PSIN` |   1,442 |
+| `ADAT` |   1,410 |
+| `KB2`  |     522 |
+| `RBF0` |     156 |
+| RPF9   |     104 |
+| GFx    |       5 |
 
 Every resource container is segment 5. The matrix records the documents' distinct roots and the two payloads that begin like XML without parsing as `xml:unvalidated`.
 
-| Capability | Entries | Share |
-| ---------- | ------: | ----: |
-| resource | 7,189 | 63.7% |
-| structural | 3,536 | 31.3% |
-| text | 423 | 3.7% |
-| archive | 104 | 0.9% |
-| bytes | 30 | 0.3% |
-| unavailable | 1 | 0.0% |
+| Capability  | Entries | Share |
+| ----------- | ------: | ----: |
+| resource    |   7,189 | 63.7% |
+| structural  |   3,536 | 31.3% |
+| text        |     423 |  3.7% |
+| archive     |     104 |  0.9% |
+| bytes       |      30 |  0.3% |
+| unavailable |       1 |  0.0% |
 
 | Extension | Entries |
 | --------- | ------: |
-| native | 9,317 |
-| `xml` | 421 |
-| none | 1,545 |
+| native    |   9,317 |
+| `xml`     |     421 |
+| none      |   1,545 |
 
 | Structure claim | Entries |
 | --------------- | ------: |
-| verified | 3,957 |
-| probable | 104 |
-| tentative | 2 |
-| unknown | 7,220 |
+| verified        |   3,957 |
+| probable        |     104 |
+| tentative       |       2 |
+| unknown         |   7,220 |
 
 154 entries carry the payload transform. The executable's key state was available for them, and 153 decoded; one entry did not verify and is reported as `transform-failed` rather than identified.
 

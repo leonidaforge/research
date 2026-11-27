@@ -27,6 +27,53 @@ import uuid
 
 CENSUS = os.environ.get('LFORGE', 'lforge')
 
+# Identities a checkpoint must match before it is reused.
+SCHEMA_ID = 'leonida-forge.rpf9-census-merged/2'
+RULES_ID = 'claims+native-registry'
+REGISTRY_ID = 'e95020b2'
+
+
+def build_identity(executable):
+    """Size and modification time of the executable, as a build identity."""
+    info = os.stat(executable)
+    return '{}:{}'.format(info.st_size, int(info.st_mtime))
+
+
+def root_identity(path):
+    info = os.stat(path)
+    return '{}:{}'.format(info.st_size, int(info.st_mtime))
+
+
+def load_journal(path):
+    """Completed roots from an append-only journal, keyed by relative path."""
+    done = {}
+    if not os.path.exists(path):
+        return done
+    with io.open(path, encoding='utf-8') as handle:
+        for line in handle:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                record = json.loads(line)
+            except ValueError:
+                # A truncated last line is an interrupted write, not a result.
+                continue
+            if record.get('schema') != SCHEMA_ID:
+                continue
+            if record.get('rules') != RULES_ID or record.get('registry') != REGISTRY_ID:
+                continue
+            done[record['relative']] = record
+    return done
+
+
+def append_journal(path, record):
+    """Append one completed root, flushed to disk before it is trusted."""
+    with io.open(path, 'a', encoding='utf-8', newline='\n') as handle:
+        handle.write(json.dumps(record, sort_keys=True) + '\n')
+        handle.flush()
+        os.fsync(handle.fileno())
+
 
 def discover(install):
     """Every `.rpf` under `install`, as (relative path, path), sorted."""
@@ -69,6 +116,7 @@ def census(relative, path, executable, entries, directory):
         target,
         '--overwrite',
     ]
+    command.extend(os.environ.get('CENSUS_EXTRA', '').split())
     try:
         result = subprocess.run(command, capture_output=True, text=True)
     except OSError as failure:
@@ -180,16 +228,55 @@ def main():
     os.makedirs(directory, exist_ok=True)
     runs = os.path.join(directory, 'runs')
     os.makedirs(runs, exist_ok=True)
+    journal_path = os.path.join(directory, 'journal.jsonl')
+    identity = build_identity(executable)
+    done = load_journal(journal_path)
     roots = discover(install)
     print('{} root archives discovered'.format(len(roots)), flush=True)
+    if done:
+        print('journal holds {} completed roots'.format(len(done)), flush=True)
     summaries = []
     failures = []
     for relative, path in roots:
+        fingerprint = root_identity(path)
+        reuse = done.get(relative)
+        if reuse is not None and reuse.get('root_identity') == fingerprint and reuse.get(
+            'build'
+        ) == identity:
+            # A completed root whose archive and build are unchanged: its
+            # persisted summary is reused, not recomputed.
+            target = os.path.join(runs, relative.replace('/', '__') + '.jsonl')
+            summary = None
+            if os.path.exists(target):
+                with io.open(target, encoding='utf-8') as handle:
+                    for line in handle:
+                        record = json.loads(line)
+                        if record.get('record') == 'summary':
+                            summary = record
+                            summary['relative'] = relative
+            if summary is not None:
+                print('{}: resumed from the journal'.format(relative), flush=True)
+                summaries.append(summary)
+                continue
         summary, error = census(relative, path, executable, entries, runs)
         if summary is None:
             print('{}: FAILED {}'.format(relative, error), flush=True)
             failures.append({'archive': relative, 'error': error})
             continue
+        append_journal(
+            journal_path,
+            {
+                'schema': SCHEMA_ID,
+                'rules': RULES_ID,
+                'registry': REGISTRY_ID,
+                'build': identity,
+                'relative': relative,
+                'root_identity': fingerprint,
+                'archives': summary['archives'],
+                'entries': summary['entries'],
+                'stopped': summary['stopped'],
+            },
+        )
         print(
             '{}: {} archives, {} entries{}'.format(
                 relative,

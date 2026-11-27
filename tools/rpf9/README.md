@@ -5,14 +5,14 @@ and refuse every range outside that file. They refuse an `--output` that names a
 file, write through a temporary file in the target directory, and replace the
 destination only after the write succeeds. They do not print payload or trailer bytes.
 
-| Tool | Input | Reports |
-| --- | --- | --- |
-| `framing_survey.py` | one archive and a native row manifest | encoding-2 prefix classes, chunk methods, decoded header classes, chunk count against declared page counts |
-| `trailer_probe.py` | one or more archives, optionally with manifests | `hdr[0x0C]` as a trailing length, the payload boundary, four bound checks, and trailer equality classes |
-| `secondary_probe.py` | one or more archives | `C`, `D`, `E`, `F`, the secondary-area size, and two size-model checks |
-| `random_transform_tests.py` | a compatible Leonida Forge CLI, a game directory and an executable | random transformed rows per archive, each decoded and compared with its declared logical size |
-| `census_all.py` | a compatible Leonida Forge CLI, an installation directory and an executable | one bounded entry census per root archive, and the merged summary |
-| `entry_matrix.py` | the merged census from `census_all.py` | the published [entry matrix](../../formats/containers/rpf9/entry-matrix.md) and its JSON |
+| Tool                        | Input                                                                       | Reports                                                                                                    |
+| --------------------------- | --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `framing_survey.py`         | one archive and a native row manifest                                       | encoding-2 prefix classes, chunk methods, decoded header classes, chunk count against declared page counts |
+| `trailer_probe.py`          | one or more archives, optionally with manifests                             | `hdr[0x0C]` as a trailing length, the payload boundary, four bound checks, and trailer equality classes    |
+| `secondary_probe.py`        | one or more archives                                                        | `C`, `D`, `E`, `F`, the secondary-area size, and two size-model checks                                     |
+| `random_transform_tests.py` | a compatible Leonida Forge CLI, a game directory and an executable          | random transformed rows per archive, each decoded and compared with its declared logical size              |
+| `census_all.py`             | a compatible Leonida Forge CLI, an installation directory and an executable | one bounded entry census per root archive, and the merged summary                                          |
+| `entry_matrix.py`           | the merged census from `census_all.py`                                      | the published [entry matrix](../../formats/containers/rpf9/entry-matrix.md) and its JSON                   |
 
 Python 3 standard library only.
 

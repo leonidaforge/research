@@ -126,6 +126,72 @@ class MergeTest(unittest.TestCase):
         self.assertEqual(variants, ['binary:0badc0de', 'text'])
 
 
+class JournalTest(unittest.TestCase):
+    def test_a_completed_root_is_reused_only_when_its_identity_matches(self):
+        with tempfile.TemporaryDirectory() as directory:
+            journal = os.path.join(directory, 'journal.jsonl')
+            census_all.append_journal(
+                journal,
+                {
+                    'schema': census_all.SCHEMA_ID,
+                    'rules': census_all.RULES_ID,
+                    'registry': census_all.REGISTRY_ID,
+                    'build': 'exe-1',
+                    'relative': 'pack/story000/story000.rpf',
+                    'root_identity': '100:5',
+                    'archives': 2,
+                    'entries': 700,
+                    'stopped': None,
+                },
+            )
+            done = census_all.load_journal(journal)
+            self.assertIn('pack/story000/story000.rpf', done)
+
+    def test_an_incompatible_checkpoint_is_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            journal = os.path.join(directory, 'journal.jsonl')
+            for schema, rules in (
+                ('leonida-forge.rpf9-census-merged/1', census_all.RULES_ID),
+                (census_all.SCHEMA_ID, 'older-rules'),
+            ):
+                census_all.append_journal(
+                    journal,
+                    {
+                        'schema': schema,
+                        'rules': rules,
+                        'registry': census_all.REGISTRY_ID,
+                        'build': 'exe-1',
+                        'relative': 'data.rpf',
+                        'root_identity': '100:5',
+                        'archives': 1,
+                        'entries': 1,
+                        'stopped': None,
+                    },
+                )
+            self.assertEqual(census_all.load_journal(journal), {})
+
+    def test_a_truncated_journal_line_is_ignored(self):
+        with tempfile.TemporaryDirectory() as directory:
+            journal = os.path.join(directory, 'journal.jsonl')
+            census_all.append_journal(
+                journal,
+                {
+                    'schema': census_all.SCHEMA_ID,
+                    'rules': census_all.RULES_ID,
+                    'registry': census_all.REGISTRY_ID,
+                    'build': 'exe-1',
+                    'relative': 'data.rpf',
+                    'root_identity': '100:5',
+                    'archives': 1,
+                    'entries': 1,
+                    'stopped': None,
+                },
+            )
+            with io.open(journal, 'a', encoding='utf-8') as handle:
+                handle.write('{"schema": "leonida-forge.rpf9-cen')
+            self.assertEqual(len(census_all.load_journal(journal)), 1)
+
+
 class DiscoveryTest(unittest.TestCase):
     def test_roots_are_relative_and_keep_duplicate_basenames(self):
         with tempfile.TemporaryDirectory() as install:
