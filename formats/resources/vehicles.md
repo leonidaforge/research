@@ -105,30 +105,44 @@ tyres carry the marker and split.
 
 The body decodes through `lforge-model` as a fragment. A preview renders the body
 alone. The shared wheel kits do not follow an individual arch, so a mounted rim
-reads as a wrong part rather than as a missing one. Wheel decoding and mounting
-stay in `attach_wheels` in the preview example, which no preview calls.
+reads as a wrong part rather than as a missing one. `lforge_model::attach_wheels`
+still mounts a kit; no preview calls it.
+
+Two commands generate the set.
+
+`lforge vehicle bodies --archive levels.rpf --executable game.exe --names
+catalog.txt --output bodies.json` scans the unresolved top-level rows for type 3
+fragments named `<model>_hi.#ft` and records the archive locator of the best body
+per model. It holds no absolute path, so it can be regenerated elsewhere.
+
+`lforge vehicle previews --bodies bodies.json --archive levels.rpf --textures
+data/ttdb --colors vehicleColors.json --output previews/` renders a 1024x1024
+primary WebP and a 320x320 thumbnail per body, writes `previews.json`, and reuses
+an image only when a versioned identity still matches. The identity covers the
+body digest, the policy and shader revisions, the texture store digests, the
+paint, the camera, the output size and the encoder profile.
 
 Materials are shaded by the metal-roughness model in `lforge-renderer`: three
 studio lights with a GGX lobe, a procedural backdrop sampled by reflection, and
-an ACES tone map. A material carries metalness, roughness, and an emissive
-weight. The preview classifies each material by shader hash and gives paint,
-glass, lamp, tyre, and trim their own response.
+an ACES tone map. The preview classifies each material by shader hash and gives
+paint, glass, lamp, tyre, and trim their own response.
 
 Painted panels carry no albedo texture. The paint shader declares a Diffuse key
 that no store we hold resolves, so the preview tints those panels with a colour
 from `vehicleColors.json`. Glass, lamps, grilles, and badges do resolve, from
 `data/ttdb/vehicles/ttdb_vehicles.ttpf`; on Akane that is 10 of 24 materials.
 
-A batch run rendered 321 of the 324 bodies found by the archive scan. Each model
-is a separate process, so one failure does not stop the run. Three bodies fail:
-`arcturus` decodes no renderable mesh, and `grouse` and `taco` have no inferable
-system/graphics boundary.
+A full run registered 326 of the 332 canonical vehicles and rendered 323 of them.
+Three bodies fail: `arcturus` decodes no renderable mesh, and `grouse` and `taco`
+have no inferable system/graphics boundary.
 
 ## Open items
 
 - The paint Diffuse key `0x5D7A3A87CC19967D` resolves in no extracted store. It
   appears only as a shader reference inside type 4 drawables in `packs.rpf`, so
   the dictionary that holds it is still unlocated.
+- Six canonical vehicles have no body fragment: `catcher`, `cutterpredator`,
+  `metrotrain`, `predator`, `speeder` and `zale`. Four are boats, one is a train.
 - Per-model wheel and tyre selection is not resolved. The shared kits are decoded
   and could be mounted, but they fit the arches badly.
 - ZMT metadata and per-model handling files are not identified.
