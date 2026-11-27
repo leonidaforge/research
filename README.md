@@ -49,6 +49,8 @@ The repository holds original descriptions, formulas and tools only. It contains
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
 
+Questions, help and development discussion happen in the [Leonida Forge Discord](https://discord.gg/PJgVZCuWGf).
+
 ## AI Contributions
 
 **AI-enabled, not AI-driven.**
