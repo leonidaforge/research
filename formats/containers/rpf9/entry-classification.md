@@ -181,6 +181,8 @@ A summary is written to a temporary name and only replaces its target once its o
 
 Both passes are driven by `tools/rpf9/census_all.py`, and the machine-written documents are produced by `tools/rpf9/entry_matrix.py` from the merged census, so no figure below is copied by hand.
 
+The counts below were produced by one binary and one executable, and both are recorded in every journal line. The scanner was built from the identification branch as it stood before the branch was rebased, and its digest, not a commit id, is what identifies it: SHA-256 `d9620f6cde297a6c20723e4aa33e40c8f8cba12a801ddba8fedc0b62089fba35`. The executable was build `e95020b2`, SHA-256 `e95020b2fa4a721db3df59fdecf75621730ac559d8835252f6c3b658d5a08993`. Rebasing the branch onto a newer `main` changed no file of the census, the classification or the registry, so a rebuild produces a different scanner digest without changing what a census reports, and the figures were not recomputed for it. A scanner whose behaviour did change would produce a different digest, and every reused journal line would be rejected rather than mixed with old counts.
+
 ### What the metadata pass establishes
 
 22 roots discovered and opened, 4,373 archives opened (4,351 of them nested), 1,255,039 entries enumerated, no archive failed to open, no root stopped at a limit: `complete: true`. It finished in 20 minutes 28 seconds, about 1,022 entries and 3.6 archives per second.
