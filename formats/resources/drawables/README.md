@@ -647,7 +647,9 @@ column lists what remains uninterpreted.
 - The header `+0xB0` list and the header `+0x80` flag words.
 - The LOD distance sentinel and the `+0x70` values in A.
 - Fragment child transforms, drawable-dictionary member selection and the
-  placement of embedded parts.
+  placement of embedded parts. The fragment root and its single member
+  drawable are read in [fragments](../fragments/README.md); multi-drawable
+  fragments and dictionary member tables were not located.
 - Whether any of these layouts change with another type ID, archive family or
   build. The AABB and material checks cover recovered `levels.rpf` resources in
   one build, not other archives.
