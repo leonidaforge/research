@@ -102,3 +102,61 @@ undecoded rather than inferred from the count.
 
 The bone rows in both viewers are now virtualized: the 600-row and 400-row caps
 are gone, so every decoded bone is reachable.
+
+## 2026-11-28: the declaration truncation, five index encodings and deformation
+
+Two claims were wrong, both traced to one reader defect, and the influence work
+then went further than recording bones.
+
+The declaration table is a fixed array of 23 words and the slot number is the
+attribute's semantic. The reader stopped at the first zero word, which is
+correct only for the attributes before the gap: a geometry without a second UV
+set leaves slot 7 empty, so slots 6 and 8 were never read for those geometries.
+That is where the earlier census's "968 geometries declare the weight form at
+slot 1" came from; it named a layout attribute of the vertex buffer, not a
+declaration slot. Reading all 23 words moves those geometries into the ordinary
+weighted group, and the slot-1 claim is withdrawn. Searching the declaration for
+the format instead of reading the slot stays rejected, for the measured reason
+already recorded: a format code says how many components an attribute has, not
+what it means.
+
+The index encoding is the pair of declaration format and layout size, and five
+pairs occur over 10,106 geometries: `0x25`/4 four `u8` (8,254), `0x8C`/16 four
+`u32` (104), `0x4A`/8 two `u32` (15), `0x00`/1 one `u8` (446) and `0x00`/2 one
+`u16` (55). The wide forms pair lane `i` with weight lane `i`, so a lane never
+crosses attributes.
+
+Two attachment kinds are now decoded that were previously left unassociated:
+
+- 501 geometries store one index per vertex and no weight stream, 446 as one
+  `u8` and 55 as one `u16`. All of them declare more than one bone, every index
+  is inside the declared count, the largest is 319 and no geometry repeats a
+  single index. A single influence has weight 1 as a structural consequence, so
+  the reading needs no invented value.
+- 753 geometries store neither attribute and their record declares one bone.
+  That reading rests on the declared count matching a one-bone skeleton and is
+  accepted only there; 479 multi-bone geometries in the same state stay
+  unassociated.
+
+No palette was found, and the search was repeated rather than assumed: the
+geometry record's fields at `+0x28`, `+0x2A`, `+0x2E`, `+0x30`, `+0x34`, `+0x38`
+and `+0x3C` hold no bone index and no palette pointer, and the model's `+0x28`
+slot does not read as a `u8` or `u16` bone list. Indices name the skeleton's own
+array positions. A palette remains a possible future decode; nothing in the
+corpus needs one.
+
+The last step evaluates a pose instead of recording one. The skinning matrix is
+`S[i] = G_pose[i] * inverse-bind[i]`, the inverse-bind array being the inverse of
+the bind pose the stored transforms define, and a vertex sums `w_k * S[i_k] *
+p_authored`. Scale stays identity, so a pose that would introduce one is
+refused rather than approximated. Two independent evaluators were compared on
+real data: a CPU reference and a GPU compute probe agree on the peacock's 25,456
+tail vertices within `3.6e-7` m at a 40 degree pose and on the candlestick's 788
+vertices within `3.7e-9` m. The peacock frame moves 24,496 of those vertices, so
+the agreement is measured on real displacement.
+
+Scope: the pose is entered by hand. No animation clip, blending or authored pose
+is decoded, and linear blend skinning is the only method implemented. The
+authored vertices are the deformed result at the reference pose, which is why
+the reference pose reproduces the stored geometry and a delta is what changes
+it.

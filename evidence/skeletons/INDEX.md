@@ -48,14 +48,17 @@ record is dropped with `BoneArrayOverrun`. See SKEL-F16.
 | SKEL-F08  | The `+0x38` array stores transpose(local rotation) and the local translation; the `+0x30` array stores the model-space rotation and `-R_model^T * t_model`, the translation half of the inverse bind matrix. | Cross sample, 6-level peacock tail | Confirmed                      | Matrix record's last value Unknown                            |
 | SKEL-F09  | Local transforms compose as `R_model = R_parent * R_local` and `t_model = t_parent + R_parent * t_local`.                                                                                   | Cross sample                    | Confirmed                          | None observed                                                 |
 | SKEL-F10  | The stored inverse-bind records validate against the composed pose with a largest observed delta of `0` at the stored precision, on all sampled skeletons.                                   | Cross sample                    | Confirmed                          | A separately authored pose is not present                     || SKEL-F11  | Geometry records declare a bone count at `+0x2C`. It equals the skeleton bone count on highest-LOD geometries and is zero on lower LODs.                                                    | Cross sample                    | Confirmed                          | The same field is untested on non-skinned geometry            |
-| SKEL-F12  | Blend weights are four `u8` at slot 6, format `0x26`; blend indices are four `u8` at slot 8, format `0x25`. Slot 8 with another format is a different attribute. 8,304 of 10,106 surveyed geometries decode this way and all validate; 968 declare the weight form at slot 1 and are read as unassociated. | Cross sample, 10,106 geometries | Confirmed for slots 6 and 8 | Slot numbers are observed, not declared; a format search was measured and rejected |
+| SKEL-F12  | The vertex-buffer declaration table is a fixed 23-slot array and the slot is the attribute's semantic: slot 6 carries four `u8` blend weights (format `0x26`) and slot 8 the blend indices. The index encoding is the pair of declaration format and layout size, and five pairs occur: `0x25`/4 four `u8` (8,254 geometries), `0x8C`/16 four `u32` (104), `0x4A`/8 two `u32` (15), `0x00`/1 one `u8` (446) and `0x00`/2 one `u16` (55). | Cross sample, 10,106 geometries | Confirmed for slots 6 and 8 | An earlier reader stopped at the first zero word and misread slot 6 as a layout attribute; that reading is withdrawn |
 | SKEL-F13  | Weight totals are 255 in most vertices, 127 on a minority, and rarely unnormalised (169 on four vertices of one geometry). The association uses the non-zero lanes and never rescales them.  | Cross sample                    | Confirmed                          | The normalisation rule is Unknown                             |
-| SKEL-F14  | A one-bone skeleton needs no index stream: every sampled vertex weights lane 0 with 255. A missing index stream is accepted only in that case.                                               | Cross sample                    | Confirmed                          | 69 surveyed multi-bone geometries store no index form at slot 8 and are read as unassociated |
+| SKEL-F14  | A one-bone skeleton needs no index stream: every sampled vertex weights lane 0 with 255. A missing index stream is accepted only in that case. 753 of 10,106 geometries are in that state; no surveyed geometry stores weights without an index attribute. | Cross sample, 10,106 geometries | Confirmed | The 479 multi-bone geometries with no influence attribute at all stay unassociated |
 | SKEL-F15  | A skeleton may hold several roots: 5,080 of 5,628 have one, 58 have two, and the rest up to 16. The extra roots are helper bones (`XH_SecondarySurface`, `OH_EyelineDirection_01`, `OH_TorsoDirection_01`) that head their own short chains. | Cross sample, 5,628 skeletons | Confirmed | The helper-bone families are named, not classified |
 | SKEL-F16  | The bone array is bounded by the arrays that follow it, because each holds one record per bone and its start is stored. 2,303 of 5,628 skeletons have the next array starting exactly at the end of the bone records; no skeleton exceeds the limit the tiling arrays imply. Two skeletons walked one record too far and are trimmed and reported. | Cross sample, 5,628 skeletons | Confirmed | A truncated array that keeps a consistent index sequence is only caught by the neighbouring arrays |
 | SKEL-F17  | Scale is `(1, 1, 1)` in all 133,110 surveyed bones. Neither stored matrix carries a scale, and the composition applies none. | Cross sample, 133,110 bones | Confirmed for the corpus | Non-identity scale is unsupported, not disproved |
-| SKEL-F18  | 4,016 surveyed one-bone geometries split into 3,263 with a weight form and 753 without. All 753 belong to one-bone skeletons, and their geometry records hold no bone index, bone-array pointer or palette pointer. | Cross sample, 10,106 geometries | Confirmed | The 753 stay unassociated; the count alone is not taken as evidence |
+| SKEL-F18  | 4,016 surveyed one-bone geometries split into 3,263 with a weight form and 753 without. All 753 belong to one-bone skeletons and their geometry records hold no bone index, bone-array pointer or palette pointer, so the reading rests on the declared count matching the skeleton. | Cross sample, 10,106 geometries | Confirmed | Accepted only where the two counts agree; 479 multi-bone geometries with no influence attribute stay unassociated |
 | SKEL-F19  | Each model stores an axis-aligned box per geometry. Decoded vertices match it where it exists: peacock 4 of 4 (`2.0e-5`), candlestick 2 of 2 (`2.0e-6`); the tarot and bolt records declare no box. | Four fragments, decoded against declared boxes | Confirmed for the four | A missing box leaves the vertex space unestablished, not disproved |
+| SKEL-F20  | No bone palette accompanies an influence stream: the geometry record's fields at `+0x28`, `+0x2A`, `+0x2E`, `+0x30`, `+0x34`, `+0x38` and `+0x3C` hold no bone index and no palette pointer, and the model's `+0x28` slot does not read as a `u8` or `u16` bone list. Blend indices name the skeleton's own array positions. | Cross sample, 10,106 geometries | Confirmed for the corpus | A palette outside the corpus is not excluded; the reader carries a palette variant no decoder produces |
+| SKEL-F21  | 501 geometries store one blend index per vertex and no weight stream: 446 as one `u8`, 55 as one `u16`. All declare more than one bone, every index is inside the declared count, the largest is 319 and no geometry repeats a single index, so each vertex selects one bone with weight 1. | Cross sample, 10,106 geometries | Confirmed | Weight 1 is structural: there is no weight stream to contradict it |
+| SKEL-F22  | The authored vertices are the deformed result at the reference pose. Skinning composes as `S[i] = G_pose[i] * inverse-bind[i]` over the verified hierarchy, and a GPU compute probe matches a CPU reference on real data: the peacock tail (25,456 vertices) within `3.6e-7` m at a 40 degree pose, the candlestick (788 vertices) within `3.7e-9` m. | Two chains, 26,244 vertices | Confirmed for the samples | Linear blend skinning only; the data holds no authored animation pose |
 
 ## Sample locators
 
@@ -75,6 +78,22 @@ files named in a list passed as `LF_TEST_ARCHIVE_LIST`; the same archives are
 the ones the fragment census used. The survey test is
 `surveys_native_skeleton_rows` in `apps/desktop/src/files/model.rs`; the four
 resources are asserted by `decodes_real_skeleton_resources`.
+
+## Deformation measurements
+
+The two evaluators are the CPU reference in `crates/scene` and a GPU compute
+probe in `crates/renderer`, run over the same skinning matrices.
+
+| Chain                | Selector         | Posed bone | Pose                | Vertices compared | Worst difference |
+| -------------------- | ---------------- | ---------- | ------------------- | ----------------: | ---------------: |
+| `mint_peacock_taxidermy_01.#ft` | `levels.rpf!5!8` | `Tail_01` (4) | 40 deg about model Z | 25,456 | `3.6e-7` m |
+| `prop_am_candlestick_02a.#ft`   | `levels.rpf!5!1` | `Candle` (3)  | 60 deg about model Z | 788    | `3.7e-9` m |
+
+The peacock frame moves 24,496 of the compared vertices with a largest
+displacement of 1.19 m and collapses no normal, so the agreement is measured on
+a pose with real displacement. The harness is
+`renders_the_verified_deformation`, which also writes the authored, posed,
+overlay, influence and reset frames.
 
 ## Method
 

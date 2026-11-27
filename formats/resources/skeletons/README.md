@@ -8,7 +8,7 @@ as read from payload data.
 
 Everything here comes from the Scarlett build and from decoded resources only.
 No engine code path was traced for skeleton loading or pose evaluation. Findings
-are `SKEL-F01` to `SKEL-F14` and are listed in
+are `SKEL-F01` to `SKEL-F22` and are listed in
 [evidence/skeletons/INDEX.md](../../../evidence/skeletons/INDEX.md).
 
 ## Where a skeleton is referenced
@@ -223,49 +223,90 @@ with the composed pose each make the result `partial`.
 
 The geometry record carries its bone count at `+0x2C`. It equals the skeleton's
 bone count on every highest-LOD geometry of a skeleton-bearing drawable and is
-zero on lower LODs. The vertex buffer carries the influences:
+zero on lower LODs. The vertex buffer carries the influences in its declaration
+table.
 
-| Stream slot | Format | Content                                                     |
-| ----------: | -----: | ----------------------------------------------------------- |
-|           6 | `0x26` | Four `u8` blend weights, one per influence                  |
-|           8 | `0x25` | Four `u8` blend indices, one per influence                  |
+### The declaration table
 
-The slot number alone is not enough: slot 8 carries another quantised attribute
-(format `0x8C`) on some rigid drawables, so the reader checks the format. A set
-is accepted only when every vertex has at least one non-zero weight, every
-weighted lane names a bone inside the skeleton, and the weights are used as
-stored. The weight totals observed are 255, 127 (a 7-bit scale), and rare
+The table at the vertex-buffer graphics target is a fixed array of 23 words.
+Word `i` declares the attribute of slot `i`, a zero word means the slot is
+absent, and the slot number is a semantic rather than a position in the list of
+attributes that happen to be present. Two slots carry the influences:
+
+| Slot | Semantic      | Declaration format | Layout size | Content                      |
+| ---: | ------------- | -----------------: | ----------- | ---------------------------- |
+|    6 | blend weights |             `0x26` | 4           | four `u8`, one per influence |
+|    8 | blend indices |             `0x25` | 4           | four `u8`, one per influence |
+
+An earlier reader stopped at the first zero word, which dropped slots 6 and 8
+whenever a lower slot is absent: a geometry without a second UV set leaves slot
+7 empty, so the table appeared to end before the influences. That truncation is
+what an earlier census reported as "weight form at slot 1"; it named a layout
+attribute, not a declaration slot. Reading all 23 words removes both the reading
+and the group.
+
+### Index encodings
+
+The declaration format alone does not identify the encoding. `0x00` is plain
+integer data whose width comes from the layout entry at the same offset, so the
+pair of declaration format and layout size is what identifies a form. Five pairs
+occur in the corpus:
+
+| Declaration | Layout size | Encoding           | Rows  |
+| ----------- | ----------: | ------------------ | ----: |
+| `0x25`      |           4 | four `u8` indices  | 8,254 |
+| `0x8C`      |          16 | four `u32` indices |   104 |
+| `0x4A`      |           8 | two `u32` indices  |    15 |
+| `0x00`      |           1 | one `u8` index     |   446 |
+| `0x00`      |           2 | one `u16` index    |    55 |
+
+The wide forms pair lane `i` of the index attribute with lane `i` of the four
+`u8` weights at slot 6. Lane `i` therefore never crosses attributes: a vertex
+with three influences uses the first three lanes of both.
+
+Rows are the 10,106 geometry rows of the wide corpus that declare bones and
+belong to a skeleton. They add up to the same total: 8,254 + 104 + 15 + 446 + 55
++ 753 + 479.
+
+### What the decoder accepts
+
+| Weights at slot 6 | Indices at slot 8 | Reading                                                    |
+| ----------------- | ----------------- | ---------------------------------------------------------- |
+| `0x26`            | a weighted form   | Blend: lane `i` names bone `index[i]` with `weight[i] / 255` |
+| absent            | one index lane    | Rigid: the single index names the bone, weight 1            |
+| absent            | absent            | Implicit single bone, accepted only for a one-bone geometry |
+| anything else     | anything else     | Reported as unsupported; nothing is guessed                 |
+
+A set is accepted only when every vertex has at least one non-zero weight,
+every weighted lane names a bone inside the declared count, and the weights are
+used as stored. The weight totals observed are 255, 127 (a 7-bit scale) and rare
 unnormalised totals such as 169; an unnormalised total is reported once and the
-association still uses the non-zero lanes. A missing index stream is accepted
-only for a one-bone skeleton, where lane 0 selects the only bone.
+primitive is not treated as deformable.
 
-The two slot numbers hold for most geometry records but not for all. Of 10,106
-surveyed highest-LOD geometries that declare bones, 8,304 decode an association
-this way and none of them fails validation. The remaining 1,802 are counted and
-not associated:
+Indices name the skeleton's own array position. Every active index of every
+surveyed weighted geometry is inside the declared bone count, the index sets are
+sparse rather than compact local ranges, and each peacock tail index is nearest
+the same-numbered bone. No palette was found: the geometry record's fields at
+`+0x28`, `+0x2A`, `+0x2E`, `+0x30`, `+0x34`, `+0x38` and `+0x3C` hold no bone
+index, no bone-array pointer and no palette pointer, and the model's `+0x28`
+slot does not read as a `u8` or `u16` bone list. A palette is therefore a
+possible future decode, not a current one; the reader carries a palette variant
+that no decoder produces.
 
-| Observation                                                    | Geometries |
-| -------------------------------------------------------------- | ---------: |
-| Weight form at slot 1 instead of slot 6                          |        968 |
-| One bone and no weight form                                     |        753 |
-| Several bones and no index form at slot 8                       |         69 |
-| No weight form in any declared slot                             |         12 |
+### Rigid attachment
 
-Searching the declaration for the weight format instead of reading slot 6 was
-tried and measured: it moved the 968 geometries out of the unread group, and
-every one of them failed the weight totals and the index bounds. The format code
-`0x26` says four `u8` components, not "blend weights", so the reader keeps the
-slot the samples verified and reports the rest as unread.
+501 geometries declare one index per vertex and no weight stream. 446 store it
+as one `u8` and 55 as one `u16`. Every one of them declares more than one bone,
+so the index selects a bone rather than repeating the only one, every index is
+inside the declared count (no row fails), the largest index is 319, and no
+geometry uses a single distinct index. Weight 1 is the structural consequence of
+a single influence, not a guess.
 
-The 753 one-bone geometries were inspected separately. Every one of them belongs
-to a skeleton that holds exactly one bone, so the association would be
-unambiguous if the declared count were trusted: the geometry declares one bone
-and the skeleton has one. The geometry record itself states nothing further. Its
-fields at `+0x28`, `+0x2A`, `+0x2E`, `+0x30`, `+0x34`, `+0x38` and `+0x3C` hold
-no bone index, no bone-array pointer and no palette pointer; the `u64` at
-`+0x30` differs per geometry and matches no skeleton offset. A rule that assigns
-every vertex to the only bone therefore rests on the count alone, which is why
-the decoder does not apply it and reports these geometries as unassociated.
+753 geometries declare neither attribute and their record declares one bone.
+That is an implicit single-bone attachment. The record states nothing further,
+so the attachment rests on the declared count matching a one-bone skeleton,
+which is why it is accepted only in that case. 479 geometries declare neither
+attribute and more than one bone; they stay unassociated.
 
 Accepted associations record which bones a primitive uses and whether any vertex
 blends more than one. The sampled geometry falls into three cases:
@@ -275,8 +316,7 @@ blends more than one. The sampled geometry falls into three cases:
 - **Rigid single-bone geometry.** One bone with weight 1, as on the tarot,
   candlestick and weapon bolt. The weights agree with drawing the vertices as
   stored.
-- **Weighted geometry.** Up to four influences, as on the peacock's tail. The
-  reader records the bones and does not deform.
+- **Weighted geometry.** Up to four influences, as on the peacock's tail.
 
 ## Static placement
 
@@ -310,6 +350,49 @@ box, so the evidence is missing rather than negative; the report says which.
 No sampled resource needed a bone-local vertex space to be placed by a bone
 transform, and none was placed. That is a statement about the samples, not a
 proof that no resource ever needs one.
+
+## Deformation
+
+A verified influence set says which bones move a vertex. Turning that into
+geometry needs one assumption the record does not state: the pose the vertices
+are drawn at. The application evaluates at the reference pose, which the stored
+local transforms and the inverse-bind records define, and at poses a person
+enters by hand. It never evaluates an animation.
+
+The bind transform of a bone is its stored model transform at the reference
+pose, `G_bind[i] = T(t_model[i]) * R(R_model[i])`. The stored inverse-bind records
+are exactly its inverse (`SKEL-F10`), so both statements of the bind pose agree.
+
+A pose supplies a local delta per bone. The deltas compose with the hierarchy the
+document states, giving `G_pose[i]`; the skinning matrix is then
+
+$$S[i] = G_{pose}[i] \cdot G_{bind}[i]^{-1} = G_{pose}[i] \cdot \text{inverse bind}[i]$$
+
+and a vertex with influences $(i_k, w_k)$ deforms as
+
+$$p' = \sum_k w_k \, S[i_k] \, p_{authored}$$
+
+with the sum over the non-zero lanes. Normals and tangents use the same matrices
+without the translation, because every surveyed pose is a rotation and a
+translation: scale is identity in all 133,110 surveyed bones (`SKEL-F17`), no
+stored matrix carries one, and a pose that would introduce one is refused rather
+than approximated.
+
+The authored vertex positions are the deformed result at the reference pose, so
+the reference pose reproduces the stored geometry bit for bit within float
+rounding. That is why the influence view and the authored view agree at
+reference and diverge only after a delta.
+
+Two independent evaluators agree on real data. On the peacock's 25,456-vertex
+tail, with `Tail_01` rotated 40 degrees about model Z, the CPU reference and a
+GPU compute probe over the same matrices differ by at most `3.6e-7` m, and on
+the candlestick the difference is `3.7e-9` m. The peacock frame moves 24,496 of
+those vertices, so the comparison covers a pose with real displacement rather
+than a degenerate case.
+
+Dual-quaternion skinning is not implemented and is not claimed: linear blend
+skinning is what the delivered evaluation does, and every statement above is
+about that method.
 
 ## Coverage
 
@@ -347,20 +430,27 @@ the extra record was dropped.
 - The value at `+0x4E` is described as a jump to the end of the bone's subtree
   because that reading fits every surveyed record; no engine code confirms it.
   The array bound does not depend on that reading.
-- Skeletons whose geometry declares its weight stream somewhere other than slot
-  6 are read as skeletons without an association. 968 of 10,106 geometries are
-  in that state; an association is never invented for them.
-- The 753 one-bone geometries without a weight form stay unassociated. Their
-  skeleton holds one bone, but the geometry record states no bone reference, so
-  the association would rest on the count alone.
+- A geometry that declares influences in a form outside the five above is read
+  as a geometry without an association. 479 of 10,106 geometries declare neither
+  attribute and more than one bone; an association is never invented for them.
+- The 753 one-bone geometries without an influence attribute rely on the
+  declared count alone. Their skeleton holds one bone and the geometry states no
+  bone reference, so the reading is accepted only because the two counts agree.
 - Scale is identity in every surveyed bone. The composition ignores scale, and
   non-identity scale is not supported because no sample shows what it means.
 - The sample is 29 archives of the Scarlett build. A skeleton variant outside it
   may store a different parent encoding or a different influence layout; the
   reader reports what it cannot read instead of assuming this layout holds
   everywhere. Earlier RAGE skeleton layouts are not assumed to match.
-- No animation pose, blending or skinning is decoded. A pose evaluated over time
-  is out of scope.
+- No animation data is decoded. A pose is entered by hand and evaluated once; there
+  is no animation, no clip, no blending between clips and no persistence of a
+  pose anywhere.
+- Linear blend skinning only. Dual-quaternion skinning is not implemented, and
+  the choice of one method over the other rests on the influence sets, not on a
+  measurement of engine behaviour.
+- Non-identity scale is unsupported. Every surveyed bone stores scale `(1, 1, 1)`
+  and no sample shows what any other value would mean, so a pose that introduces
+  one is refused.
 
 ## Tools
 
@@ -368,3 +458,20 @@ the extra record was dropped.
 decoded resource to a skeleton and reports the header, bones, hierarchy,
 composed pose, inverse-bind validation and geometry associations. The
 synthetic tests are in `tools/drawables/tests/test_skeleton_inspect.py`.
+
+The deformation numbers above come from the application's own harnesses, which
+read a resource through the native archive path:
+
+- `reports_deformation_support` prints, per chain, the bones, the primitives,
+  each influence set's status and whether it deforms.
+- `renders_the_verified_deformation` poses one bone of one chain, renders the
+  authored, posed, overlay, influence and reset frames, and asserts that a GPU
+  compute probe matches the CPU reference on every vertex of the chosen
+  primitive.
+
+The reusable part is `Pose`, `SkinningMatrices`, `deform_primitive` and
+`VertexInfluences` in `crates/scene`, with the decoders in
+`crates/model/src/influence.rs`. `examples/skinning-consumer` is a consumer that
+holds no game path: it takes a resource file, an optional dictionary member, a
+bone selector and a delta, and can render one frame or compare the GPU probe
+with the CPU reference.
