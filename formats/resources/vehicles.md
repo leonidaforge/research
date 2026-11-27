@@ -113,7 +113,15 @@ Two commands generate the set.
 `lforge vehicle bodies --archive levels.rpf --executable game.exe --names
 catalog.txt --output bodies.json` scans the unresolved top-level rows for type 3
 fragments named `<model>_hi.#ft` and records the archive locator of the best body
-per model. It holds no absolute path, so it can be regenerated elsewhere.
+per model, together with the nested row's stored 64-bit name hash. It holds no
+absolute path, so it can be regenerated elsewhere.
+
+The hashes are the same values the root table carries, written in upper case. A
+catalog record publishes them as `rowHash64` inside a resolved `fragment`
+resource, next to the root archive row and the header the payload starts with.
+On the current dataset that resolves the fragment for 326 of the 332 canonical
+vehicles. The other six have no body, so their fragment resource stays marked
+unresolved.
 
 `lforge vehicle previews --bodies bodies.json --archive levels.rpf --textures
 data/ttdb --colors vehicleColors.json --output previews/` renders a 1024x1024
