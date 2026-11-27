@@ -9,12 +9,14 @@ is a local CLI assignment, not a format identity.
 
 A first iteration decoded 40 rows of one nested archive and built the layout
 table from the 24 of those that hold a member drawable. The wider runs confirm
-that layout and add what the 40 rows could not show: a fragment always holds
-exactly one member drawable, the member always references a skeleton, list and
-shader group, and a fragment whose object has several parts carries them as
-models and geometry records of that one drawable. No engine code path was
-traced. Field meanings are **Unknown** unless the table says otherwise. Findings
-are cited as `FRAG-F01` to `FRAG-F12` and listed in
+that layout and add what the 40 rows could not show: every one of the 7,311 rows
+read holds exactly one member drawable, the member references a skeleton, list
+and shader group in every read row, and a fragment whose object has several
+parts carries them as models and geometry records of that one drawable. Those
+are properties of the rows read, not rules for the type: the 48,177 unread rows
+are not claimed. No engine code path was traced. Field meanings are **Unknown**
+unless the table says otherwise. Findings are cited as `FRAG-F01` to `FRAG-F12`
+and listed in
 [evidence/fragments/INDEX.md](../../../evidence/fragments/INDEX.md).
 
 ## Corpus
@@ -97,6 +99,13 @@ declared resource type selects the candidate; the structure decides. A fragment
 whose member carries another suffix is still the fragment its structure says it
 is, and the suffix is reported as a fact rather than required (FRAG-F08).
 
+The two interpretations can overlap: a fragment root's `+0x50` LOD slot can hold
+a pointer, which is also what a resource-level drawable header reads. When both
+readings hold, the name separates them and the overlap is reported instead of
+being resolved silently; a root that overlaps without a fragment name is refused
+rather than guessed. Neither reading is validated more loosely to make the
+choice.
+
 Sample D: two populated LOD slots, one model and one geometry each, one shader.
 Sample E: four populated LOD slots, one model and two geometries each. Sample
 F : two populated LOD slots, one model and four geometries each.
@@ -106,17 +115,24 @@ F : two populated LOD slots, one model and four geometries each.
 The four `u16` are not established. The first is `1` in 5,522 of the 5,553 rows
 and `2` in the other 31; the second is `0` in 151 rows and the rest vary from
 `1` to `80`; the third varies from `0` to `80` and the fourth from `0` to `266`.
-Every row holds exactly one member drawable whatever the four values are, so a
-reader MUST NOT read them as component counts (FRAG-F05, FRAG-F07).
+Every row read holds exactly one member drawable whatever the four values are, so
+a reader MUST NOT read them as component counts (FRAG-F05, FRAG-F07).
 
 ## Assembly
 
 Sample D's decoded geometry reproduces the member drawable's own bounds block:
 minimum `(-0.0381, -0.0635, 0.0)`, maximum `(0.0381, 0.0635, 0.02002)` against
-decoded `(-0.038086, -0.063476, 0.0)` to `(0.038086, 0.063476, 0.020019)`.
-The vertex positions are therefore already in the space the header describes.
+decoded `(-0.038086, -0.063476, 0.0)` to `(0.038086, 0.063476, 0.020019)`. The
+decoded positions of that sample therefore already sit in the space its bounds
+block describes.
+
 No additional transform is applied to a single-drawable fragment, and none is
-invented.
+invented. That is a statement about this implementation and about the samples:
+no root field was identified as a placement matrix, so there is nothing to apply
+in its place. It is not a claim that every fragment's geometry is authored in
+final resource space. The member's skeleton reference is recorded and not
+parsed, so a fragment whose parts are posed through a skeleton could render in
+its bind pose instead of its posed form; see the follow-up in [Limits](#limits).
 
 The fragment scene is the member drawable's highest populated LOD. LOD
 selection happens inside the drawable, as it does for a resource-level drawable;
@@ -153,16 +169,18 @@ Read across 5,553 rows of the 27 extracted archives and 1,758 rows of
 | Shader group `+0x10`           | Non-null in every read row                                    |
 
 The skeleton reference is the notable difference from the two sampled
-resource-level drawables, where that slot is null. A fragment member is
-therefore a rigged drawable. This document does not interpret the skeleton; it
-records that the reference exists in every row and that the static
-representation was validated without it.
+resource-level drawables, where that slot is null. The reference is non-null in
+every row read, which is consistent with a rigged member drawable; whether the
+record is a skeleton and whether it changes the rendered pose is not
+established here. This document does not interpret the skeleton; it records that
+the reference exists in every row and that the static representation was
+validated without it.
 
 ## Static placement
 
-The decoded vertex positions are already in the space the member drawable's
-bounds describe, and a fragment's parts are separate models or geometry records
-of that one drawable rather than separate drawables:
+The decoded vertex positions sit in the space the member drawable's bounds
+describe in every sample read, and a fragment's parts are separate models or
+geometry records of that one drawable rather than separate drawables:
 
 - `w_sg_goodwin_01_bolt_01_mid.#ft` (`data.rpf!26!9`) decodes to one component,
 one model and one geometry record: 620 vertices, 372 triangles, one material
@@ -173,9 +191,12 @@ geometry records: 41,613 vertices, 45,132 triangles and four materials.
 - The 1,758 `data.rpf!26` rows are weapon parts (`w_*` names): 1,172 hold one
 model and 586 hold two, and every one holds exactly one member drawable.
 
-No transform was needed to obtain those renders, and none was applied. The
-fragment root stores no placement table: the two components of a weapon part
-are models of one drawable, positioned in the drawable's own space.
+No transform was needed to obtain those renders, and none was applied. No
+fragment root field was identified as a placement table: the two models of a
+weapon part are models of one drawable and decode in the drawable's own space.
+This is support for the static, single-primary-drawable representation. It does
+not show that skeleton-driven placement is unnecessary in general; a skeleton
+driven pose is untested because the skeleton is not parsed.
 
 ## Root variants
 
@@ -205,9 +226,11 @@ on real rows rather than assumed (FRAG-F12):
 
 The `.zbft` rows therefore are not `.zft` rows with another name: their `+0x10`
 holds a small integer and their `+0x18` points near the start of the system
-segment, at no member drawable. Type 16 shares the texture dictionary's framing
-and not the drawable dictionary's, so the `b` in the extension does not imply a
-drawable container. Neither type is decoded here.
+segment, at no member drawable. In the 285 rows read, type 16 has the framing of
+a texture dictionary and not that of a drawable dictionary, so the `b` in the
+extension is not evidence of a drawable container. That is a statement about the
+rows read: neither type is decoded here, and nothing establishes type 16 as
+equivalent to a normal texture dictionary everywhere.
 
 ## Drawable dictionaries
 
@@ -233,17 +256,22 @@ about dictionaries.
 - 7,311 decoded rows from 28 archives of one build. The installation census
   counts 55,488 type-3 entries in 265 archives; the remaining 48,177 rows and
   237 archives were not read, so no claim here extends to them.
-- Only the member drawable at `+0x18` is understood. No row holds two member
-  drawables, child placements or a damage-state table, so no assembly rule for
-  them is published.
+- Only the member drawable at `+0x18` is understood. No read row holds two
+  member drawables, child placements or a damage-state table, so no assembly
+  rule for them is published. The absence of such a row in 7,311 samples is not
+  proof that a multi-drawable fragment cannot exist in a row that was not read.
 - The three other root pointers reach records that were not interpreted. The
   records behind `+0x10` hold a `u64` `2` and a name pointer, the ones behind
   `+0x20` hold repeated `0x3C00`/`0xBC00` words, and the ones behind `+0x28`
   begin with `0.70711` floats; none of them reaches a drawable in 7,311 rows.
-  The shapes are consistent with collision and shape data, which this document
-  does not interpret.
+  The shapes resemble collision or shape data; this document does not interpret
+  them and does not claim they are collision data.
 - The skeleton reference is recorded but not parsed. Whether a fragment member's
   bind pose is always the rendered pose is not established; the sampled renders
   show the objects assembled correctly without applying a pose.
+- Follow-up work: parse the member's skeleton reference and decide whether a
+  bind-pose placement is needed. Until that is done, a fragment whose parts are
+  posed through its skeleton renders as authored, and this document does not
+  claim that is the posed result.
 - No fragment root field that selects a damage state or a component subset was
   identified.

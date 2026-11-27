@@ -54,9 +54,9 @@ The detailed samples come from `<GAME_ROOT>/levels.rpf`, row 5, SHA-256
 | FRAG-F07 | No fragment row carries components, child placements or a damage-state table                                                                                                                           | `CROSS_SAMPLE` 5,553 rows; every root slot tested for the member form                    | Confirmed within the corpus |
 | FRAG-F08 | A fragment is recognised by its root structure, not by the member name's `#ft` suffix                                                                                                                  | `BINARY` root slots; `CROSS_SAMPLE` 7,311 rows carry the suffix                          | Confirmed                   |
 | FRAG-F09 | Two root variants occur: `+0x10` is a system pointer in 5,402 rows and zero in 151; both hold one member drawable and assemble the same way                                                            | `CROSS_SAMPLE` 7,311 rows                                                                | Confirmed                   |
-| FRAG-F10 | Every member drawable references a skeleton, a list and a shader group; its populated LOD slots, models and geometry records vary from 1 to 4, 1 to 7 and 1 to 71 apparently                       | `CROSS_SAMPLE` 7,311 rows                                                                | Confirmed                   |
-| FRAG-F11 | A fragment's several parts are models and geometry records of its one member drawable, already positioned; no placement transform is needed for the sampled renders                                 | `CROSS_SAMPLE` 7,311 rows; `BINARY` decoded geometry against the stored bounds; rendered previews | Confirmed for the read corpus |
-| FRAG-F12 | Type 17 (`.zbft`) shares the fragment root form but its `+0x18` reaches no member drawable; type 16 (`.zbdd`) shares the texture dictionary framing, not the drawable dictionary's | `CROSS_SAMPLE` 47 type-17 and 285 type-16 rows | Confirmed for the sampled rows |
+| FRAG-F10 | Every member drawable read references a skeleton, a list and a shader group; its populated LOD slots, models and geometry records vary from 1 to 4, 1 to 7 and 1 to 71 apparently. The three references are recorded, not parsed | `CROSS_SAMPLE` 7,311 rows                                                                | Confirmed for the read corpus |
+| FRAG-F11 | A fragment's several parts are models and geometry records of its one member drawable and decode in that drawable's own space; no placement transform was applied to the sampled renders | `CROSS_SAMPLE` 7,311 rows; `BINARY` decoded geometry against the stored bounds; rendered previews | Confirmed for the read corpus |
+| FRAG-F12 | Type 17 (`.zbft`) shares the fragment root form but its `+0x18` reaches no member drawable; type 16 (`.zbdd`) has the texture dictionary framing, not the drawable dictionary's, in the 285 rows read | `CROSS_SAMPLE` 47 type-17 and 285 type-16 rows | Confirmed for the sampled rows |
 
 FRAG-F06 corrects an earlier claim. The first iteration reported that no drawable
 dictionary member table existed, on the basis of 40 decoded type-3 rows of one
@@ -64,21 +64,36 @@ nested archive. That search covered fragments only. The table does exist in this
 build, in the 8,209 rows that carry local type ID 4; its grammar is documented in
 [drawable-dictionaries](../drawable-dictionaries/INDEX.md).
 
+## What these findings do not establish
+
+- Coverage. 7,311 of the 55,488 type-3 rows and 28 of the 265 archives were read.
+  No finding extends to the unread rows.
+- Impossibility. FRAG-F03 and FRAG-F07 record what the read rows hold. A row that
+  was not read may still carry two member drawables, a child placement or a
+  damage-state table; absence of a sample is not proof of impossibility.
+- Pose. The skeleton reference is non-null in every read row, but the record is
+  not parsed, so whether a member's bind pose is its rendered pose is open. The
+  sampled renders show the objects assembled correctly without applying a pose.
+- Universality. FRAG-F12 describes the rows that were read. Type 16 is not shown
+  to be equivalent to a texture dictionary everywhere, and the unidentified root
+  pointers are not claimed to be collision data.
+
 ## Validation
 
 - Sample D's decoded scene bounds equal the member drawable's bounds block to
-  quantisation error, so the geometry needs no extra placement.
+  quantisation error, so the geometry of that sample needs no extra placement.
 - The wider run tested every root slot of every read row for the member form:
   only `+0x18` ever holds a drawable. The records behind the other three
   pointers hold float matrices, fixed-point `0x3C00`/`0xBC00` words and a `u64`
-  `2` with a name pointer; their shapes are consistent with collision and shape
-  data, which was not interpreted.
+  `2` with a name pointer; their shapes resemble collision or shape data, which
+  was not interpreted and is not claimed.
 - Three fragments were decoded and rendered offscreen with
   `crates/model/examples/fragment_render.rs`: `w_sg_goodwin_01_bolt_01_mid.#ft`
   (`data.rpf!26!9`, 620 vertices, three reconstructed textures) shows a body and
-  two rails already positioned relative to each other;
-  `mint_peacock_taxidermy_01.#ft` (41,613 vertices, four materials) and
-  `prop_am_card_tarot_deck_01a.#ft` decode with no transform applied.
+  two rails positioned relative to each other; `mint_peacock_taxidermy_01.#ft`
+  (41,613 vertices, four materials) and `prop_am_card_tarot_deck_01a.#ft` decode
+  with no transform applied. The renders are a visual check, not a claim that
+  skeleton-driven placement is unnecessary.
 - `armor_torso_body_armor_armortorsoswat_fr1_000_regular_ws00_full.#ft` decodes
   to 25 vertices and 32 triangles in a flat 25-unit square, so the name alone
   does not describe geometric complexity and was not used as evidence.
