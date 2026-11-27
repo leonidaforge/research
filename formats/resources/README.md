@@ -50,6 +50,7 @@ Documents:
 - [pages.md](pages.md): stored entry, segment split, page map, page sizes, raw pages and reconstruction.
 - [pointers.md](pointers.md): pointer encoding, bounds and false positives.
 - [textures.md](textures.md): texture dictionary root, `0x70`-byte record grammar, allocation extents, and the dictionary-hash namespace seen from drawable references.
+- [vehicles.md](vehicles.md): vehicle archive discovery, body fragment layout, wheel skeleton and shared wheel assets.
 - Evidence: [evidence/resources/INDEX.md](../../evidence/resources/INDEX.md).
 
 ## 0DRP root header
