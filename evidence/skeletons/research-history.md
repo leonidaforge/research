@@ -90,7 +90,10 @@ alone. It now requires the decoded vertices to match the per-geometry box the
 record declares: the peacock matches 4 of 4 (`2.0e-5`) and the candlestick 2 of 2
 (`2.0e-6`), while the tarot and bolt records declare no box and report
 `unverified`. A valid influence set says which bones a primitive uses; it does
-not say where its vertices are stored, and the two are now reported apart.
+not say where its vertices are stored, and the two are now reported apart. The
+verdict was then renamed `AuthoredGeometryMatchesBounds`, because agreement
+between a geometry and the box in the same record does not prove that no later
+stage places it.
 
 The 753 one-bone geometries without a weight form were also inspected. All of
 them belong to one-bone skeletons, but their geometry records carry no bone

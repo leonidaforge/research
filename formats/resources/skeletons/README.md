@@ -286,17 +286,20 @@ about the space its vertices are stored in. The record offers one way to check
 that space independently: each model carries an axis-aligned box per geometry.
 
 The decoder compares the box of the decoded vertices with that declared box. If
-they agree, the vertices sit where the drawable says its geometry sits, which is
-the space the renderer draws, so no placement is needed. If they disagree, the
-vertex space is not established and no placement is invented. If the record
-carries no declared box, the space is likewise not established.
+they agree, the vertices sit where the drawable says its geometry sits, and the
+report says `authored geometry matches bounds`. That is agreement between two
+statements the same record carries, not a proof that nothing places the geometry
+later, so the verdict names the comparison instead of concluding that placement
+is unnecessary. If they disagree, the vertex space is not established and no
+placement is invented. If the record carries no declared box, the space is
+likewise not established.
 
 Measured on the four verified fragments:
 
 | Resource | Decoded geometries matching their declared box | Worst delta | Placement reported |
 | -------- | ---------------------------------------------: | ----------: | ------------------ |
-| Peacock  | 4 of 4                                          | `2.0e-5`    | not required       |
-| Candlestick | 2 of 2                                       | `2.0e-6`    | not required       |
+| Peacock  | 4 of 4                                          | `2.0e-5`    | authored geometry matches bounds |
+| Candlestick | 2 of 2                                       | `2.0e-6`    | authored geometry matches bounds |
 | Tarot    | no declared box                                 |             | unverified         |
 | Bolt     | no declared box                                 |             | unverified         |
 
