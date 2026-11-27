@@ -127,69 +127,105 @@ class MergeTest(unittest.TestCase):
 
 
 class JournalTest(unittest.TestCase):
+    def record(self, **overrides):
+        value = {
+            'schema': census_all.SCHEMA_ID,
+            'rules': census_all.RULES_ID,
+            'registry': census_all.REGISTRY_ID,
+            'mode': census_all.MODE,
+            'limits': census_all.LIMITS,
+            'build': 'exe-1',
+            'relative': 'pack/story000/story000.rpf',
+            'root_identity': '100:5',
+            'archives': 2,
+            'entries': 700,
+            'stopped': None,
+        }
+        value.update(overrides)
+        return value
+
     def test_a_completed_root_is_reused_only_when_its_identity_matches(self):
         with tempfile.TemporaryDirectory() as directory:
             journal = os.path.join(directory, 'journal.jsonl')
-            census_all.append_journal(
-                journal,
-                {
-                    'schema': census_all.SCHEMA_ID,
-                    'rules': census_all.RULES_ID,
-                    'registry': census_all.REGISTRY_ID,
-                    'build': 'exe-1',
-                    'relative': 'pack/story000/story000.rpf',
-                    'root_identity': '100:5',
-                    'archives': 2,
-                    'entries': 700,
-                    'stopped': None,
-                },
-            )
-            done = census_all.load_journal(journal)
+            census_all.append_journal(journal, self.record())
+            done = census_all.load_journal(journal, 'exe-1')
             self.assertIn('pack/story000/story000.rpf', done)
+            # The same record under another build describes work this build did
+            # not do.
+            self.assertEqual(census_all.load_journal(journal, 'exe-2'), {})
+
+    def test_a_stopped_root_is_pending_work_and_never_reused(self):
+        with tempfile.TemporaryDirectory() as directory:
+            journal = os.path.join(directory, 'journal.jsonl')
+            census_all.append_journal(journal, self.record(stopped='max_archives'))
+            self.assertEqual(census_all.load_journal(journal, 'exe-1'), {})
 
     def test_an_incompatible_checkpoint_is_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
             journal = os.path.join(directory, 'journal.jsonl')
-            for schema, rules in (
-                ('leonida-forge.rpf9-census-merged/1', census_all.RULES_ID),
-                (census_all.SCHEMA_ID, 'older-rules'),
+            for overrides in (
+                {'schema': 'leonida-forge.rpf9-census-merged/1'},
+                {'rules': 'older-rules'},
+                {'registry': 'another-build'},
+                {'mode': 'payload' if census_all.MODE != 'payload' else 'metadata-only'},
+                {'limits': dict(census_all.LIMITS, max_depth=1)},
+                # A checkpoint without a mode is older than the mode split.
+                {'mode': None},
             ):
-                census_all.append_journal(
-                    journal,
-                    {
-                        'schema': schema,
-                        'rules': rules,
-                        'registry': census_all.REGISTRY_ID,
-                        'build': 'exe-1',
-                        'relative': 'data.rpf',
-                        'root_identity': '100:5',
-                        'archives': 1,
-                        'entries': 1,
-                        'stopped': None,
-                    },
-                )
-            self.assertEqual(census_all.load_journal(journal), {})
+                census_all.append_journal(journal, self.record(**overrides))
+            self.assertEqual(census_all.load_journal(journal, 'exe-1'), {})
 
     def test_a_truncated_journal_line_is_ignored(self):
         with tempfile.TemporaryDirectory() as directory:
             journal = os.path.join(directory, 'journal.jsonl')
-            census_all.append_journal(
-                journal,
-                {
-                    'schema': census_all.SCHEMA_ID,
-                    'rules': census_all.RULES_ID,
-                    'registry': census_all.REGISTRY_ID,
-                    'build': 'exe-1',
-                    'relative': 'data.rpf',
-                    'root_identity': '100:5',
-                    'archives': 1,
-                    'entries': 1,
-                    'stopped': None,
-                },
-            )
+            census_all.append_journal(journal, self.record())
             with io.open(journal, 'a', encoding='utf-8') as handle:
                 handle.write('{"schema": "leonida-forge.rpf9-cen')
-            self.assertEqual(len(census_all.load_journal(journal)), 1)
+            self.assertEqual(len(census_all.load_journal(journal, 'exe-1')), 1)
+
+
+class ScanIdentityTest(unittest.TestCase):
+    def test_the_identity_separates_build_mode_limits_and_root_bytes(self):
+        base = census_all.scan_identity('exe-1', '100:5')
+        self.assertEqual(base, census_all.scan_identity('exe-1', '100:5'))
+        self.assertNotEqual(base, census_all.scan_identity('exe-2', '100:5'))
+        self.assertNotEqual(base, census_all.scan_identity('exe-1', '100:6'))
+        self.assertEqual(len(base), 64)
+
+
+class CommandTest(unittest.TestCase):
+    def test_every_root_carries_its_own_journal_and_identity(self):
+        target, arguments = census_all.command(
+            'pack/story000/story000.rpf',
+            'D:/install/pack/story000/story000.rpf',
+            'D:/install/game.exe',
+            5000,
+            'runs',
+            'abc',
+        )
+        self.assertEqual(target, os.path.join('runs', 'pack__story000__story000.rpf.jsonl'))
+        self.assertIn('--journal', arguments)
+        self.assertEqual(
+            arguments[arguments.index('--journal') + 1],
+            os.path.join('runs', 'pack__story000__story000.rpf.journal.jsonl'),
+        )
+        self.assertEqual(arguments[arguments.index('--journal-identity') + 1], 'abc')
+
+    def test_the_driver_never_sets_an_owned_option_twice(self):
+        previous = os.environ.get('CENSUS_EXTRA')
+        os.environ['CENSUS_EXTRA'] = '--max-depth 3 --metadata-only --entries --samples 5'
+        try:
+            _, arguments = census_all.command('a.rpf', 'a.rpf', 'exe', 10, 'runs', 'abc')
+        finally:
+            if previous is None:
+                del os.environ['CENSUS_EXTRA']
+            else:
+                os.environ['CENSUS_EXTRA'] = previous
+        self.assertEqual(arguments.count('--max-depth'), 1)
+        self.assertEqual(arguments.count('--samples'), 1)
+        # The mode and the extra switches are the caller's to choose.
+        self.assertIn('--metadata-only', arguments)
+        self.assertIn('--entries', arguments)
 
 
 class DiscoveryTest(unittest.TestCase):
@@ -225,7 +261,9 @@ class StaleOutputTest(unittest.TestCase):
             previous = census_all.CENSUS
             census_all.CENSUS = 'definitely-not-a-binary'
             try:
-                found, error = census_all.census('data.rpf', stale, 'exe', 10, runs)
+                found, error = census_all.census(
+                    'data.rpf', stale, 'exe', 10, runs, census_all.scan_identity('exe', '100:5')
+                )
             finally:
                 census_all.CENSUS = previous
             self.assertIsNone(found)

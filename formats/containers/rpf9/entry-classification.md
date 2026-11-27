@@ -33,7 +33,7 @@ A classification makes separate claims, each with its own level. A verified sign
 | ----------- | -------------------------------------------------------------------------------------------- |
 | `signature` | The bytes matched a signature, or the first bytes look like XML. Nothing about structure.    |
 | `structure` | The recogniser walked the payload's own framing from the head, or the whole document parsed. |
-| `asset`     | The engine's type registry has an extension for the type id.                                 |
+| `asset`     | The payload itself was read closely enough to say what asset class it belongs to.            |
 
 | Level       | Meaning                                                                      |
 | ----------- | ---------------------------------------------------------------------------- |
@@ -44,7 +44,7 @@ A classification makes separate claims, each with its own level. A verified sign
 
 A recogniser that walks framing from the head claims `verified` structure. The RPF9 recogniser matches the magic only, so its structure is `probable` until a caller opens the archive. A resource header is a verified signature with `unknown` structure: the page map it points at is not read. A named signature such as `MHIU` is a verified signature with unknown structure, format and asset class.
 
-The asset claim comes from the registry alone. It is `verified` because the extension is a fact about the build, not because anything about the payload was understood.
+The asset claim stays `unknown` for every entry today. The one thing that could settle it is a registry entry, and a registry entry is a property of the type, not of the payload: it says which class the loader assigns to the type id, not what these bytes are. The census therefore reports the registry value as a **declared** asset class (`declared_asset_classes`) and keeps it out of the claims. A type whose registry entry says `zsm` holding a `PSIN` payload is a declared `zsm` with a verified `PSIN` signature, and the disagreement is visible instead of being averaged away.
 
 Reading the first 64 decoded bytes never establishes the whole entry. Every claim is about the head, except a validated document, which is about the whole document.
 
@@ -98,7 +98,7 @@ Every resource-shaped payload in the sample starts with the same two 64-bit word
 
 The segment nibble is 5 (system) or 6 (graphics). A pointer outside those two segments, a non-zero first word, or a pointer that does not fit in 32 bits is not treated as a resource header, which keeps the match narrow. Observed heads include `0000000000000000 7091e25000000000` (pointer `0x50E29170`, segment 5, offset `0x0E29170`) and `0000000000000000 10fa005000000000` (pointer `0x5000FA10`, segment 5, offset `0x00FA10`).
 
-The header establishes the container and the segment. It does not establish which resource is inside: the page map and the resource's own descriptor are not read by the classification. That is why a resource entry has no extension.
+The header establishes the container and the segment. It does not establish which resource is inside: the page map and the resource's own descriptor are not read by the classification. A resource entry therefore gets whatever extension its type declares, and no extension of its own: the container is identified, the resource is not.
 
 ### Signatures without a format
 
@@ -119,7 +119,7 @@ The only payload-derived extension this model applies is `xml`. A recognised for
 
 Where a resource header appears under a type the registry does not cover, the reason is "a resource container with no registered engine type".
 
-Two consequences follow. Almost every observed type now has an extension without reading any payload, and no caller needs a fallback: `extension` is present or absent, and `extension_verified` says whether it may be applied without one.
+Because the registry covers every type the census reached except 255, almost every entry now has an extension without reading any payload, and no caller needs a fallback: `extension` is present or absent, `extension_provenance` says where it came from (`original`, `native`, `payload`, `unresolved`), and `extension_verified` says whether it may be applied automatically. A `native` extension is applied without being verified against the payload; the provenance is what keeps that visible.
 
 ## Capability
 

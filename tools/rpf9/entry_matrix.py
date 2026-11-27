@@ -61,6 +61,91 @@ def cell(value):
     return str(value).replace('|', '\\|')
 
 
+# The order the coverage counts are published in. Every count the merged summary
+# carries is published; this list only decides which come first.
+COVERAGE_ORDER = (
+    'roots_discovered',
+    'roots_opened',
+    'failed_roots',
+    'archives_opened',
+    'nested_archives_opened',
+    'archives_resumed',
+    'failed_archives',
+    'entries_enumerated',
+    'entries_probed',
+    'entries_decoded',
+    'entries_undecoded',
+    'structures_verified',
+    'containers_identified',
+    'declared_asset_classes',
+    'unresolved_formats',
+)
+
+
+def roots_table(summary):
+    detail = summary.get('roots_detail')
+    if not detail:
+        return []
+    lines = [
+        '## By root',
+        '',
+        '| Root | Archives | Entries | Stopped |',
+        '| ---- | -------: | ------: | ------- |',
+    ]
+    for root in detail:
+        lines.append(
+            '| {} | {} | {} | {} |'.format(
+                cell(root['root']),
+                root['archives'],
+                root['entries'],
+                cell(root['stopped']),
+            )
+        )
+    lines.append('')
+    return lines
+
+
+def kind(identification):
+    """`format:psin` -> `format`; the part before the first colon."""
+    return identification.split(':', 1)[0]
+
+
+def distribution(combinations, field):
+    """Entries per value of one property, largest first."""
+    totals = {}
+    for combination in combinations:
+        value = field(combination)
+        totals[value] = totals.get(value, 0) + combination['entries']
+    return sorted(totals.items(), key=lambda item: (-item[1], str(item[0])))
+
+
+def distribution_tables(combinations):
+    tables = (
+        ('Identification kind', lambda item: kind(item['identification'])),
+        ('Format', lambda item: item['identification']),
+        ('Capability', lambda item: item['capability']),
+        ('Extension', lambda item: item['extension']),
+        ('Structure claim', lambda item: item.get('structure')),
+        ('Payload state', lambda item: item['payload']),
+        ('Storage', lambda item: item['storage']),
+        ('Entry type', lambda item: item['type']),
+    )
+    lines = ['## Distributions', '']
+    for title, field in tables:
+        lines.extend(
+            [
+                '### ' + title,
+                '',
+                '| Value | Entries |',
+                '| ----- | ------: |',
+            ]
+        )
+        for value, entries in distribution(combinations, field):
+            lines.append('| {} | {} |'.format(cell(value), entries))
+        lines.append('')
+    return lines
+
+
 def table(combinations):
     lines = [
         '| Type | Identification | Variant | Storage | Transform | Payload | Structure | Capability | Extension | Entries | Archives |',
@@ -119,24 +204,39 @@ def document(summary, combinations):
         'validated, what the application can do with the entry, and the extension',
         'the classification allowed.',
         '',
-        '- roots discovered: {}'.format(coverage.get('roots_discovered', len(roots))),
-        '- roots opened: {}'.format(coverage.get('roots_opened', len(roots))),
-        '- archives opened: {}'.format(summary['archives']),
-        '- entries classified: {}'.format(summary['entries']),
-        '- structures verified: {}'.format(coverage.get('structures_verified', '-')),
-        '- asset classes verified: {}'.format(coverage.get('assets_verified', '-')),
-        '- unresolved formats: {}'.format(coverage.get('unresolved_formats', '-')),
-        '- stopped early: {}'.format(stopped_text),
-        '- complete: {}'.format(summary.get('complete')),
+        '## Coverage',
         '',
-        'A bounded run is a sample. Only a run whose coverage reports every',
-        'discovered root and no stopped scan is a count of the installation.',
-        '',
-        '## Every combination',
-        '',
-        table(combinations),
-        '',
+        '| Count | Value |',
+        '| ----- | ----: |',
     ]
+    for name in COVERAGE_ORDER:
+        if name in coverage:
+            parts.append('| {} | {} |'.format(name, coverage[name]))
+    for name in sorted(coverage):
+        # A count the writer does not know about is still published.
+        if name not in COVERAGE_ORDER:
+            parts.append('| {} | {} |'.format(name, coverage[name]))
+    roots = coverage.get('roots_discovered', len(roots))
+    parts.extend(
+        [
+            '| stopped early | {} |'.format(stopped_text),
+            '| complete | {} |'.format(summary.get('complete')),
+            '',
+            'A bounded run is a sample. Only a run whose coverage reports every',
+            'discovered root and no stopped scan is a count of the installation.',
+            '',
+        ]
+    )
+    parts.extend(roots_table(summary))
+    parts.extend(distribution_tables(combinations))
+    parts.extend(
+        [
+            '## Every combination',
+            '',
+            table(combinations),
+            '',
+        ]
+    )
     by_type = {}
     for combination in combinations:
         by_type.setdefault(combination['type'], []).append(combination)

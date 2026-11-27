@@ -1,4 +1,4 @@
-"""Run a bounded entry census over every root archive and merge the summaries.
+"""Run an entry census over every root archive and merge the summaries.
 
 `lforge archive census` writes one summary per run. This driver:
 
@@ -8,16 +8,22 @@
   summary, so a stale result is never read as a current scan;
 - records every failed root in the merged summary and marks the run incomplete,
   so a partial scan is never described as exhaustive;
+- gives every root a journal of its own, so an interrupted root resumes at the
+  nested archive where it stopped instead of starting over. A journal is reused
+  only for the same schema, rules, registry, scan mode, limits, executable bytes
+  and root bytes;
 - merges with exact archive occurrence counts.
 
-A complete census of a large installation is not affordable today: classifying
-one entry decodes a chunk, not only a head.
+A complete payload census of a large installation is expensive: classifying one
+entry decodes a chunk, not only a head. A metadata-only pass is the cheaper
+inventory and does not replace the payload pass.
 
 Usage:
     LFORGE=/path/to/lforge python census_all.py <install-directory> <executable> <output-directory> [entries-per-root]
 """
 
 import glob
+import hashlib
 import io
 import json
 import os
@@ -31,12 +37,30 @@ CENSUS = os.environ.get('LFORGE', 'lforge')
 SCHEMA_ID = 'leonida-forge.rpf9-census-merged/2'
 RULES_ID = 'claims+native-registry'
 REGISTRY_ID = 'e95020b2'
+# `metadata-only` and `payload` are different investigations over the same
+# archives. A checkpoint from one must never satisfy the other.
+MODE = 'metadata-only' if '--metadata-only' in os.environ.get('CENSUS_EXTRA', '').split() else 'payload'
+
+
+def option(name, default):
+    return int(os.environ.get(name, default))
+
+
+LIMITS = {
+    'max_depth': option('CENSUS_MAX_DEPTH', 8),
+    'max_archives': option('CENSUS_MAX_ARCHIVES', 4096),
+    'max_nested_bytes': option('CENSUS_MAX_NESTED_BYTES', 268435456),
+    'max_spool_bytes': option('CENSUS_MAX_SPOOL_BYTES', 4294967296),
+}
 
 
 def build_identity(executable):
-    """Size and modification time of the executable, as a build identity."""
-    info = os.stat(executable)
-    return '{}:{}'.format(info.st_size, int(info.st_mtime))
+    """SHA-256 of the executable, so a rebuilt binary is a different build."""
+    digest = hashlib.sha256()
+    with io.open(executable, 'rb') as handle:
+        for block in iter(lambda: handle.read(1024 * 1024), b''):
+            digest.update(block)
+    return digest.hexdigest()
 
 
 def root_identity(path):
@@ -44,8 +68,31 @@ def root_identity(path):
     return '{}:{}'.format(info.st_size, int(info.st_mtime))
 
 
-def load_journal(path):
-    """Completed roots from an append-only journal, keyed by relative path."""
+def scan_identity(build, fingerprint):
+    """The identity a root's journal must carry before it is reused.
+
+    A journal from another build, scan mode, rule set, registry or limit set
+    describes work this run did not do.
+    """
+    material = [
+        SCHEMA_ID,
+        RULES_ID,
+        REGISTRY_ID,
+        MODE,
+        json.dumps(LIMITS, sort_keys=True),
+        build,
+        fingerprint,
+    ]
+    return hashlib.sha256('\n'.join(material).encode('utf-8')).hexdigest()
+
+
+def load_journal(path, build):
+    """Completed roots from an append-only journal, keyed by relative path.
+
+    A record is reused only when it describes the same scan: same schema, rules,
+    registry, mode and executable, the same root bytes, and no configured limit
+    stopped it. A stopped root is pending work, never a completed one.
+    """
     done = {}
     if not os.path.exists(path):
         return done
@@ -62,6 +109,14 @@ def load_journal(path):
             if record.get('schema') != SCHEMA_ID:
                 continue
             if record.get('rules') != RULES_ID or record.get('registry') != REGISTRY_ID:
+                continue
+            if record.get('mode') != MODE:
+                continue
+            if record.get('limits') != LIMITS:
+                continue
+            if record.get('build') != build:
+                continue
+            if record.get('stopped'):
                 continue
             done[record['relative']] = record
     return done
@@ -85,14 +140,47 @@ def discover(install):
     return roots
 
 
-def census(relative, path, executable, entries, directory):
-    """One census run. Returns (summary, error); never a stale summary."""
+# Options the driver sets itself. A `CENSUS_EXTRA` copy would be a second,
+# contradictory value on the command line.
+OWNED_OPTIONS = (
+    '--executable',
+    '--recursive',
+    '--samples',
+    '--max-depth',
+    '--max-archives',
+    '--max-entries',
+    '--max-nested-bytes',
+    '--max-spool-bytes',
+    '--journal',
+    '--journal-identity',
+    '--output',
+    '--overwrite',
+)
+
+
+def extra_options():
+    """`CENSUS_EXTRA`, without any option the driver owns."""
+    kept = []
+    tokens = os.environ.get('CENSUS_EXTRA', '').split()
+    index = 0
+    while index < len(tokens):
+        token = tokens[index]
+        index += 1
+        if token in OWNED_OPTIONS or any(
+            token.startswith(option + '=') for option in OWNED_OPTIONS
+        ):
+            if token in OWNED_OPTIONS and index < len(tokens) and tokens[index][:1] != '-':
+                index += 1
+            continue
+        kept.append(token)
+    return kept
+
+
+def command(relative, path, executable, entries, directory, identity):
+    """The full argument list for one root, so the flags can be inspected."""
     name = relative.replace('/', '__') + '.jsonl'
     target = os.path.join(directory, name)
-    if os.path.exists(target):
-        os.remove(target)
-    token = uuid.uuid4().hex
-    command = [
+    arguments = [
         CENSUS,
         'archive',
         'census',
@@ -103,22 +191,35 @@ def census(relative, path, executable, entries, directory):
         '--samples',
         '3',
         '--max-depth',
-        '4',
+        str(LIMITS['max_depth']),
         '--max-archives',
-        '64',
+        str(LIMITS['max_archives']),
         '--max-entries',
         str(entries),
         '--max-nested-bytes',
-        '268435456',
+        str(LIMITS['max_nested_bytes']),
         '--max-spool-bytes',
-        '4294967296',
+        str(LIMITS['max_spool_bytes']),
+        '--journal',
+        os.path.join(directory, relative.replace('/', '__') + '.journal.jsonl'),
+        '--journal-identity',
+        identity,
         '--output',
         target,
         '--overwrite',
     ]
-    command.extend(os.environ.get('CENSUS_EXTRA', '').split())
+    arguments.extend(extra_options())
+    return target, arguments
+
+
+def census(relative, path, executable, entries, directory, identity):
+    """One census run. Returns (summary, error); never a stale summary."""
+    target, arguments = command(relative, path, executable, entries, directory, identity)
+    if os.path.exists(target):
+        os.remove(target)
+    token = uuid.uuid4().hex
     try:
-        result = subprocess.run(command, capture_output=True, text=True)
+        result = subprocess.run(arguments, capture_output=True, text=True)
     except OSError as failure:
         return None, 'cannot run {}: {}'.format(CENSUS, failure)
     summary = None
@@ -195,12 +296,24 @@ def merge(summaries, failures, discovered):
     coverage['roots_discovered'] = discovered
     coverage['roots_opened'] = len(summaries)
     coverage['failed_roots'] = len(failures)
+    coverage['archives_resumed'] = sum(
+        summary.get('resumed_archives', 0) for summary in summaries
+    )
     return {
         'record': 'summary',
         'schema': 'leonida-forge.rpf9-census-merged/2',
         'root': None,
         'roots': len(summaries),
         'archive_roots': [summary['relative'] for summary in summaries],
+        'roots_detail': [
+            {
+                'root': summary['relative'],
+                'archives': summary['archives'],
+                'entries': summary['entries'],
+                'stopped': summary['stopped'],
+            }
+            for summary in summaries
+        ],
         'archives': archives,
         'entries': entries,
         'spooled_bytes': spooled,
@@ -230,7 +343,7 @@ def main():
     os.makedirs(runs, exist_ok=True)
     journal_path = os.path.join(directory, 'journal.jsonl')
     identity = build_identity(executable)
-    done = load_journal(journal_path)
+    done = load_journal(journal_path, identity)
     roots = discover(install)
     print('{} root archives discovered'.format(len(roots)), flush=True)
     if done:
@@ -255,10 +368,17 @@ def main():
                             summary = record
                             summary['relative'] = relative
             if summary is not None:
-                print('{}: resumed from the journal'.format(relative), flush=True)
+                print('{}: reused the completed root'.format(relative), flush=True)
                 summaries.append(summary)
                 continue
-        summary, error = census(relative, path, executable, entries, runs)
+        summary, error = census(
+            relative,
+            path,
+            executable,
+            entries,
+            runs,
+            scan_identity(identity, fingerprint),
+        )
         if summary is None:
             print('{}: FAILED {}'.format(relative, error), flush=True)
             failures.append({'archive': relative, 'error': error})
@@ -269,19 +389,25 @@ def main():
                 'schema': SCHEMA_ID,
                 'rules': RULES_ID,
                 'registry': REGISTRY_ID,
+                'mode': MODE,
+                'limits': LIMITS,
                 'build': identity,
                 'relative': relative,
                 'root_identity': fingerprint,
                 'archives': summary['archives'],
+                'resumed_archives': summary.get('resumed_archives', 0),
                 'entries': summary['entries'],
                 'stopped': summary['stopped'],
             },
         )
         print(
-            '{}: {} archives, {} entries{}'.format(
+            '{}: {} archives, {} entries{}{}'.format(
                 relative,
                 summary['archives'],
                 summary['entries'],
+                ''
+                if not summary.get('resumed_archives')
+                else ' ({} resumed)'.format(summary['resumed_archives']),
                 '' if not summary['stopped'] else ' (stopped: {})'.format(summary['stopped']),
             ),
             flush=True,
