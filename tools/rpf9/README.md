@@ -48,18 +48,18 @@ archive N resumes at archive N instead of starting over.
 
 A line is reused only when all of these match:
 
-| Field      | Meaning                                                                      |
-| ---------- | ---------------------------------------------------------------------------- |
-| `schema`   | the merged-summary schema the driver writes                                  |
-| `header_schema` | the journal-line schema the census writes                               |
-| `rules`    | the classification rule set                                                  |
-| `registry` | the executable build the native type registry came from                      |
-| `mode`     | `metadata-only` or `payload`: different investigations                       |
-| `limits`   | depth, archive, entry, nested-byte and spool-byte limits                     |
-| `build`    | SHA-256 of the game executable the driver was given                          |
-| `scanner`  | SHA-256 of the census binary itself                                          |
-| `fingerprint` | the root's size, modification time and 1 MiB head and tail digests        |
-| `summary`  | the path, byte count and SHA-256 of the summary the line's counters came from |
+| Field           | Meaning                                                                       |
+| --------------- | ----------------------------------------------------------------------------- |
+| `schema`        | the merged-summary schema the driver writes                                   |
+| `header_schema` | the journal-line schema the census writes                                     |
+| `rules`         | the classification rule set                                                   |
+| `registry`      | the executable build the native type registry came from                       |
+| `mode`          | `metadata-only` or `payload`: different investigations                        |
+| `limits`        | depth, archive, entry, nested-byte and spool-byte limits                      |
+| `build`         | SHA-256 of the game executable the driver was given                           |
+| `scanner`       | SHA-256 of the census binary itself                                           |
+| `fingerprint`   | the root's size, modification time and 1 MiB head and tail digests            |
+| `summary`       | the path, byte count and SHA-256 of the summary the line's counters came from |
 
 The census gives each line an opaque `--journal-identity`, which is the SHA-256 of the
 fields above. A record cut short by an interruption is repaired at the next append; a

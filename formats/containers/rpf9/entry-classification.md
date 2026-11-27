@@ -291,7 +291,7 @@ Both passes ran against the same release build, one root archive at a time, on o
 | Pass     | Wall clock  |   Entries | Entries per second | Archives per second |
 | -------- | ----------- | --------: | -----------------: | ------------------: |
 | metadata | 20 min 28 s | 1,255,039 |              1,022 |                 3.6 |
-| payload  | 26 min  7 s | 1,255,039 |                801 |                 2.8 |
+| payload  | 26 min 7 s  | 1,255,039 |                801 |                 2.8 |
 
 Each pass ran on its own, from an empty output directory, so neither figure shares the machine with the other. The cost is per entry, not per byte: classifying an entry decodes one chunk before it can read the first 64 bytes, and that chunk's size is what the archive chose, not what the census asked for. An earlier note in this repository measured 91 entries per second; that figure came from a debug build. The same archive taken with a release build is four times faster, which is why a complete count is now affordable and why no figure here is a budgeted sample.
 
