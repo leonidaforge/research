@@ -21,17 +21,17 @@ and listed in
 
 ## Corpus
 
-| Quantity                                                      | Value   |
-| ------------------------------------------------------------- | ------- |
-| Type-3 entries the installation census counts                 | 55,488  |
-| Archives holding them                                          | 265     |
-| Rows this survey read                                          | 7,311   |
-| Archives this survey read                                      | 28      |
-| Rows with the root shape                                       | 7,311   |
-| Rows with exactly one member drawable                          | 7,311   |
-| Rows where a root slot other than `+0x18` reaches a drawable   | 0       |
-| Rows whose member name carries the `#ft` suffix                | 7,311   |
-| Rows with two or more member drawables                         | 0       |
+| Quantity                                                     | Value  |
+| ------------------------------------------------------------ | ------ |
+| Type-3 entries the installation census counts                | 55,488 |
+| Archives holding them                                        | 265    |
+| Rows this survey read                                        | 7,311  |
+| Archives this survey read                                    | 28     |
+| Rows with the root shape                                     | 7,311  |
+| Rows with exactly one member drawable                        | 7,311  |
+| Rows where a root slot other than `+0x18` reaches a drawable | 0      |
+| Rows whose member name carries the `#ft` suffix              | 7,311  |
+| Rows with two or more member drawables                       | 0      |
 
 The unread 48,177 rows are not claimed. The census counts them from metadata
 without decoding them, and the survey reads rows in place, so covering every
@@ -142,11 +142,11 @@ the fragment root stores no LOD selector that was identified.
 
 The three levels are separate and a reader MUST NOT use one word for another.
 
-| Level     | What it is                                                    | Count in a fragment |
-| --------- | ------------------------------------------------------------- | ------------------- |
-| Component | One member drawable the root references                       | Always 1            |
-| Mesh      | One model of that drawable's selected LOD slot                | 1 or more           |
-| Primitive | One geometry record inside its model's mesh                   | 1 or more per mesh  |
+| Level     | What it is                                     | Count in a fragment |
+| --------- | ---------------------------------------------- | ------------------- |
+| Component | One member drawable the root references        | Always 1            |
+| Mesh      | One model of that drawable's selected LOD slot | 1 or more           |
+| Primitive | One geometry record inside its model's mesh    | 1 or more per mesh  |
 
 A component is therefore not a mesh, and a mesh is not a component. Sample F is
 the clearest case: one component, one model and four geometries in the slot
@@ -159,14 +159,14 @@ one geometry, so its scene holds one mesh with one primitive.
 Read across 5,553 rows of the 27 extracted archives and 1,758 rows of
 `data.rpf!26` (FRAG-F10):
 
-| Quantity                       | Observed values                                              |
-| ------------------------------ | ------------------------------------------------------------ |
+| Quantity                       | Observed values                                                    |
+| ------------------------------ | ------------------------------------------------------------------ |
 | Populated LOD slots            | 1 (3,659), 2 (454), 3 (472), 4 (968) — and 1 or 2 in `data.rpf!26` |
-| Models in the member           | 1 (3,647), 2 (443), 3 (453), 4 (922), 5 (75), 6 (11), 7 (2)   |
-| Geometry records in the member | 1 to 71; 1,115 of the 1,758 `data.rpf!26` members hold one    |
-| Skeleton pointer `+0x18`       | Non-null in every read row (7,311 of 7,311)                  |
-| List pointer `+0xB0`           | Non-null in every read row                                    |
-| Shader group `+0x10`           | Non-null in every read row                                    |
+| Models in the member           | 1 (3,647), 2 (443), 3 (453), 4 (922), 5 (75), 6 (11), 7 (2)        |
+| Geometry records in the member | 1 to 71; 1,115 of the 1,758 `data.rpf!26` members hold one         |
+| Skeleton pointer `+0x18`       | Non-null in every read row (7,311 of 7,311)                        |
+| List pointer `+0xB0`           | Non-null in every read row                                         |
+| Shader group `+0x10`           | Non-null in every read row                                         |
 
 The skeleton reference is the notable difference from the two sampled
 resource-level drawables, where that slot is null. The reference is non-null in
@@ -183,13 +183,13 @@ describe in every sample read, and a fragment's parts are separate models or
 geometry records of that one drawable rather than separate drawables:
 
 - `w_sg_goodwin_01_bolt_01_mid.#ft` (`data.rpf!26!9`) decodes to one component,
-one model and one geometry record: 620 vertices, 372 triangles, one material
-and three reconstructed textures. Its render shows the bolt body with two
-parallel rails, all correctly positioned relative to each other.
+  one model and one geometry record: 620 vertices, 372 triangles, one material
+  and three reconstructed textures. Its render shows the bolt body with two
+  parallel rails, all correctly positioned relative to each other.
 - `mint_peacock_taxidermy_01.#ft` decodes to one component, one model and four
-geometry records: 41,613 vertices, 45,132 triangles and four materials.
+  geometry records: 41,613 vertices, 45,132 triangles and four materials.
 - The 1,758 `data.rpf!26` rows are weapon parts (`w_*` names): 1,172 hold one
-model and 586 hold two, and every one holds exactly one member drawable.
+  model and 586 hold two, and every one holds exactly one member drawable.
 
 No transform was needed to obtain those renders, and none was applied. No
 fragment root field was identified as a placement table: the two models of a
@@ -202,10 +202,10 @@ driven pose is untested because the skeleton is not parsed.
 
 The census normalises type-3 headers into two variants, and both occur (FRAG-F09):
 
-| Variant                      | `+0x10`        | Rows in the 27 extracted archives | Rows in `data.rpf!26` |
-| ---------------------------- | -------------- | --------------------------------: | --------------------: |
-| `s5:ptr:seg5+ptr:seg5`       | System pointer |                             5,402 |                 1,758 |
-| `s5:zero+ptr:seg5`           | Zero           |                               151 |                     0 |
+| Variant                | `+0x10`        | Rows in the 27 extracted archives | Rows in `data.rpf!26` |
+| ---------------------- | -------------- | --------------------------------: | --------------------: |
+| `s5:ptr:seg5+ptr:seg5` | System pointer |                             5,402 |                 1,758 |
+| `s5:zero+ptr:seg5`     | Zero           |                               151 |                     0 |
 
 The 151 zero-`+0x10` rows are the ones whose four `u16` at `+0x30` are
 `[1, 0, 0, 0]`; every other row stores a non-zero second word. Both variants
@@ -217,12 +217,12 @@ so the difference is reported and not interpreted.
 Three other types share the resource header family, so the framing was compared
 on real rows rather than assumed (FRAG-F12):
 
-| Type | Extension | Rows read | Root words `(+0x00, +0x10, +0x18)`      | Parseable as                                         |
-| ---: | --------- | --------: | -------------------------------------- | ---------------------------------------------------- |
-|    3 | `zft`     |     7,311 | `(0, pointer, member-drawable pointer)` | fragment root with a member drawable                 |
-|   17 | `zbft`    |        47 | `(0, 1 or 2, 0x500000A0 / 0x500000D0)`  | fragment root form, but `+0x18` is not a member drawable |
-|    5 | `ztd`     |         3 | `(0, 0, 1)`                              | texture dictionary, not a drawable dictionary        |
-|   16 | `zbdd`    |       285 | `(0, 0, 1)`                              | texture dictionary (263 of 285), not a drawable dictionary |
+| Type | Extension | Rows read | Root words `(+0x00, +0x10, +0x18)`      | Parseable as                                               |
+| ---: | --------- | --------: | --------------------------------------- | ---------------------------------------------------------- |
+|    3 | `zft`     |     7,311 | `(0, pointer, member-drawable pointer)` | fragment root with a member drawable                       |
+|   17 | `zbft`    |        47 | `(0, 1 or 2, 0x500000A0 / 0x500000D0)`  | fragment root form, but `+0x18` is not a member drawable   |
+|    5 | `ztd`     |         3 | `(0, 0, 1)`                             | texture dictionary, not a drawable dictionary              |
+|   16 | `zbdd`    |       285 | `(0, 0, 1)`                             | texture dictionary (263 of 285), not a drawable dictionary |
 
 The `.zbft` rows therefore are not `.zft` rows with another name: their `+0x10`
 holds a small integer and their `+0x18` points near the start of the system

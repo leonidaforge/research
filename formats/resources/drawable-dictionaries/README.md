@@ -192,14 +192,14 @@ These members were decoded and rendered offscreen with the maintained example
 `lforge-model`, `lforge-texture` and `lforge-renderer` crates. Every report below
 came from that example; the images were written outside the repository.
 
-| Selector                                            | Members | Index | Stored hash  | Name                                    | Meshes | Primitives | Vertices | Triangles | Materials | Bindings | Resolved | Reconstructed | Geometry | Textures               |
-| --------------------------------------------------- | ------: | ----: | ------------ | --------------------------------------- | -----: | ---------: | -------: | --------: | --------: | -------: | -------: | ------------: | -------- | ---------------------- |
-| `data.rpf!7!0`                                      |       4 |     0 | `0x460270D3` | `farlod_structures_01.#dr`              |      1 |          1 |   15,794 |    19,079 |         1 |        0 |        0 |             0 | Complete | Not referenced         |
-| `data.rpf!7!0`                                      |       4 |     1 | `0x8D887FDE` | `farlod_structures_04.#dr`              |      1 |          1 |   10,392 |    12,542 |         1 |        0 |        0 |             0 | Complete | Not referenced         |
-| `core_restofworld.rpf!6!0`                          |      13 |     0 | `0x03546CA1` | `ptfx_model_gore_bone_02.#dr`           |      1 |          1 |      254 |       375 |         1 |        4 |        2 |             2 | Complete | Partial (1 missing)    |
-| `core_restofworld.rpf!6!0`                          |      13 |    12 | `0xFA0B55BD` | `ptfx_model_gore_brain_l.#dr`           |      1 |          1 |    1,250 |     1,836 |         1 |        4 |        4 |             4 | Complete | Complete               |
-| `<nested archive>!8` (108 members, see below)        |     108 |     0 | `0x0365537D` | `ptfx_model_debris_glass_bottle_01.#dr` |      1 |          1 |      229 |       198 |         1 |        4 |        2 |             2 | Complete | Partial (1 missing)    |
-| `<nested archive>!8` (108 members, see below)        |     108 |   107 | `0xFFE1DF83` | `ptfx_model_metal_shard_02.#dr`         |      1 |          1 |      251 |       214 |         1 |        6 |        3 |             3 | Complete | Partial (1 missing)    |
+| Selector                                      | Members | Index | Stored hash  | Name                                    | Meshes | Primitives | Vertices | Triangles | Materials | Bindings | Resolved | Reconstructed | Geometry | Textures            |
+| --------------------------------------------- | ------: | ----: | ------------ | --------------------------------------- | -----: | ---------: | -------: | --------: | --------: | -------: | -------: | ------------: | -------- | ------------------- |
+| `data.rpf!7!0`                                |       4 |     0 | `0x460270D3` | `farlod_structures_01.#dr`              |      1 |          1 |   15,794 |    19,079 |         1 |        0 |        0 |             0 | Complete | Not referenced      |
+| `data.rpf!7!0`                                |       4 |     1 | `0x8D887FDE` | `farlod_structures_04.#dr`              |      1 |          1 |   10,392 |    12,542 |         1 |        0 |        0 |             0 | Complete | Not referenced      |
+| `core_restofworld.rpf!6!0`                    |      13 |     0 | `0x03546CA1` | `ptfx_model_gore_bone_02.#dr`           |      1 |          1 |      254 |       375 |         1 |        4 |        2 |             2 | Complete | Partial (1 missing) |
+| `core_restofworld.rpf!6!0`                    |      13 |    12 | `0xFA0B55BD` | `ptfx_model_gore_brain_l.#dr`           |      1 |          1 |    1,250 |     1,836 |         1 |        4 |        4 |             4 | Complete | Complete            |
+| `<nested archive>!8` (108 members, see below) |     108 |     0 | `0x0365537D` | `ptfx_model_debris_glass_bottle_01.#dr` |      1 |          1 |      229 |       198 |         1 |        4 |        2 |             2 | Complete | Partial (1 missing) |
+| `<nested archive>!8` (108 members, see below) |     108 |   107 | `0xFFE1DF83` | `ptfx_model_metal_shard_02.#dr`         |      1 |          1 |      251 |       214 |         1 |        6 |        3 |             3 | Complete | Partial (1 missing) |
 
 The 108-member dictionary is `Row 00008` of the nested archive with SHA-256
 `FDE95440F5F0DBC24D8B188D9C2338430EC00F962ADBD130D53A22804E42324B`, whose

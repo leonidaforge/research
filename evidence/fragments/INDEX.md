@@ -18,17 +18,17 @@ table from the 24 that hold a member drawable. The wider runs read all 5,553
 rows of the 27 extracted archives of the inventory expansion and all 1,758 rows
 of `data.rpf!26`.
 
-| Quantity                                                      | Value  |
-| ------------------------------------------------------------- | ------ |
-| Type-3 entries the installation census counts                 | 55,488 |
-| Archives holding them                                          | 265    |
-| Rows this survey read                                          | 7,311  |
-| Archives this survey read                                      | 28     |
-| Rows with the root shape                                       | 7,311  |
-| Rows with exactly one member drawable                          | 7,311  |
-| Rows where `+0x10`, `+0x20` or `+0x28` reaches a drawable       | 0      |
-| Rows whose member name carries the `#ft` suffix                | 7,311  |
-| Rows with two or more member drawables                         | 0      |
+| Quantity                                                  | Value  |
+| --------------------------------------------------------- | ------ |
+| Type-3 entries the installation census counts             | 55,488 |
+| Archives holding them                                     | 265    |
+| Rows this survey read                                     | 7,311  |
+| Archives this survey read                                 | 28     |
+| Rows with the root shape                                  | 7,311  |
+| Rows with exactly one member drawable                     | 7,311  |
+| Rows where `+0x10`, `+0x20` or `+0x28` reaches a drawable | 0      |
+| Rows whose member name carries the `#ft` suffix           | 7,311  |
+| Rows with two or more member drawables                    | 0      |
 
 ## Samples
 
@@ -43,20 +43,20 @@ The detailed samples come from `<GAME_ROOT>/levels.rpf`, row 5, SHA-256
 
 ## Findings
 
-| Finding  | Claim                                                                                                                                                                                                  | Evidence                                                                                 | Strength                    |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------- | --------------------------- |
-| FRAG-F01 | The fragment root header holds a zero word at `+0x00`, a system page-map pointer at `+0x08`, three further system pointers at `+0x10`, `+0x20` and `+0x28`, and the member-drawable pointer at `+0x18` | `CROSS_SAMPLE` 5,553 rows                                                                | Confirmed                   |
-| FRAG-F02 | The target of `+0x18` is an `rmcDrawable` at the resource-level offsets whose page-map word is zero and whose `+0xB8` word is `3`                                                                      | `CROSS_SAMPLE` 5,553 rows; the chain resolves to geometries with graphics vertex buffers | Confirmed                   |
-| FRAG-F03 | Every decoded row holds exactly one member drawable; the three other root pointers never reach a drawable                                                                                              | `CROSS_SAMPLE` 5,553 rows; every slot tested                                             | Confirmed                   |
-| FRAG-F04 | The member name carries the `#ft` suffix                                                                                                                                                               | `CROSS_SAMPLE` 5,553 rows                                                                | Confirmed                   |
-| FRAG-F05 | The four `u16` at `+0x30` are not component counts; the first is `1` in 5,522 rows and `2` in 31, and the row with `[1, 2, 2, 2]` still holds one drawable                                             | `CROSS_SAMPLE` 5,553 rows, one drawable each                                             | Confirmed                   |
-| FRAG-F06 | No drawable dictionary member table is located in a fragment root                                                                                                                                      | `CROSS_SAMPLE` 5,553 rows; the same table was located in the type-4 population           | Confirmed within fragments  |
-| FRAG-F07 | No fragment row carries components, child placements or a damage-state table                                                                                                                           | `CROSS_SAMPLE` 5,553 rows; every root slot tested for the member form                    | Confirmed within the corpus |
-| FRAG-F08 | A fragment is recognised by its root structure, not by the member name's `#ft` suffix                                                                                                                  | `BINARY` root slots; `CROSS_SAMPLE` 7,311 rows carry the suffix                          | Confirmed                   |
-| FRAG-F09 | Two root variants occur: `+0x10` is a system pointer in 5,402 rows and zero in 151; both hold one member drawable and assemble the same way                                                            | `CROSS_SAMPLE` 7,311 rows                                                                | Confirmed                   |
-| FRAG-F10 | Every member drawable read references a skeleton, a list and a shader group; its populated LOD slots, models and geometry records vary from 1 to 4, 1 to 7 and 1 to 71 apparently. The three references are recorded, not parsed | `CROSS_SAMPLE` 7,311 rows                                                                | Confirmed for the read corpus |
-| FRAG-F11 | A fragment's several parts are models and geometry records of its one member drawable and decode in that drawable's own space; no placement transform was applied to the sampled renders | `CROSS_SAMPLE` 7,311 rows; `BINARY` decoded geometry against the stored bounds; rendered previews | Confirmed for the read corpus |
-| FRAG-F12 | Type 17 (`.zbft`) shares the fragment root form but its `+0x18` reaches no member drawable; type 16 (`.zbdd`) has the texture dictionary framing, not the drawable dictionary's, in the 285 rows read | `CROSS_SAMPLE` 47 type-17 and 285 type-16 rows | Confirmed for the sampled rows |
+| Finding  | Claim                                                                                                                                                                                                                            | Evidence                                                                                          | Strength                       |
+| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | ------------------------------ |
+| FRAG-F01 | The fragment root header holds a zero word at `+0x00`, a system page-map pointer at `+0x08`, three further system pointers at `+0x10`, `+0x20` and `+0x28`, and the member-drawable pointer at `+0x18`                           | `CROSS_SAMPLE` 5,553 rows                                                                         | Confirmed                      |
+| FRAG-F02 | The target of `+0x18` is an `rmcDrawable` at the resource-level offsets whose page-map word is zero and whose `+0xB8` word is `3`                                                                                                | `CROSS_SAMPLE` 5,553 rows; the chain resolves to geometries with graphics vertex buffers          | Confirmed                      |
+| FRAG-F03 | Every decoded row holds exactly one member drawable; the three other root pointers never reach a drawable                                                                                                                        | `CROSS_SAMPLE` 5,553 rows; every slot tested                                                      | Confirmed                      |
+| FRAG-F04 | The member name carries the `#ft` suffix                                                                                                                                                                                         | `CROSS_SAMPLE` 5,553 rows                                                                         | Confirmed                      |
+| FRAG-F05 | The four `u16` at `+0x30` are not component counts; the first is `1` in 5,522 rows and `2` in 31, and the row with `[1, 2, 2, 2]` still holds one drawable                                                                       | `CROSS_SAMPLE` 5,553 rows, one drawable each                                                      | Confirmed                      |
+| FRAG-F06 | No drawable dictionary member table is located in a fragment root                                                                                                                                                                | `CROSS_SAMPLE` 5,553 rows; the same table was located in the type-4 population                    | Confirmed within fragments     |
+| FRAG-F07 | No fragment row carries components, child placements or a damage-state table                                                                                                                                                     | `CROSS_SAMPLE` 5,553 rows; every root slot tested for the member form                             | Confirmed within the corpus    |
+| FRAG-F08 | A fragment is recognised by its root structure, not by the member name's `#ft` suffix                                                                                                                                            | `BINARY` root slots; `CROSS_SAMPLE` 7,311 rows carry the suffix                                   | Confirmed                      |
+| FRAG-F09 | Two root variants occur: `+0x10` is a system pointer in 5,402 rows and zero in 151; both hold one member drawable and assemble the same way                                                                                      | `CROSS_SAMPLE` 7,311 rows                                                                         | Confirmed                      |
+| FRAG-F10 | Every member drawable read references a skeleton, a list and a shader group; its populated LOD slots, models and geometry records vary from 1 to 4, 1 to 7 and 1 to 71 apparently. The three references are recorded, not parsed | `CROSS_SAMPLE` 7,311 rows                                                                         | Confirmed for the read corpus  |
+| FRAG-F11 | A fragment's several parts are models and geometry records of its one member drawable and decode in that drawable's own space; no placement transform was applied to the sampled renders                                         | `CROSS_SAMPLE` 7,311 rows; `BINARY` decoded geometry against the stored bounds; rendered previews | Confirmed for the read corpus  |
+| FRAG-F12 | Type 17 (`.zbft`) shares the fragment root form but its `+0x18` reaches no member drawable; type 16 (`.zbdd`) has the texture dictionary framing, not the drawable dictionary's, in the 285 rows read                            | `CROSS_SAMPLE` 47 type-17 and 285 type-16 rows                                                    | Confirmed for the sampled rows |
 
 FRAG-F06 corrects an earlier claim. The first iteration reported that no drawable
 dictionary member table existed, on the basis of 40 decoded type-3 rows of one
