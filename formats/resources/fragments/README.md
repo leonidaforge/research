@@ -1,30 +1,40 @@
 # Fragments
 
-This document describes the resource a fragment payload holds. The subject is
-every row that carries local type ID 3 in the 27 extracted nested archives of
-the inventory expansion that declare the type: 5,553 rows. All 5,553 were read
-and all 5,553 hold the root and member form below. The type ID is a local CLI
-assignment, not a format identity.
+This document describes the resource a fragment payload holds. A metadata-only
+census of the installation counts 55,488 type-3 entries in 265 archives. The
+survey read 7,311 of those rows from 28 archives: all 5,553 rows of the 27
+extracted archives of the inventory expansion, plus all 1,758 rows of
+`data.rpf!26`. Every read row holds the root and member form below. The type ID
+is a local CLI assignment, not a format identity.
 
 A first iteration decoded 40 rows of one nested archive and built the layout
-table from the 24 of those that hold a member drawable. The whole-population run
-confirms that layout and adds the answers the 40 rows could not give: a fragment
-always holds exactly one member drawable, and its name always carries the `#ft`
-suffix. No engine code path was traced. Field meanings are **Unknown** unless the
-table says otherwise. Findings are cited as `FRAG-F01` to `FRAG-F08` and listed
-in [evidence/fragments/INDEX.md](../../../evidence/fragments/INDEX.md).
+table from the 24 of those that hold a member drawable. The wider runs confirm
+that layout and add what the 40 rows could not show: a fragment always holds
+exactly one member drawable, the member always references a skeleton, list and
+shader group, and a fragment whose object has several parts carries them as
+models and geometry records of that one drawable. No engine code path was
+traced. Field meanings are **Unknown** unless the table says otherwise. Findings
+are cited as `FRAG-F01` to `FRAG-F12` and listed in
+[evidence/fragments/INDEX.md](../../../evidence/fragments/INDEX.md).
 
 ## Corpus
 
-| Quantity                                                     | Value |
-| ------------------------------------------------------------ | ----- |
-| Nested archives that declare type-3 rows                     | 27    |
-| Type-3 rows found                                            | 5,553 |
-| Rows with the root shape                                     | 5,553 |
-| Rows with exactly one member drawable                        | 5,553 |
-| Rows where a root slot other than `+0x18` reaches a drawable | 0     |
-| Rows whose member name carries the `#ft` suffix              | 5,553 |
-| Rows with two or more member drawables                       | 0     |
+| Quantity                                                      | Value   |
+| ------------------------------------------------------------- | ------- |
+| Type-3 entries the installation census counts                 | 55,488  |
+| Archives holding them                                          | 265     |
+| Rows this survey read                                          | 7,311   |
+| Archives this survey read                                      | 28      |
+| Rows with the root shape                                       | 7,311   |
+| Rows with exactly one member drawable                          | 7,311   |
+| Rows where a root slot other than `+0x18` reaches a drawable   | 0       |
+| Rows whose member name carries the `#ft` suffix                | 7,311   |
+| Rows with two or more member drawables                         | 0       |
+
+The unread 48,177 rows are not claimed. The census counts them from metadata
+without decoding them, and the survey reads rows in place, so covering every
+archive costs one folder walk of the archive that holds it; 28 archives were
+read inside this iteration's budget.
 
 ## Sample locators
 
@@ -128,6 +138,77 @@ that decodes, so its scene holds one mesh with four primitives and four
 materials. `prop_am_card_tarot_deck_01a.#ft` holds one component, one model and
 one geometry, so its scene holds one mesh with one primitive.
 
+## What a member drawable holds
+
+Read across 5,553 rows of the 27 extracted archives and 1,758 rows of
+`data.rpf!26` (FRAG-F10):
+
+| Quantity                       | Observed values                                              |
+| ------------------------------ | ------------------------------------------------------------ |
+| Populated LOD slots            | 1 (3,659), 2 (454), 3 (472), 4 (968) — and 1 or 2 in `data.rpf!26` |
+| Models in the member           | 1 (3,647), 2 (443), 3 (453), 4 (922), 5 (75), 6 (11), 7 (2)   |
+| Geometry records in the member | 1 to 71; 1,115 of the 1,758 `data.rpf!26` members hold one    |
+| Skeleton pointer `+0x18`       | Non-null in every read row (7,311 of 7,311)                  |
+| List pointer `+0xB0`           | Non-null in every read row                                    |
+| Shader group `+0x10`           | Non-null in every read row                                    |
+
+The skeleton reference is the notable difference from the two sampled
+resource-level drawables, where that slot is null. A fragment member is
+therefore a rigged drawable. This document does not interpret the skeleton; it
+records that the reference exists in every row and that the static
+representation was validated without it.
+
+## Static placement
+
+The decoded vertex positions are already in the space the member drawable's
+bounds describe, and a fragment's parts are separate models or geometry records
+of that one drawable rather than separate drawables:
+
+- `w_sg_goodwin_01_bolt_01_mid.#ft` (`data.rpf!26!9`) decodes to one component,
+one model and one geometry record: 620 vertices, 372 triangles, one material
+and three reconstructed textures. Its render shows the bolt body with two
+parallel rails, all correctly positioned relative to each other.
+- `mint_peacock_taxidermy_01.#ft` decodes to one component, one model and four
+geometry records: 41,613 vertices, 45,132 triangles and four materials.
+- The 1,758 `data.rpf!26` rows are weapon parts (`w_*` names): 1,172 hold one
+model and 586 hold two, and every one holds exactly one member drawable.
+
+No transform was needed to obtain those renders, and none was applied. The
+fragment root stores no placement table: the two components of a weapon part
+are models of one drawable, positioned in the drawable's own space.
+
+## Root variants
+
+The census normalises type-3 headers into two variants, and both occur (FRAG-F09):
+
+| Variant                      | `+0x10`        | Rows in the 27 extracted archives | Rows in `data.rpf!26` |
+| ---------------------------- | -------------- | --------------------------------: | --------------------: |
+| `s5:ptr:seg5+ptr:seg5`       | System pointer |                             5,402 |                 1,758 |
+| `s5:zero+ptr:seg5`           | Zero           |                               151 |                     0 |
+
+The 151 zero-`+0x10` rows are the ones whose four `u16` at `+0x30` are
+`[1, 0, 0, 0]`; every other row stores a non-zero second word. Both variants
+hold exactly one member drawable at `+0x18` and behave identically for assembly,
+so the difference is reported and not interpreted.
+
+## Sibling types
+
+Three other types share the resource header family, so the framing was compared
+on real rows rather than assumed (FRAG-F12):
+
+| Type | Extension | Rows read | Root words `(+0x00, +0x10, +0x18)`      | Parseable as                                         |
+| ---: | --------- | --------: | -------------------------------------- | ---------------------------------------------------- |
+|    3 | `zft`     |     7,311 | `(0, pointer, member-drawable pointer)` | fragment root with a member drawable                 |
+|   17 | `zbft`    |        47 | `(0, 1 or 2, 0x500000A0 / 0x500000D0)`  | fragment root form, but `+0x18` is not a member drawable |
+|    5 | `ztd`     |         3 | `(0, 0, 1)`                              | texture dictionary, not a drawable dictionary        |
+|   16 | `zbdd`    |       285 | `(0, 0, 1)`                              | texture dictionary (263 of 285), not a drawable dictionary |
+
+The `.zbft` rows therefore are not `.zft` rows with another name: their `+0x10`
+holds a small integer and their `+0x18` points near the start of the system
+segment, at no member drawable. Type 16 shares the texture dictionary's framing
+and not the drawable dictionary's, so the `b` in the extension does not imply a
+drawable container. Neither type is decoded here.
+
 ## Drawable dictionaries
 
 An earlier iteration reported that no drawable dictionary member table was
@@ -149,17 +230,20 @@ about dictionaries.
 
 ## Limits
 
-- 5,553 decoded rows from 27 nested archives of one build. Other archives,
-  other types and other builds were not inspected, and the inventory reached 27
-  of the archives that declare the type.
-- Only the member drawable at `+0x18` is understood. Multi-drawable fragments,
-  child placements, damage-state selection and physics data were not observed
-  in any row, so no assembly rule for them is published.
+- 7,311 decoded rows from 28 archives of one build. The installation census
+  counts 55,488 type-3 entries in 265 archives; the remaining 48,177 rows and
+  237 archives were not read, so no claim here extends to them.
+- Only the member drawable at `+0x18` is understood. No row holds two member
+  drawables, child placements or a damage-state table, so no assembly rule for
+  them is published.
 - The three other root pointers reach records that were not interpreted. The
   records behind `+0x10` hold a `u64` `2` and a name pointer, the ones behind
   `+0x20` hold repeated `0x3C00`/`0xBC00` words, and the ones behind `+0x28`
-  begin with `0.70711` floats; none of them reaches a drawable in 5,553 rows.
+  begin with `0.70711` floats; none of them reaches a drawable in 7,311 rows.
   The shapes are consistent with collision and shape data, which this document
   does not interpret.
+- The skeleton reference is recorded but not parsed. Whether a fragment member's
+  bind pose is always the rendered pose is not established; the sampled renders
+  show the objects assembled correctly without applying a pose.
 - No fragment root field that selects a damage state or a component subset was
   identified.

@@ -22,6 +22,10 @@ The 8,209 rows were enumerated from the extracted archives of the inventory
 expansion, which sampled 53 nested archives out of the 782 it could read. Each
 row was reconstructed with its native page split, so no boundary was inferred.
 
+A metadata-only census of the installation counts 48,584 type-4 entries in 179
+archives. The 8,209 rows below are the subset the survey read; they are not the
+whole population, and no claim here extends to the unread 40,375 entries.
+
 | Quantity                                   | Value  |
 | ------------------------------------------ | ------ |
 | Nested archives with type-4 rows           | 53     |
@@ -93,7 +97,29 @@ part of the hashed string.
 
 Example: the hash `0xE727331E` is `joaat("farlod_structures_03")`; the member's
 stored name is `farlod_structures_03.#dr`.
+The hash is a derived label, not the member's identity. A reader MUST select a
+member by its index in the arrays, because that identifies one entry even when
+two entries share a hash or point at the same drawable. The public API exposes
+the stored hash and the hash computed from the stored name independently, so a
+mismatch is visible rather than silently repaired.
 
+## Member states
+
+Enumerating a dictionary never stops at the first member it cannot resolve.
+Each entry is reported as one of four states: a drawable, null, not a system
+pointer, or a system pointer without the member-drawable form. A null or
+malformed member does not invalidate its neighbours, and the classifier still
+accepts the dictionary when at least one member resolves (DDICT-F07).
+
+## Native and inferred boundaries
+
+The archive's page metadata is authoritative for the system/graphics boundary.
+The standalone inference in `model::split_resource` disagrees with it on 1,513
+of the 8,209 rows. On every one of those rows the inferred boundary produces no
+usable dictionary: 1,479 have no dictionary root form and 34 have no inference
+candidate at all, and **no** row yields a root form with members. A standalone
+open of such a resource therefore fails loudly instead of misreading it
+(DDICT-F09).
 ## Member values
 
 Every value is a system pointer to an `rmcDrawable` at the offsets documented in
@@ -127,6 +153,52 @@ so a reader MUST NOT invent per-member transforms from them.
 
 Fragments are the opposite case: every type-3 fragment in the wider corpus holds
 exactly one member drawable, see [fragments](../fragments/README.md).
+
+## Verified members
+
+These members were decoded and rendered offscreen with the maintained example
+`crates/model/examples/dictionary_render.rs`, which uses only the shared
+`lforge-model`, `lforge-texture` and `lforge-renderer` crates. Every report below
+came from that example; the images were written outside the repository.
+
+| Selector                                            | Members | Index | Stored hash  | Name                                    | Meshes | Primitives | Vertices | Triangles | Materials | Bindings | Resolved | Reconstructed | Geometry | Textures               |
+| --------------------------------------------------- | ------: | ----: | ------------ | --------------------------------------- | -----: | ---------: | -------: | --------: | --------: | -------: | -------: | ------------: | -------- | ---------------------- |
+| `data.rpf!7!0`                                      |       4 |     0 | `0x460270D3` | `farlod_structures_01.#dr`              |      1 |          1 |   15,794 |    19,079 |         1 |        0 |        0 |             0 | Complete | Not referenced         |
+| `data.rpf!7!0`                                      |       4 |     1 | `0x8D887FDE` | `farlod_structures_04.#dr`              |      1 |          1 |   10,392 |    12,542 |         1 |        0 |        0 |             0 | Complete | Not referenced         |
+| `core_restofworld.rpf!6!0`                          |      13 |     0 | `0x03546CA1` | `ptfx_model_gore_bone_02.#dr`           |      1 |          1 |      254 |       375 |         1 |        4 |        2 |             2 | Complete | Partial (1 missing)    |
+| `core_restofworld.rpf!6!0`                          |      13 |    12 | `0xFA0B55BD` | `ptfx_model_gore_brain_l.#dr`           |      1 |          1 |    1,250 |     1,836 |         1 |        4 |        4 |             4 | Complete | Complete               |
+| `<nested archive>!8` (108 members, see below)        |     108 |     0 | `0x0365537D` | `ptfx_model_debris_glass_bottle_01.#dr` |      1 |          1 |      229 |       198 |         1 |        4 |        2 |             2 | Complete | Partial (1 missing)    |
+| `<nested archive>!8` (108 members, see below)        |     108 |   107 | `0xFFE1DF83` | `ptfx_model_metal_shard_02.#dr`         |      1 |          1 |      251 |       214 |         1 |        6 |        3 |             3 | Complete | Partial (1 missing)    |
+
+The 108-member dictionary is `Row 00008` of the nested archive with SHA-256
+`FDE95440F5F0DBC24D8B188D9C2338430EC00F962ADBD130D53A22804E42324B`, whose
+system segment is `0x489F0` bytes and whose page map is at `0x3F810`. The same
+archive also holds an 83-member dictionary at `Row 00006`. Both were enumerated
+in full and one member was decoded from each; enumerating a dictionary does not
+decode its members.
+
+The two `farlod_structures` members have no material texture binding at all,
+which is the zero-texture-parameter shader case: geometry `Complete`, textures
+`NotReferenced`. The restofworld members resolve through the shared store scan
+(46 stores, 352,461 descriptors) and render with their textures; the
+`Partial (1 missing)` members each bind a texture key no store carries.
+
+## Comparison with the texture and batch dictionaries
+
+The census normalises the headers of types 4, 5 and 16 into one variant, so the
+framing was compared on real rows instead of assumed (DDICT-F11):
+
+| Type | Extension | Rows read | Root words `(+0x00, +0x10, +0x18)` | Drawable dictionary parser | Texture dictionary parser |
+| ---: | --------- | --------: | ---------------------------------- | -------------------------- | ------------------------- |
+|    4 | `zdd`     |     8,209 | `(0, 0, 1)`                        | 8,209 of 8,209             | 0 of 8,209                |
+|    5 | `ztd`     |         3 | `(0, 0, 1)`                        | 0 of 3                     | 3 of 3                    |
+|   16 | `zbdd`    |       285 | `(0, 0, 1)`                        | 0 of 285                   | 263 of 285                |
+
+The three roots share the zero word, the page map and the `+0x18` word, and
+nothing else. Type 16 is a texture-dictionary-shaped container, not a drawable
+dictionary, and the `b` in its extension does not change that. The two parsers
+therefore stay separate: their member arrays, member kinds and name rules differ,
+and a shared abstraction over them would have to invent a common member type.
 
 ## Limits
 

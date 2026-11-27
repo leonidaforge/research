@@ -45,6 +45,9 @@ Member counts, number of dictionaries: 1 → 7,181; 2 → 56; 3 → 5; 4 → 878
 | DDICT-F06 | Each hash equals `joaat` of a member drawable's name with its final extension (`.#dr`) removed                                                                 | `CROSS_SAMPLE` 12,480/12,480 members | Confirmed   |
 | DDICT-F07 | Every value is a system pointer to a member drawable whose page-map word is zero                                                                               | `CROSS_SAMPLE` 12,480/12,480 members | Confirmed   |
 | DDICT-F08 | No empty dictionary was observed; the empty case is accepted only on structure plus the `+0x18` word                                                           | `CROSS_SAMPLE` 0 empty rows in 8,209 | Null result |
+| DDICT-F09 | The inferred system/graphics boundary yields no usable dictionary on every row where it disagrees with native metadata                                          | `CROSS_SAMPLE` 1,513 rows: 1,479 no root form, 34 no candidate, 0 usable | Confirmed |
+| DDICT-F10 | Member identity is the array position; a repeated hash or a shared drawable pointer does not remove an entry                                                   | `BINARY` parser rules; `SYNTHETIC` duplicate fixtures | Confirmed |
+| DDICT-F11 | Types 4, 5 and 16 share only the zero word, the page map and the `+0x18` word; type 16 parses as a texture dictionary and never as a drawable dictionary          | `CROSS_SAMPLE` 8,209 type-4, 3 type-5 and 285 type-16 rows | Confirmed |
 
 ## Validation
 
@@ -73,5 +76,14 @@ above:
   member drawables each root slot reaches.
 
 They are ignored by default and read only caller-supplied paths:
-`LF_TEST_ARCHIVE_LIST` names a file of extracted archives, `LF_TEST_EXECUTABLE`
-names the executable that supplies the archive keys.
+`LF_TEST_ARCHIVE_LIST` names a file of extracted archives, `LF_TEST_CHAIN_LIST`
+names a file of census chains (`data.rpf!7!0`) that the survey resolves to the
+archives that hold them, and `LF_TEST_EXECUTABLE` names the executable that
+supplies the archive keys. `LF_SURVEY_SELECTORS` prints the exact locator of
+every dictionary with at least that many members.
+
+The rendered members in the format document come from
+`cargo run -p lforge-model --example dictionary_render -- <resource> --split
+<hex|infer> [--member <index>]... [--textures <dir>] [--out <dir>]`, which is a
+maintained, compile-checked consumer of the public API and depends on no desktop
+code.
