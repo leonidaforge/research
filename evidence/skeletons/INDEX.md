@@ -25,10 +25,14 @@ corrected SKEL-F02, SKEL-F05 and SKEL-F06.
 | Bone counts observed                       | 1..42         | 1..596      |
 | Roots per skeleton                         | 1             | 1..16       |
 | Hierarchy depths observed                  | 1..21         | 1..35       |
-| Skeletons with any structural issue        | 0             | 1           |
+| Skeletons with any structural issue        | 0             | 2           |
 | Decoded-LOD geometries declaring bones     | 3,425         | 10,106      |
 | Influence sets validated                   | 3,425         | 8,304       |
 | Weighted geometries                        | 100           | 425         |
+
+Both structural issues in the wide corpus are the two skeletons whose walk ran
+past the bone allocation; the neighbouring arrays bound the count and the extra
+record is dropped with `BoneArrayOverrun`. See SKEL-F16.
 
 ## Findings
 
@@ -43,12 +47,15 @@ corrected SKEL-F02, SKEL-F05 and SKEL-F06.
 | SKEL-F07  | The quaternion is `x, y, z, w` in a right-handed, column-vector convention: child translation rotated by the parent rotation reproduces the stored model positions.                          | Cross sample                    | Confirmed                          | Proved through SKEL-F08, not from engine code                 |
 | SKEL-F08  | The `+0x38` array stores transpose(local rotation) and the local translation; the `+0x30` array stores the model-space rotation and `-R_model^T * t_model`, the translation half of the inverse bind matrix. | Cross sample, 6-level peacock tail | Confirmed                      | Matrix record's last value Unknown                            |
 | SKEL-F09  | Local transforms compose as `R_model = R_parent * R_local` and `t_model = t_parent + R_parent * t_local`.                                                                                   | Cross sample                    | Confirmed                          | None observed                                                 |
-| SKEL-F10  | The stored inverse-bind records validate against the composed pose with a largest observed delta of `0` at the stored precision, on all sampled skeletons.                                   | Cross sample                    | Confirmed                          | A separately authored pose is not present                     |
-| SKEL-F11  | Geometry records declare a bone count at `+0x2C`. It equals the skeleton bone count on highest-LOD geometries and is zero on lower LODs.                                                    | Cross sample                    | Confirmed                          | The same field is untested on non-skinned geometry            |
+| SKEL-F10  | The stored inverse-bind records validate against the composed pose with a largest observed delta of `0` at the stored precision, on all sampled skeletons.                                   | Cross sample                    | Confirmed                          | A separately authored pose is not present                     || SKEL-F11  | Geometry records declare a bone count at `+0x2C`. It equals the skeleton bone count on highest-LOD geometries and is zero on lower LODs.                                                    | Cross sample                    | Confirmed                          | The same field is untested on non-skinned geometry            |
 | SKEL-F12  | Blend weights are four `u8` at slot 6, format `0x26`; blend indices are four `u8` at slot 8, format `0x25`. Slot 8 with another format is a different attribute. 8,304 of 10,106 surveyed geometries decode this way and all validate; 968 declare the weight form at slot 1 and are read as unassociated. | Cross sample, 10,106 geometries | Confirmed for slots 6 and 8 | Slot numbers are observed, not declared; a format search was measured and rejected |
 | SKEL-F13  | Weight totals are 255 in most vertices, 127 on a minority, and rarely unnormalised (169 on four vertices of one geometry). The association uses the non-zero lanes and never rescales them.  | Cross sample                    | Confirmed                          | The normalisation rule is Unknown                             |
 | SKEL-F14  | A one-bone skeleton needs no index stream: every sampled vertex weights lane 0 with 255. A missing index stream is accepted only in that case.                                               | Cross sample                    | Confirmed                          | 69 surveyed multi-bone geometries store no index form at slot 8 and are read as unassociated |
 | SKEL-F15  | A skeleton may hold several roots: 5,080 of 5,628 have one, 58 have two, and the rest up to 16. The extra roots are helper bones (`XH_SecondarySurface`, `OH_EyelineDirection_01`, `OH_TorsoDirection_01`) that head their own short chains. | Cross sample, 5,628 skeletons | Confirmed | The helper-bone families are named, not classified |
+| SKEL-F16  | The bone array is bounded by the arrays that follow it, because each holds one record per bone and its start is stored. 2,303 of 5,628 skeletons have the next array starting exactly at the end of the bone records; no skeleton exceeds the limit the tiling arrays imply. Two skeletons walked one record too far and are trimmed and reported. | Cross sample, 5,628 skeletons | Confirmed | A truncated array that keeps a consistent index sequence is only caught by the neighbouring arrays |
+| SKEL-F17  | Scale is `(1, 1, 1)` in all 133,110 surveyed bones. Neither stored matrix carries a scale, and the composition applies none. | Cross sample, 133,110 bones | Confirmed for the corpus | Non-identity scale is unsupported, not disproved |
+| SKEL-F18  | 4,016 surveyed one-bone geometries split into 3,263 with a weight form and 753 without. All 753 belong to one-bone skeletons, and their geometry records hold no bone index, bone-array pointer or palette pointer. | Cross sample, 10,106 geometries | Confirmed | The 753 stay unassociated; the count alone is not taken as evidence |
+| SKEL-F19  | Each model stores an axis-aligned box per geometry. Decoded vertices match it where it exists: peacock 4 of 4 (`2.0e-5`), candlestick 2 of 2 (`2.0e-6`); the tarot and bolt records declare no box. | Four fragments, decoded against declared boxes | Confirmed for the four | A missing box leaves the vertex space unestablished, not disproved |
 
 ## Sample locators
 

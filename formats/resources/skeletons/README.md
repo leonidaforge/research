@@ -60,6 +60,33 @@ word at `+0x1C` nor the per-record value at `+0x4E` is the bone count: reading
 either as a limit truncates skeletons that hold helper bones, so the array is
 walked to its own end.
 
+### What bounds the walk
+
+The walk is checked against the arrays that follow it, because each of them also
+holds one record per bone and its start address is stored:
+
+- Of 5,628 surveyed skeletons, 2,303 have the next array starting exactly at the
+  end of the bone records. That is a direct statement of the count.
+- For every skeleton, the smallest pair of arrays that have to tile (`inverse
+  bind` then `local matrices`, or the bone array and its neighbour) gives the
+  largest count the layout allows. No surveyed skeleton exceeds it.
+- The `+0x40` parent array starts inside the bone array in none of the 5,628.
+
+Two skeletons broke the plain walk and are the reason the bound is enforced.
+Both walked one record further than the layout allows, because the bytes just
+past the bone allocation happened to carry the next index at `+0x48`: a 6-record
+walk that the matrix arrays bound to 5, and a 9-record walk they bound to 8. The
+same two skeletons are the only ones whose stored transforms are degenerate
+(denormal scale, an inverse-bind record that does not validate), so the record
+they contributed was not a bone. The parser now stops at the bound and reports
+`BoneArrayOverrun` with both counts, so nothing is dropped silently.
+
+A walk can also stop early. A discontinuity in the index sequence, a record past
+the segment end and the `MAX_BONES` cap each end or bound the walk, and the cap
+is reported when a record continues past it. A truncated array that keeps a
+consistent index sequence is not distinguishable from a shorter skeleton by the
+records alone; the neighbouring arrays are what catches it.
+
 | Offset | Size | Content                                                    |
 | -----: | ---: | ---------------------------------------------------------- |
 | `+0x00` | 16 | Quaternion `x, y, z, w`, standard right-handed rotation     |
@@ -123,14 +150,62 @@ arrays confirm this without assuming it:
 
 The `+0x30` translation is the translation half of the inverse bind matrix
 `[R_model^T | -R_model^T * t_model]`, stored with the rotation transposed back.
-On the peacock skeleton, whose tail has six rotated levels, both arrays match the
-composed pose to the stored precision: the largest rotation delta is `0.0000`
-and the largest translation delta is `0.0000` against a `2e-3` tolerance. The
-same check passes on the other sampled skeletons.
+
+### What the stored elements are
+
+The two arrays are stored with different conventions, and a check that compares
+raw elements without saying which reading it tests proves nothing. Measured over
+the 133,110 bones of 5,628 skeletons, with `R` taken from the bone record's
+quaternion and built as a column-vector rotation matrix:
+
+| Array    | Elements read row-major equal | Bones matching | Worst delta |
+| -------- | ----------------------------- | -------------: | ----------: |
+| `+0x38`  | `transpose(R_local)`          | 133,110 of 133,110 | `1.2e-7` (rotation), `0` (translation) |
+| `+0x30`  | `R_model`                     | 133,110 of 133,110 | `5.4e-7` (rotation), `4.8e-6` (translation) |
+
+Read as the other reading, none of the 133,110 match: `+0x38` is not `R_local`,
+and `+0x30` is not `transpose(R_model)`. Neither array carries scale.
+
+So the local array holds the local transform with its rotation transposed, and
+the inverse-bind array holds the model-space rotation where an inverse bind
+matrix holds its transpose. A reader that wants the mathematical matrices has to
+transpose both: the local array yields `R_local` after one transpose, and the
+inverse-bind array yields `R_model^T` after one transpose.
+
+The application checks both arrays. The local record is compared with the bone's
+own quaternion, which tests the quaternion convention at every bone without
+going through the hierarchy; the inverse-bind record is compared with the inverse
+of the composed pose. A disagreement is a diagnostic and makes the skeleton
+`partial`.
+
+Tolerance: the values are `f32`, and the stored box and the stored matrix are
+each produced by a handful of `f32` multiplies from quantised input. The worst
+rotation error observed is `5.4e-7`, about four units in the last place at
+magnitude one, and the worst translation error is `4.8e-6`. The check uses
+`2e-3`, which is roughly forty times the largest translation error and covers
+poses whose translation components reach hundreds of units, where one `f32` step
+is `6e-5`. It is not a value chosen to make the samples pass: a differently
+composed pose misses by `1e-1` or more.
 
 A matrix record is 0x40 bytes: a 3x3 rotation in row-major order, an unused
 fourth column of zeros, a translation and one further value whose meaning is
 Unknown. The reader keeps the last value for a later investigation.
+
+### Scale
+
+The bone record carries a scale at `+0x20`. In the whole surveyed corpus it is
+`(1, 1, 1)`: 133,110 of 133,110 bones. The two non-identity values that appeared
+during the survey sat on the records that the array bound removed, and they were
+denormal (`7e-39`, `3e-39`), not authored scale.
+
+The decoder records the scale, rejects a non-finite or zero one, and composes
+rotation and translation only. That is consistent with every sampled skeleton,
+because no sampled skeleton can distinguish the two readings. It is not evidence
+that a non-identity scale composes the same way, and universal scale support is
+not claimed: a skeleton with a non-identity scale would need its own check
+against the two matrix arrays before the composition could be trusted, because
+transposing a matrix is not inverting it once the linear part carries scale.
+
 
 ### Bind-pose terminology
 
@@ -180,26 +255,58 @@ Searching the declaration for the weight format instead of reading slot 6 was
 tried and measured: it moved the 968 geometries out of the unread group, and
 every one of them failed the weight totals and the index bounds. The format code
 `0x26` says four `u8` components, not "blend weights", so the reader keeps the
-slot the samples verified and reports the rest as unread. A 753-geometry group
-of one-bone records needs no weights: the bone count states the association.
+slot the samples verified and reports the rest as unread.
+
+The 753 one-bone geometries were inspected separately. Every one of them belongs
+to a skeleton that holds exactly one bone, so the association would be
+unambiguous if the declared count were trusted: the geometry declares one bone
+and the skeleton has one. The geometry record itself states nothing further. Its
+fields at `+0x28`, `+0x2A`, `+0x2E`, `+0x30`, `+0x34`, `+0x38` and `+0x3C` hold
+no bone index, no bone-array pointer and no palette pointer; the `u64` at
+`+0x30` differs per geometry and matches no skeleton offset. A rule that assigns
+every vertex to the only bone therefore rests on the count alone, which is why
+the decoder does not apply it and reports these geometries as unassociated.
 
 Accepted associations record which bones a primitive uses and whether any vertex
 blends more than one. The sampled geometry falls into three cases:
 
-- **Already positioned geometry.** The stored vertex positions are the bind
-  pose, so drawing them unchanged is correct. All four verified fragments are of
-  this kind.
+- **Already positioned geometry.** The stored vertex positions are the shape the
+  drawable draws. All four verified fragments are of this kind.
 - **Rigid single-bone geometry.** One bone with weight 1, as on the tarot,
-  candlestick and weapon bolt. No placement is applied; the weights already agree
-  with drawing the vertices as stored.
+  candlestick and weapon bolt. The weights agree with drawing the vertices as
+  stored.
 - **Weighted geometry.** Up to four influences, as on the peacock's tail. The
-  reader records the bones and does not deform; the bind pose is what the stored
-  positions already are.
+  reader records the bones and does not deform.
 
-No resource in the sample required a bone-local vertex space to be placed by a
-bone transform. The application therefore applies no placement and reports
-`not required`. A geometry whose influences do not validate makes the association
-`partial` and the placement `unverified`; it is never reported as placed.
+## Static placement
+
+Whether a placement is needed is a separate question from whether the influences
+decode. A valid influence set says which bones a primitive uses; it says nothing
+about the space its vertices are stored in. The record offers one way to check
+that space independently: each model carries an axis-aligned box per geometry.
+
+The decoder compares the box of the decoded vertices with that declared box. If
+they agree, the vertices sit where the drawable says its geometry sits, which is
+the space the renderer draws, so no placement is needed. If they disagree, the
+vertex space is not established and no placement is invented. If the record
+carries no declared box, the space is likewise not established.
+
+Measured on the four verified fragments:
+
+| Resource | Decoded geometries matching their declared box | Worst delta | Placement reported |
+| -------- | ---------------------------------------------: | ----------: | ------------------ |
+| Peacock  | 4 of 4                                          | `2.0e-5`    | not required       |
+| Candlestick | 2 of 2                                       | `2.0e-6`    | not required       |
+| Tarot    | no declared box                                 |             | unverified         |
+| Bolt     | no declared box                                 |             | unverified         |
+
+The tarot and bolt fragments report `unverified` even though their influences
+decode and their vertices render in the right place. Their records do not state a
+box, so the evidence is missing rather than negative; the report says which.
+
+No sampled resource needed a bone-local vertex space to be placed by a bone
+transform, and none was placed. That is a statement about the samples, not a
+proof that no resource ever needs one.
 
 ## Coverage
 
@@ -217,15 +324,16 @@ findings. Both are selected samples, not the installation.
 | Roots per skeleton                      | 1                       | 1 to 16 (5,080 have 1) |
 | Hierarchy depths observed               | 1 to 21                 | 1 to 35                |
 | Inverse-bind records present            | every bone              | every skeleton         |
-| Skeletons with a structural issue       | 0                       | 1                      |
+| Skeletons with a structural issue       | 0                       | 2 (both a bone-array overrun) |
 | Decoded-LOD geometries declaring bones  | 3,425                   | 10,106                 |
 | Influence sets validated                | 3,425                   | 8,304                  |
 | Weighted geometries                     | 100                     | 425                    |
 
-The single structural issue in the wide corpus is one skeleton whose `+0x40`
-parent array holds a value outside the skeleton while its bone records are
-consistent. It is reported as partial and its hierarchy is still read from the
-bone records.
+The two structural issues in the wide corpus are the two skeletons the array
+bound trimmed: both walked past the end of the bone allocation and both are
+reported as `BoneArrayOverrun` with the walked and kept counts. The
+parent-array disagreement that the same two records produced disappeared once
+the extra record was dropped.
 
 ## Limits
 
@@ -234,11 +342,16 @@ bone records.
 - The 32-bit and 16-bit bone identifiers have no established hash function.
 - The key map is observed, not decoded beyond its entry shape.
 - The value at `+0x4E` is described as a jump to the end of the bone's subtree
-  because that reading fits every surveyed record; no engine code confirms it,
-  and nothing depends on it.
+  because that reading fits every surveyed record; no engine code confirms it.
+  The array bound does not depend on that reading.
 - Skeletons whose geometry declares its weight stream somewhere other than slot
   6 are read as skeletons without an association. 968 of 10,106 geometries are
   in that state; an association is never invented for them.
+- The 753 one-bone geometries without a weight form stay unassociated. Their
+  skeleton holds one bone, but the geometry record states no bone reference, so
+  the association would rest on the count alone.
+- Scale is identity in every surveyed bone. The composition ignores scale, and
+  non-identity scale is not supported because no sample shows what it means.
 - The sample is 29 archives of the Scarlett build. A skeleton variant outside it
   may store a different parent encoding or a different influence layout; the
   reader reports what it cannot read instead of assuming this layout holds
