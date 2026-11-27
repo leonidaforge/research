@@ -272,6 +272,24 @@ Some earlier notes used "A" and "B" for `hdr[0x04]` and `hdr[0x08]`. Those lette
 
 **Correction.** The engine carries its own table, recovered from the build (RPF9-F144), and the classification quotes it rather than inventing one. Each entry records where its extension came from (`original`, `native`, `payload`, `unresolved`), the asset claim stays `unknown`, and a payload that contradicts the declared family is reported as a conflict. The earlier statement that a resource container "carries no extension" was wrong for every type the build registers: 1,181,971 of the installation's 1,255,039 entries carry a declared extension, and the only entries without one are the 73,068 rows of type 255 (RPF9-F145).
 
+## The Explorer applied its own extension rule
+
+**Old assumption.** The listing completed a name the archive did not spell with an extension by appending `.rpf`, but only for type 0; every other type was shown as the archive spells it.
+
+**Correction.** One rule now serves the Explorer and the command line, from `lforge_core::registry::file_name`: a name that already carries an extension keeps it, a name without one takes the extension the type declares — type 5 rows show `.ztd`, type 11 rows `.zmt` — and a type that declares nothing gets none. The Explorer names the synthesized extension as such and keeps the archive's own spelling beside it, so a completed name is never mistaken for a stored one. 1,181,971 entries carry a declared extension and 72,579 carry none.
+
+## A metadata pass was reported as a decoding blocker
+
+**Old assumption.** An entry whose payload was not read was `blocked`, the same outcome a payload transform failure produced.
+
+**Correction.** `blocked` now means a payload that was reached and could not be read. An entry nothing was read for is `not-probed`: a metadata pass reports that for every row, and it claims nothing about the bytes. The five outcomes the payload pass reports add up to the entry count, and the two that occur nowhere are named rather than left to be inferred.
+
+## A census summary was trusted because it existed
+
+**Old assumption.** The driver accepted a summary file the CLI had written, whatever the CLI's exit status and however the run had ended.
+
+**Correction.** A census now publishes its summary atomically — written beside the target and renamed into place — and exits non-zero when it stopped at a limit or could not read an archive. The driver requires a zero exit status, a `completion.complete` record, a matching header schema and scan mode, and binds a reused summary to a SHA-256 of its own bytes, its size and the root fingerprint the journal recorded. A journal record alone no longer authorizes a summary, and the merged result names the reasons it is not a census of the installation instead of only saying that it is not.
+
 ## Open
 
 - Meaning of descriptor `+0x08`, and any use of `+0x12`.
