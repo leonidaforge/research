@@ -21,7 +21,7 @@ A classification reads bounded evidence and records which part of it decided:
 | Structure | Nothing extra: recognisers that walk framing do it on the head | Included in the head read           |
 | Extension | The engine's [type registry](type-registry.md)                 | Metadata only                       |
 
-The classification reads at most 64 decoded bytes. The matrix publishes the first 32 of them with every sample, which is a sample of the head, not the whole head.
+The classification reads at most 64 decoded bytes. The matrix publishes the first 32 of them with every combination, which is a sample of the head, not the whole head.
 
 The classification never reads a payload in full, never guesses an extension it cannot establish, and never lets the type decide the format.
 
@@ -150,80 +150,167 @@ Because the registry covers every type the census reached except 255, almost eve
 
 The capability is what the application dispatches on. The type is not: an entry typed 0 whose payload is `PSIN` is `structural`, not `archive`.
 
-## Sample
+## The inventory
 
-The census below is bounded: every root archive of the install gets the same entry budget, and nested archives are entered where they lie or through temporary storage. It is a sample, not a complete count. The machine-written matrix is [entry-matrix.md](entry-matrix.md) with the same data in [entry-matrix.json](entry-matrix.json).
+The classification is used twice. A **metadata pass** enumerates every entry without reading a payload; a **payload pass** reads the first decoded bytes of every entry. They are separate investigations with separate journals, because a metadata checkpoint must never stand in for a payload one.
 
-### How the sample was taken
+| Pass     | Reads                      | Establishes                                                                    |
+| -------- | -------------------------- | ------------------------------------------------------------------------------ |
+| metadata | the table of contents      | every archive and entry, the type id, the storage shape, the declared extension |
+| payload  | the first 64 decoded bytes | what the entry holds, and one terminal outcome per entry                        |
 
-One run per root archive, each with the same budget:
+### How the inventory was taken
+
+Every `.rpf` under the installation, found recursively, one census run per root archive:
 
 ```sh
 lforge archive census <root>.rpf --executable <game executable> --recursive \
-    --samples 3 --max-depth 4 --max-archives 64 --max-entries 900 \
-    --max-nested-bytes 268435456 --max-spool-bytes 4294967296
+    --samples 3 --max-depth 8 --max-archives 4096 --max-entries 2000000 \
+    --max-nested-bytes 268435456 --max-spool-bytes 4294967296 --metadata-only
 ```
 
-Every root archive under the installation, found recursively: 22 discovered, 22 opened, 126 archives opened (104 of them nested), 11,283 entries classified, no archive failed to open. Seventeen roots stopped at their per-root entry budget, so the run is a sample and the matrix records `complete: false`. Nothing was copied to temporary storage: every nested archive in the sample had all-copy chunks and was read where it lies.
+The payload pass is the same command without `--metadata-only` and with room for what a payload read costs: `--max-archives 16384`, `--max-nested-bytes 2147483648`, `--max-spool-bytes 68719476736`. Reading payloads opens more nested archives, and larger ones, than reading tables of contents does.
 
-### What the sample holds
+Each root gets a journal of its own: one line per completed archive, written and synced before the run moves on, keyed by a SHA-256 over the schema, rule set, registry build, scan mode, limits, the executable's bytes and the root's size and modification time. A root interrupted at archive N resumes at archive N. A line cut short by a limit carries `complete: false` and is walked again. Measured: a scan of `audio.rpf` killed after 25 s had journalled four archives, and the rerun with the same identity reproduced the uninterrupted totals exactly.
 
-| Identification                | Entries | Share |
-| ----------------------------- | ------: | ----: |
-| resource container            |   7,189 | 63.7% |
-| supported format              |   3,634 | 32.2% |
-| validated XML document        |     421 |  3.7% |
-| nothing, or a named signature |      39 |  0.3% |
+Both passes are driven by `tools/rpf9/census_all.py`, and the machine-written documents are produced by `tools/rpf9/entry_matrix.py` from the merged census, so no figure below is copied by hand.
+
+### What the metadata pass establishes
+
+22 roots discovered and opened, 4,373 archives opened (4,351 of them nested), 1,255,039 entries enumerated, no archive failed to open, no root stopped at a limit: `complete: true`. It finished in 18 minutes 49 seconds, about 1,112 entries and 3.9 archives per second.
+
+| Count                      | Value     |
+| -------------------------- | --------: |
+| entries enumerated         | 1,255,039 |
+| entries probed             |         0 |
+| archives opened            |     4,373 |
+| nested archives opened     |     4,351 |
+| failed archives            |         0 |
+| declared asset classes     | 1,181,971 |
+| unresolved formats         | 1,255,039 |
+
+Nothing is read, so the pass claims nothing about any payload: every entry is `unprobed` and its outcome is `blocked`. What it does establish is exhaustive: which types exist, in which archives, in what storage shape, and with which declared extension. The full per-root, per-type and per-combination record is [type-inventory.md](type-inventory.md) with the same data in [type-inventory.json](type-inventory.json).
+
+| Declared extension | Entries |
+| ------------------ | ------: |
+| `zbdr`             | 250,434 |
+| `zdr`              | 167,897 |
+| `zmap`             | 166,072 |
+| `zbn`              |  92,199 |
+| none               |  73,068 |
+| `zcd`              |  62,384 |
+| `zft`              |  55,488 |
+| `zmt`              |  48,612 |
+| `zdd`              |  48,584 |
+| `zsm`              |  40,019 |
+| `zascd`            |  32,878 |
+| `zldbmt`           |  30,511 |
+
+The remaining thirty-three extensions are in the type inventory. The `none` row is type 255 alone: 73,068 entries under the one type the build does not register.
+
+### What the payload pass establishes
+
+The same roots and the same archives, read one entry at a time: the first 64 decoded bytes, never the whole payload. Every figure of this pass is in [entry-matrix.md](entry-matrix.md) with the same data in [entry-matrix.json](entry-matrix.json); the tables below quote it.
+
+It enumerated 1,255,039 entries in 4,373 archives, root by root the same numbers as the metadata pass: two enumerations that never consulted each other agree exactly.
+
+| Outcome                 | Entries   | Share |
+| ----------------------- | --------: | ----: |
+| `partially-identified`  | 1,143,183 | 91.1% |
+| `identified`            |    93,627 |  7.5% |
+| `undecodable`           |    14,432 |  1.1% |
+| `unresolved`            |     3,047 |  0.2% |
+| `blocked`               |       750 |  0.1% |
+
+Every entry has exactly one outcome, and the five that occur add up to the entry count. Two outcomes of the vocabulary occur nowhere: no entry is `malformed`, and none is `transform-unavailable`. `blocked` is 750 entries behind the payload transform that did not verify; `undecodable` is 14,432 entries whose storage the decoder refused.
+
+| Identification            | Entries   |
+| ------------------------- | --------: |
+| resource container        | 1,138,382 |
+| supported format          |    97,489 |
+| nothing recognised        |    18,229 |
+| validated XML document    |       491 |
+| named signature           |       448 |
+
+`nothing recognised` is 18,229 entries, but only 3,047 of them were read and found unrecognisable. The other 15,182 were never decoded: an entry that could not be read is reported as unidentified with the reason, and is not counted as a negative result about its bytes.
 
 | Format | Entries |
 | ------ | ------: |
-| `PSIN` |   1,442 |
-| `ADAT` |   1,410 |
-| `KB2`  |     522 |
-| `RBF0` |     156 |
-| RPF9   |     104 |
-| GFx    |       5 |
+| `ADAT` |  71,676 |
+| `PSIN` |  19,080 |
+| RPF9   |   4,351 |
+| `RBF0` |   1,493 |
+| `KB2`  |     797 |
+| GFx    |      87 |
+| `EDUP` |       5 |
 
-Every resource container is segment 5. The matrix records the documents' distinct roots and the two payloads that begin like XML without parsing as `xml:unvalidated`.
+The 4,351 RPF9 rows are the whole of the nesting in this installation: the passes opened exactly 4,351 nested archives, every one of them through a type-0 row, and no other entry holds an archive.
 
-| Capability  | Entries | Share |
-| ----------- | ------: | ----: |
-| resource    |   7,189 | 63.7% |
-| structural  |   3,536 | 31.3% |
-| text        |     423 |  3.7% |
-| archive     |     104 |  0.9% |
-| bytes       |      30 |  0.3% |
-| unavailable |       1 |  0.0% |
+| Capability  | Entries   |
+| ----------- | --------: |
+| resource    | 1,138,382 |
+| structural  |    93,138 |
+| unavailable |    15,182 |
+| archive     |     4,351 |
+| bytes       |     3,495 |
+| text        |       491 |
 
-| Extension | Entries |
-| --------- | ------: |
-| native    |   9,317 |
-| `xml`     |     421 |
-| none      |   1,545 |
+| Extension provenance | Entries   |
+| -------------------- | --------: |
+| `native`             | 1,181,971 |
+| `unresolved`         |    72,579 |
+| `payload`            |       489 |
 
-| Structure claim | Entries |
-| --------------- | ------: |
-| verified        |   3,957 |
-| probable        |     104 |
-| tentative       |       2 |
-| unknown         |   7,220 |
+1,181,971 entries carry the extension their type declares and 489 carry one the bytes themselves established: the 491 validated documents, two of which only look like XML and therefore keep no payload extension. 72,579 entries have no extension at all: the 73,068 rows of the unregistered type 255, minus the 489 documents that established `xml` for themselves.
 
-154 entries carry the payload transform. The executable's key state was available for them, and 153 decoded; one entry did not verify and is reported as `transform-failed` rather than identified.
+| Structure claim | Entries   |
+| --------------- | --------: |
+| unknown         | 1,157,059 |
+| verified        |    93,627 |
+| probable        |     4,351 |
+| tentative       |         2 |
 
-### What the type does and does not say
+`unknown` is what a resource container and an unrecognised payload share: the head was read, and neither said what lies behind it. `probable` is the 4,351 RPF9 rows, whose recogniser matches the magic and leaves authentication to whoever opens them. `tentative` is the two payloads that begin like XML and do not parse.
 
-Twenty-eight types appear in the sample, against twenty-one in the earlier twelve-root run. Nine of them were never reached before, because ten root archives under `pack/` were missed by a non-recursive glob: 4, 15, 16, 17, 72, 73, 78, 88 and 108. Types 93 and 94, which the tighter budget had reached before, are not in this sample.
+| Storage      | Entries   |
+| ------------ | --------: |
+| `chunked-2`  | 1,139,128 |
+| `stored`     |    76,826 |
+| `chunked-3`  |    24,436 |
+| `chunked-4`  |    14,488 |
+| `raw-deflate`|       161 |
 
-The thirteen resource-only types of the earlier sample (2, 3, 5, 6, 67, 70, 74, 79, 87, 95, 102, 111, 114) still hold only resource containers, and every type except 255 has a registered native extension. Type 255 is the unregistered catch-all and holds `ADAT`, `KB2`, documents, named signatures and payloads that match nothing.
+1,398 entries carry the payload transform. 648 of them decoded; 750 did not verify and are reported as `blocked`, not guessed at.
 
-Eleven types the earlier investigation recorded remain unobserved in both runs: 14, 64, 69, 77, 86, 99, 101, 103, 109, 110 and 115. They are unobserved, not disproved; the per-root entry budgets are the first thing to raise, and no scan has yet reached the archives that hold them.
+### What it cost
 
-That is why the type cannot decide the format. A type that holds one identification in the sample is a type whose rows happened to share one; it is not a promise about the next row.
+Both passes ran against the same release build, one root archive at a time, on one machine reading a 150 GiB installation.
+
+| Pass     | Wall clock    | Entries   | Entries per second | Archives per second |
+| -------- | ------------- | --------: | -----------------: | ------------------: |
+| metadata | 18 min 49 s   | 1,255,039 |              1,112 |                 3.9 |
+| payload  | 30 min 47 s   | 1,255,039 |                679 |                 2.4 |
+
+The two overlapped for about five minutes, so both figures are a little pessimistic. The cost is per entry, not per byte: classifying an entry decodes one chunk before it can read the first 64 bytes, and that chunk's size is what the archive chose, not what the census asked for. An earlier note in this repository measured 91 entries per second; that figure came from a debug build. The same archive taken with a release build is four times faster, which is why a complete count is now affordable and why no figure here is a budgeted sample.
+
+### What the types say
+
+The 22 roots together reach 46 type ids: the 45 registered ids that rows use, and 255, the one id the build does not register. Twenty-six registered ids appear in no entry of the installation: 1, 7, 8, 9, 10, 12, 13, 65, 68, 71, 75, 76, 80, 81, 82, 83, 84, 85, 90, 91, 92, 97, 98, 106, 107 and 112. Seven of them are in the low range and nineteen in the high one. Since every `.rpf` under the installation was scanned, these are unobserved, not merely unsampled: this installation has no entry that uses them. What they would hold is not established by their absence.
+
+Type 0 holds exactly 4,351 entries, and the passes opened exactly 4,351 nested archives. Every nested archive in this installation is a type-0 row. The type is still not a format: a type-0 row is an archive only because its payload is one, which is what the payload pass checks.
+
+Some types hold one format throughout the installation, and others do not. Every type-0 row is an RPF9 archive (4,351), every type-64 row is a `MoVE` payload (443) and every type-66 row is a GFx payload (87). Against that, `PSIN` appears under four types — 11 (18,787), 93 (211), 94 (80) and 255 (2) — and type 11 holds `PSIN` and `RBF0` (1,493) side by side. Type 255 holds `ADAT` (71,676), `KB2` (797), `EDUP` (5) and four named signatures, and nothing else.
+
+Type 255 is the catch-all the build does not name, 73,068 entries strong. The pass records what each of those rows holds, and no extension is declared for any of them.
+
+That is why the type cannot decide the format. A type whose rows share one identification is a type whose rows happened to; the matrix records every identification seen under every type, and it is the payload, not the type, that decides.
 
 ## What this does not establish
 
 - Which resource a resource container holds. The classification records the segment and the page-map offset and stops there.
 - The format of a payload that decoded but matched no signature.
 - The format of a payload behind the transform when no key state is available.
-- Any meaning for the entry type. Every type seen in the sample is reported with the identifications observed under it, and no type is treated as a format.
-- That the sample is complete. Types and combinations outside the budgets are not counted.
+- Any meaning for an entry type beyond the extension the loader registers for it.
+- That a declared extension matches the bytes. The provenance says `native`, and a payload that says otherwise is reported in `conflict` rather than resolved.
+- That these counts describe another installation or another build. Every count is of this installed copy and this executable; the journals are keyed to both, so a changed build or archive invalidates them instead of mixing them.
+- That a payload's full content is known. Every claim except a validated document is about the first 64 decoded bytes.

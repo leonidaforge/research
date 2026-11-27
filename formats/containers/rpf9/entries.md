@@ -115,7 +115,7 @@ After the metadata signature verifies, the location records can be read for ever
 | Rows behind the payload transform | 455               |
 | Type IDs                          | 0, 11, 14 and 255 |
 
-The counts are sample observations, not format limits. Type IDs are numeric; their meanings and extension mappings are not established. Layout A and non-main read sources are confirmed by code but were not observed in this sample.
+The counts are observations from one archive, not format limits. The type ids are numeric; their extensions come from the recovered [type registry](type-registry.md), and what each id holds is recorded per entry in the [type inventory](type-inventory.md). Layout A and non-main read sources are confirmed by code but were not observed in this sample.
 
 Stored and chunked rows extract to exactly their logical sizes. Rows behind the payload transform are refused because the transform is unknown (RPF9-F104). Successful extraction does not authenticate payload bytes.
 

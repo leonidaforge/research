@@ -25,7 +25,140 @@
   "shaders.rpf",
   "textures.rpf"
  ],
- "roots_detail": null,
+ "roots_detail": [
+  {
+   "root": "anim.rpf",
+   "archives": 236,
+   "entries": 84940,
+   "stopped": null
+  },
+  {
+   "root": "appdata0.rpf",
+   "archives": 1,
+   "entries": 2,
+   "stopped": null
+  },
+  {
+   "root": "audio.rpf",
+   "archives": 104,
+   "entries": 7283,
+   "stopped": null
+  },
+  {
+   "root": "common.rpf",
+   "archives": 1,
+   "entries": 418,
+   "stopped": null
+  },
+  {
+   "root": "data.rpf",
+   "archives": 42,
+   "entries": 23075,
+   "stopped": null
+  },
+  {
+   "root": "levels.rpf",
+   "archives": 2051,
+   "entries": 526538,
+   "stopped": null
+  },
+  {
+   "root": "movies.rpf",
+   "archives": 1,
+   "entries": 515,
+   "stopped": null
+  },
+  {
+   "root": "navmeshes.rpf",
+   "archives": 29,
+   "entries": 64779,
+   "stopped": null
+  },
+  {
+   "root": "pack/core_bvh4/core_bvh4.rpf",
+   "archives": 1282,
+   "entries": 295244,
+   "stopped": null
+  },
+  {
+   "root": "pack/core_licenses/core_licenses_data.rpf",
+   "archives": 2,
+   "entries": 6,
+   "stopped": null
+  },
+  {
+   "root": "pack/core_restofworld/core_restofworld.rpf",
+   "archives": 11,
+   "entries": 1156,
+   "stopped": null
+  },
+  {
+   "root": "pack/core_restofworld001/core_restofworld001.rpf",
+   "archives": 2,
+   "entries": 28,
+   "stopped": null
+  },
+  {
+   "root": "pack/shared_minigame000/shared_minigame000.rpf",
+   "archives": 50,
+   "entries": 3183,
+   "stopped": null
+  },
+  {
+   "root": "pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf",
+   "archives": 9,
+   "entries": 1331,
+   "stopped": null
+  },
+  {
+   "root": "pack/story000/story000.rpf",
+   "archives": 442,
+   "entries": 160082,
+   "stopped": null
+  },
+  {
+   "root": "pack/story000/story000_script.rpf",
+   "archives": 5,
+   "entries": 3072,
+   "stopped": null
+  },
+  {
+   "root": "pack/story000_bvh4/story000_bvh4.rpf",
+   "archives": 1,
+   "entries": 4,
+   "stopped": null
+  },
+  {
+   "root": "pack/story000_restofworld/story000_restofworld.rpf",
+   "archives": 19,
+   "entries": 507,
+   "stopped": null
+  },
+  {
+   "root": "packs.rpf",
+   "archives": 60,
+   "entries": 80470,
+   "stopped": null
+  },
+  {
+   "root": "script.rpf",
+   "archives": 3,
+   "entries": 1016,
+   "stopped": null
+  },
+  {
+   "root": "shaders.rpf",
+   "archives": 1,
+   "entries": 3,
+   "stopped": null
+  },
+  {
+   "root": "textures.rpf",
+   "archives": 21,
+   "entries": 1387,
+   "stopped": null
+  }
+ ],
  "archives": 4373,
  "entries": 1255039,
  "stopped": {},
@@ -243,9 +376,11 @@
     "none": 4351
    },
    "outcomes": {
-    "-": 4351
+    "blocked": 4351
    },
-   "declared": {},
+   "declared": {
+    "rpf": 4351
+   },
    "payload": {}
   },
   {
@@ -256,9 +391,11 @@
     "none": 167897
    },
    "outcomes": {
-    "-": 167897
+    "blocked": 167897
    },
-   "declared": {},
+   "declared": {
+    "zdr": 167897
+   },
    "payload": {}
   },
   {
@@ -269,9 +406,11 @@
     "none": 55488
    },
    "outcomes": {
-    "-": 55488
+    "blocked": 55488
    },
-   "declared": {},
+   "declared": {
+    "zft": 55488
+   },
    "payload": {}
   },
   {
@@ -282,9 +421,11 @@
     "none": 48584
    },
    "outcomes": {
-    "-": 48584
+    "blocked": 48584
    },
-   "declared": {},
+   "declared": {
+    "zdd": 48584
+   },
    "payload": {}
   },
   {
@@ -295,9 +436,11 @@
     "none": 2612
    },
    "outcomes": {
-    "-": 2612
+    "blocked": 2612
    },
-   "declared": {},
+   "declared": {
+    "ztd": 2612
+   },
    "payload": {}
   },
   {
@@ -308,9 +451,11 @@
     "none": 92199
    },
    "outcomes": {
-    "-": 92199
+    "blocked": 92199
    },
-   "declared": {},
+   "declared": {
+    "zbn": 92199
+   },
    "payload": {}
   },
   {
@@ -321,9 +466,11 @@
     "none": 48612
    },
    "outcomes": {
-    "-": 48612
+    "blocked": 48612
    },
-   "declared": {},
+   "declared": {
+    "zmt": 48612
+   },
    "payload": {}
   },
   {
@@ -334,9 +481,11 @@
     "none": 2
    },
    "outcomes": {
-    "-": 2
+    "blocked": 2
    },
-   "declared": {},
+   "declared": {
+    "zdatb": 2
+   },
    "payload": {}
   },
   {
@@ -347,9 +496,11 @@
     "none": 250434
    },
    "outcomes": {
-    "-": 250434
+    "blocked": 250434
    },
-   "declared": {},
+   "declared": {
+    "zbdr": 250434
+   },
    "payload": {}
   },
   {
@@ -360,9 +511,11 @@
     "none": 22382
    },
    "outcomes": {
-    "-": 22382
+    "blocked": 22382
    },
-   "declared": {},
+   "declared": {
+    "zbdd": 22382
+   },
    "payload": {}
   },
   {
@@ -373,9 +526,11 @@
     "none": 22440
    },
    "outcomes": {
-    "-": 22440
+    "blocked": 22440
    },
-   "declared": {},
+   "declared": {
+    "zbft": 22440
+   },
    "payload": {}
   },
   {
@@ -386,9 +541,11 @@
     "none": 611
    },
    "outcomes": {
-    "-": 611
+    "blocked": 611
    },
-   "declared": {},
+   "declared": {
+    "zvert": 611
+   },
    "payload": {}
   },
   {
@@ -399,9 +556,11 @@
     "none": 443
    },
    "outcomes": {
-    "-": 443
+    "blocked": 443
    },
-   "declared": {},
+   "declared": {
+    "mrf": 443
+   },
    "payload": {}
   },
   {
@@ -412,9 +571,11 @@
     "none": 87
    },
    "outcomes": {
-    "-": 87
+    "blocked": 87
    },
-   "declared": {},
+   "declared": {
+    "gfx": 87
+   },
    "payload": {}
   },
   {
@@ -425,9 +586,11 @@
     "none": 62384
    },
    "outcomes": {
-    "-": 62384
+    "blocked": 62384
    },
-   "declared": {},
+   "declared": {
+    "zcd": 62384
+   },
    "payload": {}
   },
   {
@@ -438,9 +601,11 @@
     "none": 1
    },
    "outcomes": {
-    "-": 1
+    "blocked": 1
    },
-   "declared": {},
+   "declared": {
+    "zpmd": 1
+   },
    "payload": {}
   },
   {
@@ -451,9 +616,11 @@
     "none": 8443
    },
    "outcomes": {
-    "-": 8443
+    "blocked": 8443
    },
-   "declared": {},
+   "declared": {
+    "zpm": 8443
+   },
    "payload": {}
   },
   {
@@ -464,9 +631,11 @@
     "none": 226
    },
    "outcomes": {
-    "-": 226
+    "blocked": 226
    },
-   "declared": {},
+   "declared": {
+    "zpt": 226
+   },
    "payload": {}
   },
   {
@@ -477,9 +646,11 @@
     "none": 166072
    },
    "outcomes": {
-    "-": 166072
+    "blocked": 166072
    },
-   "declared": {},
+   "declared": {
+    "zmap": 166072
+   },
    "payload": {}
   },
   {
@@ -490,9 +661,11 @@
     "none": 6308
    },
    "outcomes": {
-    "-": 6308
+    "blocked": 6308
    },
-   "declared": {},
+   "declared": {
+    "ztyp": 6308
+   },
    "payload": {}
   },
   {
@@ -503,9 +676,11 @@
     "none": 3
    },
    "outcomes": {
-    "-": 3
+    "blocked": 3
    },
-   "declared": {},
+   "declared": {
+    "zjd": 3
+   },
    "payload": {}
   },
   {
@@ -516,9 +691,11 @@
     "none": 25608
    },
    "outcomes": {
-    "-": 25608
+    "blocked": 25608
    },
-   "declared": {},
+   "declared": {
+    "zad": 25608
+   },
    "payload": {}
   },
   {
@@ -529,9 +706,11 @@
     "none": 27644
    },
    "outcomes": {
-    "-": 27644
+    "blocked": 27644
    },
-   "declared": {},
+   "declared": {
+    "znv": 27644
+   },
    "payload": {}
   },
   {
@@ -542,9 +721,11 @@
     "none": 11
    },
    "outcomes": {
-    "-": 11
+    "blocked": 11
    },
-   "declared": {},
+   "declared": {
+    "zfd": 11
+   },
    "payload": {}
   },
   {
@@ -555,9 +736,11 @@
     "none": 15067
    },
    "outcomes": {
-    "-": 15067
+    "blocked": 15067
    },
-   "declared": {},
+   "declared": {
+    "zas": 15067
+   },
    "payload": {}
   },
   {
@@ -568,9 +751,11 @@
     "none": 40019
    },
    "outcomes": {
-    "-": 40019
+    "blocked": 40019
    },
-   "declared": {},
+   "declared": {
+    "zsm": 40019
+   },
    "payload": {}
   },
   {
@@ -581,9 +766,11 @@
     "none": 746
    },
    "outcomes": {
-    "-": 746
+    "blocked": 746
    },
-   "declared": {},
+   "declared": {
+    "zscript": 746
+   },
    "payload": {}
   },
   {
@@ -594,9 +781,11 @@
     "none": 211
    },
    "outcomes": {
-    "-": 211
+    "blocked": 211
    },
-   "declared": {},
+   "declared": {
+    "zfc": 211
+   },
    "payload": {}
   },
   {
@@ -607,9 +796,11 @@
     "none": 80
    },
    "outcomes": {
-    "-": 80
+    "blocked": 80
    },
-   "declared": {},
+   "declared": {
+    "zlfc": 80
+   },
    "payload": {}
   },
   {
@@ -620,9 +811,11 @@
     "none": 518
    },
    "outcomes": {
-    "-": 518
+    "blocked": 518
    },
-   "declared": {},
+   "declared": {
+    "zcg": 518
+   },
    "payload": {}
   },
   {
@@ -633,9 +826,11 @@
     "none": 1
    },
    "outcomes": {
-    "-": 1
+    "blocked": 1
    },
-   "declared": {},
+   "declared": {
+    "zasd": 1
+   },
    "payload": {}
   },
   {
@@ -646,9 +841,11 @@
     "none": 98
    },
    "outcomes": {
-    "-": 98
+    "blocked": 98
    },
-   "declared": {},
+   "declared": {
+    "zcps": 98
+   },
    "payload": {}
   },
   {
@@ -659,9 +856,11 @@
     "none": 27482
    },
    "outcomes": {
-    "-": 27482
+    "blocked": 27482
    },
-   "declared": {},
+   "declared": {
+    "zsp": 27482
+   },
    "payload": {}
   },
   {
@@ -672,9 +871,11 @@
     "none": 5
    },
    "outcomes": {
-    "-": 5
+    "blocked": 5
    },
-   "declared": {},
+   "declared": {
+    "ztsl": 5
+   },
    "payload": {}
   },
   {
@@ -685,9 +886,11 @@
     "none": 142
    },
    "outcomes": {
-    "-": 142
+    "blocked": 142
    },
-   "declared": {},
+   "declared": {
+    "zmmd": 142
+   },
    "payload": {}
   },
   {
@@ -698,9 +901,11 @@
     "none": 6762
    },
    "outcomes": {
-    "-": 6762
+    "blocked": 6762
    },
-   "declared": {},
+   "declared": {
+    "zfid": 6762
+   },
    "payload": {}
   },
   {
@@ -711,9 +916,11 @@
     "none": 1476
    },
    "outcomes": {
-    "-": 1476
+    "blocked": 1476
    },
-   "declared": {},
+   "declared": {
+    "zmsk": 1476
+   },
    "payload": {}
   },
   {
@@ -724,9 +931,11 @@
     "none": 1476
    },
    "outcomes": {
-    "-": 1476
+    "blocked": 1476
    },
-   "declared": {},
+   "declared": {
+    "zhdat": 1476
+   },
    "payload": {}
   },
   {
@@ -737,9 +946,11 @@
     "none": 32878
    },
    "outcomes": {
-    "-": 32878
+    "blocked": 32878
    },
-   "declared": {},
+   "declared": {
+    "zascd": 32878
+   },
    "payload": {}
   },
   {
@@ -750,9 +961,11 @@
     "none": 4
    },
    "outcomes": {
-    "-": 4
+    "blocked": 4
    },
-   "declared": {},
+   "declared": {
+    "zrd": 4
+   },
    "payload": {}
   },
   {
@@ -763,9 +976,11 @@
     "none": 5
    },
    "outcomes": {
-    "-": 5
+    "blocked": 5
    },
-   "declared": {},
+   "declared": {
+    "zsmam": 5
+   },
    "payload": {}
   },
   {
@@ -776,9 +991,11 @@
     "none": 30511
    },
    "outcomes": {
-    "-": 30511
+    "blocked": 30511
    },
-   "declared": {},
+   "declared": {
+    "zldbmt": 30511
+   },
    "payload": {}
   },
   {
@@ -789,9 +1006,11 @@
     "none": 2715
    },
    "outcomes": {
-    "-": 2715
+    "blocked": 2715
    },
-   "declared": {},
+   "declared": {
+    "zkit": 2715
+   },
    "payload": {}
   },
   {
@@ -802,9 +1021,11 @@
     "none": 518
    },
    "outcomes": {
-    "-": 518
+    "blocked": 518
    },
-   "declared": {},
+   "declared": {
+    "zcgc": 518
+   },
    "payload": {}
   },
   {
@@ -815,9 +1036,11 @@
     "none": 8415
    },
    "outcomes": {
-    "-": 8415
+    "blocked": 8415
    },
-   "declared": {},
+   "declared": {
+    "zcov": 8415
+   },
    "payload": {}
   },
   {
@@ -828,7 +1051,7 @@
     "none": 73068
    },
    "outcomes": {
-    "-": 73068
+    "blocked": 73068
    },
    "declared": {},
    "payload": {}
@@ -850,7 +1073,9 @@
    "capability": "unprobed",
    "entries": 4351,
    "extension": "rpf",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -1019,7 +1244,9 @@
    "capability": "unprobed",
    "entries": 164701,
    "extension": "zdr",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -1128,7 +1355,9 @@
    "capability": "unprobed",
    "entries": 3196,
    "extension": "zdr",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -1171,7 +1400,9 @@
    "capability": "unprobed",
    "entries": 55488,
    "extension": "zft",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -1286,7 +1517,9 @@
    "capability": "unprobed",
    "entries": 48328,
    "extension": "zdd",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -1418,7 +1651,9 @@
    "capability": "unprobed",
    "entries": 256,
    "extension": "zdd",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -1461,7 +1696,9 @@
    "capability": "unprobed",
    "entries": 2612,
    "extension": "ztd",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -1576,7 +1813,9 @@
    "capability": "unprobed",
    "entries": 90545,
    "extension": "zbn",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -1648,7 +1887,9 @@
    "capability": "unprobed",
    "entries": 1654,
    "extension": "zbn",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -1691,7 +1932,9 @@
    "capability": "unprobed",
    "entries": 28295,
    "extension": "zmt",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -1830,7 +2073,9 @@
    "capability": "unprobed",
    "entries": 19572,
    "extension": "zmt",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -1999,7 +2244,9 @@
    "capability": "unprobed",
    "entries": 496,
    "extension": "zmt",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -2132,7 +2379,9 @@
    "capability": "unprobed",
    "entries": 157,
    "extension": "zmt",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -2174,7 +2423,9 @@
    "capability": "unprobed",
    "entries": 88,
    "extension": "zmt",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -2213,7 +2464,9 @@
    "capability": "unprobed",
    "entries": 4,
    "extension": "zmt",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -2249,7 +2502,9 @@
    "capability": "unprobed",
    "entries": 1,
    "extension": "zdatb",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -2273,7 +2528,9 @@
    "capability": "unprobed",
    "entries": 1,
    "extension": "zdatb",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -2304,7 +2561,9 @@
    "capability": "unprobed",
    "entries": 245666,
    "extension": "zbdr",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -2358,7 +2617,9 @@
    "capability": "unprobed",
    "entries": 4768,
    "extension": "zbdr",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -2401,7 +2662,9 @@
    "capability": "unprobed",
    "entries": 22126,
    "extension": "zbdd",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -2455,7 +2718,9 @@
    "capability": "unprobed",
    "entries": 256,
    "extension": "zbdd",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -2498,7 +2763,9 @@
    "capability": "unprobed",
    "entries": 22440,
    "extension": "zbft",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -2553,7 +2820,9 @@
    "capability": "unprobed",
    "entries": 611,
    "extension": "zvert",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -2590,7 +2859,9 @@
    "capability": "unprobed",
    "entries": 443,
    "extension": "mrf",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -2650,7 +2921,9 @@
    "capability": "unprobed",
    "entries": 87,
    "extension": "gfx",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -2693,7 +2966,9 @@
    "capability": "unprobed",
    "entries": 62375,
    "extension": "zcd",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -2819,7 +3094,9 @@
    "capability": "unprobed",
    "entries": 9,
    "extension": "zcd",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -2855,7 +3132,9 @@
    "capability": "unprobed",
    "entries": 1,
    "extension": "zpmd",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -2886,7 +3165,9 @@
    "capability": "unprobed",
    "entries": 8443,
    "extension": "zpm",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -2943,7 +3224,9 @@
    "capability": "unprobed",
    "entries": 226,
    "extension": "zpt",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -3016,7 +3299,9 @@
    "capability": "unprobed",
    "entries": 161985,
    "extension": "zmap",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -3091,7 +3376,9 @@
    "capability": "unprobed",
    "entries": 4087,
    "extension": "zmap",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -3134,7 +3421,9 @@
    "capability": "unprobed",
    "entries": 6135,
    "extension": "ztyp",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -3225,7 +3514,9 @@
    "capability": "unprobed",
    "entries": 173,
    "extension": "ztyp",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -3261,7 +3552,9 @@
    "capability": "unprobed",
    "entries": 3,
    "extension": "zjd",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -3304,7 +3597,9 @@
    "capability": "unprobed",
    "entries": 25608,
    "extension": "zad",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -3365,7 +3660,9 @@
    "capability": "unprobed",
    "entries": 27644,
    "extension": "znv",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -3401,7 +3698,9 @@
    "capability": "unprobed",
    "entries": 11,
    "extension": "zfd",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -3444,7 +3743,9 @@
    "capability": "unprobed",
    "entries": 15067,
    "extension": "zas",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -3520,7 +3821,9 @@
    "capability": "unprobed",
    "entries": 40019,
    "extension": "zsm",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -3593,7 +3896,9 @@
    "capability": "unprobed",
    "entries": 746,
    "extension": "zscript",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -3635,7 +3940,9 @@
    "capability": "unprobed",
    "entries": 211,
    "extension": "zfc",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -3671,7 +3978,9 @@
    "capability": "unprobed",
    "entries": 80,
    "extension": "zlfc",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -3708,7 +4017,9 @@
    "capability": "unprobed",
    "entries": 518,
    "extension": "zcg",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -3744,7 +4055,9 @@
    "capability": "unprobed",
    "entries": 1,
    "extension": "zasd",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -3768,7 +4081,9 @@
    "capability": "unprobed",
    "entries": 98,
    "extension": "zcps",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -3811,7 +4126,9 @@
    "capability": "unprobed",
    "entries": 27482,
    "extension": "zsp",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -3847,7 +4164,9 @@
    "capability": "unprobed",
    "entries": 5,
    "extension": "ztsl",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -3890,7 +4209,9 @@
    "capability": "unprobed",
    "entries": 142,
    "extension": "zmmd",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -3933,7 +4254,9 @@
    "capability": "unprobed",
    "entries": 6762,
    "extension": "zfid",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -3987,7 +4310,9 @@
    "capability": "unprobed",
    "entries": 1476,
    "extension": "zmsk",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -4023,7 +4348,9 @@
    "capability": "unprobed",
    "entries": 1476,
    "extension": "zhdat",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -4062,7 +4389,9 @@
    "capability": "unprobed",
    "entries": 32878,
    "extension": "zascd",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -4137,7 +4466,9 @@
    "capability": "unprobed",
    "entries": 4,
    "extension": "zrd",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -4177,7 +4508,9 @@
    "capability": "unprobed",
    "entries": 5,
    "extension": "zsmam",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -4232,7 +4565,9 @@
    "capability": "unprobed",
    "entries": 30511,
    "extension": "zldbmt",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -4304,7 +4639,9 @@
    "capability": "unprobed",
    "entries": 2715,
    "extension": "zkit",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -4341,7 +4678,9 @@
    "capability": "unprobed",
    "entries": 518,
    "extension": "zcgc",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -4380,7 +4719,9 @@
    "capability": "unprobed",
    "entries": 8415,
    "extension": "zcov",
+   "extension_provenance": "native",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -4423,7 +4764,9 @@
    "capability": "unprobed",
    "entries": 72475,
    "extension": "-",
+   "extension_provenance": "unresolved",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -4568,7 +4911,9 @@
    "capability": "unprobed",
    "entries": 441,
    "extension": "-",
+   "extension_provenance": "unresolved",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -4731,7 +5076,9 @@
    "capability": "unprobed",
    "entries": 151,
    "extension": "-",
+   "extension_provenance": "unresolved",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {
@@ -4779,7 +5126,9 @@
    "capability": "unprobed",
    "entries": 1,
    "extension": "-",
+   "extension_provenance": "unresolved",
    "identification": "none",
+   "outcome": "blocked",
    "payload": "not-read",
    "samples": [
     {

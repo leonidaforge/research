@@ -15,23 +15,50 @@ classification allowed and where that extension came from.
 | roots_discovered | 22 |
 | roots_opened | 22 |
 | failed_roots | 0 |
-| archives_opened | 4373 |
-| nested_archives_opened | 4351 |
+| archives_opened | 4,373 |
+| nested_archives_opened | 4,351 |
 | archives_resumed | 0 |
 | failed_archives | 0 |
-| entries_enumerated | 1255039 |
+| entries_enumerated | 1,255,039 |
 | entries_probed | 0 |
 | entries_decoded | 0 |
 | entries_undecoded | 0 |
 | structures_verified | 0 |
 | containers_identified | 0 |
-| declared_asset_classes | 1181971 |
-| unresolved_formats | 1255039 |
+| declared_asset_classes | 1,181,971 |
+| unresolved_formats | 1,255,039 |
 | stopped early | nothing |
 | complete | True |
 
 A bounded run is a sample. Only a run whose coverage reports every
 discovered root and no stopped scan is a count of the installation.
+
+## By root
+
+| Root | Archives | Entries | Stopped |
+| ---- | -------: | ------: | ------- |
+| anim.rpf | 236 | 84,940 | - |
+| appdata0.rpf | 1 | 2 | - |
+| audio.rpf | 104 | 7,283 | - |
+| common.rpf | 1 | 418 | - |
+| data.rpf | 42 | 23,075 | - |
+| levels.rpf | 2,051 | 526,538 | - |
+| movies.rpf | 1 | 515 | - |
+| navmeshes.rpf | 29 | 64,779 | - |
+| pack/core_bvh4/core_bvh4.rpf | 1,282 | 295,244 | - |
+| pack/core_licenses/core_licenses_data.rpf | 2 | 6 | - |
+| pack/core_restofworld/core_restofworld.rpf | 11 | 1,156 | - |
+| pack/core_restofworld001/core_restofworld001.rpf | 2 | 28 | - |
+| pack/shared_minigame000/shared_minigame000.rpf | 50 | 3,183 | - |
+| pack/shared_minigame000_bvh4/shared_minigame000_bvh4.rpf | 9 | 1,331 | - |
+| pack/story000/story000.rpf | 442 | 160,082 | - |
+| pack/story000/story000_script.rpf | 5 | 3,072 | - |
+| pack/story000_bvh4/story000_bvh4.rpf | 1 | 4 | - |
+| pack/story000_restofworld/story000_restofworld.rpf | 19 | 507 | - |
+| packs.rpf | 60 | 80,470 | - |
+| script.rpf | 3 | 1,016 | - |
+| shaders.rpf | 1 | 3 | - |
+| textures.rpf | 21 | 1,387 | - |
 
 ## Type summary
 
@@ -40,52 +67,52 @@ Sorted by type id. `declared` is the extension the engine registers for the type
 
 | Type | Entries | Declared | From payload | Outcomes |
 | ---- | ------: | -------- | ------------ | -------- |
-| 0 | 4351 | - | - | - 4351 |
-| 2 | 167897 | - | - | - 167897 |
-| 3 | 55488 | - | - | - 55488 |
-| 4 | 48584 | - | - | - 48584 |
-| 5 | 2612 | - | - | - 2612 |
-| 6 | 92199 | - | - | - 92199 |
-| 11 | 48612 | - | - | - 48612 |
-| 14 | 2 | - | - | - 2 |
-| 15 | 250434 | - | - | - 250434 |
-| 16 | 22382 | - | - | - 22382 |
-| 17 | 22440 | - | - | - 22440 |
-| 18 | 611 | - | - | - 611 |
-| 64 | 443 | - | - | - 443 |
-| 66 | 87 | - | - | - 87 |
-| 67 | 62384 | - | - | - 62384 |
-| 69 | 1 | - | - | - 1 |
-| 70 | 8443 | - | - | - 8443 |
-| 72 | 226 | - | - | - 226 |
-| 73 | 166072 | - | - | - 166072 |
-| 74 | 6308 | - | - | - 6308 |
-| 77 | 3 | - | - | - 3 |
-| 78 | 25608 | - | - | - 25608 |
-| 79 | 27644 | - | - | - 27644 |
-| 86 | 11 | - | - | - 11 |
-| 87 | 15067 | - | - | - 15067 |
-| 88 | 40019 | - | - | - 40019 |
-| 89 | 746 | - | - | - 746 |
-| 93 | 211 | - | - | - 211 |
-| 94 | 80 | - | - | - 80 |
-| 95 | 518 | - | - | - 518 |
-| 96 | 1 | - | - | - 1 |
-| 99 | 98 | - | - | - 98 |
-| 100 | 27482 | - | - | - 27482 |
-| 101 | 5 | - | - | - 5 |
-| 102 | 142 | - | - | - 142 |
-| 103 | 6762 | - | - | - 6762 |
-| 104 | 1476 | - | - | - 1476 |
-| 105 | 1476 | - | - | - 1476 |
-| 108 | 32878 | - | - | - 32878 |
-| 109 | 4 | - | - | - 4 |
-| 110 | 5 | - | - | - 5 |
-| 111 | 30511 | - | - | - 30511 |
-| 113 | 2715 | - | - | - 2715 |
-| 114 | 518 | - | - | - 518 |
-| 115 | 8415 | - | - | - 8415 |
-| 255 | 73068 | - | - | - 73068 |
+| 0 | 4,351 | `rpf` 4,351 | - | blocked 4,351 |
+| 2 | 167,897 | `zdr` 167,897 | - | blocked 167,897 |
+| 3 | 55,488 | `zft` 55,488 | - | blocked 55,488 |
+| 4 | 48,584 | `zdd` 48,584 | - | blocked 48,584 |
+| 5 | 2,612 | `ztd` 2,612 | - | blocked 2,612 |
+| 6 | 92,199 | `zbn` 92,199 | - | blocked 92,199 |
+| 11 | 48,612 | `zmt` 48,612 | - | blocked 48,612 |
+| 14 | 2 | `zdatb` 2 | - | blocked 2 |
+| 15 | 250,434 | `zbdr` 250,434 | - | blocked 250,434 |
+| 16 | 22,382 | `zbdd` 22,382 | - | blocked 22,382 |
+| 17 | 22,440 | `zbft` 22,440 | - | blocked 22,440 |
+| 18 | 611 | `zvert` 611 | - | blocked 611 |
+| 64 | 443 | `mrf` 443 | - | blocked 443 |
+| 66 | 87 | `gfx` 87 | - | blocked 87 |
+| 67 | 62,384 | `zcd` 62,384 | - | blocked 62,384 |
+| 69 | 1 | `zpmd` 1 | - | blocked 1 |
+| 70 | 8,443 | `zpm` 8,443 | - | blocked 8,443 |
+| 72 | 226 | `zpt` 226 | - | blocked 226 |
+| 73 | 166,072 | `zmap` 166,072 | - | blocked 166,072 |
+| 74 | 6,308 | `ztyp` 6,308 | - | blocked 6,308 |
+| 77 | 3 | `zjd` 3 | - | blocked 3 |
+| 78 | 25,608 | `zad` 25,608 | - | blocked 25,608 |
+| 79 | 27,644 | `znv` 27,644 | - | blocked 27,644 |
+| 86 | 11 | `zfd` 11 | - | blocked 11 |
+| 87 | 15,067 | `zas` 15,067 | - | blocked 15,067 |
+| 88 | 40,019 | `zsm` 40,019 | - | blocked 40,019 |
+| 89 | 746 | `zscript` 746 | - | blocked 746 |
+| 93 | 211 | `zfc` 211 | - | blocked 211 |
+| 94 | 80 | `zlfc` 80 | - | blocked 80 |
+| 95 | 518 | `zcg` 518 | - | blocked 518 |
+| 96 | 1 | `zasd` 1 | - | blocked 1 |
+| 99 | 98 | `zcps` 98 | - | blocked 98 |
+| 100 | 27,482 | `zsp` 27,482 | - | blocked 27,482 |
+| 101 | 5 | `ztsl` 5 | - | blocked 5 |
+| 102 | 142 | `zmmd` 142 | - | blocked 142 |
+| 103 | 6,762 | `zfid` 6,762 | - | blocked 6,762 |
+| 104 | 1,476 | `zmsk` 1,476 | - | blocked 1,476 |
+| 105 | 1,476 | `zhdat` 1,476 | - | blocked 1,476 |
+| 108 | 32,878 | `zascd` 32,878 | - | blocked 32,878 |
+| 109 | 4 | `zrd` 4 | - | blocked 4 |
+| 110 | 5 | `zsmam` 5 | - | blocked 5 |
+| 111 | 30,511 | `zldbmt` 30,511 | - | blocked 30,511 |
+| 113 | 2,715 | `zkit` 2,715 | - | blocked 2,715 |
+| 114 | 518 | `zcgc` 518 | - | blocked 518 |
+| 115 | 8,415 | `zcov` 8,415 | - | blocked 8,415 |
+| 255 | 73,068 | - | - | blocked 73,068 |
 
 ## Distributions
 
@@ -93,51 +120,51 @@ Sorted by type id. `declared` is the extension the engine registers for the type
 
 | Value | Entries |
 | ----- | ------: |
-| none | 1255039 |
+| none | 1,255,039 |
 
 ### Format
 
 | Value | Entries |
 | ----- | ------: |
-| none | 1255039 |
+| none | 1,255,039 |
 
 ### Capability
 
 | Value | Entries |
 | ----- | ------: |
-| unprobed | 1255039 |
+| unprobed | 1,255,039 |
 
 ### Extension
 
 | Value | Entries |
 | ----- | ------: |
-| zbdr | 250434 |
-| zdr | 167897 |
-| zmap | 166072 |
-| zbn | 92199 |
-| - | 73068 |
-| zcd | 62384 |
-| zft | 55488 |
-| zmt | 48612 |
-| zdd | 48584 |
-| zsm | 40019 |
-| zascd | 32878 |
-| zldbmt | 30511 |
-| znv | 27644 |
-| zsp | 27482 |
-| zad | 25608 |
-| zbft | 22440 |
-| zbdd | 22382 |
-| zas | 15067 |
-| zpm | 8443 |
-| zcov | 8415 |
-| zfid | 6762 |
-| ztyp | 6308 |
-| rpf | 4351 |
-| zkit | 2715 |
-| ztd | 2612 |
-| zhdat | 1476 |
-| zmsk | 1476 |
+| zbdr | 250,434 |
+| zdr | 167,897 |
+| zmap | 166,072 |
+| zbn | 92,199 |
+| - | 73,068 |
+| zcd | 62,384 |
+| zft | 55,488 |
+| zmt | 48,612 |
+| zdd | 48,584 |
+| zsm | 40,019 |
+| zascd | 32,878 |
+| zldbmt | 30,511 |
+| znv | 27,644 |
+| zsp | 27,482 |
+| zad | 25,608 |
+| zbft | 22,440 |
+| zbdd | 22,382 |
+| zas | 15,067 |
+| zpm | 8,443 |
+| zcov | 8,415 |
+| zfid | 6,762 |
+| ztyp | 6,308 |
+| rpf | 4,351 |
+| zkit | 2,715 |
+| ztd | 2,612 |
+| zhdat | 1,476 |
+| zmsk | 1,476 |
 | zscript | 746 |
 | zvert | 611 |
 | zcg | 518 |
@@ -162,55 +189,55 @@ Sorted by type id. `declared` is the extension the engine registers for the type
 
 | Value | Entries |
 | ----- | ------: |
-| unknown | 1255039 |
+| unknown | 1,255,039 |
 
 ### Payload state
 
 | Value | Entries |
 | ----- | ------: |
-| not-read | 1255039 |
+| not-read | 1,255,039 |
 
 ### Storage
 
 | Value | Entries |
 | ----- | ------: |
-| chunked-2 | 1139128 |
-| stored | 76826 |
-| chunked-3 | 24436 |
-| chunked-4 | 14488 |
+| chunked-2 | 1,139,128 |
+| stored | 76,826 |
+| chunked-3 | 24,436 |
+| chunked-4 | 14,488 |
 | raw-deflate | 161 |
 
 ### Entry type
 
 | Value | Entries |
 | ----- | ------: |
-| 15 | 250434 |
-| 2 | 167897 |
-| 73 | 166072 |
-| 6 | 92199 |
-| 255 | 73068 |
-| 67 | 62384 |
-| 3 | 55488 |
-| 11 | 48612 |
-| 4 | 48584 |
-| 88 | 40019 |
-| 108 | 32878 |
-| 111 | 30511 |
-| 79 | 27644 |
-| 100 | 27482 |
-| 78 | 25608 |
-| 17 | 22440 |
-| 16 | 22382 |
-| 87 | 15067 |
-| 70 | 8443 |
-| 115 | 8415 |
-| 103 | 6762 |
-| 74 | 6308 |
-| 0 | 4351 |
-| 113 | 2715 |
-| 5 | 2612 |
-| 104 | 1476 |
-| 105 | 1476 |
+| 15 | 250,434 |
+| 2 | 167,897 |
+| 73 | 166,072 |
+| 6 | 92,199 |
+| 255 | 73,068 |
+| 67 | 62,384 |
+| 3 | 55,488 |
+| 11 | 48,612 |
+| 4 | 48,584 |
+| 88 | 40,019 |
+| 108 | 32,878 |
+| 111 | 30,511 |
+| 79 | 27,644 |
+| 100 | 27,482 |
+| 78 | 25,608 |
+| 17 | 22,440 |
+| 16 | 22,382 |
+| 87 | 15,067 |
+| 70 | 8,443 |
+| 115 | 8,415 |
+| 103 | 6,762 |
+| 74 | 6,308 |
+| 0 | 4,351 |
+| 113 | 2,715 |
+| 5 | 2,612 |
+| 104 | 1,476 |
+| 105 | 1,476 |
 | 89 | 746 |
 | 18 | 611 |
 | 114 | 518 |

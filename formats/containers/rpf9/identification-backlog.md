@@ -1,32 +1,32 @@
 # RPF9 entry identification backlog
 
-Work that the classification in [entry-classification.md](entry-classification.md) leaves open, ordered by what it unlocks in the sample matrix ([entry-matrix.md](entry-matrix.md)).
+Work that the classification in [entry-classification.md](entry-classification.md) leaves open, ordered by what it unlocks in the [entry matrix](entry-matrix.md).
 
-Each item states what is known, what is missing, and what would count as done. Counts are the sample's, not the install's.
+Each item states what is known, what is missing, and what would count as done. Counts are the inventory's: 1,255,039 entries in 4,373 archives, every one of them classified and given an outcome.
 
 ## 1. Resource containers
 
-**Known.** A resource payload starts with eight zero bytes and a `0x5…` pointer at `+0x08`. Every resource in the sample is segment 5, and the pointer's low 28 bits are a page-map offset.
+**Known.** A resource payload starts with eight zero bytes and a `0x5…` pointer at `+0x08`. Every resource in the installation is segment 5, and the pointer's low 28 bits are a page-map offset.
 
-**Missing.** The page map at that offset, the resource headers it reaches, and the resource types those headers name. Until the map is read, a resource entry can be described as a container and nothing more, which is why it carries no extension.
+**Missing.** The page map at that offset, the resource headers it reaches, and the resource types those headers name. Until the map is read, a resource entry can be described as a container and nothing more: it carries the extension its type declares, which is a fact about the loader's naming, and no extension of its own.
 
 **Done when** a resource container can list its resources, each with its own type identifier and count, and the classification can report an asset class per resource instead of per entry.
 
-**Blocks.** The largest share of the sample. It is also the precondition for any resource viewer.
+**Blocks.** 1,138,382 entries, 90.7% of the installation. It is also the precondition for any resource viewer.
 
 ## 2. A bounded head read
 
-**Known.** Classifying one entry currently costs one decoded chunk, because the payload decoder decodes a chunk before handing out its first bytes. On large entries the first chunk is large.
+**Known.** Classifying one entry costs one decoded chunk, because the payload decoder decodes a chunk before handing out its first bytes. On large entries the first chunk is large.
 
 **Missing.** A read that stops after the requested bytes and does not decode past them, while keeping the exact-size and checksum checks that the decoder performs today.
 
-**Done when** a census of a full install is affordable: the current run is bounded to a small entry budget per root archive, and a complete count would take hours at the present cost per entry.
+**Done when** the census gets cheaper per entry. Completeness is no longer what this unlocks: with a release build the payload pass covered all 1,255,039 entries in about half an hour. What it would buy now is a lower cost per run and a head read that does not depend on how a chunk was stored.
 
-**Blocks.** Completeness of every measurement in this repository that samples entries.
+**Blocks.** Nothing outstanding. Every count in this repository is now a count of the installation, not of a budget.
 
 ## 3. Named signatures without a format
 
-**Known.** `MoVE`, `SGD5`, `MHIU` and `SPS1` start payloads and nothing else about them is established. `DDS ` and the PNG signature also appear.
+**Known.** `MoVE`, `SGD5`, `MHIU` and `SPS1` start payloads and nothing else about them is established: 443 `MoVE` payloads (all of them under type 64), two `MHIU`, two `SGD5` and one `SPS1`. `DDS ` and the PNG signature do not appear in this installation at all.
 
 **Missing.** Structure: version fields, section tables, sizes, and the relationship to the entry types they appear under.
 
@@ -34,7 +34,7 @@ Each item states what is known, what is missing, and what would count as done. C
 
 ## 4. Payloads that match nothing
 
-**Known.** A small number of decoded payloads match no signature. Their first 64 bytes are recorded in the matrix samples, so the bytes are available without a new run.
+**Known.** 3,047 entries were read and matched no signature. Their first 64 bytes are recorded in the matrix samples, so the bytes are available without a new run.
 
 **Missing.** Enough structure to say whether these are one family or several.
 
@@ -42,7 +42,7 @@ Each item states what is known, what is missing, and what would count as done. C
 
 ## 5. Transform behind the transform
 
-**Known.** A payload transform is required for a share of entries. Where the executable's key state is available the census decodes them; where it is not, the entry is reported as `transform-unavailable` with no format guess.
+**Known.** 1,398 entries carry the payload transform. Where the executable's key state is available the census decodes them; 750 did not verify and are reported as `blocked` with no format guess, and no entry in the installation is `transform-unavailable`.
 
 **Missing.** Nothing for the classification itself. The open work is the transform's own coverage across builds, which belongs to the cryptography documents.
 
@@ -50,8 +50,10 @@ Each item states what is known, what is missing, and what would count as done. C
 
 ## Rejected
 
-**A type table that maps entry types to formats or extensions.** The sample shows types that hold several formats and formats that hold several types, so any such table would be wrong for real entries. The only established mapping stays type 0 to `rpf`, and even that is applied only when the payload's own bytes are an RPF9 archive.
+**A table from observed types to formats.** Types hold several formats and formats appear under several types, so any such table would be wrong for the next entry. What the census publishes instead is what it observed under each type, in [entry-matrix.md](entry-matrix.md).
 
-**An extension inferred from a type when the payload is not read.** This is what made misidentified entries look resolved. The classification reports `extension: null` with a reason instead.
+**Reporting a declared extension as a verified asset class.** The engine's [type registry](type-registry.md) is a real table, recovered from the build, and the classification applies it. It is labelled `native` and the asset claim stays `unknown`, because the table says what the loader calls the type, not what these bytes are. Folding the two together is what made misidentified entries look resolved.
+
+**Inventing an extension for a type the build does not register.** Type 255 has none, and the classification says so with a reason instead of guessing.
 
 **Guessing a format from a partial match.** A short signature that is not unique to one format stays a named signature, not a format.

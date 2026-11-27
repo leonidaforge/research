@@ -258,13 +258,19 @@ Some earlier notes used "A" and "B" for `hdr[0x04]` and `hdr[0x08]`. Those lette
 
 **Old assumption.** A recognisable payload, or a known type, was enough to show a file extension.
 
-**Correction.** An extension is now applied only when the classification establishes it: the archive's own name, `rpf` for an RPF9 payload, `xml` for a validated document. Everything else is reported as unresolved with a reason, including a recognised format with no established extension and a resource container whose asset class is not identified. The sample's largest group is unresolved for exactly that reason (RPF9-F140, RPF9-F141).
+**Correction.** An extension is applied only when the classification establishes it: the archive's own name, `rpf` for an RPF9 payload, `xml` for a validated document. Everything else is reported as unresolved with a reason, including a recognised format with no established extension and a resource container whose asset class is not identified. The sample's largest group is unresolved for exactly that reason (RPF9-F140, RPF9-F141). The rule was widened later, when the engine's own table was recovered: a type's declared extension is applied and labelled as such, which is not the same as establishing it (see below).
 
 ## A head read was assumed to be cheap
 
 **Old assumption.** Reading the first bytes of an entry costs a few bytes.
 
-**Correction.** The payload decoder decodes a chunk before handing out its first byte, so classifying one entry can cost a whole chunk. A complete census of a large install is therefore not affordable today, and every measurement taken this way is bounded by an entry budget per root archive rather than complete. A bounded head read is the first item in the identification backlog (RPF9-F142).
+**Correction.** The payload decoder decodes a chunk before handing out its first byte, so classifying one entry can cost a whole chunk — that part stands. What did not stand is the conclusion drawn from it: that a complete census was unaffordable. Two full passes, one over metadata and one over every payload head, each covered all 1,255,039 entries of the installation and finished in 19 and 31 minutes with a release build. The 91-entries-per-second figure that made a complete run look out of reach came from a debug build; the same archive runs four times faster in release. No count in this repository is a budgeted sample any more (RPF9-F145, RPF9-F146). A bounded head read would still cut the cost, so it stays in the backlog, but as an optimisation rather than a precondition.
+
+## A declared extension was treated as an inference
+
+**Old assumption.** Any type-to-extension mapping could only come from observation, so applying one without reading the payload meant guessing.
+
+**Correction.** The engine carries its own table, recovered from the build (RPF9-F144), and the classification quotes it rather than inventing one. Each entry records where its extension came from (`original`, `native`, `payload`, `unresolved`), the asset claim stays `unknown`, and a payload that contradicts the declared family is reported as a conflict. The earlier statement that a resource container "carries no extension" was wrong for every type the build registers: 1,181,971 of the installation's 1,255,039 entries carry a declared extension, and the only entries without one are the 73,068 rows of type 255 (RPF9-F145).
 
 ## Open
 
