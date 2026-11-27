@@ -23,13 +23,38 @@ LFORGE=/path/to/lforge python tools/rpf9/census_all.py INSTALL_DIR EXECUTABLE OU
 python tools/rpf9/entry_matrix.py OUTPUT_DIR/census-merged.jsonl OUTPUT_DIR
 ```
 
-Every root archive gets the same entry budget, so the sample covers all roots rather
-than the first archive. `census_all.py` reports how many archives and entries each run
-covered and whether it stopped at a budget. `entry_matrix.py` writes `entry-matrix.md`
-and `entry-matrix.json`: one row per combination of entry type, identification, storage,
-transform, payload state, confidence, extension and capability, with the number of
-entries, the archives it was seen in and samples that name the row and show the first
-bytes of its decoded head.
+`census_all.py` reports how many archives and entries each root covered and whether it
+stopped at a budget. `entry_matrix.py` writes `entry-matrix.md` and `entry-matrix.json`:
+one row per combination of entry type, identification, storage, transform, payload
+state, structure claim, extension, extension provenance and capability, with the number
+of entries, the archives it was seen in and samples that name the row and show the first
+bytes of its decoded head. The Markdown also carries every coverage count, the per-root
+breakdown and the property distributions, so a document quoting a figure quotes a
+machine-written one.
+
+### Progress and resumption
+
+Each root gets `runs/<root>.journal.jsonl` from the census itself: one line per
+completed archive, written and synced before the run moves on. A root interrupted at
+archive N resumes at archive N instead of starting over.
+
+A line is reused only when all of these match:
+
+| Field      | Meaning                                                        |
+| ---------- | -------------------------------------------------------------- |
+| `schema`   | the merged-summary schema the driver writes                    |
+| `rules`    | the classification rule set                                    |
+| `registry` | the executable build the native type registry came from        |
+| `mode`     | `metadata-only` or `payload`: different investigations         |
+| `limits`   | depth, archive, entry, nested-byte and spool-byte limits       |
+| `build`    | SHA-256 of the game executable the driver was given            |
+| identity   | SHA-256 of the above plus the root's size and modification time |
+
+The census gives each line an opaque `--journal-identity`, which is that last SHA-256.
+A record cut short by a limit carries `complete: false` and is walked again; a record
+from another identity is ignored. `journal.jsonl` in the output directory holds one
+line per completed root, and a root is only reused from it when its identity matches
+and it did not stop at a limit.
 
 ## Framing survey
 

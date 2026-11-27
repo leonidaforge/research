@@ -2,11 +2,12 @@
 
 Reads the summary record of a `census_all.py` run and writes:
 
-- `entry-matrix.json`: the combinations with their samples and coverage;
-- `entry-matrix.md`: the same as Markdown, one table per entry type and a
-  sample block for every combination, so no combination loses its evidence.
+- `<name>.json`: the combinations with their samples, coverage and type summary;
+- `<name>.md`: the same as Markdown: the coverage counts, the per-root table, the
+  type summary, the distributions, one table per entry type and a sample block
+  for every combination, so no combination loses its evidence.
 
-Usage: python entry_matrix.py <census-merged.jsonl> <output-directory>
+Usage: python entry_matrix.py <census-merged.jsonl> <output-directory> [NAME]
 """
 
 import io
@@ -44,12 +45,15 @@ def json_document(summary, combinations):
         'schema': 'leonida-forge.rpf9-entry-matrix/2',
         'census': summary['schema'],
         'archive_roots': summary.get('archive_roots') or [summary.get('root')],
+        'roots_detail': summary.get('roots_detail'),
         'archives': summary['archives'],
         'entries': summary['entries'],
         'stopped': summary['stopped'],
         'complete': summary.get('complete'),
         'coverage': summary.get('coverage'),
+        'outcomes': summary.get('outcomes'),
         'types': summary['types'],
+        'type_summary': type_summary(combinations),
         'combinations': combinations,
         'failures': summary['failures'],
     }
@@ -119,6 +123,83 @@ def distribution(combinations, field):
     return sorted(totals.items(), key=lambda item: (-item[1], str(item[0])))
 
 
+def tally(target, value, entries):
+    if value is None:
+        value = '-'
+    target[value] = target.get(value, 0) + entries
+
+
+def type_summary(combinations):
+    """One row per entry type: what the type declared and what its rows were.
+
+    The declared extensions come from the registry (the type's own property);
+    the payload extensions come from the bytes. Keeping them apart is what stops
+    a registry entry from being reported as a verified asset class.
+    """
+    types = {}
+    for combination in combinations:
+        row = types.setdefault(
+            combination['type'],
+            {
+                'type': combination['type'],
+                'entries': 0,
+                'archives': 0,
+                'identifications': {},
+                'outcomes': {},
+                'declared': {},
+                'payload': {},
+            },
+        )
+        entries = combination['entries']
+        row['entries'] += entries
+        row['archives'] = max(row['archives'], combination.get('archive_count') or 0)
+        tally(row['identifications'], combination['identification'], entries)
+        tally(row['outcomes'], combination.get('outcome'), entries)
+        provenance = combination.get('extension_provenance')
+        extension = combination['extension']
+        if provenance == 'native' and extension != '-':
+            tally(row['declared'], extension, entries)
+        if provenance == 'payload' and extension != '-':
+            tally(row['payload'], extension, entries)
+    return sorted(types.values(), key=lambda row: (row['type'] is None, row['type']))
+
+
+def type_table(combinations):
+    summary = type_summary(combinations)
+    if not summary:
+        return []
+    lines = [
+        '## Type summary',
+        '',
+        'Sorted by type id. `declared` is the extension the engine registers for the type;',
+        '`from payload` is an extension the bytes themselves established.',
+        '',
+        '| Type | Entries | Declared | From payload | Outcomes |',
+        '| ---- | ------: | -------- | ------------ | -------- |',
+    ]
+    for row in summary:
+        declared = ', '.join(
+            '`{}` {}'.format(name, entries) for name, entries in sorted(row['declared'].items())
+        )
+        payload = ', '.join(
+            '`{}` {}'.format(name, entries) for name, entries in sorted(row['payload'].items())
+        )
+        outcomes = ', '.join(
+            '{} {}'.format(name, entries) for name, entries in sorted(row['outcomes'].items())
+        )
+        lines.append(
+            '| {} | {} | {} | {} | {} |'.format(
+                cell(row['type']),
+                row['entries'],
+                declared or '-',
+                payload or '-',
+                outcomes or '-',
+            )
+        )
+    lines.append('')
+    return lines
+
+
 def distribution_tables(combinations):
     tables = (
         ('Identification kind', lambda item: kind(item['identification'])),
@@ -183,7 +264,7 @@ def samples(combination):
     return '\n'.join(lines)
 
 
-def document(summary, combinations):
+def document(summary, combinations, title='RPF9 entry matrix'):
     stopped = summary['stopped']
     if isinstance(stopped, dict):
         stopped_text = ', '.join(
@@ -194,15 +275,15 @@ def document(summary, combinations):
     roots = summary.get('archive_roots') or [summary.get('root')]
     coverage = summary.get('coverage') or {}
     parts = [
-        '# RPF9 entry matrix',
+        '# ' + title,
         '',
         'Machine-written from a `lforge archive census` run. Every row is one',
-        'combination of properties observed in the sample: the entry type stored in',
+        'combination of properties observed in the run: the entry type stored in',
         'the table of contents, the identification made from the decoded head, a',
         'normalised shape of that head, the storage shape, whether the payload',
         'transform applies, whether the payload decoded, whether the structure was',
-        'validated, what the application can do with the entry, and the extension',
-        'the classification allowed.',
+        'validated, what the application can do with the entry, the extension the',
+        'classification allowed and where that extension came from.',
         '',
         '## Coverage',
         '',
@@ -228,6 +309,7 @@ def document(summary, combinations):
         ]
     )
     parts.extend(roots_table(summary))
+    parts.extend(type_table(combinations))
     parts.extend(distribution_tables(combinations))
     parts.extend(
         [
@@ -257,23 +339,26 @@ def document(summary, combinations):
 
 
 def main():
-    if len(sys.argv) != 3:
+    if len(sys.argv) not in (3, 4):
         raise SystemExit(__doc__)
     source, directory = sys.argv[1], sys.argv[2]
+    name = sys.argv[3] if len(sys.argv) == 4 else 'entry-matrix'
     summary = load(source)
     combinations = rows(summary)
     os.makedirs(directory, exist_ok=True)
     with io.open(
-        os.path.join(directory, 'entry-matrix.json'), 'w', encoding='utf-8', newline='\n'
+        os.path.join(directory, name + '.json'), 'w', encoding='utf-8', newline='\n'
     ) as handle:
         json.dump(json_document(summary, combinations), handle, indent=1)
         handle.write('\n')
     with io.open(
-        os.path.join(directory, 'entry-matrix.md'), 'w', encoding='utf-8', newline='\n'
+        os.path.join(directory, name + '.md'), 'w', encoding='utf-8', newline='\n'
     ) as handle:
-        handle.write(document(summary, combinations))
+        handle.write(document(summary, combinations, 'RPF9 ' + name.replace('-', ' ')))
         handle.write('\n')
-    print('{} combinations, {} entries'.format(len(combinations), summary['entries']))
+    print(
+        '{} combinations, {} entries -> {}.md'.format(len(combinations), summary['entries'], name)
+    )
 
 
 if __name__ == '__main__':

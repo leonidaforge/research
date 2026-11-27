@@ -6,7 +6,7 @@ An RPF9 row does not say what it holds. The table of contents gives a numeric ty
 2. **What the payload is.** A format, a resource container, a text document, or nothing recognisable.
 3. **What the application can do with it.** Open it as an archive, parse it structurally, show it as text, read a resource, or only show its bytes.
 
-Treating these as one property is the mistake this document exists to prevent. Type 255 holds payloads of every kind. Type 0 usually holds a nested archive and, in the sample below, also holds a `PSIN` payload. A type 5 entry is a candidate for the texture viewer only because the type was named that way in observations, not because the bytes are known to be a texture dictionary.
+Treating these as one property is the mistake this document exists to prevent. Type 255 holds payloads of every kind. Type 0 is registered as `rpf` and holds archives, but a type-0 row is an archive only when its payload is one: a synthetic fixture whose type-0 row holds a `PSIN` payload is classified as structural, and the census keeps such a row apart from the archives it also counts. A type 5 row is a candidate for the texture viewer because the recovered [type registry](type-registry.md) calls the type `ztd`; that is a declaration about the loader's naming, not evidence about the bytes.
 
 ## Where the evidence comes from
 
@@ -77,6 +77,22 @@ One practical consequence, used by the census: when every chunk of an entry copi
 
 Only `decoded` entries are identified. A state that is not `decoded` is a fact about the archive, not a guess about the payload: the entry is reported as unidentified with the reason, never as an unknown format.
 
+## Terminal outcome
+
+Every entry ends an investigation with exactly one outcome, and the census counts them so the counts add up to the entry count. This is what makes an inventory exhaustive rather than a pile of categories: a row cannot be counted twice and cannot be left out.
+
+| Outcome                 | Established                                                        |
+| ----------------------- | ------------------------------------------------------------------ |
+| `identified`            | The payload's own framing was walked and the container named        |
+| `partially-identified`  | Something about the payload, but not the container                  |
+| `unresolved`            | The payload was read and nothing in it was recognised               |
+| `undecodable`           | The storage cannot be decoded                                       |
+| `transform-unavailable` | The payload is behind the transform and no key state is available   |
+| `malformed`             | The metadata describing the payload is malformed                    |
+| `blocked`               | The payload was not read, or the transform did not verify or run    |
+
+`partially-identified` covers the three shapes that stop short of a container: a magic-only match such as `RPF9`, a resource header whose page map was not read, and a payload that looks like XML without parsing as XML. `blocked` is the honest label for a metadata pass and for a transform that failed to verify: nothing was established about the bytes, and the reason field says why.
+
 ## Identification
 
 | Kind           | What it records                                      |
@@ -89,7 +105,7 @@ Only `decoded` entries are identified. A state that is not `decoded` is a fact a
 
 ### The resource header
 
-Every resource-shaped payload in the sample starts with the same two 64-bit words:
+Every resource-shaped payload read so far starts with the same two 64-bit words:
 
 | Offset  | Width | Value                                                                      |
 | ------- | ----- | -------------------------------------------------------------------------- |
