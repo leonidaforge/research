@@ -290,6 +290,29 @@ Some earlier notes used "A" and "B" for `hdr[0x04]` and `hdr[0x08]`. Those lette
 
 **Correction.** A census now publishes its summary atomically — written beside the target and renamed into place — and exits non-zero when it stopped at a limit or could not read an archive. The driver requires a zero exit status, a `completion.complete` record, a matching header schema and scan mode, and binds a reused summary to a SHA-256 of its own bytes, its size and the root fingerprint the journal recorded. A journal record alone no longer authorizes a summary, and the merged result names the reasons it is not a census of the installation instead of only saying that it is not.
 
+## Chunk encoding 4 was a prefix, not a compression algorithm
+
+**Old assumption.** Encoding 4 was treated as unsupported storage. The census
+reported 14,432 entries as `undecodable`, and the handoff described the error as
+"unrecognised chunk encoding", which suggested the chunk method or the
+compression algorithm was unknown.
+
+**Correction.** The decoder already parsed the encoding-4 chunk table. It
+applied the 16-byte stored prefix only to encoding 2, so chunk 0 began 16 bytes
+early on 14,432 rows and zlib read zero bytes as a header. The error was
+therefore a framing error with a DEFLATE message, not a missing codec. The
+prefix length is the entry's stored size minus the sum of the chunk stored
+sizes; it is 0 on 56 rows and 16 on 14,432, and every prefixed row stores zero
+bytes there. The decoder now derives it from the sizes (RPF9-F150). All 14,488
+entries decode to their declared logical size, and the 56 that decoded before
+the change produce identical bytes (RPF9-F151, RPF9-F152).
+
+**Correction.** `archive ls` reported `contents.state = "decoded"` for a chunked
+row whose chunk table validated but whose chunk was never decoded. The state is
+now `validated`, and `decoded` is reserved for a read that returned the payload.
+A full-decode command reports the digest, size match and failure category
+(RPF9-F153).
+
 ## Open
 
 - Meaning of descriptor `+0x08`, and any use of `+0x12`.
@@ -298,7 +321,9 @@ Some earlier notes used "A" and "B" for `hdr[0x04]` and `hdr[0x08]`. Those lette
 - The stored state of the secondary area and of archives other than the inspected ones, and how many bytes of the primary area change. One earlier note called the primary regions "post-transform" from the order of initialization alone. The step 4 pass, the archive scan and the verified signature now confirm the primary area is stored transformed in the inspected archives (RPF9-F28, RPF9-F48, RPF9-F102).
 - Whether a second executable build registers the same keys or binds to the same archives. Cipher algorithms 1, 2 and `0x12`, whether the embedded schedule is the standard AES-256 expansion, and the role of the `B` trailer remain open.
 - The block program of the payload transform's algorithm `0x11`: its round structure, table roles and key use, without which no transformed payload can be decoded (RPF9-F117). The descriptor, the algorithm selection and the key state are established (RPF9-F114 to RPF9-F116). Payload bytes are not covered by the metadata signature.
-- The meaning of the 16-byte stored prefix before encoding-2 chunks (RPF9-F119).
+- The meaning of the 16-byte stored prefix before encoding-2 and some
+  encoding-4 chunks (RPF9-F119, RPF9-F124, RPF9-F150). Its length is known; its
+  content is only observed to be zero.
 - Directory structure outside the traced paths, and enumeration in the device layer or above.
 - CityHash32 identity of the fingerprint hash, the concrete startup fingerprint and the contents of `B` sub-block 9 in real archives.
 - Path normalization, the physical device implementation, and the mount prefixes the game uses.

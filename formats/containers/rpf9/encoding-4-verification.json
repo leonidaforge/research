@@ -1,0 +1,187 @@
+{
+ "archives": [
+  "levels.rpf!1029",
+  "levels.rpf!1091",
+  "levels.rpf!1549",
+  "levels.rpf!1719",
+  "levels.rpf!1806",
+  "levels.rpf!772",
+  "levels.rpf!927",
+  "pack/core_bvh4/core_bvh4.rpf!772"
+ ],
+ "chunk_counts": {
+  "1": 2134,
+  "2": 10409,
+  "3": 1315,
+  "4": 619,
+  "5": 9,
+  "6": 2
+ },
+ "digest_of_digests": "80c4ec5b0c49fd17235b93ac2568f62e467515abab70d891ac071a8bf7a76cb9",
+ "entries": 14488,
+ "identification": {
+  "format:psin": 55,
+  "none": 1,
+  "resource:segment-5": 14432
+ },
+ "layouts": {
+  "F": 56,
+  "R": 14432
+ },
+ "logical_bytes": 5470573199,
+ "max_logical": 20050112,
+ "methods": {
+  "0": 1,
+  "3": 2133,
+  "3,0": 381,
+  "3,0,3": 4,
+  "3,3": 10028,
+  "3,3,0": 4,
+  "3,3,3": 1307,
+  "3,3,3,3": 619,
+  "3,3,3,3,3": 9,
+  "3,3,3,3,3,3": 2
+ },
+ "min_logical": 15,
+ "note": "Every entry was decoded in full through a bounded stream. The complete per-entry inventory stays in the analysis directory; no payload bytes are published.",
+ "prefix_values": {
+  "": 56,
+  "00000000000000000000000000000000": 14432
+ },
+ "read_source": {
+  "main": 14488
+ },
+ "regression": {
+  "entries": 56,
+  "identical_bytes": 56,
+  "method": "baseline lforge-census.exe and the fixed build were compared by SHA-256"
+ },
+ "samples": [
+  {
+   "chain": "pack/core_bvh4/core_bvh4.rpf!772!0",
+   "chunk_count": 2,
+   "digest_sha256": "0dbbce63ca4a95b9541bf543777157c2434608c79c0d09b5ad7a390b99f2a048",
+   "extension": "zbdr",
+   "identification": "resource:segment-5",
+   "layout": "R",
+   "logical_size": 131280,
+   "methods": [
+    3,
+    3
+   ],
+   "prefix_hex": "00000000000000000000000000000000",
+   "stored_prefix": 16,
+   "stored_size": 5008,
+   "type": 15
+  },
+  {
+   "chain": "levels.rpf!1719!1429",
+   "chunk_count": 6,
+   "digest_sha256": "cbfa151bf3abc1de972596b86ed6b4337e8e4bac1200d4f994ea5e2588b6bcf3",
+   "extension": "zdd",
+   "identification": "resource:segment-5",
+   "layout": "R",
+   "logical_size": 20050112,
+   "methods": [
+    3,
+    3,
+    3,
+    3,
+    3,
+    3
+   ],
+   "prefix_hex": "00000000000000000000000000000000",
+   "stored_prefix": 16,
+   "stored_size": 6030096,
+   "type": 4
+  },
+  {
+   "chain": "levels.rpf!1029!4065",
+   "chunk_count": 1,
+   "digest_sha256": "e6574bf19c19c4e77dba77d4e8189e21f792dca20b138104e7c7a655f39b17c1",
+   "extension": "zmt",
+   "identification": "format:psin",
+   "layout": "F",
+   "logical_size": 2504,
+   "methods": [
+    3
+   ],
+   "prefix_hex": "",
+   "stored_prefix": 0,
+   "stored_size": 880,
+   "type": 11
+  },
+  {
+   "chain": "levels.rpf!1029!2750",
+   "chunk_count": 3,
+   "digest_sha256": "5d1a3d6914aa9749af841781197adeea161b464a30acf13007f7451dddce64ac",
+   "extension": "zmap",
+   "identification": "resource:segment-5",
+   "layout": "R",
+   "logical_size": 102272,
+   "methods": [
+    3,
+    0,
+    3
+   ],
+   "prefix_hex": "00000000000000000000000000000000",
+   "stored_prefix": 16,
+   "stored_size": 46448,
+   "type": 73
+  },
+  {
+   "chain": "levels.rpf!1091!0",
+   "chunk_count": 1,
+   "digest_sha256": "531df6482da9b87705cf8f097c7a5886f73e1c7b93374121d216e8b4cbc3bc5e",
+   "extension": null,
+   "identification": "none",
+   "layout": "F",
+   "logical_size": 15,
+   "methods": [
+    0
+   ],
+   "prefix_hex": "",
+   "stored_prefix": 0,
+   "stored_size": 16,
+   "type": 255
+  },
+  {
+   "chain": "levels.rpf!1806!0",
+   "chunk_count": 2,
+   "digest_sha256": "045b87392dea8c5b21a4321551de8500df0399f4729fe4bf69457e73156901c2",
+   "extension": "zdr",
+   "identification": "resource:segment-5",
+   "layout": "R",
+   "logical_size": 13552,
+   "methods": [
+    3,
+    3
+   ],
+   "prefix_hex": "00000000000000000000000000000000",
+   "stored_prefix": 16,
+   "stored_size": 4160,
+   "type": 2
+  }
+ ],
+ "schema": "leonida-forge.encoding-4-verification/1",
+ "stored_bytes": 1230134720,
+ "stored_prefix": {
+  "0": 56,
+  "16": 14432
+ },
+ "transform": {
+  "false": 14488
+ },
+ "types": {
+  "11": 88,
+  "15": 4768,
+  "16": 256,
+  "2": 3196,
+  "255": 1,
+  "4": 256,
+  "6": 1654,
+  "67": 9,
+  "73": 4087,
+  "74": 173
+ }
+}

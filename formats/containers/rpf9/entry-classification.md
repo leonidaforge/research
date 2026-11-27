@@ -70,12 +70,33 @@ One practical consequence, used by the census: when every chunk of an entry copi
 | State                   | Meaning                                                           |
 | ----------------------- | ----------------------------------------------------------------- |
 | `decoded`               | The decoded head was read                                         |
+| `not-read`              | No payload was read, as in a metadata pass                        |
 | `transform-unavailable` | The payload is behind the transform and no key state is available |
 | `transform-failed`      | The transform was available but did not verify or run             |
 | `undecodable`           | The storage cannot be decoded                                     |
 | `malformed`             | The metadata describing the payload is malformed                  |
 
 Only `decoded` entries are identified. A state that is not `decoded` is a fact about the archive, not a guess about the payload: the entry is reported as unidentified with the reason, never as an unknown format.
+
+### Listing state
+
+`archive ls` reports `contents.state` without decoding a payload:
+
+| State                    | Established                                                        |
+| ------------------------ | ------------------------------------------------------------------ |
+| `stored`                 | The stored bytes are the contents                                  |
+| `validated`              | The chunk table and its sizes fit the entry; no chunk was decoded  |
+| `transform_key_missing`  | The payload is transformed and no key state is available           |
+| `transform_available`    | The payload is transformed and a key state is available            |
+| `unsupported_transform`  | The transform's algorithm or descriptor is not supported           |
+| `unsupported_compression`| The storage cannot be decoded                                      |
+| `alternate_source`       | The entry reads through a companion that was not opened            |
+| `malformed`              | The metadata describing the payload is malformed                   |
+
+`validated` replaced the earlier `decoded`, which promised a decode the listing
+never performed: a row with a corrupt zlib stream was reported as `decoded`
+while extraction failed. `decoded` now means a read returned the payload, which
+`archive verify` and extraction establish (RPF9-F153).
 
 ## Terminal outcome
 
@@ -89,9 +110,10 @@ Every entry ends an investigation with exactly one outcome, and the census count
 | `undecodable`           | The storage cannot be decoded                                     |
 | `transform-unavailable` | The payload is behind the transform and no key state is available |
 | `malformed`             | The metadata describing the payload is malformed                  |
-| `blocked`               | The payload was not read, or the transform did not verify or run  |
+| `not-probed`            | No payload was read, so nothing about the bytes is established    |
+| `blocked`               | The payload was reached and could not be read                     |
 
-`partially-identified` covers the three shapes that stop short of a container: a magic-only match such as `RPF9`, a resource header whose page map was not read, and a payload that looks like XML without parsing as XML. `blocked` is the honest label for a metadata pass and for a transform that failed to verify: nothing was established about the bytes, and the reason field says why.
+`partially-identified` covers the three shapes that stop short of a container: a magic-only match such as `RPF9`, a resource header whose page map was not read, and a payload that looks like XML without parsing as XML. A metadata pass reports every entry as `not-probed`: it never claims that a payload was blocked. `blocked` is reserved for a payload that was reached and could not be read, which in this installation means a transform that did not verify.
 
 ## Identification
 
@@ -173,7 +195,7 @@ lforge archive census <root>.rpf --executable <game executable> --recursive \
     --max-nested-bytes 268435456 --max-spool-bytes 4294967296 --metadata-only
 ```
 
-The payload pass is the same command without `--metadata-only` and with room for what a payload read costs: `--max-archives 16384`, `--max-nested-bytes 2147483648`, `--max-spool-bytes 68719476736`. Reading payloads opens more nested archives, and larger ones, than reading tables of contents does.
+The payload pass is the same command without `--metadata-only` and with room for what a payload read costs: `--max-archives 8192`, `--max-nested-bytes 2147483648`, `--max-spool-bytes 68719476736`. Reading payloads opens more nested archives, and larger ones, than reading tables of contents does.
 
 Each root gets a journal of its own: one line per completed archive, written and synced before the run moves on. A line is keyed by a SHA-256 over the schema, the rule set, the registry build, the scan mode, every limit including the entry budget, the scanner's own digest, and the root's size, modification time and 1 MiB head and tail digests. That last part is a fingerprint, not a whole-file hash: a change in the middle of a root that alters neither end is not detected, which is why a reused line is also bound to the size and digest of the summary it came from. A line also names the summary it came from and that file's digest, so a journal is only reused for the scan that wrote it: a different build, a different budget or a different mode re-runs the root instead of crediting rows it never enumerated. A line cut short by an interruption is repaired at the next append, and a root interrupted at archive N resumes at archive N.
 
@@ -181,7 +203,7 @@ A summary is written to a temporary name and only replaces its target once its o
 
 Both passes are driven by `tools/rpf9/census_all.py`, and the machine-written documents are produced by `tools/rpf9/entry_matrix.py` from the merged census, so no figure below is copied by hand.
 
-The counts below were produced by one binary and one executable, and both are recorded in every journal line. The scanner was built from the identification branch as it stood before the branch was rebased, and its digest, not a commit id, is what identifies it: SHA-256 `d9620f6cde297a6c20723e4aa33e40c8f8cba12a801ddba8fedc0b62089fba35`. The executable was build `e95020b2`, SHA-256 `e95020b2fa4a721db3df59fdecf75621730ac559d8835252f6c3b658d5a08993`. Rebasing the branch onto a newer `main` changed no file of the census, the classification or the registry, so a rebuild produces a different scanner digest without changing what a census reports, and the figures were not recomputed for it. A scanner whose behaviour did change would produce a different digest, and every reused journal line would be rejected rather than mixed with old counts.
+The counts below were produced by one binary and one executable, and both are recorded in every journal line. The scanner that produced this payload pass is the build with the encoding-4 stored prefix: SHA-256 `ef1cde45d69162d01eaa14aa6a8bc21753d229d507c4e25108776a92ff7c36bd`. The executable was build `e95020b2`, SHA-256 `e95020b2fa4a721db3df59fdecf75621730ac559d8835252f6c3b658d5a08993`. The earlier payload pass used scanner `d9620f6c…`; its 14,432 `undecodable` rows are the encoding-4 population this pass decodes. A later build differs only in the verification command, not in the classification path; because the journal is keyed to the whole binary, a rebuilt scanner rejects the old journals and re-runs the roots rather than mixing the two counts.
 
 ### What the metadata pass establishes
 
@@ -224,23 +246,22 @@ It enumerated 1,255,039 entries in 4,373 archives, root by root the same numbers
 
 | Outcome                |   Entries | Share |
 | ---------------------- | --------: | ----: |
-| `partially-identified` | 1,143,183 | 91.1% |
+| `partially-identified` | 1,157,615 | 92.2% |
 | `identified`           |    93,627 |  7.5% |
-| `undecodable`          |    14,432 |  1.1% |
 | `unresolved`           |     3,047 |  0.2% |
 | `blocked`              |       750 |  0.1% |
 
-Every entry has exactly one outcome, and the five that occur add up to the entry count. Two outcomes of the vocabulary occur nowhere: no entry is `malformed`, and none is `transform-unavailable`. `blocked` is 750 entries behind the payload transform that did not verify; `undecodable` is 14,432 entries whose storage the decoder refused.
+Every entry has exactly one outcome, and the four that occur add up to the entry count. Three outcomes of the vocabulary occur nowhere: no entry is `undecodable`, none is `malformed`, and none is `transform-unavailable`. `blocked` is 750 entries behind the payload transform that did not verify; the encoding-4 rows that the previous pass reported as `undecodable` are now `partially-identified` resource containers (RPF9-F151).
 
 | Identification         |   Entries |
 | ---------------------- | --------: |
-| resource container     | 1,138,382 |
+| resource container     | 1,152,814 |
 | supported format       |    97,489 |
-| nothing recognised     |    18,229 |
+| nothing recognised     |     3,797 |
 | validated XML document |       491 |
 | named signature        |       448 |
 
-`nothing recognised` is 18,229 entries, but only 3,047 of them were read and found unrecognisable. The other 15,182 were never decoded: an entry that could not be read is reported as unidentified with the reason, and is not counted as a negative result about its bytes.
+`nothing recognised` is 3,797 entries, of which 3,047 were read and found unrecognisable. The other 750 were reached and could not be read: they are behind the transform that did not verify, and are not counted as a negative result about their bytes.
 
 | Format | Entries |
 | ------ | ------: |
@@ -252,13 +273,13 @@ Every entry has exactly one outcome, and the five that occur add up to the entry
 | GFx    |      87 |
 | `EDUP` |       5 |
 
-The 4,351 RPF9 rows are the whole of the nesting in this installation: the passes opened exactly 4,351 nested archives, every one of them through a type-0 row. Opening an archive is a separate fact from recognising its magic. The 4,351 RPF9 rows are `partially-identified` on the strength of a four-byte match; that all 4,351 then authenticated and were walked is what `archives_opened` records, and it is the stronger claim. No other entry that was _read_ holds an archive. Entries the passes could not read (15,182) are not evidence either way, and none of them is claimed to hold one.
+The 4,351 RPF9 rows are the whole of the nesting in this installation: the passes opened exactly 4,351 nested archives, every one of them through a type-0 row. Opening an archive is a separate fact from recognising its magic. The 4,351 RPF9 rows are `partially-identified` on the strength of a four-byte match; that all 4,351 then authenticated and were walked is what `archives_opened` records, and it is the stronger claim. No other entry that was _read_ holds an archive. The 750 entries the payload pass could not read are not evidence either way, and none of them is claimed to hold one.
 
 | Capability  |   Entries |
 | ----------- | --------: |
-| resource    | 1,138,382 |
+| resource    | 1,152,814 |
 | structural  |    93,138 |
-| unavailable |    15,182 |
+| unavailable |       750 |
 | archive     |     4,351 |
 | bytes       |     3,495 |
 | text        |       491 |
@@ -297,7 +318,7 @@ Both passes ran against the same release build, one root archive at a time, on o
 | Pass     | Wall clock  |   Entries | Entries per second | Archives per second |
 | -------- | ----------- | --------: | -----------------: | ------------------: |
 | metadata | 20 min 28 s | 1,255,039 |              1,022 |                 3.6 |
-| payload  | 26 min 7 s  | 1,255,039 |                801 |                 2.8 |
+| payload  | 29 min 31 s | 1,255,039 |                709 |                 2.5 |
 
 Each pass ran on its own, from an empty output directory, so neither figure shares the machine with the other. The cost is per entry, not per byte: classifying an entry decodes one chunk before it can read the first 64 bytes, and that chunk's size is what the archive chose, not what the census asked for. An earlier note in this repository measured 91 entries per second; that figure came from a debug build. The same archive taken with a release build is four times faster, which is why a complete count is now affordable and why no figure here is a budgeted sample.
 

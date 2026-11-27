@@ -4,7 +4,11 @@ Work that the classification in [entry-classification.md](entry-classification.m
 
 Each item states what is known, what is missing, and what would count as done. Counts are the inventory's: 1,255,039 entries in 4,373 archives, every one of them classified and given an outcome.
 
-Five findings the census measured but did not solve have their own tasks in [identification-follow-up.md](identification-follow-up.md): chunk encoding 4, the payload transform failures, resource structures, type 255, and the newly observed types.
+The five findings that the census measured now have their own tasks in
+[identification-follow-up.md](identification-follow-up.md). Chunk encoding 4 is
+solved: all 14,488 entries decode ([chunk-encoding-4.md](chunk-encoding-4.md)).
+The payload transform failures, resource structures, type 255 and the newly
+observed types remain open.
 
 ## 1. Resource containers
 

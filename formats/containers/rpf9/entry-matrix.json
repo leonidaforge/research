@@ -177,17 +177,17 @@
  },
  "coverage": {
   "archives_opened": 4373,
-  "containers_identified": 1138382,
+  "containers_identified": 1152814,
   "declared_asset_classes": 1181971,
-  "entries_decoded": 1239857,
+  "entries_decoded": 1254289,
   "entries_enumerated": 1255039,
   "entries_probed": 1255039,
-  "entries_undecoded": 15182,
+  "entries_undecoded": 750,
   "failed_archives": 0,
   "nested_archives_opened": 4351,
   "rejected_archive_candidates": 0,
   "structures_verified": 93627,
-  "unresolved_formats": 18229,
+  "unresolved_formats": 3797,
   "roots_discovered": 22,
   "roots_opened": 22,
   "failed_roots": 0,
@@ -196,8 +196,7 @@
  "outcomes": {
   "blocked": 750,
   "identified": 93627,
-  "partially-identified": 1143183,
-  "undecodable": 14432,
+  "partially-identified": 1157615,
   "unresolved": 3047
  },
  "types": [
@@ -452,8 +451,7 @@
    "archives": 1289,
    "identifications": {},
    "outcomes": {
-    "partially-identified": 164701,
-    "undecodable": 3196
+    "partially-identified": 167897
    },
    "declared": {
     "zdr": 167897
@@ -479,8 +477,7 @@
    "archives": 179,
    "identifications": {},
    "outcomes": {
-    "partially-identified": 48328,
-    "undecodable": 256
+    "partially-identified": 48584
    },
    "declared": {
     "zdd": 48584
@@ -506,8 +503,7 @@
    "archives": 970,
    "identifications": {},
    "outcomes": {
-    "partially-identified": 90545,
-    "undecodable": 1654
+    "partially-identified": 92199
    },
    "declared": {
     "zbn": 92199
@@ -520,9 +516,8 @@
    "archives": 422,
    "identifications": {},
    "outcomes": {
-    "partially-identified": 28295,
+    "partially-identified": 28328,
     "identified": 20280,
-    "undecodable": 33,
     "blocked": 4
    },
    "declared": {
@@ -549,8 +544,7 @@
    "archives": 1204,
    "identifications": {},
    "outcomes": {
-    "partially-identified": 245666,
-    "undecodable": 4768
+    "partially-identified": 250434
    },
    "declared": {
     "zbdr": 250434
@@ -563,8 +557,7 @@
    "archives": 132,
    "identifications": {},
    "outcomes": {
-    "partially-identified": 22126,
-    "undecodable": 256
+    "partially-identified": 22382
    },
    "declared": {
     "zbdd": 22382
@@ -629,8 +622,7 @@
    "archives": 384,
    "identifications": {},
    "outcomes": {
-    "partially-identified": 62375,
-    "undecodable": 9
+    "partially-identified": 62384
    },
    "declared": {
     "zcd": 62384
@@ -682,8 +674,7 @@
    "archives": 316,
    "identifications": {},
    "outcomes": {
-    "partially-identified": 161985,
-    "undecodable": 4087
+    "partially-identified": 166072
    },
    "declared": {
     "zmap": 166072
@@ -696,8 +687,7 @@
    "archives": 591,
    "identifications": {},
    "outcomes": {
-    "partially-identified": 6135,
-    "undecodable": 173
+    "partially-identified": 6308
    },
    "declared": {
     "ztyp": 6308
@@ -1439,30 +1429,30 @@
     "levels.rpf!1719",
     "levels.rpf!1806"
    ],
-   "capability": "unavailable",
-   "entries": 3196,
+   "capability": "resource",
+   "entries": 3017,
    "extension": "zdr",
    "extension_provenance": "native",
-   "identification": "none",
-   "outcome": "undecodable",
-   "payload": "undecodable",
+   "identification": "resource:segment-5",
+   "outcome": "partially-identified",
+   "payload": "decoded",
    "samples": [
     {
      "archive": "levels.rpf!1719",
      "chain": "levels.rpf!1719!4",
-     "head": "",
+     "head": "00000000000000006055005000000000b04f0050000000000000000000000000",
      "size": 54928
     },
     {
      "archive": "levels.rpf!1719",
      "chain": "levels.rpf!1719!5",
-     "head": "",
+     "head": "0000000000000000b00d005000000000900c0050000000000000000000000000",
      "size": 5376
     },
     {
      "archive": "levels.rpf!1719",
      "chain": "levels.rpf!1719!6",
-     "head": "",
+     "head": "0000000000000000000e005000000000e00c0050000000000000000000000000",
      "size": 4992
     }
    ],
@@ -1470,7 +1460,45 @@
    "structure": "unknown",
    "transform": false,
    "type": 2,
-   "variant": "empty"
+   "variant": "resource:s5:ptr:seg5+zero"
+  },
+  {
+   "archive_count": 1,
+   "archives": [
+    "levels.rpf!1719"
+   ],
+   "capability": "resource",
+   "entries": 179,
+   "extension": "zdr",
+   "extension_provenance": "native",
+   "identification": "resource:segment-5",
+   "outcome": "partially-identified",
+   "payload": "decoded",
+   "samples": [
+    {
+     "archive": "levels.rpf!1719",
+     "chain": "levels.rpf!1719!31",
+     "head": "0000000000000000e00f005000000000d00d0050000000004008005000000000",
+     "size": 24272
+    },
+    {
+     "archive": "levels.rpf!1719",
+     "chain": "levels.rpf!1719!90",
+     "head": "0000000000000000d015005000000000f012005000000000300c005000000000",
+     "size": 62704
+    },
+    {
+     "archive": "levels.rpf!1719",
+     "chain": "levels.rpf!1719!107",
+     "head": "0000000000000000e00f005000000000d00d0050000000004008005000000000",
+     "size": 21472
+    }
+   ],
+   "storage": "chunked-4",
+   "structure": "unknown",
+   "transform": false,
+   "type": 2,
+   "variant": "resource:s5:ptr:seg5+ptr:seg5"
   },
   {
    "archive_count": 259,
@@ -1786,30 +1814,30 @@
    "archives": [
     "levels.rpf!1719"
    ],
-   "capability": "unavailable",
+   "capability": "resource",
    "entries": 256,
    "extension": "zdd",
    "extension_provenance": "native",
-   "identification": "none",
-   "outcome": "undecodable",
-   "payload": "undecodable",
+   "identification": "resource:segment-5",
+   "outcome": "partially-identified",
+   "payload": "decoded",
    "samples": [
     {
      "archive": "levels.rpf!1719",
      "chain": "levels.rpf!1719!7",
-     "head": "",
+     "head": "000000000000000000ad00500000000000000000000000000100000000000000",
      "size": 436656
     },
     {
      "archive": "levels.rpf!1719",
      "chain": "levels.rpf!1719!12",
-     "head": "",
+     "head": "0000000000000000502900500000000000000000000000000100000000000000",
      "size": 19184
     },
     {
      "archive": "levels.rpf!1719",
      "chain": "levels.rpf!1719!25",
-     "head": "",
+     "head": "0000000000000000c01000500000000000000000000000000100000000000000",
      "size": 11504
     }
    ],
@@ -1817,7 +1845,7 @@
    "structure": "unknown",
    "transform": false,
    "type": 4,
-   "variant": "empty"
+   "variant": "resource:s5:zero+small"
   },
   {
    "archive_count": 33,
@@ -2022,30 +2050,30 @@
    "archives": [
     "levels.rpf!1719"
    ],
-   "capability": "unavailable",
+   "capability": "resource",
    "entries": 1654,
    "extension": "zbn",
    "extension_provenance": "native",
-   "identification": "none",
-   "outcome": "undecodable",
-   "payload": "undecodable",
+   "identification": "resource:segment-5",
+   "outcome": "partially-identified",
+   "payload": "decoded",
    "samples": [
     {
      "archive": "levels.rpf!1719",
      "chain": "levels.rpf!1719!0",
-     "head": "",
+     "head": "0000000000000000a0f4005000000000060100003e0280410000000000000000",
      "size": 77280
     },
     {
      "archive": "levels.rpf!1719",
      "chain": "levels.rpf!1719!1",
-     "head": "",
+     "head": "00000000000000004094005000000000060100005cda89410000000000000000",
      "size": 38048
     },
     {
      "archive": "levels.rpf!1719",
      "chain": "levels.rpf!1719!2",
-     "head": "",
+     "head": "0000000000000000f0f905500000000006010000b6e1dd410000000000000000",
      "size": 405888
     }
    ],
@@ -2053,7 +2081,7 @@
    "structure": "unknown",
    "transform": false,
    "type": 6,
-   "variant": "empty"
+   "variant": "resource:s5:small+zero"
   },
   {
    "archive_count": 202,
@@ -2754,30 +2782,30 @@
    "archives": [
     "levels.rpf!1029"
    ],
-   "capability": "unavailable",
+   "capability": "resource",
    "entries": 33,
    "extension": "zmt",
    "extension_provenance": "native",
-   "identification": "none",
-   "outcome": "undecodable",
-   "payload": "undecodable",
+   "identification": "resource:segment-5",
+   "outcome": "partially-identified",
+   "payload": "decoded",
    "samples": [
     {
      "archive": "levels.rpf!1029",
      "chain": "levels.rpf!1029!4071",
-     "head": "",
+     "head": "00000000000000006011005000000000304452507a0000000000000000000000",
      "size": 5136
     },
     {
      "archive": "levels.rpf!1029",
      "chain": "levels.rpf!1029!4074",
-     "head": "",
+     "head": "0000000000000000b028005000000000304452507a0000000000000000000000",
      "size": 11104
     },
     {
      "archive": "levels.rpf!1029",
      "chain": "levels.rpf!1029!4085",
-     "head": "",
+     "head": "00000000000000000012005000000000304452507a0000000000000000000000",
      "size": 5296
     }
    ],
@@ -2785,7 +2813,7 @@
    "structure": "unknown",
    "transform": false,
    "type": 11,
-   "variant": "empty"
+   "variant": "resource:s5:ptr:seg5+zero"
   },
   {
    "archive_count": 4,
@@ -2974,30 +3002,30 @@
    "archives": [
     "pack/core_bvh4/core_bvh4.rpf!772"
    ],
-   "capability": "unavailable",
+   "capability": "resource",
    "entries": 4768,
    "extension": "zbdr",
    "extension_provenance": "native",
-   "identification": "none",
-   "outcome": "undecodable",
-   "payload": "undecodable",
+   "identification": "resource:segment-5",
+   "outcome": "partially-identified",
+   "payload": "decoded",
    "samples": [
     {
      "archive": "pack/core_bvh4/core_bvh4.rpf!772",
      "chain": "pack/core_bvh4/core_bvh4.rpf!772!0",
-     "head": "",
+     "head": "000000000000000080000050000000000100000000000000a000005000000000",
      "size": 131280
     },
     {
      "archive": "pack/core_bvh4/core_bvh4.rpf!772",
      "chain": "pack/core_bvh4/core_bvh4.rpf!772!1",
-     "head": "",
+     "head": "000000000000000080000050000000000100000000000000a000005000000000",
      "size": 196816
     },
     {
      "archive": "pack/core_bvh4/core_bvh4.rpf!772",
      "chain": "pack/core_bvh4/core_bvh4.rpf!772!2",
-     "head": "",
+     "head": "000000000000000080000050000000000100000000000000a000005000000000",
      "size": 11216
     }
    ],
@@ -3005,7 +3033,7 @@
    "structure": "unknown",
    "transform": false,
    "type": 15,
-   "variant": "empty"
+   "variant": "resource:s5:small+ptr:seg5"
   },
   {
    "archive_count": 131,
@@ -3075,30 +3103,30 @@
    "archives": [
     "pack/core_bvh4/core_bvh4.rpf!772"
    ],
-   "capability": "unavailable",
+   "capability": "resource",
    "entries": 256,
    "extension": "zbdd",
    "extension_provenance": "native",
-   "identification": "none",
-   "outcome": "undecodable",
-   "payload": "undecodable",
+   "identification": "resource:segment-5",
+   "outcome": "partially-identified",
+   "payload": "decoded",
    "samples": [
     {
      "archive": "pack/core_bvh4/core_bvh4.rpf!772",
      "chain": "pack/core_bvh4/core_bvh4.rpf!772!8",
-     "head": "",
+     "head": "0000000000000000300100500000000000000000000000000100000000000000",
      "size": 368
     },
     {
      "archive": "pack/core_bvh4/core_bvh4.rpf!772",
      "chain": "pack/core_bvh4/core_bvh4.rpf!772!13",
-     "head": "",
+     "head": "0000000000000000a00000500000000000000000000000000100000000000000",
      "size": 240
     },
     {
      "archive": "pack/core_bvh4/core_bvh4.rpf!772",
      "chain": "pack/core_bvh4/core_bvh4.rpf!772!31",
-     "head": "",
+     "head": "0000000000000000600000500000000000000000000000000100000000000000",
      "size": 160
     }
    ],
@@ -3106,7 +3134,7 @@
    "structure": "unknown",
    "transform": false,
    "type": 16,
-   "variant": "empty"
+   "variant": "resource:s5:zero+small"
   },
   {
    "archive_count": 263,
@@ -3490,30 +3518,30 @@
    "archives": [
     "levels.rpf!1719"
    ],
-   "capability": "unavailable",
+   "capability": "resource",
    "entries": 9,
    "extension": "zcd",
    "extension_provenance": "native",
-   "identification": "none",
-   "outcome": "undecodable",
-   "payload": "undecodable",
+   "identification": "resource:segment-5",
+   "outcome": "partially-identified",
+   "payload": "decoded",
    "samples": [
     {
      "archive": "levels.rpf!1719",
      "chain": "levels.rpf!1719!4983",
-     "head": "",
+     "head": "0000000000000000500900500000000000000000000000000000000000000000",
      "size": 2480
     },
     {
      "archive": "levels.rpf!1719",
      "chain": "levels.rpf!1719!4984",
-     "head": "",
+     "head": "0000000000000000c00800500000000000000000000000000000000000000000",
      "size": 2336
     },
     {
      "archive": "levels.rpf!1719",
      "chain": "levels.rpf!1719!4985",
-     "head": "",
+     "head": "0000000000000000800500500000000000000000000000000000000000000000",
      "size": 1488
     }
    ],
@@ -3521,7 +3549,7 @@
    "structure": "unknown",
    "transform": false,
    "type": 67,
-   "variant": "empty"
+   "variant": "resource:s5:zero+zero"
   },
   {
    "archive_count": 1,
@@ -4011,30 +4039,30 @@
     "levels.rpf!772",
     "levels.rpf!927"
    ],
-   "capability": "unavailable",
+   "capability": "resource",
    "entries": 4087,
    "extension": "zmap",
    "extension_provenance": "native",
-   "identification": "none",
-   "outcome": "undecodable",
-   "payload": "undecodable",
+   "identification": "resource:segment-5",
+   "outcome": "partially-identified",
+   "payload": "decoded",
    "samples": [
     {
      "archive": "levels.rpf!772",
      "chain": "levels.rpf!772!0",
-     "head": "",
+     "head": "0000000000000000403c135000000000304452507a0000000000000000000000",
      "size": 1263616
     },
     {
      "archive": "levels.rpf!927",
      "chain": "levels.rpf!927!0",
-     "head": "",
+     "head": "0000000000000000e006005000000000304452507a0000000000000000000000",
      "size": 6384
     },
     {
      "archive": "levels.rpf!927",
      "chain": "levels.rpf!927!1",
-     "head": "",
+     "head": "0000000000000000900a005000000000304452507a0000000000000000000000",
      "size": 144448
     }
    ],
@@ -4042,7 +4070,7 @@
    "structure": "unknown",
    "transform": false,
    "type": 73,
-   "variant": "empty"
+   "variant": "resource:s5:ptr:seg5+zero"
   },
   {
    "archive_count": 589,
@@ -4149,30 +4177,30 @@
     "levels.rpf!1029",
     "levels.rpf!1549"
    ],
-   "capability": "unavailable",
+   "capability": "resource",
    "entries": 173,
    "extension": "ztyp",
    "extension_provenance": "native",
-   "identification": "none",
-   "outcome": "undecodable",
-   "payload": "undecodable",
+   "identification": "resource:segment-5",
+   "outcome": "partially-identified",
+   "payload": "decoded",
    "samples": [
     {
      "archive": "levels.rpf!1029",
      "chain": "levels.rpf!1029!4063",
-     "head": "",
+     "head": "00000000000000006008005000000000304452507a0000000000000000000000",
      "size": 4000
     },
     {
      "archive": "levels.rpf!1029",
      "chain": "levels.rpf!1029!4064",
-     "head": "",
+     "head": "0000000000000000e012005000000000304452507a0000000000000000000000",
      "size": 8576
     },
     {
      "archive": "levels.rpf!1029",
      "chain": "levels.rpf!1029!4067",
-     "head": "",
+     "head": "00000000000000000093015000000000304452507a0000000000000000000000",
      "size": 121120
     }
    ],
@@ -4180,7 +4208,7 @@
    "structure": "unknown",
    "transform": false,
    "type": 74,
-   "variant": "empty"
+   "variant": "resource:s5:ptr:seg5+zero"
   },
   {
    "archive_count": 1,

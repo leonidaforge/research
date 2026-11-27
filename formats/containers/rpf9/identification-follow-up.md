@@ -19,13 +19,22 @@ the installation directory without searching for it.
 
 ## A. Chunk-encoding 4
 
-**Established.** 14,488 entries are stored with chunk encoding 4. 14,432 of them
-cannot be decoded at all, and every entry the census could not decode uses this
-encoding: no undecodable entry has any other storage. The 56 that did decode are
-55 `PSIN` rows of type 11 and one 15-byte row of type 255 whose payload is the
-text `FORCE_EMPTY_RPF`.
+**Solved.** The framing is established and every entry decodes. Encoding 4 is a
+chunk-descriptor layout, not a compression algorithm: each chunk selects zlib or
+copy. The 16-byte stored prefix that the decoder applied only to encoding 2 is
+also present on encoding 4 when the entry's stored size exceeds the chunk stored
+sizes by 16. The decoder now derives that length from the sizes. All 14,488
+entries decoded to their declared logical size, and the 56 that decoded before
+the change produce the same bytes. See
+[chunk-encoding-4.md](chunk-encoding-4.md) and RPF9-F150 to RPF9-F153.
 
-| Type        | Entries | Outcome                       |
+**Established before the fix.** 14,488 entries are stored with chunk encoding 4.
+14,432 of them could not be decoded at all, and every entry the census could not
+decode used this encoding: no undecodable entry had any other storage. The 56
+that did decode were 55 `PSIN` rows of type 11 and one 15-byte row of type 255
+whose payload is the text `FORCE_EMPTY_RPF`.
+
+| Type        | Entries | Outcome before the fix        |
 | ----------- | ------: | ----------------------------- |
 | 15 (`zbdr`) |   4,768 | undecodable                   |
 | 73 (`zmap`) |   4,087 | undecodable                   |
@@ -49,16 +58,21 @@ Representative rows that did decode:
 - 55 rows of type 11: `levels.rpf!1029!4065` (2,504 bytes), head `5053494e…`
 - 1 row of type 255: `levels.rpf!1091!0` (15 bytes), head `FORCE_EMPTY_RPF`
 
-**Missing.** What encoding 4 means. The decoder has no branch for it, so the
-error is "unrecognised chunk encoding" rather than a structural finding: nothing
-is known about how those bytes are framed, compressed or padded.
+**Was missing.** What encoding 4 meant. The handoff described the decoder error
+as "unrecognised chunk encoding". The build does not contain that string: it
+accepted the encoding-4 table and then failed to inflate chunk 0 because it
+started the chunk 16 bytes too early. Nothing was known about how those bytes
+were framed, compressed or padded.
 
 **Done when** the encoding's framing is described from the bytes, at least one
 row decodes to a size that matches its location record, and the census reports
-those rows with a real payload state.
+those rows with a real payload state. **Met:** the framing is described in
+[chunk-encoding-4.md](chunk-encoding-4.md), all 14,488 rows decode to their
+declared sizes, and the census reports them as decoded.
 
 **Scope.** Do not add an encoding-4 path by guessing from the encoding number.
 Do not treat the 56 decodable rows as evidence about the 14,432 that are not.
+The 56 were used only as a regression set: their bytes must not change.
 
 ## B. Payload transform failures
 
