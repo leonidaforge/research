@@ -7,6 +7,7 @@ Everything here comes from payload data of the Scarlett build. No engine code pa
 Drawable object structure read from resources is in [drawables](drawables/README.md).
 Fragment roots and their member drawables are in [fragments](fragments/README.md).
 Drawable dictionaries, whose members are the multi-part drawable containers, are in [drawable-dictionaries](drawable-dictionaries/README.md).
+Skeleton records and their geometry associations are in [skeletons](skeletons/README.md).
 
 ## Status
 

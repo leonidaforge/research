@@ -131,8 +131,10 @@ invented. That is a statement about this implementation and about the samples:
 no root field was identified as a placement matrix, so there is nothing to apply
 in its place. It is not a claim that every fragment's geometry is authored in
 final resource space. The member's skeleton reference is recorded and not
-parsed, so a fragment whose parts are posed through a skeleton could render in
-its bind pose instead of its posed form; see the follow-up in [Limits](#limits).
+parsed *in this document*, so a fragment whose parts are posed through a
+skeleton could render in its bind pose instead of its posed form; see the
+follow-up in [Limits](#limits). The skeleton record itself is documented in
+[skeletons](../skeletons/README.md) (SKEL-F01 to SKEL-F14).
 
 The fragment scene is the member drawable's highest populated LOD. LOD
 selection happens inside the drawable, as it does for a resource-level drawable;
@@ -172,9 +174,11 @@ The skeleton reference is the notable difference from the two sampled
 resource-level drawables, where that slot is null. The reference is non-null in
 every row read, which is consistent with a rigged member drawable; whether the
 record is a skeleton and whether it changes the rendered pose is not
-established here. This document does not interpret the skeleton; it records that
-the reference exists in every row and that the static representation was
-validated without it.
+established *here*. This document does not interpret the skeleton; it records
+that the reference exists in every row and that the static representation was
+validated without it. The record is read in [skeletons](../skeletons/README.md):
+the sampled fragments store vertex positions in the bind pose, which is why the
+static representation validates without a pose transform.
 
 ## Static placement
 

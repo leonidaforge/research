@@ -20,6 +20,7 @@ Subjects:
 - [RAGE resources](resources/INDEX.md)
 - [Drawables](drawables/INDEX.md)
 - [Fragments](fragments/INDEX.md)
+- [Skeletons](skeletons/INDEX.md)
 - [Drawable dictionaries](drawable-dictionaries/INDEX.md)
 - [KB2j and KB2n](kb2j/INDEX.md)
 - [GFX\*](gfx/INDEX.md)
