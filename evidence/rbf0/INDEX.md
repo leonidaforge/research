@@ -9,12 +9,32 @@ Payload observations from the Scarlett build [e95020b2](../../builds/gta-vi/scar
 | RBF0 files | 447 decoded occurrences; 291 if the repeated row 0 archive extraction is counted once |
 | Unique payloads | 238 by SHA-256 of the decoded bytes |
 | Original nested archive | row 0 of `<GAME_ROOT>/data.rpf`, SHA-256 `91A236BCB4ECF96840BC0B70E22D1619C0FEDFA11976A336DE311A438214A09E`, 414544 bytes, 156 type 11 rows |
-| Original rows | 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 72, 78, 90, 141, 154, 155 |
+| Original rows | 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 72, 78, 90, 141, 154 and 155 of the nested archive |
 | Additional nested archives | 17 more RPF9 archives extracted from `<GAME_ROOT>/data.rpf` type 0 rows 1, 3, 7, 8, 9, 13, 14, 15, 16, 19, 20, 23, 31, 32, 35, 37 and 38, the nested archives at or below 2 MiB |
 | Top-level rows | all readable type 11 rows beginning with RBF0 from the 22 top-level archives enumerated in the [format document](../../formats/metadata/rbf0/README.md#population); 9 unique payloads |
 | Parse result | 238 of 238 unique payloads and 447 of 447 decoded occurrences consumed |
 
 The original 18 rows remain a subset. Later archives were added to test the grammar, not to estimate a population. The sample is a convenience sample, not a random one.
+
+## Census sample
+
+| Property | Value |
+| -------- | ----- |
+| Scope | `<GAME_ROOT>/data.rpf`, walked recursively |
+| Archives opened | 41 |
+| Entries walked | 23,075 |
+| Payloads beginning with `RBF0` | 1,462 |
+| Payloads decoded to the end of the root element | 1,462 |
+| Failures and limit refusals | 0 |
+| Unique payloads | 1,395 by SHA-256 of the decoded bytes |
+| Document sizes | 98 to 2,372,401 bytes |
+| Elements per document | 1 to 68,398 |
+| Names per document | 4 to 204 |
+| Deepest nesting | 35 levels |
+| Headers | 1,459 versioned, 3 versionless |
+| Distinct root names | 30 |
+
+This sample is the whole population of one archive, not a selection, and it is what RBF0-F18 to RBF0-F25 rest on. It was produced by the implementation's decoder, which walks the archive the way the CLI does and decodes every payload it reaches. Payloads outside `data.rpf` were walked separately under an entry bound; see RBF0-F26.
 
 ## Evidence types
 
@@ -45,6 +65,16 @@ The original 18 rows remain a subset. Later archives were added to test the gram
 | RBF0-F15 | An independent token parser consumes 238 of 238 unique payloads and 447 of 447 decoded occurrences with no unsupported token. The original 18 nested rows and the nine unique top-level RBF0 payloads are included in that population | `BINARY`, `CROSS_SAMPLE`, `SYNTHETIC` | Confirmed (sample) | Selection is not the full game population |
 | RBF0-F16 | Observed value widths: type 1 is the document number width (8 or 4 bytes); type 2 and type 3 carry no value bytes; type 4 is the document number width (8 or 4 bytes); type 5 is 12 bytes in its single observation; type 6 is `u16` length plus bytes. Counts are in the value table of the format document | `BINARY`, `CROSS_SAMPLE` | Confirmed (widths); Unknown (meaning) | Type 5 has one observation; types 2 and 3 have 21 observations together |
 | RBF0-F17 | The versionless header appears in 3 of 238 unique payloads. All three parse with 4-byte numbers and the same token grammar | `BINARY`, `CROSS_SAMPLE` | Confirmed (sample) | Whether it is a stable family or a rare variant is Unknown |
+| RBF0-F18 | An element is a node with a name, a counted attribute set and a body of nested elements, value tokens and text nodes in the order the bytes store them. Repeated sibling elements are how the format writes a list; the grammar has no array token. The largest document in `data.rpf` is 68,398 elements, mostly repeated children of one element | `BINARY`, `CROSS_SAMPLE` | Confirmed | Field meaning remains Unknown |
+| RBF0-F19 | A text node's declared length includes one trailing `0x00` that is not part of the text. 287,267 of 287,297 text nodes in `data.rpf` end with it; the 30 that do not are also not valid UTF-8, so no UTF-8 text value is observed without a terminator. The earlier reading that the declared bytes are the value verbatim is corrected | `BINARY`, `CROSS_SAMPLE` | Confirmed | One build; a text node is text only when it is UTF-8 |
+| RBF0-F20 | A type-6 value is `u16` length plus bytes with **no** terminator: none of 110,051 observations in `data.rpf` ends with a NUL, and 30 contain a NUL before their end or are not UTF-8. Type-6 values appear in body positions as well as counted attribute positions, which the earlier sample did not show | `BINARY`, `CROSS_SAMPLE` | Confirmed | Meaning of a type-6 value is Unknown; it reads as an engine class name in the observed families |
+| RBF0-F21 | Type 1 is a 64-bit integer and type 4 is an IEEE-754 binary64, both little-endian. `data.rpf` holds 30,663 class-1 values (30,655 fit in `i32`, 1,079 negative, range -2,125,891,426 to 4,289,044,108) and 39,291 class-4 values (all finite, 27,169 integral, range -431,602,080 to 65,536). The same number is written both ways: `1` is `01 00 00 00 00 00 00 00` as class 1 and `00 00 00 00 00 00 F0 3F` as class 4 | `BINARY`, `CROSS_SAMPLE` | Confirmed (encoding) | What a stored number describes is Unknown |
+| RBF0-F22 | Nesting reaches 35 levels and documents reach 2,372,401 bytes in `data.rpf`. A 32-level parse cap refused 4 payloads of the archive, so any decoder limit MUST exceed the observed nesting rather than reject real documents | `BINARY` | Confirmed | One build |
+| RBF0-F23 | The recursive walk of `<GAME_ROOT>/data.rpf` reaches 41 archives and 23,075 entries, finds 1,462 RBF0 payloads (1,395 distinct), and decodes all 1,462 to the end of the root element with 0 failures and 0 limit refusals. All end with the close word of the root element; the `FFFF` run before it closes each element still open | `BINARY`, `CROSS_SAMPLE` | Confirmed | One archive; other archives are bounded separately (RBF0-F26) |
+| RBF0-F24 | Values of class 2 and class 3 store no bytes: 3,627 and 3,747 observations in `data.rpf`. They carry neither a value nor a length, so their meaning cannot be recovered from the document alone | `BINARY`, `CROSS_SAMPLE` | Confirmed (width) | Meaning Unknown |
+| RBF0-F25 | The 1,462 payloads have 30 distinct root names and fall into UI description and tuning families: prefab definitions, animation node graphs, screens, credits pages, movie subtitle containers and views, flow blocks, feedback contexts, panels, grids, progress datasets, safe-area configurations, one general tuning file and one combat tunables table. The vocabulary is the engine's UI one: 518 distinct element names, 11 distinct attribute names, and type-6 values that read as engine class names | `BINARY`, `CROSS_SAMPLE` | Confirmed (family level) | Individual field semantics Unknown; names are game content and are not published |
+| RBF0-F26 | Outside `data.rpf` the format is rare. 296,590 entries were walked across 19 other archives under a 60,000-entry bound per archive; 5 payloads beginning with `RBF0` were found, in `textures.rpf` (1), `anim.rpf` (1) and `pack/core_restofworld` (3), and all 5 decoded. `audio.rpf` was not walked | `BINARY`, `CROSS_SAMPLE` | Confirmed (bounded) | Six walks are entry-bounded, so 5 is a floor |
+| RBF0-F27 | The element and type-6 vocabularies are the engine's UI vocabulary. Of 1,092 name hashes stored by 13 decoded `PSIN` documents, 16 are reproduced exactly by the 2,539 distinct RBF0 names: 14 field names and 2 enum members, all generic (`Name`, `Type`, `Value`, `Data` and the like), and no structure name. A hash equality is a candidate, not a proof | `BINARY`, `CROSS_SAMPLE`, `SYNTHETIC` (the hash function) | Confirmed (measured) | 13 `PSIN` documents, one build; a 32-bit hash collides |
 
 ## Reproduction
 
