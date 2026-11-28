@@ -160,3 +160,56 @@ is decoded, and linear blend skinning is the only method implemented. The
 authored vertices are the deformed result at the reference pose, which is why
 the reference pose reproduces the stored geometry and a delta is what changes
 it.
+
+## 2026-11-28: single-influence skinning, weight totals and the raster check
+
+An acceptance review of the previous entry corrected four statements in it and
+found one renderer defect.
+
+**"501 rigid attachments" was the wrong name.** The measurement stands: 501
+geometries store one index per vertex and no weight stream, every index is inside
+the declared count, the largest is 319, and none of them repeats a single index.
+That last fact is the opposite of a rigid piece. A primitive whose vertices name
+different bones skins across those bones; whole-primitive rigid attachment is the
+narrower case where every vertex names one bone, and it occurs on weighted
+geometry as well. Measured per chain: the peacock has 2 single-influence
+primitives, 1 of them whole-primitive rigid; the candlestick 2 and 2; the
+dominator 25 of 29 and 2. The code now names the two cases apart
+(`single_influence`, `rigid_attachment`) and no primitive is collapsed into one
+mesh transform.
+
+**The candlestick sample was misread.** Rotating `Candle` (bone 3) by 60 degrees
+moved 139 vertices of the 927, not 788. The 788-vertex primitive belongs to bone
+2 and does not move at all. The earlier count named the primitive size, not the
+affected vertices.
+
+**The rotation axis was misnamed.** A pose delta is a bone-local rotation, applied
+after the stored local rotation, and a parent-space translation. The peacock's
+"40 degrees about model Z" was 40 degrees about `Tail_01`'s own Z axis.
+
+**The weight-total rule needed its population.** 8,373 rows carry a weight
+stream; 10 of them hold a vertex whose four lanes do not sum to 255 or 127. Those
+totals cluster between 197 and 254, which reads as independent rounding of four
+lanes rather than a third scale, and the bowtie dictionary member is one of them
+at 254. The decoder keeps rejecting them: a denominator that is not stated cannot
+be inferred from the total alone, and rescaling would silently change every
+weight on the primitive.
+
+The inferred association is now named. 753 geometries declare no influence
+attribute and their record declares one bone; that reading is an inference, so
+`VertexInfluences::inferred` marks it and the status line says so. It is not
+presented as a decoded stream.
+
+The renderer defect: the skinned vertex shader normalised the skinned tangent, and
+a geometry without a tangent attribute supplies a zero vector, so
+`normalize(vec3(0))` produced NaN and the whole primitive lost its normal-mapped
+shading. A pixel comparison of CPU-deformed geometry against skinned geometry
+found it on the peacock: 24,141 of 630,000 pixels differed before the correction
+and 28 differ now. The numerical probe could not see it, because it compared
+positions, normals and tangents of the same vertices and not the shading they
+produce. The fallback now matches the CPU reference: a direction the blend
+cancels falls back to the authored direction.
+
+The declaration truncation measured: every one of the 10,106 rows has a zero slot
+before a populated one, so the old reader lost 29,438 slot entries in total,
+including 660 normal streams, 683 first-UV streams and 1,996 tangent streams.
