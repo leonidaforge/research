@@ -126,7 +126,7 @@ Container layouts are the ones `PSIN` stores, with one divergent pair (ODRP-F08)
 
 A map's buckets and entries are records of a structure the schema defines: the bucket records carry the key hash and a reference to the entry records. Both are read as records of their structures, not as raw words.
 
-A `0x42` field is an 8-byte reference into a `0x10` text block. The referenced string runs to the next NUL; the block as a whole is a run of NUL-terminated UTF-8 strings (ODRP-F09). 4,215,226 text values resolve across the population.
+A `0x42` field is an 8-byte reference into a `0x10` text block. The referenced string runs to the next NUL; the block as a whole is a run of NUL-terminated UTF-8 strings (ODRP-F09). 4,215,226 text values resolve across the population, every one of them valid UTF-8 (ODRP-F21). A block whose last string carries no terminator holds bytes the format does not divide; the population has none.
 
 A `0x44` field is a 16-byte slot in the record itself. The observed bytes hold a length, a capacity and a reference-shaped word, but no string can be read from them at the offsets the container form uses, so the layout stays **Unknown** (ODRP-F16). The bytes are kept.
 
@@ -149,7 +149,7 @@ So the observed population is display text and the tables that organise it, not 
 
 - The object type byte `0x7A`, the `u16` at `+0x4E` and the pointer at `+0x40`.
 - The layout of a `0x44` 16-byte slot.
-- The four blocks of ODRP-F17.
+- The four blocks of ODRP-F17. The 8,272-byte `0x5C` block divides by 16 into 517 records of the same header shape a `0x5C` field stores, which would make it a block of array headers; no field was observed naming such a block, so the reading stays a candidate.
 - Every field's meaning. The decoder reports storage, not semantics.
 - Whether a resource may carry a graphics-segment block: none was observed, because no resource had a graphics page.
 
