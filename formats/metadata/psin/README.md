@@ -59,6 +59,21 @@ Sizes of the 865 rows decoded here range from 215 to 17,406,784 bytes.
 
 The 775 decoded containers hold 3,929,948 records between them. Every one of the 775 has a verified `CHKS` checksum and a copied resource header whose structure, enum and block counts equal the tables that were read (PSIN-D07).
 
+### What the rest of the reachable population is
+
+A recursive classification census of `data.rpf` — `archive census data.rpf --recursive --entries`, classifying each entry from a bounded decoded head and deserializing nothing — opened 42 archives and probed all 23,075 entries. It finished complete, with no failed archive and nothing stopped by a limit. **5,321** of those entries are RPF9 type 11, spread over 31 of the 42 archives:
+
+| Recognised form | Entries |
+| --------------- | ------: |
+| `PSIN` signature | 2,573 |
+| `RBF0` payload | 1,462 |
+| `0DRP` resource form | 1,286 |
+
+The census cannot tell the two `PSIN` families apart, because both carry the same magic. A sample of 129 of the 2,573 rows, every twentieth in census order, extracted each payload and read the first section tag: **126 are `LSCH` and 3 are `PMAP`**. That is a sample, not a count; the 3:126 ratio is consistent with the 62 `PMAP` rows of the 837 `PSIN` rows in the decoded population.
+
+None of the 5,321 is text. The `0DRP` form is far more common inside nested archives than at the top level, where only one row of 865 is one.
+
+
 ## Container
 
 Seven sections tile the payload exactly, the first of them being the `PSIN` section itself:
@@ -302,7 +317,7 @@ No game bytes, table dumps or extracted payloads are stored in this repository.
 ## Limits
 
 - One build (`scarlett-e95020b2`) and one local installation were examined.
-- The findings are confirmed on the 865 rows that were decoded. The further 8,500 rows reachable inside nested archives are the same RPF9 type and the same container, but no count below covers them.
+- The findings are confirmed on the 865 rows that were decoded. The other 4,664 rows reachable inside `data.rpf` are the same RPF9 type and one of the same three recognised forms, but they were classified from a head and not decoded: no count below covers them, and only the `LSCH` share of them is likely to have a schema at all.
 - The search enters a nested archive only when the row's type declares the archive type. A row whose type is undeclared but whose payload is an archive is not entered, so the 9,365 figure is a floor for a second reason.
 - The block-table, schema and header findings are confirmed on the containers that decoded. The 62 `PMAP` containers are outside everything here except their section tags.
 - The type codes are adopted from a community specification and corroborated only in the weak sense that the values they produce are coherent (floats that look like positions and colours, references that bind to whole records, arrays whose lengths match their blocks). They are not derived from game code.
