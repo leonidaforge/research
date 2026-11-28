@@ -295,7 +295,7 @@ archive inspect <ARCHIVE> --row <ROW> --blocks --metadata-output <FILE> --json
 archive inspect <ARCHIVE> --row <ROW> --metadata-output <FILE> --metadata-xml --json
 ```
 
-The first search yields the 865 rows of the archives that are files on disk. The second yields, for one archive, the rows of the archives stored inside it as well, each reported as `<archive>!<row>`; `--max-archives` bounds how many archives one search opens. The third command reports, per row, whether the container decoded and what its counts are; the last two write the decoded document as JSON or XML. Four archives are nested under `pack/` and must be named by their full path, and a row inside a nested archive is selected with `--enter row:<ROW>`.
+The first search yields the 865 rows of the archives that are files on disk. The second yields, for one archive, the rows of the archives stored inside it as well; `--max-archives` bounds how many archives one search opens. The third command reports, per row, whether the container decoded and what its counts are; the last two write the decoded document as JSON or XML. Four archives are nested under `pack/` and must be named by their full path, and a row inside a nested archive is selected with `--enter row:<ROW>`.
 
 No game bytes, table dumps or extracted payloads are stored in this repository.
 
