@@ -2,7 +2,9 @@
 
 PSIN is a container identified by the four bytes `50 53 49 4E`, ASCII `PSIN`, at offset 0. It has one outer framing and two pre-section grammars, keyed by the first section tag: `LSCH` and `PMAP`. They are not separate file formats.
 
-PSIN payloads occur in RPF9 type 11, 93 and 94 rows. The type ID does not identify PSIN: type 11 also carries `RBF0`. Nothing about the purpose, field meanings or record semantics is established. The name expands to nothing known.
+The `LSCH` family carries a self-describing document — a schema, instance blocks, references, arrays, maps and enumerations — which is documented in [metadata/psin](../../metadata/psin/README.md). This document covers the framing, the `PMAP` family and the parts of `LSCH` that the decoded form does not explain.
+
+PSIN payloads occur in RPF9 type 11, 93 and 94 rows. The type ID does not identify PSIN: type 11 also carries `RBF0`. The name expands to nothing known.
 
 ## Status
 
