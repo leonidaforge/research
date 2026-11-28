@@ -10,7 +10,7 @@ Numbers as of 2026-11-28. Confidence is **confirmed**, **inferred** or **unknown
 
 | Part | Status |
 | ---- | ------ |
-| `.zmt` rows hold `PSIN` containers | Confirmed (865 rows, PSIN-D01) |
+| `.zmt` rows hold `PSIN` containers | Confirmed on the 865 decoded rows of 9,365 reachable (PSIN-D01) |
 | Instance block table | Confirmed (775 containers, PSIN-D03) |
 | Structure and field tables | Confirmed (PSIN-D04, PSIN-D05) |
 | Enumeration table | Confirmed on 431 containers (PSIN-D06) |
@@ -22,14 +22,32 @@ Numbers as of 2026-11-28. Confidence is **confirmed**, **inferred** or **unknown
 | Field semantics | Unknown |
 | Every structure block decodable | **No**: 116 blocks in 89 containers hold no structure the schema defines |
 | `PMAP` family decoded | **No**: 62 containers stop at the framing |
+| The 8,500 rows inside nested archives | **No**: reachable, not decoded |
 
 ## Population
 
 A search of `<GAME_ROOT>` for readable `.zmt` rows found **865** rows in **10** archives: 657 in `data.rpf`, 113 in `packs.rpf`, 30 in `anim.rpf`, 28 in `levels.rpf`, 25 in `story000.rpf`, 7 in `core_restofworld.rpf`, 2 in `shared_minigame000.rpf` and one each in `navmeshes.rpf`, `story000_restofworld.rpf` and `textures.rpf`. The four archives named without a parent are nested under `pack/`; the search reports only their leaf name. Every row is RPF9 type 11.
 
-This is the population at the level the search reaches. It is **not** every `.zmt` row in the installation: the RPF9 census, which descends into archives nested inside `data.rpf` and `packs.rpf`, counted 5,321 `.zmt` entries across 24 archives, most of them in those nested archives. Those rows were not decoded here. The format is the same container, but nothing below is claimed for them.
+Those 865 rows are only the `.zmt` rows of archives that are files on disk. Most archives in this installation are stored **inside** `data.rpf` and `packs.rpf`, and the search as it stood did not enter them, so it never saw their rows. Entering the archive a row holds (the search's `--recursive`, the census's walk) raises the count fourfold:
 
-Decoded sizes range from 215 to 17,406,784 bytes.
+| Root | Rows at the searched file | Rows after entering the archives it holds | Archives opened |
+| ---- | ------------------------: | ----------------------------------------: | --------------: |
+| `data.rpf` | 657 | 5,321 | 42 |
+| `packs.rpf` | 113 | 2,268 | 60 |
+| `navmeshes.rpf` | 1 | 1,210 | 29 |
+| `story000.rpf` | 25 | 184 | 64 or more |
+| `levels.rpf` | 28 | 239 | 64 or more |
+| `shared_minigame000.rpf` | 2 | 74 | 50 |
+| `anim.rpf` | 30 | 30 | 64 or more |
+| `story000_restofworld.rpf` | 1 | 29 | 19 |
+| `core_restofworld.rpf` | 7 | 9 | 11 |
+| `textures.rpf` | 1 | 1 | 21 |
+
+The `64 or more` rows are roots where the walk stopped at a 64-archive budget, so their counts are floors. No nested archive needed temporary storage: every one was stored byte-for-byte in its row and could be read where it lies.
+
+**9,365 `.zmt` rows are reachable** across these ten roots and the archives inside them, against 865 without entering an archive, and the figure is a floor.
+
+Sizes of the 865 rows decoded here range from 215 to 17,406,784 bytes.
 
 | Outcome | Rows |
 | ------- | ---: |
@@ -218,6 +236,30 @@ The map entry check is independent: the five entry records of `data/effects/focu
 
 No other structure or field hash in the studied population was resolved by the built-in name tables. The names of most structures and fields are therefore still unknown, and the field semantics that would follow from them are unknown too.
 
+## The blocks no structure defines
+
+89 of the 775 decoded containers hold a block whose type names neither a structure nor one of the six pool types above: 116 blocks in all. Their type words are not arbitrary. Every one of them is a code the schema also uses as a field type:
+
+| Block type word | Field meaning elsewhere in the schema | Blocks |
+| --------------- | ------------------------------------- | -----: |
+| `0x4f` | identifier, 8 bytes | 23 |
+| `0x08` | `u64`, 8 bytes | 21 |
+| `0x4d` | 64-bit hash, 8 bytes | 18 |
+| `0x21` | `f32`, 4 bytes | 12 |
+| `0x34` | four `f32`, 16 bytes | 12 |
+| `0x15` | `u32`, 4 bytes | 8 |
+| `0x31` | three `f32`, 12 bytes | 7 |
+| `0x44` | text slot, 16 bytes | 3 |
+| `0x11` | `u8`, 1 byte | 3 |
+| `0x42` | not in the type table | 2 |
+| `0x13` | `u16`, 2 bytes | 1 |
+| `0x5c` | array, 16 bytes | 1 |
+| `0x01`, `0x17`, `0x30`, `0x32`, `0x52` | various | 1 each |
+
+That a pool is typed by a schema field code is a **candidate** reading, not a confirmed rule: the block length is a whole multiple of that code's field width for ten of the thirteen codes, but not for every one. `0x4d` blocks are 500, 36, 132 and 472 bytes long, none divisible by the 8-byte field width, and every one of them is divisible by 4; `0x31` blocks are 112 and 448 bytes, divisible by 4 but not by the 12-byte field width. A block type therefore does not always carry the field width of the same-numbered field type.
+
+The check that would settle it has not been run: an array field whose element descriptor is one of these codes names the block and carries the element count in its own header, so a block of length `L` reached by an array of `n` elements implies a width of `L / n`. If two independent arrays agree on one width for one code, the rule is established for that code. Until then the 116 blocks keep their bytes and stay reported as unsupported.
+
 ## What counts as a decoded container
 
 A container is decoded only when all of the following hold. A container whose outer RPF row inflated is not thereby decoded.
@@ -247,28 +289,30 @@ The metadata resource form carries the same self-describing tables in a resource
 
 ```text
 archive search <GAME_ROOT> --extension zmt --limit 100000 --json
+archive search <ARCHIVE> --recursive --extension zmt --limit 100000 --json
 archive inspect <ARCHIVE> --row <ROW> --json --sample 1
 archive inspect <ARCHIVE> --row <ROW> --blocks --metadata-output <FILE> --json
 archive inspect <ARCHIVE> --row <ROW> --metadata-output <FILE> --metadata-xml --json
 ```
 
-The search yields the 865 rows; the second command reports, per row, whether the container decoded and what its counts are; the third and fourth write the decoded document as JSON or XML. Four archives are nested under `pack/` and must be named by their full path.
+The first search yields the 865 rows of the archives that are files on disk. The second yields, for one archive, the rows of the archives stored inside it as well, each reported as `<archive>!<row>`; `--max-archives` bounds how many archives one search opens. The third command reports, per row, whether the container decoded and what its counts are; the last two write the decoded document as JSON or XML. Four archives are nested under `pack/` and must be named by their full path, and a row inside a nested archive is selected with `--enter row:<ROW>`.
 
 No game bytes, table dumps or extracted payloads are stored in this repository.
 
 ## Limits
 
 - One build (`scarlett-e95020b2`) and one local installation were examined.
-- The population is the 865 rows the search reaches; the 5,321 census entries, most of them in archives nested inside `data.rpf` and `packs.rpf`, were not decoded. The format is the same container, but no count below covers them.
+- The findings are confirmed on the 865 rows that were decoded. The further 8,500 rows reachable inside nested archives are the same RPF9 type and the same container, but no count below covers them.
+- The search enters a nested archive only when the row's type declares the archive type. A row whose type is undeclared but whose payload is an archive is not entered, so the 9,365 figure is a floor for a second reason.
 - The block-table, schema and header findings are confirmed on the containers that decoded. The 62 `PMAP` containers are outside everything here except their section tags.
 - The type codes are adopted from a community specification and corroborated only in the weak sense that the values they produce are coherent (floats that look like positions and colours, references that bind to whole records, arrays whose lengths match their blocks). They are not derived from game code.
-- 116 blocks in 89 containers hold a type the schema does not define. Their bytes are kept but not interpreted.
+- 116 blocks in 89 containers hold a type the schema does not define. Their bytes are kept but not interpreted. Their type words are codes the schema uses for fields, and the candidate reading that such a block is a pool of that scalar type is recorded above.
 - No field meaning is established, so no structure is assigned a purpose.
 - The `.zmt` rows in this installation hold gameplay, effect, AI, container, UI and level metadata. Nothing in the population was established to be a vehicle, ped or weapon definition; see the note on vehicle names below.
 
 ## Open questions
 
-- What do the 116 blocks whose type no structure defines hold?
+- What do the 116 blocks whose type no structure defines hold? Their type words are field type codes, but the element width does not follow the field width for every code; an array's element count against the block length would decide it.
 - What is the `PMAP` family's instance layout?
 - What does the structure signature word protect or identify?
 - What do the `0x14`, `0x16` and `0x33` pools hold?
