@@ -25,7 +25,9 @@ Numbers as of 2026-11-28. Confidence is **confirmed**, **inferred** or **unknown
 
 ## Population
 
-A recursive search of `<GAME_ROOT>` for readable `.zmt` rows found **865** rows in **10** top-level archives: 657 in `data.rpf`, 113 in `packs.rpf`, 30 in `anim.rpf`, 28 in `levels.rpf`, 25 in `story000.rpf`, 7 in `core_restofworld.rpf`, 2 in `shared_minigame000.rpf` and one each in `navmeshes.rpf`, `story000_restofworld.rpf` and `textures.rpf`. The four archives named without a parent are nested under `pack/`; the search reports only their leaf name. Every row is RPF9 type 11.
+A search of `<GAME_ROOT>` for readable `.zmt` rows found **865** rows in **10** archives: 657 in `data.rpf`, 113 in `packs.rpf`, 30 in `anim.rpf`, 28 in `levels.rpf`, 25 in `story000.rpf`, 7 in `core_restofworld.rpf`, 2 in `shared_minigame000.rpf` and one each in `navmeshes.rpf`, `story000_restofworld.rpf` and `textures.rpf`. The four archives named without a parent are nested under `pack/`; the search reports only their leaf name. Every row is RPF9 type 11.
+
+This is the population at the level the search reaches. It is **not** every `.zmt` row in the installation: the RPF9 census, which descends into archives nested inside `data.rpf` and `packs.rpf`, counted 5,321 `.zmt` entries across 24 archives, most of them in those nested archives. Those rows were not decoded here. The format is the same container, but nothing below is claimed for them.
 
 Decoded sizes range from 215 to 17,406,784 bytes.
 
@@ -257,6 +259,7 @@ No game bytes, table dumps or extracted payloads are stored in this repository.
 ## Limits
 
 - One build (`scarlett-e95020b2`) and one local installation were examined.
+- The population is the 865 rows the search reaches; the 5,321 census entries, most of them in archives nested inside `data.rpf` and `packs.rpf`, were not decoded. The format is the same container, but no count below covers them.
 - The block-table, schema and header findings are confirmed on the containers that decoded. The 62 `PMAP` containers are outside everything here except their section tags.
 - The type codes are adopted from a community specification and corroborated only in the weak sense that the values they produce are coherent (floats that look like positions and colours, references that bind to whole records, arrays whose lengths match their blocks). They are not derived from game code.
 - 116 blocks in 89 containers hold a type the schema does not define. Their bytes are kept but not interpreted.
