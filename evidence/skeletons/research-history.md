@@ -243,3 +243,32 @@ ordinary. `levels.rpf!1240!14` (`coastguard_base_towcable.#ft`) declares
 attribute at all, which makes it both a tangent sample and a member of the
 inferred class; under the default policy it does not deform, and with the opt-in
 its 150 vertices move.
+
+## 2026-11-28: canonical paths, and the counts the shipped tree reproduces
+
+The samples were named by row selectors, which are stable but unreadable. Every
+resource in this document now also carries the canonical path the application
+shows: the root file name, then the stored entry name of each archive on the
+chain, separated by `!`. Five of the nine resolve their containing archive to a
+name (`levels.rpf!levels/americas/props/furniture/am_ornaments.rpf!...`), and
+none resolves its leaf, so a leaf stays the stored key in canonical hexadecimal
+form. The paths were produced by the explorer's own path model, not typed by
+hand, and each was checked against the entry the selector names: same row, same
+declared type, same identity, same decoded member.
+
+Every deformation figure was then measured again on the tree that carries the
+rebase onto current `main`. The probe and the moved-vertex counts did not change:
+41,613 peacock vertices with 31,480 moved at 1.19 m and `3.6e-7` m of CPU/GPU
+disagreement, 139 candlestick vertices at 0.018 m and `1.9e-9` m, 2,077 dominator
+vertices at 0.30 m and `4.8e-7` m. The raster comparison did change, from 28
+peacock pixels and 0 candlestick pixels to 38 and 1, because both pipelines now
+evaluate one shading function instead of two; the remaining pixels are silhouette
+precision at a maximum channel delta of 3 and 1. The eighteen preview frames the
+harness wrote before the rebase are byte-identical to the ones it writes now.
+
+Two counts in this document were mislabelled rather than wrong. The dominator's
+scene holds 37 primitives in its highest populated LOD and 29 of them declare a
+bone; the single-influence table reported the second number under a column headed
+`Primitives`. The column now says what it counts, and the format document states
+both numbers so that `29 of 37` in the panel matches a reader's own count.
+

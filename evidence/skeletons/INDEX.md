@@ -58,20 +58,24 @@ record is dropped with `BoneArrayOverrun`. See SKEL-F16.
 | SKEL-F19  | Each model stores an axis-aligned box per geometry. Decoded vertices match it where it exists: peacock 4 of 4 (`2.0e-5`), candlestick 2 of 2 (`2.0e-6`); the tarot and bolt records declare no box. | Four fragments, decoded against declared boxes | Confirmed for the four | A missing box leaves the vertex space unestablished, not disproved |
 | SKEL-F20  | No bone palette accompanies an influence stream: the geometry record's fields at `+0x28`, `+0x2A`, `+0x2E`, `+0x30`, `+0x34`, `+0x38` and `+0x3C` hold no bone index and no palette pointer, and the model's `+0x28` slot does not read as a `u8` or `u16` bone list. Blend indices name the skeleton's own array positions. | Cross sample, 10,106 geometries | Confirmed for the corpus | A palette outside the corpus is not excluded; the reader carries a palette variant no decoder produces |
 | SKEL-F21  | 501 geometries store one blend index per vertex and no weight stream: 446 as one `u8`, 55 as one `u16`. All declare more than one bone, every index is inside the declared count, the largest is 319, and every one uses at least two distinct indices, so this is single-influence vertex skinning rather than one rigid piece. Weight 1 is the structural consequence of one influence. | Cross sample, 10,106 geometries | Confirmed | Whole-primitive rigid attachment is the narrower case where every vertex names the same bone; it occurs on ordinary weighted geometry too |
-| SKEL-F22  | The authored vertices are the deformed result at the reference pose. A pose supplies a bone-local rotation delta and a parent-space translation delta, and skinning composes as `S[i] = G_pose[i] * inverse-bind[i]` over the verified hierarchy. Three checks agree on real data: a GPU compute probe against the CPU reference (peacock `3.6e-7` m over 41,613 vertices, candlestick `1.9e-9` m, dominator9 `4.8e-7` m over 91,466 vertices) and a pixel comparison of CPU-deformed geometry against skinned geometry (28 of 630,000 pixels differ on the peacock, 0 on the other two). | Three chains, 133,080 vertices | Confirmed for the samples | Linear blend skinning only; the data holds no authored animation pose |
+| SKEL-F22  | The authored vertices are the deformed result at the reference pose. A pose supplies a bone-local rotation delta and a parent-space translation delta, and skinning composes as `S[i] = G_pose[i] * inverse-bind[i]` over the verified hierarchy. Three checks agree on real data: a GPU compute probe against the CPU reference (peacock `3.6e-7` m over 41,613 vertices, candlestick `1.9e-9` m, dominator9 `4.8e-7` m over 91,466 vertices) and a pixel comparison of CPU-deformed geometry against skinned geometry (38 of 630,000 pixels differ on the peacock at a maximum channel delta of 3, 1 on the candlestick at delta 1, 0 on the dominator). | Three chains, 133,080 vertices | Confirmed for the samples | Linear blend skinning only; the data holds no authored animation pose. The pixel counts are the ones the current tree reproduces; an earlier build whose skinned shader carried its own lighting reported 28 and 0. |
 | SKEL-F23  | 753 geometries declare no influence attribute and their record declares one bone. The association to that bone is an inference from the count, not a decoded reference, so it is recorded as inferred (`VertexInfluences::inferred`, status `complete (inferred single bone)`), reported apart from a decoded stream, and excluded from deformation unless a caller opts in. | Cross sample, 10,106 geometries | Confirmed as an inference, not as authored semantics | The record states no bone reference; 479 multi-bone geometries in the same state stay unassociated |
 
 ## Sample locators
 
-The selectors are the original native paths. `levels.rpf!5!0` means: open
-`levels.rpf`, descend into the archive in row 5, then open row 0.
+Two names are given for every resource. The canonical path is what the
+application shows: the root file name, then the stored entry name of each
+archive on the chain, separated by `!`. A leaf the name index does not resolve
+stays a stored key. The selector is the same chain in row numbers, for a reader
+holding only a table of contents. `levels.rpf!5!0` means: open `levels.rpf`,
+descend into the archive in row 5, then open row 0.
 
-| Resource           | Selector          | Member drawable                  | Split    | Bones | Roots | Depth | Weighted | Inverse bind |
-| ------------------ | ----------------- | -------------------------------- | -------: | ----: | ----: | ----: | -------- | ------------ |
-| Tarot deck         | `levels.rpf!5!0`  | `prop_am_card_tarot_deck_01a.#ft` | `0x1980` |     3 |     1 |     3 | no       | 3 of 3       |
-| Candlestick        | `levels.rpf!5!1`  | `prop_am_candlestick_02a.#ft`     | `0x3cc0` |     4 |     1 |     4 | no       | 4 of 4       |
-| Weapon bolt        | `data.rpf!26!9`   | `w_sg_goodwin_01_bolt_01_mid.#ft` | `0x1c30` |     3 |     1 |     3 | no       | 3 of 3       |
-| Peacock taxidermy  | `levels.rpf!5!8`  | `mint_peacock_taxidermy_01.#ft`   | `0xbbc0` |    10 |     1 |    10 | yes      | 10 of 10     |
+| Resource           | Canonical path                                                                  | Selector          | Member drawable                  | Split    | Bones | Roots | Depth | Weighted | Inverse bind |
+| ------------------ | ------------------------------------------------------------------------------- | ----------------- | -------------------------------- | -------: | ----: | ----: | ----: | -------- | ------------ |
+| Tarot deck         | `levels.rpf!levels/americas/props/furniture/am_ornaments.rpf!0x00F3FFFF0AB33AD1.zft` | `levels.rpf!5!0`  | `prop_am_card_tarot_deck_01a.#ft` | `0x1980` |     3 |     1 |     3 | no       | 3 of 3       |
+| Candlestick        | `levels.rpf!levels/americas/props/furniture/am_ornaments.rpf!0x018C79492CD36803.zft` | `levels.rpf!5!1`  | `prop_am_candlestick_02a.#ft`     | `0x3cc0` |     4 |     1 |     4 | no       | 4 of 4       |
+| Weapon bolt        | `data.rpf!0x98531060A2A91C59.rpf!0x00C111CBBAA1A730.zft`                          | `data.rpf!26!9`   | `w_sg_goodwin_01_bolt_01_mid.#ft` | `0x1c30` |     3 |     1 |     3 | no       | 3 of 3       |
+| Peacock taxidermy  | `levels.rpf!levels/americas/props/furniture/am_ornaments.rpf!0x0781E13426B493CF.zft` | `levels.rpf!5!8`  | `mint_peacock_taxidermy_01.#ft`   | `0xbbc0` |    10 |     1 |    10 | yes      | 10 of 10     |
 
 Survey archives: `data.rpf!26` (1,229 type-2 and 1,982 type-3 rows) and
 `levels.rpf!5`, which form the narrow corpus. The wide corpus is 27 archive
@@ -85,10 +89,16 @@ resources are asserted by `decodes_real_skeleton_resources`.
 The two evaluators are the CPU reference in `crates/scene` and a GPU compute
 probe in `crates/renderer`, run over the same skinning matrices.
 
-| Chain                | Selector         | Posed bone | Pose                | Vertices compared | Worst difference |
-| -------------------- | ---------------- | ---------- | ------------------- | ----------------: | ---------------: |
-| `mint_peacock_taxidermy_01.#ft` | `levels.rpf!5!8` | `Tail_01` (4) | 40 deg about model Z | 25,456 | `3.6e-7` m |
-| `prop_am_candlestick_02a.#ft`   | `levels.rpf!5!1` | `Candle` (3)  | 60 deg about model Z | 788    | `3.7e-9` m |
+| Chain                | Canonical path                                                                  | Posed bone | Pose (bone-local Z) | Vertices compared | Worst difference |
+| -------------------- | ------------------------------------------------------------------------------- | ---------- | ------------------- | ----------------: | ---------------: |
+| `mint_peacock_taxidermy_01.#ft` | `levels.rpf!levels/americas/props/furniture/am_ornaments.rpf!0x0781E13426B493CF.zft` | `Tail_01` (4) | 40 deg | 25,456 | `3.6e-7` m |
+| `prop_am_candlestick_02a.#ft`   | `levels.rpf!levels/americas/props/furniture/am_ornaments.rpf!0x018C79492CD36803.zft` | bone 2, `rsBone_Prop_Am_Candlestick_02a` | 60 deg | 788 | `3.7e-9` m |
+
+The harness poses one bone. `LF_TEST_BONE` takes a bone index; without it the
+harness poses the heaviest influence of the primitive with the widest influence
+set, and its report line names the bone it chose. On the candlestick that is
+bone 2, the base the 788-vertex primitive is bound to, not the `Candle` bone the
+deformation table in the format document poses.
 
 The peacock frame moves 24,496 of the compared vertices with a largest
 displacement of 1.19 m and collapses no normal, so the agreement is measured on

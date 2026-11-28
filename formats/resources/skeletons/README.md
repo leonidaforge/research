@@ -340,11 +340,16 @@ vertex to vertex, so the primitive skins across the bones it names. Whole-primit
 rigid attachment is the narrower case where every vertex names the same bone, and
 it occurs on ordinary weighted geometry too. Of the sampled resources:
 
-| Resource   | Primitives | Single influence per vertex | Whole-primitive rigid |
-| ---------- | ---------: | --------------------------: | --------------------: |
-| Peacock    |          4 |                           2 |                     1 |
-| Candlestick |         2 |                           2 |                     2 |
-| Dominator9 |         29 |                          25 |                     2 |
+| Resource   | Primitives | With an influence attribute | Single influence per vertex | Whole-primitive rigid |
+| ---------- | ---------: | --------------------------: | --------------------------: | --------------------: |
+| Peacock    |          4 |                           4 |                           2 |                     1 |
+| Candlestick |         2 |                           2 |                           2 |                     2 |
+| Dominator9 |         37 |                          29 |                          25 |                     2 |
+
+The dominator's scene holds 37 primitives in its highest populated LOD; the 29
+counted here are the geometries whose record declares a bone. The other eight
+declare no usable influence attribute and stay on the authored path, which is
+why the application reports `29 of 37 primitive(s) deform`.
 
 The decoder records one influence per vertex and leaves the choice of one bone
 for the whole primitive to the consumer, which is what
@@ -495,8 +500,8 @@ rendered pixels. Numbers for the verified chains:
 
 | Chain        | Posed bone        | Pose (bone-local Z) | Moved vertices | Worst displacement | CPU vs GPU probe | Rendered pixels differing |
 | ------------ | ----------------- | ------------------: | -------------: | -----------------: | ---------------: | ------------------------: |
-| Peacock      | `Tail_01` (4)     |             40 deg  |         31,480 |            1.19 m  |        `3.6e-7` m | 28 of 630,000, channel 3  |
-| Candlestick  | `Candle` (3)      |             60 deg  |            139 |            0.018 m |        `1.9e-9` m | 0                         |
+| Peacock      | `Tail_01` (4)     |             40 deg  |         31,480 |            1.19 m  |        `3.6e-7` m | 38 of 630,000, channel 3  |
+| Candlestick  | `Candle` (3)      |             60 deg  |            139 |            0.018 m |        `1.9e-9` m | 1 of 630,000, channel 1   |
 | Dominator9   | `wing_rf` (372)   |             25 deg  |          2,077 |            0.30 m  |        `4.8e-7` m | 0                         |
 
 The pixel column compares the CPU-deformed geometry drawn through the ordinary
@@ -504,7 +509,14 @@ static pipeline with the authored geometry drawn through the skinned pipeline,
 same camera, materials and lights. It caught a defect the numerical probe could
 not: the skinned vertex shader normalised a zero tangent into NaN, so every
 primitive without a tangent stream lost its normal-mapped shading. The peacock
-differs on 28 pixels now and differed on 24,141 before that correction.
+differed on 24,141 pixels before that correction and on 38 after it.
+
+The counts above were measured again on the current tree. The two pipelines now
+evaluate one shading function, so what remains is precision at silhouettes: a
+maximum channel delta of 3 on the peacock and 1 on the candlestick. The earlier
+measurement of 28 peacock pixels and 0 candlestick pixels predates that shared
+function, when the skinned shader still carried its own lighting; the numbers in
+this table are the ones the shipped code reproduces.
 
 Dual-quaternion skinning is not implemented and is not claimed: linear blend
 skinning is what the delivered evaluation does, and every statement above is
