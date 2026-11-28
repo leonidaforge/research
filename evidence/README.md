@@ -11,6 +11,7 @@ Subjects:
 
 - [RPF9](rpf9/INDEX.md)
 - [RBF0](rbf0/INDEX.md)
+- [0DRP metadata resource](odrp/INDEX.md)
 - [PSIN](psin/INDEX.md)
 - [EDUP](edup/INDEX.md)
 - [PTFX](ptfx/INDEX.md)

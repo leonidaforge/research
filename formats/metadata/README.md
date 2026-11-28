@@ -4,6 +4,7 @@ Structured data encodings, such as schema-driven documents or serialized records
 
 | Format                 | Identification    | Status                                                                 |
 | ---------------------- | ----------------- | ---------------------------------------------------------------------- |
+| [0DRP resource](odrp/README.md) | ASCII `0DRP` at system `+0x10` | Header, schema tables, blocks, references and observed value forms known; field meanings unknown |
 | [RBF0](rbf0/README.md) | ASCII `RBF0` at 0 | Header, object body, field dictionary and observed value forms known |
 | [PSIN `LSCH`](psin/README.md) | ASCII `PSIN` at 0, first section `LSCH` | Schema, instance blocks, references, arrays, maps and enums decoded; field meanings unknown |
 

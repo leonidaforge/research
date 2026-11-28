@@ -5,7 +5,7 @@ On-disk structures and parsing rules, grouped by category. [STRUCTURE.md](../STR
 | Category                           | Formats                                                  |
 | ---------------------------------- | -------------------------------------------------------- |
 | [containers](containers/README.md) | RDS5, RPF9                                               |
-| [metadata](metadata/README.md)     | RBF0, PSIN `LSCH`                                        |
+| [metadata](metadata/README.md)     | 0DRP, RBF0, PSIN `LSCH`                                  |
 | [resources](resources/README.md)   | RAGE resource serialization                              |
 | [unknown](unknown/README.md)       | EDUP, KB2j, KB2n, PSIN, PTFX, SGD5, type 14, GFX\*, ADAT |
 
