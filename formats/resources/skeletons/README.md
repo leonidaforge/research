@@ -359,15 +359,20 @@ bone and whose scene carries a skeleton.
 
 | Stage                                                     | Geometries |
 | --------------------------------------------------------- | ---------: |
-| Recognised declaration (a form in the table above)        |      8,873 |
-| Index stream read and every active index inside the bones |      8,764 |
-| Weights read and normalised to 255 or 127                 |      8,754 |
+| Recognised declaration (a form in the table above)        |      8,874 |
+| Index stream read and every active index inside the bones |      8,763 |
+| Weights read and normalised to 255 or 127                 |      8,753 |
 | Decoded association (weighted or single index)            |      8,753 |
 | Inferred single-bone association                          |        753 |
-| Deformable (decoded plus inferred)                        |      9,506 |
-| Unassociated                                              |        600 |
+| Deformable under the default policy (decoded only)        |      8,753 |
+| Deformable if inferred associations are included          |      9,506 |
+| Unassociated under either policy                          |        600 |
 
-Where the 600 unassociated geometries stand:
+The stages compose exactly: 8,874 recognised, minus 111 whose active index is at
+or past the declared bone count, gives 8,763 readable index streams; minus the 10
+rows whose weights total neither 255 nor 127 gives 8,753 decoded associations;
+plus the 753 inferred gives 9,506 deformable if the caller includes them. The 600
+geometries that deform under neither policy split three ways:
 
 | Reason                                                  | Geometries |
 | ------------------------------------------------------- | ---------: |
@@ -378,7 +383,8 @@ Where the 600 unassociated geometries stand:
 The 111 are all wide-index rows: 100 of the 104 four-`u32` and 11 of the 15
 two-`u32` declarations. Only 8 wide-form rows validate, so the wide forms are
 implemented and almost unused: the four-`u8` form carries 8,244 of the 8,753
-decoded geometries and the two single-index forms carry the other 501. A four-`u32`
+decoded geometries, the wide forms 8, and the two single-index forms the other
+501. A four-`u32`
 row that fails reads values near `2.99e9`, three orders of magnitude past any bone
 count, which is why the range check rejects it rather than clamping.
 
@@ -394,9 +400,10 @@ chains that do carry boxes, the peacock and the candlestick, report
 geometry record states no bone reference, so the reading is an inference from the
 declared count matching a one-bone skeleton. It is recorded as inferred:
 `VertexInfluences::inferred` is true, the status line reads
-`complete (inferred single bone)`, and the viewer says how many of its deforming
-primitives are inferred. 479 geometries declare neither attribute and more than
-one bone; they stay unassociated.
+`complete (inferred single bone)`, and the application excludes it from
+deformation by default. A caller opts in explicitly, and the viewer says how many
+primitives the choice covers. 479 geometries declare neither attribute and more
+than one bone; they stay unassociated under either policy.
 
 Accepted associations therefore cover three cases:
 

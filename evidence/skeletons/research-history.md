@@ -213,3 +213,33 @@ cancels falls back to the authored direction.
 The declaration truncation measured: every one of the 10,106 rows has a zero slot
 before a populated one, so the old reader lost 29,438 slot entries in total,
 including 660 normal streams, 683 first-UV streams and 1,996 tangent streams.
+
+## 2026-11-28: inferred associations are opt-in, and the stage counts close
+
+The maintained policy is that an association the record does not state may not
+deform geometry by default. The 753 single-bone geometries are still decoded and
+still recorded, but `VertexInfluences::inferred` now reaches the deformation
+policy: the CPU reference, the GPU draw decision and the desktop panel all
+exclude them unless a caller asks for them, and the panel says how many
+primitives the choice covers. Nothing about the reading changed; what changed is
+that the application no longer treats a plausible inference as permission to
+deform.
+
+The stage counts in the previous entry did not close. Recomputed over the same
+10,106 geometries: 8,874 recognised declarations, minus 111 whose active index is
+at or past the declared bone count, gives 8,763 readable index streams; minus the
+10 rows whose weight total is neither 255 nor 127 gives 8,753 decoded
+associations; plus 753 inferred gives 9,506 deformable when the caller includes
+them; 600 geometries deform under neither policy. The earlier table carried an
+off-by-one in two rows and an unexplained exclusion between weight validation and
+association; there is no such exclusion, the two filters account for all 121.
+
+Two native samples show what the declaration fix recovered. `levels.rpf!21!85`
+declares slots `[0,1,2,3,4,8,11,12,14,15,17]` with the first zero at slot 5, so
+the old reader lost the tangent stream, the blend indices and four unidentified
+attributes; 34 of its 37 primitives now decode tangents, and their UV ranges are
+ordinary. `levels.rpf!1240!14` (`coastguard_base_towcable.#ft`) declares
+`[0,1,2,3,4,11,12,13,14,15,17]` with first zero at slot 5 and no influence
+attribute at all, which makes it both a tangent sample and a member of the
+inferred class; under the default policy it does not deform, and with the opt-in
+its 150 vertices move.
